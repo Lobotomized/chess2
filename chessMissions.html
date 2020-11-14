@@ -1,0 +1,318 @@
+<script src="/socket.io/socket.io.js"></script>
+
+<script src="/src/variables.js"></script>
+
+<script src="/src/loadImages.js"></script>
+<script src="/src/helperFunctions.js"></script>
+<link rel="stylesheet" href="/src/main.css">
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Chess 2</title>
+</head>
+
+<body>
+    <div class="container">
+        <canvas id="canvas" width="500" height="500"></canvas>
+        <div class="times">
+            <h1 class="clock" id="blackClock"></h1>
+            <button class="row exitButton" style="display:none;" id="exitButton"><span id="forfeitText" class="forfeitText">Forfeit</span> <img id="flagImage" style="width:50px; height:50px;" src="/static/whiteFlag.svg" alt="" /></button>
+
+            <h1 class="clock" id="whiteClock"></h1>
+        </div>
+        <div class="row message">
+            <h3 id="turn"></h3>
+        </div>
+
+    </div>
+
+
+</body>
+
+
+<script>
+    let squareLength = screen.width < screen.height? parseInt(screen.width/8) : parseInt(screen.height/10) 
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const exitButton = document.getElementById('exitButton')
+    const flagImage = document.getElementById('flagImage')
+    const socket = io();
+    let mouseX;
+    let mouseY;
+    let st = undefined;
+    let endGame = false;
+    let IAM;
+    let boardheight;
+    let boardWidth;
+    let state;
+    let hoveredPiece;
+    let playerRef;
+
+    exitButton.addEventListener('click', function(){
+        socket.emit('exit');
+        window.location.replace('/')
+    })
+    socket.on('rooms', (data) => {
+        console.log(data)
+    })
+    socket.on('returnState', (secretState) => {
+        //Draw the game
+        const myTurnH1 = document.getElementById('turn');
+        canvas.width = squareLength * boardWidth + squareLength;
+        canvas.height = squareLength * boardWidth + squareLength;
+        state = secretState;
+        if(hoveredPiece){
+            if(hoveredPiece.color != IAM && IAM != undefined){
+                lightBoard(hoveredPiece,state,'red','grey')
+            }
+        }
+        if (state.pieces) {
+            if(exitButton.hasAttribute('style')){
+                exitButton.removeAttribute('style')
+            }
+
+            //Draw Squares
+            const me = document.getElementById('blackClock');
+            const enemy = document.getElementById('whiteClock');
+            const body = document.getElementsByTagName('body')[0];
+            const forfeitTextButton = document.getElementById('forfeitText');
+            me.innerText = 'My Time ' +state.blackClock;
+            enemy.innerText = 'Enemy Time ' +state.whiteClock
+            if (state.turn == 'black') {
+                body.style.background = blackSquareColor
+            }
+            else {
+                body.style.background = whiteSquareColor
+            }
+            myTurnH1.innerText = state.message || '';
+            const height = getMaxX(state.board,'y')
+            if(state.playerRef !== undefined){
+                playerRef = state.playerRef
+            }
+            if(state.turn != 'menu' ){
+                if(playerRef != 'player1' && playerRef !='player2'){
+                    IAM = 'white'
+                }
+                else if(!state.won){
+                    if(state.turn == 'white' && state.yourTurn || state.turn == 'black' && !state.yourTurn){
+                        IAM = 'white'
+                        me.innerText = 'My time '+state.whiteClock;
+                        enemy.innerText = 'Enemy time '+state.blackClock;
+                    }
+                    else{
+                        IAM = 'black'
+                    }
+                }
+            }
+            boardWidth  = state.board.reduce((accumulator, currentValue) => {
+                if(accumulator > currentValue.x){
+                    return accumulator
+                }
+                else{
+                    return currentValue.x
+                }
+            })
+            boardHeight  = state.board.reduce((accumulator, currentValue) => {
+                if(accumulator > currentValue.y){
+                    return accumulator
+                }
+                else{
+                    return currentValue.y
+                }
+            })
+            state.board.forEach((sq,index) => {
+                let y = sq.y;
+                let x = sq.x;
+                if(IAM == 'black'){
+                    y = reverseNumber(y,boardHeight);
+                }
+
+                let orderFirst = true;
+                if(y%2 != 0){
+                    orderFirst = false;
+                }
+                if (!sq.light && !sq.special) {
+                        if(IAM == 'white'){
+                            if(orderFirst){
+                                if(x % 2 != 0){
+                                    drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                                else{
+                                    drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                            }
+                            else{
+                                if(x % 2 != 0){
+                                    drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                                else{
+                                    drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                            }
+                            if(state.pieceSelected){
+                                if(x == state.pieceSelected.x && y == state.pieceSelected.y){
+                                    drawColoredSquare(x*squareLength, y*squareLength,availableSquareColor, squareLength)
+                                }
+                            }
+
+                        }
+                        else{
+                            if(orderFirst){
+                                if(x % 2 != 0){
+                                    drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                                else{
+                                    drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                            }
+                            else{
+                                if(x % 2 != 0){
+                                    drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                                else{
+                                    drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                            }
+                            //reverseNumber(piece.y,boardHeight)
+                            if(state.pieceSelected){
+                                if(x == state.pieceSelected.x && y == state.pieceSelected.y){
+                                    drawColoredSquare(x*squareLength, reverseNumber(y, boardHeight)*squareLength,availableSquareColor, squareLength)
+                                }
+                            }
+                        }
+                }
+                else if(sq.special){
+                    drawColoredSquare(x*squareLength, y * squareLength, '#855bb3', squareLength)
+                }
+                else {
+                    drawLightedSquare(x * squareLength, y * squareLength, squareLength);
+                }
+
+                if(sq.red){
+                    drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength)
+                }
+                else if(sq.grey){
+                    drawColoredSquare(x*squareLength, y * squareLength, blockedSquareColor, squareLength)
+                }
+                
+            })
+            //Draw Pieces
+            state.pieces.forEach((piece) => {
+                if(IAM == 'black'){
+                    drawPiece(piece.x, reverseNumber(piece.y,boardHeight), piece.icon, squareLength)
+                }
+                else{
+                    drawPiece(piece.x, piece.y, piece.icon, squareLength)
+                }
+            })
+            if (state.won) {
+                if (state.won == 'black') {
+                    if(IAM == 'black'){
+                        forfeitTextButton.innerText = 'You Won'
+                        forfeitTextButton.style.paddingLeft = '31px';
+                        forfeitTextButton.style.paddingRight = '31px';
+                        forfeitTextButton.style.paddingTop = '24px';
+                        forfeitTextButton.style.paddingBottom = '24px';
+                        forfeitTextButton.style.paddingTop = '14px';
+                        forfeitTextButton.style.paddingBottom = '24px';
+                        forfeitTextButton.style.paddingBottom = '24px';
+                        forfeitTextButton.style.marginRight='0px';
+
+                    }
+                    else if(IAM == 'white'){
+                        forfeitTextButton.innerText = 'You Lost'
+                    }
+                    flagImage.style.display ='none'
+
+                    myTurnH1.innerText = 'Black Won'
+                }
+                else if (state.won == 'white') {
+
+                    if(IAM == 'white'){
+                        flagImage.style.display ='none'
+                        forfeitTextButton.style.paddingLeft = '31px';
+                        forfeitTextButton.style.paddingRight = '31px';
+                        forfeitTextButton.style.paddingLeft = '31px';
+                        forfeitTextButton.style.paddingTop = '24px';
+                        forfeitTextButton.style.paddingBottom = '24px';
+                        forfeitTextButton.style.marginRight='0px';
+
+                        myTurnH1.innerText = 'White Won'
+                        forfeitTextButton.innerText = 'You Won'
+                    }
+                    else if(IAM == 'black'){
+                        forfeitTextButton.innerText = 'You Lost'
+                    }
+
+                }
+            }
+        }
+        else {
+            console.log('vliza tuk')
+            myTurnH1.innerText = 'Waiting for Opponent'
+        }
+
+    })
+
+    canvas.addEventListener('click', (e) => {
+        var element = canvas, offsetX = 0, offsetY = 0, mx, my;
+
+        // Compute the total offset. It's possible to cache this if you want
+        if (element.offsetParent !== undefined) {
+            do {
+                offsetX += element.offsetLeft;
+                offsetY += element.offsetTop;
+            } while ((element = element.offsetParent));
+        }
+        
+        mx = e.pageX - offsetX;
+        my = e.pageY - offsetY;
+        if(IAM == 'black' && boardHeight){
+            socket.emit('move', { x: parseInt(mx / squareLength), y: reverseNumber(parseInt(my / squareLength),boardHeight) })
+        }
+        else{
+            socket.emit('move', { x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
+        }
+    })
+
+    canvas.addEventListener('mousemove', (e) => {
+        let {x, y} = getMousePos(canvas,e);
+        
+        if(!state || !state.pieces){
+            return;
+        }
+        if(IAM == 'black'){
+            hoveredPiece = pieceFromXY(parseInt(x / squareLength), reverseNumber(parseInt(y / squareLength), boardHeight),state.pieces)
+        }
+        else{
+            hoveredPiece = pieceFromXY(parseInt(x / squareLength), parseInt(y / squareLength),state.pieces)
+        }
+    })
+
+    if(localStorage.getItem('me')){
+        socket.emit('joinRoom',{roomId:getParams(window.location.href).roomId, mode:getParams(window.location.href).mode, id:localStorage.getItem('me')});
+
+    }
+    else{
+        localStorage.setItem('me', Math.random()+'')
+        socket.emit('joinRoom',{roomId:getParams(window.location.href).roomId, mode:getParams(window.location.href).mode, id:localStorage.getItem('me')});
+
+    }
+
+
+    
+
+
+
+
+</script>
+
+</html>
