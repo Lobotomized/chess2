@@ -17,7 +17,13 @@ class gallery  extends HTMLElement {
         if(selected){
             selected.classList.remove('selected');
         }
-        e.path[0].classList.add('selected')
+        if(e.path){
+            e.path[0].classList.add('selected')
+        }
+        else if (e.explicitOriginalTarget){
+            e.explicitOriginalTarget.classList.add('selected')
+        }
+        
         // console.log(item)
         elements.forEach((el, index) => {
             elements[index].style = "display:none;"

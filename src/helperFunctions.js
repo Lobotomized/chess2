@@ -234,9 +234,12 @@ function closeLights(board, flag) {
     if (!flag) {
         flag = 'light'
     }
-    board.forEach((square) => {
-        square[flag] = false;
-    })
+    if(board){
+        board.forEach((square) => {
+            square[flag] = false;
+        })
+    }
+
 }
 
 function lightBoard(piece, state, flag,blockedFlag) {

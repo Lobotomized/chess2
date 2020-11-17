@@ -224,6 +224,7 @@ function playerMove(playerMove, state,alwaysLight) {
             return false;
         }
     }
+    state.oldMove = {oldX:oldX,oldY:oldY,currentY:state.pieceSelected.y,currentX:state.pieceSelected.x}
     state.pieceSelected = undefined;
     
     closeLights(state.board)

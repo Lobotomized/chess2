@@ -6,7 +6,6 @@
     <title>Chess 2 -  Lobby</title>
     <script src="/src/variables.js"></script>
 
-    <script src="/src/components/gameInLobby.js"></script>
     <script src="/src/components/galleryComponent.js"></script>
     <script src="/socket.io/socket.io.js"></script>
 
@@ -35,7 +34,15 @@
                 console.log(data.length)
                 data.forEach((el,index) => {
                     gamesHTML.innerHTML += `
-                                <lobby-game game=${JSON.stringify(el)} gameName=${el.roomId}></lobby-game>
+                    <div class="lobbyGame"> <a class="linkHeader"  href="/play?roomId=${el.roomId}">${el.roomId}</a>
+                            <div class="row">
+                                <span class="span"> ${el.players.length} / 2 players</span>
+                            </div>
+                            <div class="row"> 
+                            <a class="startGame" href="/play?roomId=${el.roomId}">Start Game</a>
+                            </div>
+                        
+                    </div>
                             `
                 })
                 if(data.length == 0){
@@ -50,7 +57,15 @@
                 data.json().then((data) => {
                     data.forEach((el,index) => {
                     gamesHTML.innerHTML += `
-                                <lobby-game game=${JSON.stringify(el)} gameName=${el.roomId}></lobby-game>
+                    <div class="lobbyGame"> <a class="linkHeader"  href="/play?roomId=${el.roomId}">${el.roomId}</a>
+                            <div class="row">
+                                <span class="span"> ${el.players.length} / 2 players</span>
+                            </div>
+                            <div class="row"> 
+                            <a class="startGame" href="/play?roomId=${el.roomId}">Start Game</a>
+                            </div>
+                        
+                    </div>
                             `
                     })
                     if(data.length == 0){

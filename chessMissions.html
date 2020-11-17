@@ -85,11 +85,16 @@
             const body = document.getElementsByTagName('body')[0];
             const forfeitTextButton = document.getElementById('forfeitText');
             me.innerText = 'My Time ' +state.blackClock;
+            
             enemy.innerText = 'Enemy Time ' +state.whiteClock
             if (state.turn == 'black') {
                 body.style.background = blackSquareColor
+                me.style.color = whiteSquareColor;
+                enemy.style.color = whiteSquareColor;
             }
             else {
+                me.style.color = blackSquareColor;
+                enemy.style.color = blackSquareColor;
                 body.style.background = whiteSquareColor
             }
             myTurnH1.innerText = state.message || '';
@@ -162,6 +167,11 @@
                                     drawColoredSquare(x*squareLength, y*squareLength,availableSquareColor, squareLength)
                                 }
                             }
+                            
+                            if(state.oldMove){
+                                drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
+                                drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
+                            }
 
                         }
                         else{
@@ -186,6 +196,11 @@
                                 if(x == state.pieceSelected.x && y == state.pieceSelected.y){
                                     drawColoredSquare(x*squareLength, reverseNumber(y, boardHeight)*squareLength,availableSquareColor, squareLength)
                                 }
+                            }
+
+                            if(state.oldMove){
+                                drawColoredSquare(state.oldMove.oldX*squareLength, reverseNumber(state.oldMove.oldY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
+                                drawColoredSquare(state.oldMove.currentX*squareLength, reverseNumber(state.oldMove.currentY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
                             }
                         }
                 }
