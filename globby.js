@@ -356,7 +356,7 @@ module.exports.newGame = newGame;
 
 
 module.exports.newIOServer = function newServer(properties, io, hello, botConfig) {
-    let g = newGame(properties);
+    const g = newGame(properties);
     const frameRate = properties.delay || 100;
     const lobby = new g();
     const maxPlayers = properties.maxPlayers || 2;
