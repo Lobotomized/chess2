@@ -11,6 +11,13 @@ function lightPieceMove(piece,color,board){
 
 }
 
+function findSquareByXY(board,x,y){
+    let index =  board.findIndex((square) => {
+        return square.x == x && square.y == y;
+    })
+    return board[index]
+}
+
 function drawWhiteSquare(x, y, size) {
     if(size == undefined){
         size = 50;

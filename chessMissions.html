@@ -61,7 +61,6 @@
         window.location.replace('/')
     })
     socket.on('rooms', (data) => {
-        console.log(data)
     })
     socket.on('returnState', (secretState) => {
         //Draw the game
@@ -168,10 +167,10 @@
                                 }
                             }
                             
-                            if(state.oldMove){
-                                drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
-                                drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
-                            }
+                            // if(state.oldMove){
+                            //     drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
+                            //     drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
+                            // }
 
                         }
                         else{
@@ -198,10 +197,10 @@
                                 }
                             }
 
-                            if(state.oldMove){
-                                drawColoredSquare(state.oldMove.oldX*squareLength, reverseNumber(state.oldMove.oldY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
-                                drawColoredSquare(state.oldMove.currentX*squareLength, reverseNumber(state.oldMove.currentY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
-                            }
+                            // if(state.oldMove){
+                            //     drawColoredSquare(state.oldMove.oldX*squareLength, reverseNumber(state.oldMove.oldY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
+                            //     drawColoredSquare(state.oldMove.currentX*squareLength, reverseNumber(state.oldMove.currentY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
+                            // }
                         }
                 }
                 else if(sq.special){
@@ -219,6 +218,28 @@
                 }
                 
             })
+            if(state.oldMove){
+                const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);
+                const newSquare = findSquareByXY(state.board,state.oldMove.currentX, state.oldMove.currentY);
+                if(IAM === 'black'){
+                    if(!oldSquare.light){
+                        drawColoredSquare(state.oldMove.oldX*squareLength, reverseNumber(state.oldMove.oldY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
+                    }
+                    if(!newSquare.light){
+                        drawColoredSquare(state.oldMove.currentX*squareLength, reverseNumber(state.oldMove.currentY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
+                    }
+                }
+                else if(IAM === 'white'){
+                    if(!oldSquare.light){
+                        drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
+                    }
+                    if(!newSquare.light){
+                        drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
+                    }
+                }
+
+            }
+
             //Draw Pieces
             state.pieces.forEach((piece) => {
                 if(IAM == 'black'){
@@ -271,7 +292,6 @@
             }
         }
         else {
-            console.log('vliza tuk')
             myTurnH1.innerText = 'Waiting for Opponent'
         }
 
