@@ -22,4 +22,4 @@ const dangerSquareColor = '#f76176';
 const lightedSquareColor = '#7aaccc';
 const blockedSquareColor = '#c25766';
 const availableSquareColor = '#b990ca';
-const oldMoveSquareColor = '#7aaccc';
+const oldMoveSquareColor = '#cec031';
