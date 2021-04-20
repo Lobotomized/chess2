@@ -1,34 +1,34 @@
 function newGame(properties) {
 
-    let state = JSON.parse(JSON.stringify(properties.baseState));
-    state.playersConfigArray = this.players;
+    this.state = JSON.parse(JSON.stringify(properties.baseState));
+    this.state.playersConfigArray = this.players;
     this.players = [];
     this.disconnected = [];
     this.roomData  = {};
 
     this.move = (socketId, move) => {
-        let player = state.playersConfigArray.find((pl) => {
+        let player = this.state.playersConfigArray.find((pl) => {
             return pl.socketId == socketId
         })
 
-        properties.moveFunction(player, move, state)
+        properties.moveFunction(player, move, this.state)
     }
 
     this.timeFunction = () => {
 
         if (timeFunction != undefined) {
-            properties.timeFunction(state)
+            properties.timeFunction(this.state)
         }
     }
 
     this.returnState = (socketId) => {
 
-        let copyState = JSON.parse(JSON.stringify(state));
-        const player = state.playersConfigArray.find((pl) => {
+        let copyState = JSON.parse(JSON.stringify(this.state));
+        const player = this.state.playersConfigArray.find((pl) => {
             return pl.socketId == socketId
         })
         if (player) {
-            copyState = properties.statePresenter(copyState, player.ref)
+            copyState = properties.this.statePresenter(copyState, player.ref)
         }
         return copyState
     }
@@ -57,9 +57,9 @@ function newGame(properties) {
         else {
             this.players.push(player);
         }
-        state.playersConfigArray = this.players;
+        this.state.playersConfigArray = this.players;
 
-        properties.connectFunction(state, player.ref,this.roomData)
+        properties.connectFunction(this.state, player.ref,this.roomData)
 
     }
 
@@ -71,7 +71,7 @@ function newGame(properties) {
             return;
         }
         this.players.splice(this.players.indexOf(pl), 1);
-        properties.exitFunction(state,pl.ref)
+        properties.exitFunction(this.state,pl.ref)
     }
 
     this.disconnect = (socketId,dontWrite) => {
@@ -95,10 +95,10 @@ function newGame(properties) {
             this.players.splice(this.players.indexOf(pl), 1);
         }
         if(dontWrite){
-            properties.exitFunction(state,pl.ref)
+            properties.exitFunction(this.state,pl.ref)
         }   
         else{
-            properties.disconnectFunction(state, pl.ref)
+            properties.disconnectFunction(this.state, pl.ref)
         }
     }
 }

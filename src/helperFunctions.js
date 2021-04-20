@@ -82,6 +82,62 @@ function drawLightedSquare(x, y, size) {
     ctx.stroke();
 }
 
+function raceChoiceChess(pieces, board,raceWhite,raceBlack){
+    pieces.length = 0;
+    if(raceBlack == 'classic'){
+        pieces.push(rookFactory('black', 0,0), knightFactory('black', 1,0) ,
+        bishopFactory('black', 2,0), queenFactory('black', 3,0),
+        kingFactory('black', 4,0), bishopFactory('black', 5,0),
+        knightFactory('black', 6,0), rookFactory('black', 7,0),
+        pawnFactory('black', 0,1), pawnFactory('black', 1,1) ,
+        pawnFactory('black', 2,1), pawnFactory('black', 3,1),
+        pawnFactory('black', 4,1), pawnFactory('black', 5,1),
+        pawnFactory('black', 6,1), pawnFactory('black', 7,1))
+    }
+    else if(raceBlack == 'medieval'){
+        pieces.push(
+                                ghostFactory('black',2,2),ghostFactory('black',3,2),ghostFactory('black',4,2),ghostFactory('black',5,2),
+                                pigFactory('black',2,1),  horseFactory('black',3,1),horseFactory('black',4,1),pigFactory('black',5,1),
+            clownFactory('black',1,0),ricarFactory('black',2,0),hatFactory('black',3,0),hatFactory('black',4,0),ricarFactory('black',5,0),clownFactory('black',6,0),
+            )
+    }
+    else if(raceBlack == 'bug'){
+        pieces.push(
+        antFactory('black',0,1),   queenBugFactory('black',1,1), antFactory('black',2,1),        antFactory('black',3,1),         antFactory('black',4,1),    antFactory('black',5,1),       queenBugFactory('black',6,1), antFactory('black',7,1),
+        shroomFactory('black',0,0),spiderFactory('black',1,0),   ladyBugFactory('black',2,0),    goliathBugFactory('black',3,0),   goliathBugFactory('black',4,0),ladyBugFactory('black', 5,0), spiderFactory('black',6,0), shroomFactory('black',7,0)
+        )
+    }
+
+    if(raceWhite == 'classic'){
+        pieces.push( rookFactory('white', 0,7), 
+        knightFactory('white', 1,7) ,
+        bishopFactory('white', 2,7), 
+        queenFactory('white', 3,7),
+        kingFactory('white', 4,7), bishopFactory('white', 5,7),
+        knightFactory('white', 6,7), rookFactory('white', 7,7),
+        pawnFactory('white', 0,6), pawnFactory('white', 1,6) ,
+        pawnFactory('white', 2,6), pawnFactory('white', 3,6),
+        pawnFactory('white', 4,6), pawnFactory('white', 5,6),
+        pawnFactory('white', 6,6), pawnFactory('white', 7,6),)
+    }
+    else if(raceWhite == 'medieval'){
+        pieces.push(
+                                ghostFactory('white',2,5),ghostFactory('white',3,5),ghostFactory('white',4,5),ghostFactory('white',5,5),
+                                pigFactory('white',2,6),  horseFactory('white',3,6),horseFactory('white',4,6),pigFactory('white',5,6),
+                clownFactory('white',1,7),ricarFactory('white',2,7),hatFactory('white',3,7),hatFactory('white',4,7),ricarFactory('white',5,7),clownFactory('white',6,7)
+            )
+    }
+    else if(raceWhite == 'bug'){
+        pieces.push(
+        antFactory('white',0,6),   queenBugFactory('white',1,6),antFactory('white',2,6),        antFactory('white',3,6),    antFactory('white',4,6),      antFactory('white',5,6), queenBugFactory('white',6,6),    antFactory('white',7,6),
+        shroomFactory('white',0,7),spiderFactory('white',1,7),  ladyBugFactory('white',2,7), goliathBugFactory('white',3,7),   goliathBugFactory('white',4,7),ladyBugFactory('white', 5,7), spiderFactory('white',6,7),shroomFactory('white',7,7)
+        )
+    }
+
+
+}
+
+
 function drawPiece(x, y, img, size) {
     if(size == undefined){
         size = 50
@@ -381,3 +437,234 @@ function getMousePos(canvas, evt) {
     };
 }
 
+
+
+function getSinglePlayerGame() {
+    const g = new newGame({
+        baseState: {
+            //Starting State
+            gameType:'classic',
+            board: [],
+            pieceSelected: undefined,
+            turn: 'white',
+            white: undefined,
+            black: undefined,
+            whiteRace:undefined,
+            blackRace: undefined,
+            whiteClock: 6000,
+            blackClock: 6000,
+            pieces: [],
+            won: undefined,
+            message:'',
+            started:false
+        },
+        moveFunction: function (player, move, state) {
+            if(state.turn == 'menu'){
+
+                    if(player.ref == state.white){
+                        if(move.x == 1  && move.y == 1){
+                            state.whiteRace = 'classic'
+                        }
+                        else if(move.x === 1 && move.y ==2){
+                            state.whiteRace = 'medieval'
+                        }
+                        else if(move.x === 1 && move.y ==3){
+                            state.whiteRace = 'bug'
+                        }
+                    }
+                    else if(player.ref == state.black){
+                        if(move.x  == 1 && move.y == 1){
+                            state.blackRace = 'classic'
+                        }
+                        else if(move.x == 1 && move.y == 2){
+                            state.blackRace = 'medieval'
+                        }
+                        else if(move.x === 1 && move.y ==3){
+                            state.blackRace = 'bug'
+                        }
+                    }
+
+                if(state.whiteRace && state.blackRace){
+                    state.turn = 'white'
+                    raceChoiceChess(state.pieces,state.board,state.whiteRace,state.blackRace)
+                }
+            }   
+            else{
+                const cont = checkTurn(state, player.ref);
+                if (!cont) {
+                    return
+                }
+                if(state.on){
+                    return;
+                }
+                if (state.pieceSelected) {
+                    if (playerMove(move, state)) {
+                        changeTurn(state)
+                        for (let i = state.pieces.length - 1; i >= 0; i--) {
+                            if(state.pieces[i].color ==  state.turn){
+                                if (state.pieces[i].afterEnemyPlayerMove) {
+                                    state.pieces[i].afterEnemyPlayerMove(state, playerMove)
+                                }
+                            }
+                        }
+                    }
+                    else {
+                        closeLights(state.board);
+                        state.pieceSelected = undefined;
+                    }
+                }
+                else {
+                    console.log('vliza 1')
+                    selectPiece(move, state)
+                    if (state.pieceSelected) {
+                        lightBoard(state.pieceSelected, state)
+                    }
+                }
+            }
+        },
+        maxPlayers: 2, // Number of Players you want in a single game
+
+        statePresenter: function (copyState, playerRef) {
+            let search = {x:undefined,y:undefined}
+            copyState.playerRef = playerRef;
+            if(!copyState.blackRace || !copyState.whiteRace){
+                if(copyState.black == playerRef){
+                    if(copyState.blackRace == 'medieval'){
+                        search.x = 1;
+                        search.y = 2;
+                    }
+                    else if(copyState.blackRace == 'classic'){
+                        search.x = 1;
+                        search.y = 1;
+                    }
+                    else if(copyState.blackRace == 'bug'){
+                        search.x = 1;
+                        search.y = 3;
+                    }
+                }
+                else{
+                    if(copyState.whiteRace == 'medieval'){
+                        search.x = 1;
+                        search.y = 2;
+                    }
+                    else if(copyState.whiteRace == 'classic'){
+                        search.x = 1;
+                        search.y = 1;
+                    }
+                    else if(copyState.whiteRace == 'bug'){
+                        search.x = 1;
+                        search.y = 3;
+                    }
+                }
+            }
+            copyState.board.forEach((sq) => {
+                if(sq.x == search.x && sq.y == search.y){
+                    sq.light = true;
+                }
+            })
+            if (checkTurn(copyState, playerRef)) {
+                copyState.yourTurn = true;
+
+                return copyState
+            }
+
+            copyState.yourTurn = false;
+            return copyState;
+
+        },
+        timeFunction: function (state) {
+            
+            if(state.gameType == 'raceChoiceChess'){
+                if(state.blackRace && state.whiteRace){
+                    if (state.turn == 'white') {
+                        state.whiteClock -= 1;
+                        if (state.whiteClock < 0) {
+                            state.won = 'black'
+                        }
+                        return
+                    }
+            
+                    state.blackClock -= 1;
+                    if (state.blackClock < 0) {
+                        state.won = 'white'
+                    }
+                    return
+                }
+            }
+            else{
+                if (state.turn == 'white') {
+                    state.whiteClock -= 1;
+                    if (state.whiteClock < 0) {
+                        state.won = 'black'
+                    }
+                    return
+                }
+        
+                state.blackClock -= 1;
+                if (state.blackClock < 0) {
+                    state.won = 'white'
+                }
+                return
+            }
+        },
+        exitFunction: function(state,playerRef){
+            io.emit(lobby.games)
+
+            if(state.white == playerRef){
+                state.won = 'black'
+            }
+            else{
+                state.won = 'white'
+            }
+        },
+        connectFunction: function (state, playerRef) {
+            const roomData = {mode:'raceChoiceChess'}
+            if (!state.white) {
+                state.white = playerRef;
+            }
+            else if (!state.black) {
+                state.black = playerRef;
+                if(roomData.mode == 'minichess'){
+                    state.gameType = 'minichess'
+                    miniChess(state.pieces, state.board);
+                }
+                else if(roomData.mode == 'randomchess'){
+                    state.gameType = 'randomchess'
+                    randomChess(state.pieces,state.board)
+                }
+                else if(roomData.mode == 'catchthedragon'){
+                    state.gameType = 'catchthedragon'
+                    catchTheDragon(state.pieces,state.board)
+                }
+                else if(roomData.mode == 'mongolianChess'){
+                    state.gameType = 'mongolianChess'
+                    mongolianChess(state.pieces,state.board)
+                }
+                else if(roomData.mode == 'classicChess'){
+                    state.gameType = 'classiChess'
+                    classicChess(state.pieces,state.board)
+                }
+                else if(roomData.mode == 'raceChess'){
+                    state.gameType = 'raceChess'
+                    raceChess(state.pieces,state.board)
+                }
+                else if(roomData.mode == 'raceChoiceChess'){
+                    state.pieces.length = 0;
+                    state.board.length = 0;
+                    for (let x = 0; x <= 7; x++) {
+                        for (let y = 0; y <= 7; y++) {
+                                state.board.push({ light: false, x: x, y: y })
+                        }
+                    }
+
+                    state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3))
+                    state.gameType = 'raceChoiceChess'
+                    state.turn = 'menu'
+                }
+            }
+        },
+        rooms:true,
+        delay: 100
+    })
+    return g;
+}

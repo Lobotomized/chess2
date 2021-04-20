@@ -235,10 +235,11 @@ function selectPiece(playerMove, state) {
     const x = playerMove.x;
     const y = playerMove.y;
 
-
+    console.log('vliza2')
     const piece = state.pieces.find((el) => {
         return x == el.x && y == el.y;
     })
+    console.log(piece.color, state.turn)
     if (!piece) {
         closeLights(state.board);
         return;
@@ -249,5 +250,6 @@ function selectPiece(playerMove, state) {
         return;
     }
     state.pieceSelected = piece;
+    console.log(state.pieceSelected)
     lightBoard(piece, state)
 }

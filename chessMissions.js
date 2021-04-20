@@ -272,6 +272,9 @@ app.get('/play', function(req,res){
     return res.status(200).sendFile(__dirname + '/chessMissions.html');
 })
 
+app.get('/hotseat', function(req,res){
+    return res.status(200).sendFile(__dirname + '/hotseat.html');
+})
 
 
 http.listen(8080, function () {
