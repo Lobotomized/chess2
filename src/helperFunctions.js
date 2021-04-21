@@ -305,72 +305,79 @@ function closeLights(board, flag) {
 
 }
 
-function lightBoard(piece, state, flag,blockedFlag) {
-    if (!flag) {
-        flag = 'light'
-    }
-    closeLights(state.board, flag);
-    if (!piece) {
-        return;
-    }
-    let tempMoves = [];
-    if (piece.conditionalMoves) {
-        tempMoves = piece.conditionalMoves(state);
-    }
-    [...piece.moves, ...tempMoves].forEach((move) => {
-        if (move.type == 'absolute') {
-            const square = state.board.find((el) => {
-                return el.x === piece.x + move.x && el.y === piece.y + move.y
-            })
-            if (square) {
-                const innerPiece = pieceFromSquare(square, state.pieces)
-                if (innerPiece) {
-                    if (innerPiece.color != piece.color && !move.impotent) {
-                        square[flag] = true;
-                    }
-                    else{
-                        square[blockedFlag] = true;
-                    }
-                }
-                else if (!innerPiece) {
-                    square[flag] = true;
-                }
-            }
-        }
-        else if (move.type == 'allMine') {
-            state.board.forEach((square) => {
-                const innerPiece = pieceFromSquare(square, state.pieces);
-                if (innerPiece) {
-                    if (innerPiece.color == piece.color) {
-                        square[flag] = true;
-                    }
-                }
-            })
-        }
-        else if (move.type == 'takeMove') {
-            const square = state.board.find((el) => {
-                return el.x === piece.x + move.x && el.y === piece.y + move.y
-            })
-            if (square) {
-                const innerPiece = pieceFromSquare(square, state.pieces)
-                if (innerPiece) {
-                    if (innerPiece.color != piece.color && !move.impotent) {
-                        square[flag] = true;
-                    }
-                }
-            }
-        }
-        else if (move.type == 'blockable') {
-            if (move.repeat) {
-                const limit = move.limit || 100;
-                blockableFunction(state, move.x, move.y, piece.x, piece.y, move, limit, flag,blockedFlag);
-            }
-        }
+// function lightBoard(piece, state, flag,blockedFlag) {
+//     if (!flag) {
+//         flag = 'light'
+//     }
+//     closeLights(state.board, flag);
+//     if (!piece) {
+//         return;
+//     }
+//     let tempMoves = [];
+//     if (piece.conditionalMoves) {
+//         tempMoves = piece.conditionalMoves(state);
+//     }
+//     [...piece.moves, ...tempMoves].forEach((move) => {
+//         if (move.type == 'absolute') {
+//             const square = state.board.find((el) => {
+//                 return el.x === piece.x + move.x && el.y === piece.y + move.y
+//             })
+//             if (square) {
+//                 const innerPiece = pieceFromSquare(square, state.pieces)
+//                 if (innerPiece) {
+//                     if (innerPiece.color != piece.color && !move.impotent) {
+//                         square[flag] = true;
+//                     }
+//                     else{
+//                         console.log(blockedFlag)
+
+//                         square[blockedFlag] = true;
+//                     }
+//                 }
+//                 else if (!innerPiece) {
+//                     console.log(flag)
+//                     square[flag] = true;
+//                 }
+//             }
+//         }
+//         else if (move.type == 'allMine') {
+//             state.board.forEach((square) => {
+//                 const innerPiece = pieceFromSquare(square, state.pieces);
+//                 if (innerPiece) {
+//                     if (innerPiece.color == piece.color) {
+//                         square[flag] = true;
+//                     }
+//                 }
+//             })
+//         }
+//         else if (move.type == 'takeMove') {
+//             const square = state.board.find((el) => {
+//                 return el.x === piece.x + move.x && el.y === piece.y + move.y
+//             })
+//             if (square) {
+//                 const innerPiece = pieceFromSquare(square, state.pieces)
+//                 if (innerPiece) {
+//                     if (innerPiece.color != piece.color && !move.impotent) {
+//                         square[flag] = true;
+//                     }
+//                 }
+//             }
+//         }
+//         else if (move.type == 'blockable') {
+//             if (move.repeat) {
+//                 const limit = move.limit || 100;
+//                 blockableSpecialFunction(state, move.x, move.y, piece.x, piece.y, move, limit, flag,blockedFlag);
+//             }
+//         }
+//     })
+// }
+function findCopyPieceByXY(pieces,x,y){
+    return pieces.find((piece) => {
+        return piece .x == x && piece.y == y;
     })
 }
 
-
-function blockableFunction(state, powerX, powerY, x, y, move, limit, flag,secondFlag) {
+function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag,secondFlag) {
     if (!flag) {
         flag = 'light'
     }
@@ -408,7 +415,7 @@ function blockableFunction(state, powerX, powerY, x, y, move, limit, flag,second
 
     if (!piece) {
         square[flag] = true;
-        blockableFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1, flag,secondFlag)
+        blockableSpecialFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1, flag,secondFlag)
     }
     else if (!move.impotent) {
         // console.log(state, state.pieces)
@@ -423,7 +430,7 @@ function blockableFunction(state, powerX, powerY, x, y, move, limit, flag,second
             }
         }
         
-        blockableFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1, secondFlag,secondFlag)
+        blockableSpecialFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1, secondFlag,secondFlag)
     }
 
     return;
@@ -437,6 +444,185 @@ function getMousePos(canvas, evt) {
     };
 }
 
+function findPieceByXY(pieces,x,y){
+    let index =  pieces.findIndex((piece) => {
+         return piece .x == x && piece.y == y;
+     })
+     return index
+ }
+
+ function areYouChecked(state,enemyColor,me){
+    for (let i = state.pieces.length - 1; i >= 0; i--) {
+        const piece = state.pieces[i]
+        let tempMoves = [];
+        if (piece.conditionalMoves) {
+            tempMoves = piece.conditionalMoves(state);
+        }
+        for(let ii = [...piece.moves, ...tempMoves].length-1; ii>=0; ii--){
+            const move = [...piece.moves, ...tempMoves][ii];
+            if (piece.color == enemyColor) {
+                if ((move.type == 'absolute' || move.type == 'takeMove') && !move.impotent) {
+                    if(piece.x + move.x == me.x && piece.y + move.y == me.y){
+                        return true;
+                    }
+                }
+                else if (move.type == 'blockable' && !move.impotent) {
+                    if (move.repeat) {
+                        const limit = move.limit || 100;
+                        if(blockableCheck(state, move.x, move.y, piece.x, piece.y, move, limit, me) == 'block'){
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return false
+
+}
+
+ function     areYouCheckedWithoutTempMoves(state,enemyColor,me, flag){
+    let toReturn = false;
+    for (let i = state.pieces.length - 1; i >= 0; i--) {
+        const piece = state.pieces[i]
+
+        for(let ii = [...piece.moves].length-1; ii>=0; ii--){
+            const move = [...piece.moves][ii];
+            if (piece.color == enemyColor) {
+
+                if ((move.type == 'absolute' || move.type == 'takeMove') && !move.impotent) {
+                    if(piece.x + move.x == me.x && piece.y + move.y == me.y){
+                        toReturn =  true;
+                    }
+                }
+                else if (move.type == 'blockable' && !move.impotent) {
+                    if (move.repeat) {
+                        const limit = move.limit || 100;
+                        if(blockableCheck(state, move.x, move.y, piece.x, piece.y, move, limit, me,'rokado') == 'block'){
+                            toReturn = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return toReturn
+
+}
+
+ function isRoadAttacked(state,enemyColor,pointOne,pointTwo){
+    let direction = false;
+    let checker = false;
+    let actor = pointOne
+
+    let myColor = 'white';
+    if(enemyColor == 'white'){
+        myColor = 'black'
+    }
+    
+    if(pointOne.x > pointTwo.x){
+        direction = true;
+    }
+    let distance = 0;
+
+    if(direction){
+        distance = pointOne.x - pointTwo.x;
+    }
+    else{
+        distance = pointTwo.x - pointOne.x;
+        actor = pointTwo
+    }
+    for(let c = distance-1; c > 0; c--){
+        if(areYouCheckedWithoutTempMoves(state,enemyColor,{x:actor.x-c,y:actor.y,color:myColor}, 'rokado')){
+            checker = true;
+        }
+
+    }
+    return checker;
+}
+ function checkEmptyHorizontalBetween(state,pieceOne, pieceTwo){
+
+    let direction = false;
+    let checker = true;
+    let actor = pieceOne
+    
+    if(pieceOne.x > pieceTwo.x){
+        direction = true;
+    }
+    let distance = 0;
+
+    if(direction){
+        distance = pieceOne.x - pieceTwo.x;
+    }
+    else{
+        distance = pieceTwo.x - pieceOne.x;
+        actor = pieceTwo
+    }
+    distance -=1;
+    while(distance > 0){            
+        if(state.pieces[findPieceByXY(state.pieces,actor.x-distance, actor.y)]){
+            checker = false;
+        }
+        distance--;
+    }
+    return checker;
+}
+
+function blockableCheck(state, powerX, powerY, x, y, move, limit,myPiece, flag,counter) {
+    let toReturn;
+    if (limit === 0) {
+        return;
+    }
+    const square = state.board.find((el) => {
+        return el.x === x + powerX && el.y === y + powerY;
+    }) // Find a square for x/y
+    if (!square) {
+        return;
+    }// If such a square does not exist return undefined
+    let directionX = 0;
+    if (powerX < 0) {
+        directionX = -1;
+    }
+    else if (powerX > 0) {
+        directionX = 1;
+    }
+
+    let directionY = 0;
+    
+    if (powerY < 0) {
+        directionY = -1;
+    }
+    else if (powerY > 0) {
+        directionY = 1;
+    }
+    else { 
+        directionY = 0;
+    }
+    const secondPiece = state.pieces[findPieceByXY(state.pieces,x+powerX, y + powerY)] // The piece on the attacked square
+    //Find the direction in which we are going
+    if (!secondPiece && !(x+powerX == myPiece.x && y+powerY == myPiece.y)) {
+        //If there is  no such piece continue
+        return blockableCheck(state, powerX+directionX, powerY+directionY, x, y, move, limit - 1, myPiece,flag,counter+1)
+    }
+    else{
+        if(secondPiece){
+            if(secondPiece.x == myPiece.x && secondPiece.y == myPiece.y){
+                toReturn = 'block';
+                return 'block'
+            }
+        }
+        else{
+            if(x+powerX == myPiece.x && y+powerY == myPiece.y){
+                toReturn = 'block'
+                return 'block'
+            }
+        }
+
+    }
+    return toReturn
+}
 
 
 function getSinglePlayerGame() {
@@ -514,7 +700,6 @@ function getSinglePlayerGame() {
                     }
                 }
                 else {
-                    console.log('vliza 1')
                     selectPiece(move, state)
                     if (state.pieceSelected) {
                         lightBoard(state.pieceSelected, state)

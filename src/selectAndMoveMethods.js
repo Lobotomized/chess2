@@ -1,5 +1,6 @@
 
 function lightBoard(piece, state, flag) {
+    console.log('vliza 4 wtf')
     if (!flag) {
         flag = 'light'
     }
@@ -54,6 +55,7 @@ function lightBoard(piece, state, flag) {
         else if (move.type == 'blockable') {
             if (move.repeat) {
                 const limit = move.limit || 100;
+                console.log('vliza tuk')
                 blockableFunction(state, move.x, move.y, piece.x, piece.y, move, limit, flag);
             }
         }
@@ -100,7 +102,7 @@ function blockableFunction(state, powerX, powerY, x, y, move, limit, flag) {
 
     if (!piece) {
         square[flag] = true;
-        blockableFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1)
+        blockableFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1, flag)
     }
     else if (piece.color != state.turn && !move.impotent) {
         square[flag] = true;
@@ -235,11 +237,9 @@ function selectPiece(playerMove, state) {
     const x = playerMove.x;
     const y = playerMove.y;
 
-    console.log('vliza2')
     const piece = state.pieces.find((el) => {
         return x == el.x && y == el.y;
     })
-    console.log(piece.color, state.turn)
     if (!piece) {
         closeLights(state.board);
         return;
@@ -250,6 +250,5 @@ function selectPiece(playerMove, state) {
         return;
     }
     state.pieceSelected = piece;
-    console.log(state.pieceSelected)
-    lightBoard(piece, state)
+    lightBoard(piece, state, 'light')
 }

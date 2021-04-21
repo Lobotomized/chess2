@@ -31,7 +31,7 @@
         <canvas id="canvas" width="500" height="500"></canvas>
         <div class="times">
             <h1 class="clock" id="blackClock"></h1>
-            <button class="row exitButton" style="display:none;" id="exitButton"><span id="forfeitText" class="forfeitText">Forfeit</span> <img id="flagImage" style="width:50px; height:50px;" src="/static/whiteFlag.svg" alt="" /></button>
+            <button class="row exitButton" style="display:none;" id="exitButton"><span id="forfeitText" class="forfeitText">Game Continues</span> <img id="flagImage" style="width:50px; height:50px;" src="/static/whiteFlag.svg" alt="" /></button>
 
             <h1 class="clock" id="whiteClock"></h1>
         </div>
@@ -40,21 +40,17 @@
         </div>
 
     </div>
-    <button onclick="klik()">wtf</button>
 
 </body>
 
 
 
 <script>
-
-let klik = function(){
-        animate(hotseatGame.returnState())
-        console.log('vliza')
-    }
+let ani = function(){
+    animate(hotseatGame.returnState())
+}
 
 
-    console.log('wtf')
     const startHotseat = function(){
         const g = getSinglePlayerGame();
         return g;
@@ -71,7 +67,6 @@ let klik = function(){
     let mouseY;
     let st = undefined;
     let endGame = false;
-    let IAM = 'white'
     let boardheight;
     let boardWidth;
     let state;
@@ -92,9 +87,9 @@ let klik = function(){
     hotseatGame.state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3))
     hotseatGame.state.gameType = 'raceChoiceChess'
     hotseatGame.state.turn = 'menu'
-    hotseatGame.state.whiteRace = 'medieval'
-    hotseatGame.state.blackRace = 'medieval'
-    hotseatGame.state.turn = 'white'
+    hotseatGame.state.whiteRace = getParams(window.location.href).whiteRace || 'medieval'
+    hotseatGame.state.blackRace = getParams(window.location.href).blackRace || 'bug'
+    hotseatGame.state.turn = 'black'
 
     raceChoiceChess(hotseatGame.state.pieces,hotseatGame.state.board,hotseatGame.state.whiteRace,hotseatGame.state.blackRace)
     function animate(secretState){
@@ -104,6 +99,11 @@ let klik = function(){
         canvas.height = squareLength * boardWidth + squareLength;
         state = secretState;
 
+        if(hoveredPiece){
+            if(hoveredPiece.color != hotseatGame.state.turn && hotseatGame.state.turn != undefined){
+                lightBoard(hoveredPiece,state,'red','grey')
+            }
+        }
         if (state.pieces) {
             if(exitButton.hasAttribute('style')){
                 exitButton.removeAttribute('style')
@@ -113,8 +113,6 @@ let klik = function(){
             const enemy = document.getElementById('whiteClock');
             const body = document.getElementsByTagName('body')[0];
             const forfeitTextButton = document.getElementById('forfeitText');
-            me.innerText = 'My Time ' +state.blackClock;
-            enemy.innerText = 'Enemy Time ' +state.whiteClock
             if (state.turn == 'black') {
                 body.style.background = blackSquareColor
                 me.style.color = whiteSquareColor;
@@ -151,16 +149,14 @@ let klik = function(){
             state.board.forEach((sq,index) => {
                 let y = sq.y;
                 let x = sq.x;
-                if(IAM == 'black'){
-                    y = reverseNumber(y,boardHeight);
-                }
+
 
                 let orderFirst = true;
                 if(y%2 != 0){
                     orderFirst = false;
                 }
-                if (!sq.light && !sq.special) {
-                        if(IAM == 'white'){
+                if (!sq.light && !sq.special && !sq.red) {
+                        if(hotseatGame.state.turn == 'white'){
                             if(orderFirst){
                                 if(x % 2 != 0){
                                     drawBlackSquare(x * squareLength, y * squareLength, squareLength)
@@ -182,12 +178,6 @@ let klik = function(){
                                     drawColoredSquare(x*squareLength, y*squareLength,availableSquareColor, squareLength)
                                 }
                             }
-                            
-                            // if(state.oldMove){
-                            //     drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
-                            //     drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
-                            // }
-
                         }
                         else{
                             if(orderFirst){
@@ -206,17 +196,11 @@ let klik = function(){
                                     drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
                                 }
                             }
-                            //reverseNumber(piece.y,boardHeight)
                             if(state.pieceSelected){
                                 if(x == state.pieceSelected.x && y == state.pieceSelected.y){
-                                    drawColoredSquare(x*squareLength, reverseNumber(y, boardHeight)*squareLength,availableSquareColor, squareLength)
+                                    drawColoredSquare(x*squareLength, y*squareLength,availableSquareColor, squareLength)
                                 }
                             }
-
-                            // if(state.oldMove){
-                            //     drawColoredSquare(state.oldMove.oldX*squareLength, reverseNumber(state.oldMove.oldY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
-                            //     drawColoredSquare(state.oldMove.currentX*squareLength, reverseNumber(state.oldMove.currentY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
-                            // }
                         }
                 }
                 else if(sq.special){
@@ -225,27 +209,29 @@ let klik = function(){
                 else {
                     drawLightedSquare(x * squareLength, y * squareLength, squareLength);
                 }
-
                 if(sq.red){
+                    console.log('a tuk')
                     drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength)
                 }
                 else if(sq.grey){
                     drawColoredSquare(x*squareLength, y * squareLength, blockedSquareColor, squareLength)
                 }
+
+                
                 
             })
             if(state.oldMove){
                 const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);
                 const newSquare = findSquareByXY(state.board,state.oldMove.currentX, state.oldMove.currentY);
-                if(IAM === 'black'){
+                if(hotseatGame.state.turn === 'black'){
                     if(!oldSquare.light){
-                        drawColoredSquare(state.oldMove.oldX*squareLength, reverseNumber(state.oldMove.oldY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
+                        drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
                     }
                     if(!newSquare.light){
-                        drawColoredSquare(state.oldMove.currentX*squareLength, reverseNumber(state.oldMove.currentY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
+                        drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
                     }
                 }
-                else if(IAM === 'white'){
+                else if(hotseatGame.state.turn === 'white'){
                     if(!oldSquare.light){
                         drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
                     }
@@ -259,52 +245,15 @@ let klik = function(){
             //Draw Pieces
             state.pieces.forEach((piece) => {
                 drawPiece(piece.x, piece.y, piece.icon, squareLength)
-                console.log(piece.x, reverseNumber(piece.y,boardHeight), piece.icon, squareLength)
-                // if(IAM == 'black'){
-                //     drawPiece(piece.x, reverseNumber(piece.y,boardHeight), piece.icon, squareLength)
-                // }
-                // else{
-                //     drawPiece(piece.x, piece.y, piece.icon, squareLength)
-                // }
             })
             if (state.won) {
                 if (state.won == 'black') {
-                    if(IAM == 'black'){
-                        forfeitTextButton.innerText = 'You Won'
-                        forfeitTextButton.style.paddingLeft = '31px';
-                        forfeitTextButton.style.paddingRight = '31px';
-                        forfeitTextButton.style.paddingTop = '24px';
-                        forfeitTextButton.style.paddingBottom = '24px';
-                        forfeitTextButton.style.paddingTop = '14px';
-                        forfeitTextButton.style.paddingBottom = '24px';
-                        forfeitTextButton.style.paddingBottom = '24px';
-                        forfeitTextButton.style.marginRight='0px';
-
-                    }
-                    else if(IAM == 'white'){
-                        forfeitTextButton.innerText = 'You Lost'
-                    }
-                    flagImage.style.display ='none'
-
-                    myTurnH1.innerText = 'Black Won'
+                    
+                    forfeitTextButton.innerText = 'Black Won'
                 }
                 else if (state.won == 'white') {
 
-                    if(IAM == 'white'){
-                        flagImage.style.display ='none'
-                        forfeitTextButton.style.paddingLeft = '31px';
-                        forfeitTextButton.style.paddingRight = '31px';
-                        forfeitTextButton.style.paddingLeft = '31px';
-                        forfeitTextButton.style.paddingTop = '24px';
-                        forfeitTextButton.style.paddingBottom = '24px';
-                        forfeitTextButton.style.marginRight='0px';
-
-                        myTurnH1.innerText = 'White Won'
-                        forfeitTextButton.innerText = 'You Won'
-                    }
-                    else if(IAM == 'black'){
-                        forfeitTextButton.innerText = 'You Lost'
-                    }
+                    forfeitTextButton.innerText = 'White Won'
 
                 }
             }
@@ -316,7 +265,6 @@ let klik = function(){
     }
     
     canvas.addEventListener('click', (e) => {
-        console.log('a tuk')
         var element = canvas, offsetX = 0, offsetY = 0, mx, my;
 
         // Compute the total offset. It's possible to cache this if you want
@@ -329,16 +277,9 @@ let klik = function(){
         
         mx = e.pageX - offsetX;
         my = e.pageY - offsetY;
-        if(IAM == 'black' && boardHeight){
-            hotseatGame.move('black',  { x: parseInt(mx / squareLength), y: reverseNumber(parseInt(my / squareLength),boardHeight) })
-            // g.move({ x: parseInt(mx / squareLength), y: reverseNumber(parseInt(my / squareLength),boardHeight) })
-        }
-        else{
-            // g.move({ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
-        }
-        hotseatGame.move('white',{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
-        hotseatGame.move('black',  { x: parseInt(mx / squareLength), y: reverseNumber(parseInt(my / squareLength),boardHeight) })
-        console.log(hotseatGame.returnState())
+
+        hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
+        // hotseatGame.move('black',  { x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
     })
 
     canvas.addEventListener('mousemove', (e) => {
@@ -347,19 +288,10 @@ let klik = function(){
             return;
         }
         hoveredPiece = pieceFromXY(parseInt(x / squareLength), parseInt(y / squareLength),state.pieces)
-
-        if(hoveredPiece){
-            if(hoveredPiece.color != IAM && IAM != undefined){
-                lightBoard(hoveredPiece,state,'red','grey')
-            }
-        }
-        else{
-            closeLights(state.board,'red')
-            closeLights(state.board,'grey')
-        }
         // animate(state)
     })
 
+    setInterval(ani, 100)
 
 
 </script>

@@ -822,6 +822,15 @@ function shroomFactory(color,x,y){
     }
 }
 
+function giveOppositeColor(color){
+    if(color == 'white'){
+        return 'black'
+    }
+    else if(color == 'black'){
+        return 'white'
+    }
+}
+
 
 function queenBugFactory(color,x,y){
     return {

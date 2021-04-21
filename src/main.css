@@ -320,3 +320,26 @@ html{
     flex-direction:row;
     justify-content:space-around;
   }
+
+  .racePickImage{
+      max-width:20vw;
+  }
+
+  .racePickImage:hover{
+    background-color:white;
+    border-radius:50px;
+  }
+
+  .racePickImageSelectedWhite{
+    background-color:white;
+    border-radius:50px;
+  }
+
+  .racePickImageSelectedBlack{
+    background-color:white;
+    border-radius:50px;
+  }
+
+ .marginMedium {
+     margin:50px;
+ }

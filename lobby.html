@@ -12,7 +12,26 @@
     <link rel="stylesheet" href="/src/main.css">
 
     <script>
+        let raceWhite = 'classic';
+        let raceBlack = 'classic';
+        const cleanSelect = function(selected,removedClass, race){
+            var elems = document.querySelectorAll("."+removedClass);
+            [].forEach.call(elems, function(el) {
+                el.classList.remove(removedClass);
+            });
+            selected.classList.add(removedClass)
 
+            if(removedClass === 'racePickImageSelectedWhite'){
+                raceWhite = race;
+            }
+            else{
+                raceBlack = race;
+            }
+        }
+
+        const hotseatGameStart = function(){
+            window.location.href = `/hotseat?whiteRace=${raceWhite}&blackRace=${raceBlack}`
+        }
     </script>
 
 
@@ -112,6 +131,21 @@
         </div>
 
         <div class="hotseat">
+            <h1 style="text-align:center;">Pick White Race</h1>
+
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'medieval')" src="/static/whiteClown.png" alt="">
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'bug')" src="/static/whiteAnt.png" alt="">
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'classic')" src="/static/whiteKing.png" alt="">
+
+            <h1 style="text-align:center;">Pick Black Race</h1>
+
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'medieval')" src="/static/blackClown.png" alt="">
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'bug')" src="/static/blackAnt.png" alt="">
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'classic')" src="/static/blackKing.png" alt="">
+
+            <div class="marginMedium">
+                <a class="startGame column" onclick="hotseatGameStart()">Start Game</a>
+            </div>
         </div>
 
         <div class="pieces">
