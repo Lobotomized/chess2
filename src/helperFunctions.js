@@ -305,72 +305,72 @@ function closeLights(board, flag) {
 
 }
 
-// function lightBoard(piece, state, flag,blockedFlag) {
-//     if (!flag) {
-//         flag = 'light'
-//     }
-//     closeLights(state.board, flag);
-//     if (!piece) {
-//         return;
-//     }
-//     let tempMoves = [];
-//     if (piece.conditionalMoves) {
-//         tempMoves = piece.conditionalMoves(state);
-//     }
-//     [...piece.moves, ...tempMoves].forEach((move) => {
-//         if (move.type == 'absolute') {
-//             const square = state.board.find((el) => {
-//                 return el.x === piece.x + move.x && el.y === piece.y + move.y
-//             })
-//             if (square) {
-//                 const innerPiece = pieceFromSquare(square, state.pieces)
-//                 if (innerPiece) {
-//                     if (innerPiece.color != piece.color && !move.impotent) {
-//                         square[flag] = true;
-//                     }
-//                     else{
-//                         console.log(blockedFlag)
+function lightBoard(piece, state, flag,blockedFlag) {
+    if (!flag) {
+        flag = 'light'
+    }
+    closeLights(state.board, flag);
+    if (!piece) {
+        return;
+    }
+    let tempMoves = [];
+    if (piece.conditionalMoves) {
+        tempMoves = piece.conditionalMoves(state);
+    }
+    [...piece.moves, ...tempMoves].forEach((move) => {
+        if (move.type == 'absolute') {
+            const square = state.board.find((el) => {
+                return el.x === piece.x + move.x && el.y === piece.y + move.y
+            })
+            if (square) {
+                const innerPiece = pieceFromSquare(square, state.pieces)
+                if (innerPiece) {
+                    if (innerPiece.color != piece.color && !move.impotent) {
+                        square[flag] = true;
+                    }
+                    else{
+                        console.log(blockedFlag)
 
-//                         square[blockedFlag] = true;
-//                     }
-//                 }
-//                 else if (!innerPiece) {
-//                     console.log(flag)
-//                     square[flag] = true;
-//                 }
-//             }
-//         }
-//         else if (move.type == 'allMine') {
-//             state.board.forEach((square) => {
-//                 const innerPiece = pieceFromSquare(square, state.pieces);
-//                 if (innerPiece) {
-//                     if (innerPiece.color == piece.color) {
-//                         square[flag] = true;
-//                     }
-//                 }
-//             })
-//         }
-//         else if (move.type == 'takeMove') {
-//             const square = state.board.find((el) => {
-//                 return el.x === piece.x + move.x && el.y === piece.y + move.y
-//             })
-//             if (square) {
-//                 const innerPiece = pieceFromSquare(square, state.pieces)
-//                 if (innerPiece) {
-//                     if (innerPiece.color != piece.color && !move.impotent) {
-//                         square[flag] = true;
-//                     }
-//                 }
-//             }
-//         }
-//         else if (move.type == 'blockable') {
-//             if (move.repeat) {
-//                 const limit = move.limit || 100;
-//                 blockableSpecialFunction(state, move.x, move.y, piece.x, piece.y, move, limit, flag,blockedFlag);
-//             }
-//         }
-//     })
-// }
+                        square[blockedFlag] = true;
+                    }
+                }
+                else if (!innerPiece) {
+                    console.log(flag)
+                    square[flag] = true;
+                }
+            }
+        }
+        else if (move.type == 'allMine') {
+            state.board.forEach((square) => {
+                const innerPiece = pieceFromSquare(square, state.pieces);
+                if (innerPiece) {
+                    if (innerPiece.color == piece.color) {
+                        square[flag] = true;
+                    }
+                }
+            })
+        }
+        else if (move.type == 'takeMove') {
+            const square = state.board.find((el) => {
+                return el.x === piece.x + move.x && el.y === piece.y + move.y
+            })
+            if (square) {
+                const innerPiece = pieceFromSquare(square, state.pieces)
+                if (innerPiece) {
+                    if (innerPiece.color != piece.color && !move.impotent) {
+                        square[flag] = true;
+                    }
+                }
+            }
+        }
+        else if (move.type == 'blockable') {
+            if (move.repeat) {
+                const limit = move.limit || 100;
+                blockableSpecialFunction(state, move.x, move.y, piece.x, piece.y, move, limit, flag,blockedFlag);
+            }
+        }
+    })
+}
 function findCopyPieceByXY(pieces,x,y){
     return pieces.find((piece) => {
         return piece .x == x && piece.y == y;
