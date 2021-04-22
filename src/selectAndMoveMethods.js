@@ -1,5 +1,5 @@
 
-function lightBoardSave(piece, state, flag) {
+function lightBoard(piece, state, flag) {
     console.log('vliza 4 wtf')
     if (!flag) {
         flag = 'light'
@@ -250,5 +250,5 @@ function selectPiece(playerMove, state) {
         return;
     }
     state.pieceSelected = piece;
-    lightBoardSave(piece, state, 'light')
+    lightBoard(piece, state, 'light')
 }

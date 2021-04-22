@@ -305,7 +305,7 @@ function closeLights(board, flag) {
 
 }
 
-function lightBoard(piece, state, flag,blockedFlag) {
+function lightBoardFE(piece, state, flag,blockedFlag) {
     if (!flag) {
         flag = 'light'
     }
