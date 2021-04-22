@@ -329,13 +329,11 @@ function lightBoardFE(piece, state, flag,blockedFlag) {
                         square[flag] = true;
                     }
                     else{
-                        console.log(blockedFlag)
 
                         square[blockedFlag] = true;
                     }
                 }
                 else if (!innerPiece) {
-                    console.log(flag)
                     square[flag] = true;
                 }
             }

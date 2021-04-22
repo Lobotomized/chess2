@@ -1,6 +1,5 @@
 
 function lightBoard(piece, state, flag) {
-    console.log('vliza 4 wtf')
     if (!flag) {
         flag = 'light'
     }
@@ -55,7 +54,6 @@ function lightBoard(piece, state, flag) {
         else if (move.type == 'blockable') {
             if (move.repeat) {
                 const limit = move.limit || 100;
-                console.log('vliza tuk')
                 blockableFunction(state, move.x, move.y, piece.x, piece.y, move, limit, flag);
             }
         }
