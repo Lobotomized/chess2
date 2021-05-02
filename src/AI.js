@@ -1,29 +1,38 @@
 const moveToValueMap = {
-    'absolute':0.3,
-    'takeMove':0.1,
-    'blockable':0.2
+    'absolutePossible':0.5,
+    'takeMovePossible':0.6,
+    'blockablePossible':0.5,
+    'absoluteOutOfBoard':0,
+    'takeMoveOutOfBoard':0,
+    'blockableOutOfBoard':0,
+    'absoluteTaking':0.5,
+    'takeMoveTaking':0.6,
+    'blockableTaking':0.5,
+    'absoluteAlly':0.4,
+    'takeMoveAlly':0.4,
+    'blockableAlly':0.4,
+    'blockableBlocked':0.1
 }
 
 
 
 
-function evaluateBoard(colorPerspective, pieces){
+function evaluateBoard(colorPerspective, pieces, state){
     let counter = 0;
     let valueTransformer = 1;
     let valueCounter = 0;
     while(pieces.length > counter-1){
-
-        if(colorPerspective === pieces[counter].color){
+        const piece = pieces[counter]
+        if(colorPerspective === piece.color){
             valueTransformer = 1;
         }
         else{
             valueTransformer = -1;
         }
 
-        // valueCounter += getValueForPiece(piece)*valueTransformer
-
+        console.log(piece.conditionalMoves(state))
         /*  
-            getValueForPiece  => A function similair to lightBoard that gives value for every move in the piece and additional value for possible moves
+           Go through all moves for all pieces and evaluate them using moveToValueMap
         */
 
         counter++;
@@ -31,39 +40,3 @@ function evaluateBoard(colorPerspective, pieces){
     }
 }
 
-function getAbsolutePieceValue(piece){
-    let counter = 0;
-    let valueCounter = 0;
-    while(counter < piece.moves.length-1){
-        const move = piece.moves[counter];
-        let turnValueCounter = 0;
-        if(move.type === 'blockable'){
-            turnValueCounter += moveToValueMap['absolute']
-            const mnojitel = move.limit === undefined ? 7 : move.limit;
-            turnValueCounter += moveToValueMap['blockable'] * mnojitel;
-        }
-        else{
-            turnValueCounter = moveToValueMap[move.type]
-        }
-        if(move.impotent){
-            turnValueCounter = turnValueCounter / 5
-        }
-        valueCounter += turnValueCounter;
-        counter++
-    }
-    return valueCounter;
-}
-
-function createPieceToValueMap(pieces){
-    let counter = 0;
-    const pieceToValueMap = {};
-    console.log(pieces.length-1)
-    while(counter < pieces.length-1){
-        const piece = pieces[counter];
-        if(!pieceToValueMap[piece.icon]){
-            pieceToValueMap[piece.icon] = getAbsolutePieceValue(piece);
-        }
-        counter++;
-    }
-    return pieceToValueMap
-}
