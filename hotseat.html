@@ -259,29 +259,57 @@ let ani = function(){
 
                 }
             }
+
+
         }
         else {
             myTurnH1.innerText = 'Waiting for Opponent'
         }
 
-    }
+    } 
+    AISetup(hotseatGame,'white');
     
     canvas.addEventListener('click', (e) => {
-        var element = canvas, offsetX = 0, offsetY = 0, mx, my;
-
-        // Compute the total offset. It's possible to cache this if you want
-        if (element.offsetParent !== undefined) {
-            do {
-                offsetX += element.offsetLeft;
-                offsetY += element.offsetTop;
-            } while ((element = element.offsetParent));
-        }
+        const AIColor = 'white';
+        const hotseat = false;
+        const state = hotseatGame.state;
         
-        mx = e.pageX - offsetX;
-        my = e.pageY - offsetY;
+        if(hotseat || state.turn !=  AIColor){
+            var element = canvas, offsetX = 0, offsetY = 0, mx, my;
 
-        hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
+            // Compute the total offset. It's possible to cache this if you want
+            if (element.offsetParent !== undefined) {
+                do {
+                    offsetX += element.offsetLeft;
+                    offsetY += element.offsetTop;
+                } while ((element = element.offsetParent));
+            }
+
+            mx = e.pageX - offsetX;
+            my = e.pageY - offsetY;
+            
+
+            hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
+            if(state.turn === AIColor){
+                //Here add function for actual select and move
+                // for(let i = 69^14; i>=0; i--){
+                //     generateMovesFromPieces(state)
+                // }
+                const potentialMoves = generateMovesFromPieces(state);
+                const selectedMove = minimax(state,2,'white')
+                console.log(selectedMove)
+                const moves = generateMovesFromPieces(state,'white')
+                // AIMove(moves[selectedMove.moveCounter].pieceCounter,moves[selectedMove.moveCounter].movesCounter,{x:1,y:2})
+            }
+        }
+
+
+        
+        
+        //
         // hotseatGame.move('black',  { x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
+        //evaluateBoard('white',state.pieces,state);
+
     })
 
     canvas.addEventListener('mousemove', (e) => {
@@ -295,7 +323,6 @@ let ani = function(){
 
     setInterval(ani, 100)
 
-    console.log(createPieceToValueMap(hotseatGame.state.pieces));
 
 </script>
 
