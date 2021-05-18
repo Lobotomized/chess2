@@ -156,52 +156,27 @@ let ani = function(){
                     orderFirst = false;
                 }
                 if (!sq.light && !sq.special && !sq.red) {
-                        if(hotseatGame.state.turn == 'white'){
-                            if(orderFirst){
-                                if(x % 2 != 0){
-                                    drawBlackSquare(x * squareLength, y * squareLength, squareLength)
-                                }
-                                else{
-                                    drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
-                                }
-                            }
-                            else{
-                                if(x % 2 != 0){
-                                    drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
-                                }
-                                else{
-                                    drawBlackSquare(x * squareLength, y * squareLength, squareLength)
-                                }
-                            }
-                            if(state.pieceSelected){
-                                if(x == state.pieceSelected.x && y == state.pieceSelected.y){
-                                    drawColoredSquare(x*squareLength, y*squareLength,availableSquareColor, squareLength)
-                                }
-                            }
+                    if(orderFirst){
+                        if(x % 2 != 0){
+                            drawBlackSquare(x * squareLength, y * squareLength, squareLength)
                         }
                         else{
-                            if(orderFirst){
-                                if(x % 2 != 0){
-                                    drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
-                                }
-                                else{
-                                    drawBlackSquare(x * squareLength, y * squareLength, squareLength)
-                                }
-                            }
-                            else{
-                                if(x % 2 != 0){
-                                    drawBlackSquare(x * squareLength, y * squareLength, squareLength)
-                                }
-                                else{
-                                    drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
-                                }
-                            }
-                            if(state.pieceSelected){
-                                if(x == state.pieceSelected.x && y == state.pieceSelected.y){
-                                    drawColoredSquare(x*squareLength, y*squareLength,availableSquareColor, squareLength)
-                                }
-                            }
+                            drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
                         }
+                    }
+                    else{
+                        if(x % 2 != 0){
+                            drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+                        }
+                        else{
+                            drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+                        }
+                    }
+                    if(state.pieceSelected){
+                        if(x == state.pieceSelected.x && y == state.pieceSelected.y){
+                            drawColoredSquare(x*squareLength, y*squareLength,availableSquareColor, squareLength)
+                        }
+                    }
                 }
                 else if(sq.special){
                     drawColoredSquare(x*squareLength, y * squareLength, '#855bb3', squareLength)
