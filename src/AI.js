@@ -1,25 +1,13 @@
-const moveToValueMap = {
-    'absolutePossible':0.5,
-    'takeMovePossible':0.6,
-    'blockablePossible':0.5,
-    'absoluteOutOfBoard':0,
-    'takeMoveOutOfBoard':0,
-    'blockableOutOfBoard':0,
-    'absoluteTaking':0.5,
-    'takeMoveTaking':0.6,
-    'blockableTaking':0.5,
-    'absoluteAlly':0.4,
-    'takeMoveAlly':0.4,
-    'blockableAlly':0.4,
-    'blockableBlocked':0.1
-}
+
 
 const AIProps = {
    state:undefined,
    color:'white'
 }
 
-
+let pieceToValue = {
+    
+}
 
 
 function evaluateBoard(colorPerspective, pieces){
@@ -30,10 +18,10 @@ function evaluateBoard(colorPerspective, pieces){
     while(pieces.length > counter){
         const piece = pieces[counter]
         if(colorPerspective === piece.color){
-            valueTransformer = 1;
+            valueTransformer = piece.value ? piece.value : 1;
         }
         else{
-            valueTransformer = -1;
+            valueTransformer = piece.value ? piece.value* -1 : -1;
         }
         valueCounter += valueTransformer;
         counter++;
@@ -154,7 +142,6 @@ function minimax(state,maximizer, depth){
     const moves = generateMovesFromPieces(state,maximizer)
                 
     let selectedMove = undefined;
-    let currValue = -999999;
     let badMoveResults= []
     let randomMoves = moves.slice(0,depth);
     let lowestBadMoveResult = 99999999;
@@ -174,8 +161,6 @@ function minimax(state,maximizer, depth){
         badMoveResults.push(bestBadMove)
     })
     badMoveResults.forEach((badMoveResult) => {
-        console.log(moves[badMoveResult.moveCounter], badMoveResult, '  bad moves')
-
         if(badMoveResult.value < lowestBadMoveResult ){
             lowestBadMoveResult = badMoveResult.value;
             selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};

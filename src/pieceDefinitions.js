@@ -7,7 +7,8 @@ function knightFactory(color, x, y) {
         { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }],
         x: x,
         y: y,
-        color: color
+        color: color,
+        value:2.5
     }
 }
 
@@ -44,6 +45,7 @@ function weakPawn(color,x,y){
         y: y,
         moved: false,
         color: color,
+        value:1,
         afterPieceMove: function (state, move) {
             //return false if you want to prevent next turn and true if you want to continue it
             if (!this.moved) {
@@ -122,7 +124,8 @@ function ghostFactory(color,x,y){
         moves:moves,
         color:color,
         x:x,
-        y:y
+        y:y,
+        value:1
     }
 }
 
@@ -137,7 +140,8 @@ function pigFactory(color,x,y){
         moves:moves,
         color:color,
         x:x,
-        y:y
+        y:y,
+        value:2
     }
 }
 
@@ -152,7 +156,8 @@ function horseFactory(color,x,y){
         moves:moves,
         color:color,
         x:x,
-        y:y
+        y:y,
+        value:6
     }
 }
 
@@ -171,6 +176,7 @@ function ricarFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        value:2.5,
         
         afterThisPieceTaken:function(state){
             const copy = findCopyPieceByXY(state.pieces,this.x,this.y + direction);
@@ -196,6 +202,7 @@ function hatFactory(color,x,y){
         icon: color + 'Hat.png',
         moves:moves,
         color:color,
+        value:500,
         x:x,
         y:y,
         afterThisPieceTaken: function (state) {
@@ -223,6 +230,7 @@ function clownFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        value:2,
 
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
@@ -712,6 +720,7 @@ function antFactory(color,x,y, direction){
         color:color,
         x:x,
         y:y,
+        value:1,
         afterPieceMove: function(state,move,prevMove) {
             if(direction == 'white' && move.y == 0 || direction == 'black' && move.y == 7)
             {
@@ -746,7 +755,8 @@ function goliathBugFactory(color,x,y){
         color:color,
         weakMoves:weakMoves,
         x:x,
-        y:y
+        y:y,
+        value:7,
     }
 }
 
@@ -769,7 +779,8 @@ function ladyBugFactory(color,x,y){
         color:color,
         weakMoves:weakMoves,
         x:x,
-        y:y
+        y:y,
+        value:5,
     }
 }
 
@@ -794,7 +805,8 @@ function spiderFactory(color,x,y){
         color:color,
         weakMoves:weakMoves,
         x:x,
-        y:y
+        y:y,
+        value:4.5
     }
 }
 
@@ -805,6 +817,7 @@ function shroomFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        value:500,
         afterThisPieceTaken:function(state){
             state.pieces.forEach((piece) => {
                 if(piece.color == this.color){
@@ -840,6 +853,7 @@ function queenBugFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        value:3,
         afterPieceMove:function(state, move, prevMove) {
             const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
             this.x = prevMove.x;
