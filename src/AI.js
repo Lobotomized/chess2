@@ -22,11 +22,12 @@ const AIProps = {
 
 
 
-function evaluateBoard(colorPerspective, pieces, state){
+function evaluateBoard(colorPerspective, pieces){
     let counter = 0;
     let valueTransformer = 1;
     let valueCounter = 0;
-    while(pieces.length-1 > counter){
+    
+    while(pieces.length > counter){
         const piece = pieces[counter]
         if(colorPerspective === piece.color){
             valueTransformer = 1;
@@ -34,16 +35,10 @@ function evaluateBoard(colorPerspective, pieces, state){
         else{
             valueTransformer = -1;
         }
-        // if(piece.conditionalMoves){
-        //     console.log(piece.conditionalMoves(state))
-        // }
-        /*  
-           Go through all moves for all pieces and evaluate them using moveToValueMap
-        */
-
+        valueCounter += valueTransformer;
         counter++;
-
     }
+    return valueCounter;
 }
 
 //How Does a move look? 
@@ -75,24 +70,16 @@ function AISetup(hotseatGame, AIColor){
     AIProps.color = AIColor;
 }
 
-function AIMove(pieceIndex,moveIndex, power){
+function AIMove(pieceIndex, xClicked, yClicked){
     const hotseatGame = AIProps.hotseatGame;
     const state = hotseatGame.state;
-    const myPieces = AIProps.hotseatGame.state.pieces//getColorPieces(state.pieces,AIProps.color);
+    const myPieces = getColorPieces(AIProps.hotseatGame.state.pieces,AIProps.color);
     selectPiece({x:myPieces[pieceIndex].x, y:myPieces[pieceIndex].y},state)
-    if(!power){
-        power = {x:0,y:0}
-    }
+
     const selectedPiece = state.pieceSelected;
-    const move = selectedPiece.moves[moveIndex];
-        switch(move.type){
-            case 'blockable':
-                hotseatGame.move(state.turn,{ x: selectedPiece.x+move.x*power.x, y: selectedPiece.y+move.y*power.y });
-                break;
-            default:
-                hotseatGame.move(state.turn,{ x: selectedPiece.x+move.x, y: selectedPiece.y+move.y });
-                break;
-        }
+
+    lightBoard(selectedPiece,{pieces:state.pieces, board:state.board})
+    hotseatGame.move(state.turn,{ x: xClicked, y: yClicked });
 }
 
 function getColorPieces(pieces,color){
@@ -110,96 +97,159 @@ function generateMovesFromPieces(state,color){
     const movesAndPieces = []
     color = color ? color : AIProps.color;
     let piecesCounter = 0;
-    const myPieces = state.pieces //getColorPieces(state.pieces,   color);
+    const myPieces = !color ?state.pieces : getColorPieces(state.pieces,color) //getColorPieces(state.pieces,   color);
     while(myPieces.length > piecesCounter){
         let movesCounter = 0;
         let piece = myPieces[piecesCounter]
-        while(piece.moves.length > movesCounter){
-            const newPieces = JSON.parse(JSON.stringify(myPieces))
-            piece = newPieces[piecesCounter];
-            lightBoard(piece,{pieces:newPieces, board:state.board},'allowedMove')
-            const move = piece.moves[movesCounter]
-            //Logic for check if move is possible
-            
-            const square = findSquareByXY(state.board,piece.x + move.x,piece.y + move.y)
-            if( square && square.allowedMove){
-                playerMove(move,{board:state.board, pieces:newPieces},true,piece);
+        lightBoardFE(piece,{pieces:state.pieces, board:state.board},'allowedMove')
+        // console.log(piece.moves.length, movesCounter, '  piece')
+                //     const result = playerMove({x:piece.x+move.x, y:piece.y+move.y},{board:state.board, pieces:newPieces, pieceSelected:piece},true, undefined, 'allowedMove')
 
-                movesAndPieces.push({movesCounter:movesCounter, pieceCounter:piecesCounter,pieces:newPieces})
+        const allowedMoves = state.board.filter((square) => {
+            return square.allowedMove;
+        })
+        while(allowedMoves.length > movesCounter){
+            const newPieces = JSON.parse(JSON.stringify(state.pieces))
+            let newMyPieces = getColorPieces(newPieces, color)
+            piece = newMyPieces[piecesCounter];
+
+
+            const square = allowedMoves[movesCounter]
+            playerMove({x:square.x, y:square.y},{board:state.board, pieces:newPieces, pieceSelected:piece},true, undefined, 'allowedMove')
+
+
+            if( square && square.allowedMove){
+                movesAndPieces.push({pieceCounter:piecesCounter,pieces:newPieces, xClicked:square.x, yClicked:square.y})
             }
             movesCounter++
         }
 
+        // while(piece.moves.length > movesCounter){
+        //     const newPieces = JSON.parse(JSON.stringify(state.pieces))
+
+        //     let newMyPieces = getColorPieces(newPieces, color)
+        //     piece = newMyPieces[piecesCounter];
+        //     const move = piece.moves[movesCounter]
+        //     //Logic for check if move is possible
+        //     const result = playerMove({x:piece.x+move.x, y:piece.y+move.y},{board:state.board, pieces:newPieces, pieceSelected:piece},true, undefined, 'allowedMove')
+
+        //     if(result){
+        //         // console.log(newPieces, '  novite figuri?')
+        //     }
+        //     const square = findSquareByXY(state.board,piece.x+move.x,piece.y+move.y)
+        //     if( square && square.allowedMove){
+        //         movesAndPieces.push({movesCounter:movesCounter, pieceCounter:piecesCounter,pieces:newPieces, xClicked:piece.x+move.x, yClicked:piece.y+move.y})
+                
+        //     }
+        //     movesCounter++
+        // }
+
         piecesCounter++
     }
     return movesAndPieces
-
-
-
-    
 }
 
-function minimax(state,depth,maximizer,counter){
-//Ako Depth 0
-    if(depth === 0){
 
-        /*
-            Ako Depth e 0 trqbva da se vyrne tekushtiqt hod, i valueto na tekushtiqt hod
+function minimax(state,maximizer, depth){
+    const moves = generateMovesFromPieces(state,maximizer)
+                
+    let selectedMove = undefined;
+    let currValue = -999999;
+    let badMoveResults= []
+    let randomMoves = moves.slice(0,depth);
+    let lowestBadMoveResult = 99999999;
 
-        */
-        let maximizingPieces = getColorPieces(state.pieces,'black').length
-        let minimizingPieces = getColorPieces(state.pieces, 'white').length
-        //Nameri koi si za da iz4islish value
-        return {value:maximizingPieces - minimizingPieces, moveCounter:counter} //EvaluateBoard(board)
-    }
+    randomMoves.forEach((move, index) => {
+        const badMoves = generateMovesFromPieces({board:state.board,pieces:move.pieces},'black')
+        let bestBadMove = {};
+        let badMoveValue = -999999;
+        badMoves.forEach((badMove) => {
+
+            let thisValue = evaluateBoard("black",badMove.pieces)
+            if(thisValue > badMoveValue){
+                badMoveValue = thisValue;
+                bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
+            }
+        })
+        badMoveResults.push(bestBadMove)
+    })
+    badMoveResults.forEach((badMoveResult) => {
+        console.log(moves[badMoveResult.moveCounter], badMoveResult, '  bad moves')
+
+        if(badMoveResult.value < lowestBadMoveResult ){
+            lowestBadMoveResult = badMoveResult.value;
+            selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
+        }
+    })
+    // console.log(moves[selectedMove.moveCounter], selectedMove, badMoveResults, lowestBadMoveResult)
+    return moves[selectedMove.moveCounter];
+    // const move = moves[selectedMove.moveCounter]
+    // return move
+
+    // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
+}
+
+// function minimax(state,depth,maximizer,counter){
+// //Ako Depth 0
+//     if(depth === 0){
+
+//         /*
+//             Ako Depth e 0 trqbva da se vyrne tekushtiqt hod, i valueto na tekushtiqt hod
+
+//         */
+//         let maximizingPieces = getColorPieces(state.pieces,'black').length
+//         let minimizingPieces = getColorPieces(state.pieces, 'white').length
+//         //Nameri koi si za da iz4islish value
+//         return {value:Math.random(), moveCounter:counter} //EvaluateBoard(board)
+//     }
 
 
-// Ako Depth ne e 0
+// // Ako Depth ne e 0
 
-/* 
-    Ako Depth ne e 0 
-
-
-    Trqbva da se buubble upne valueto na vseki hod ot minimax i samiq hod da se podnovi s noviqt hod
-*/
+// /* 
+//     Ako Depth ne e 0 
 
 
-   let value;
-   if(maximizer == 'black'){
-    value = {value:-999999};
-    let counter = 0;
-    const possibleMoves = generateMovesFromPieces(state,maximizer);
-    while(counter <= possibleMoves.length -1){
-        const moveAndValue = minimax({pieces:possibleMoves[counter].pieces, board:state.board},
-             depth-1,'white',counter);
-        value = max(value,moveAndValue)
-        counter++;
-    }
-    return value;
-   }
+//     Trqbva da se buubble upne valueto na vseki hod ot minimax i samiq hod da se podnovi s noviqt hod
+// */
+
+
+//    let value;
+//    if(maximizer == 'black'){
+//     value = {value:-999999};
+//     let counter = 0;
+//     const possibleMoves = generateMovesFromPieces(state,maximizer);
+//     while(counter <= possibleMoves.length -1){
+//         const moveAndValue = minimax({pieces:possibleMoves[counter].pieces, board:state.board},
+//              depth-1,'white',counter);
+//         value = max(value,moveAndValue)
+//         counter++;
+//     }
+//     return value;
+//    }
 
 
    
-   else{
-    value = {value:999999};
-    let counter = 0;
-    const possibleMoves = generateMovesFromPieces(state,maximizer);
-    while(counter <= possibleMoves.length -1){
-        const moveAndValue =  minimax({pieces:possibleMoves[counter].pieces, board:state.board}
-            ,depth-1,'black',counter);
-        value = min(value, moveAndValue)
+//    else{
+//     value = {value:999999};
+//     let counter = 0;
+//     const possibleMoves = generateMovesFromPieces(state,maximizer);
+//     while(counter <= possibleMoves.length -1){
+//         const moveAndValue =  minimax({pieces:possibleMoves[counter].pieces, board:state.board}
+//             ,depth-1,'black',counter);
+//         value = min(value, moveAndValue)
 
-        counter++;
-    }
-    // console.log('gets here ever  ' , value)
+//         counter++;
+//     }
+//     // console.log('gets here ever  ' , value)
 
-    return value;
-   }
+//     return value;
+//    }
 
 
-       //Trqbva da vryshta hod, koito da se igrae 
+//        //Trqbva da vryshta hod, koito da se igrae 
 
-}
+// }
 
 function max(objOne, objTwo){
     if(objOne.value > objTwo.value){

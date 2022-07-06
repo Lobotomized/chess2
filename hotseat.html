@@ -290,17 +290,29 @@ let ani = function(){
             
 
             hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
-            if(state.turn === AIColor){
-                //Here add function for actual select and move
-                // for(let i = 69^14; i>=0; i--){
-                //     generateMovesFromPieces(state)
-                // }
-                const potentialMoves = generateMovesFromPieces(state);
-                const selectedMove = minimax(state,2,'white')
-                console.log(selectedMove)
-                const moves = generateMovesFromPieces(state,'white')
-                // AIMove(moves[selectedMove.moveCounter].pieceCounter,moves[selectedMove.moveCounter].movesCounter,{x:1,y:2})
+            while(state.turn === 'white'){
+                // const moves = generateMovesFromPieces(state,'white')
+                
+                // let selectedMove = undefined;
+                // let currValue = -999999;
+
+                // moves.forEach((move, index) => {
+                //     let thisValue = evaluateBoard('white',move.pieces)
+                //     if(thisValue > currValue){
+                //         currValue = thisValue;
+                //         selectedMove = {moveCounter:index};
+                //     }
+                // })
+                // const move = moves[selectedMove.moveCounter]
+                let move = minimax(state,'white',100)
+
+                
+                AIMove(move.pieceCounter, move.xClicked, move.yClicked)
             }
+        }
+
+        function getRndInteger(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
 
