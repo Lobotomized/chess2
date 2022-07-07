@@ -14,7 +14,7 @@ function evaluateBoard(colorPerspective, pieces){
     let counter = 0;
     let valueTransformer = 1;
     let valueCounter = 0;
-    
+
     while(pieces.length > counter){
         const piece = pieces[counter]
         if(colorPerspective === piece.color){
@@ -146,7 +146,7 @@ function minimax(state,maximizer, depth){
     let randomMoves = moves.slice(0,depth);
     let lowestBadMoveResult = 99999999;
 
-    randomMoves.forEach((move, index) => {
+    moves.forEach((move, index) => {
         const badMoves = generateMovesFromPieces({board:state.board,pieces:move.pieces},'black')
         let bestBadMove = {};
         let badMoveValue = -999999;

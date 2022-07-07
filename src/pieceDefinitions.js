@@ -263,6 +263,7 @@ function pawnFactory(color, x, y) {
         moved: false,
         enPassantMove:false,
         color: color,
+        value:1,
         conditionalMoves: function (state) {
             let conditionalMoves = [];
             if(state){
@@ -483,6 +484,7 @@ function bishopFactory(color, x, y) {
         { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 }],
         x: x,
         y: y,
+        value:3,
         color: color
     }
 }
@@ -494,6 +496,7 @@ function rookFactory(color, x, y) {
         { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 }],
         x: x,
         y: y,
+        value:5,
         moved:false,
         color: color,
         afterPieceMove:function(){
@@ -512,6 +515,7 @@ function queenFactory(color, x, y) {
         { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 }],
         x: x,
         y: y,
+        value:9,
         color: color
     }
 }
@@ -530,6 +534,7 @@ function kingFactory(color, x, y) {
         { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }],
         x: x,
         y: y,
+        value:500,
         color: color,
 
         conditionalMoves: function(state){
