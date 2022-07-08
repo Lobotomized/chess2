@@ -290,21 +290,9 @@ let ani = function(){
             
 
             hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
-            while(state.turn === 'white'){
-                // const moves = generateMovesFromPieces(state,'white')
-                
-                // let selectedMove = undefined;
-                // let currValue = -999999;
+            state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
 
-                // moves.forEach((move, index) => {
-                //     let thisValue = evaluateBoard('white',move.pieces)
-                //     if(thisValue > currValue){
-                //         currValue = thisValue;
-                //         selectedMove = {moveCounter:index};
-                //     }
-                // })
-                // const move = moves[selectedMove.moveCounter]
-                state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
+            while(state.turn === 'white'){
                 let move = minimax(state,'white',500)
 
                 
