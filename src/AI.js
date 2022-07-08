@@ -103,7 +103,7 @@ function generateMovesFromPieces(state,color){
 
 
             const square = allowedMoves[movesCounter]
-            playerMove({x:square.x, y:square.y},{board:state.board, pieces:newPieces, pieceSelected:piece},true, undefined, 'allowedMove')
+            playerMove({x:square.x, y:square.y},{board:state.board, pieces:newPieces, pieceSelected:piece , turn:color},true, undefined, 'allowedMove')
 
 
             if( square && square.allowedMove){
@@ -140,19 +140,23 @@ function generateMovesFromPieces(state,color){
 
 function minimax(state,maximizer, depth){
     const moves = generateMovesFromPieces(state,maximizer)
+    let enemy = 'black';
+    if(maximizer === 'black'){
+        enemy = 'white';
+    }
                 
     let selectedMove = undefined;
     let badMoveResults= []
-    let randomMoves = moves.slice(0,depth);
+    let slizedMoves = moves.slice(0,depth);
     let lowestBadMoveResult = 99999999;
 
-    moves.forEach((move, index) => {
-        const badMoves = generateMovesFromPieces({board:state.board,pieces:move.pieces},'black')
+    slizedMoves.forEach((move, index) => {
+        const badMoves = generateMovesFromPieces({board:state.board,pieces:move.pieces},enemy)
         let bestBadMove = {};
         let badMoveValue = -999999;
         badMoves.forEach((badMove) => {
 
-            let thisValue = evaluateBoard("black",badMove.pieces)
+            let thisValue = evaluateBoard(enemy,badMove.pieces)
             if(thisValue > badMoveValue){
                 badMoveValue = thisValue;
                 bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
@@ -166,7 +170,6 @@ function minimax(state,maximizer, depth){
             selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
         }
     })
-    // console.log(moves[selectedMove.moveCounter], selectedMove, badMoveResults, lowestBadMoveResult)
     return moves[selectedMove.moveCounter];
     // const move = moves[selectedMove.moveCounter]
     // return move

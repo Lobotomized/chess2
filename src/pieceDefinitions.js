@@ -125,7 +125,7 @@ function ghostFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-        value:1
+        value:0.6
     }
 }
 
@@ -141,7 +141,7 @@ function pigFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-        value:2
+        value:1.25
     }
 }
 
@@ -157,7 +157,7 @@ function horseFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-        value:6
+        value:5
     }
 }
 
@@ -725,7 +725,7 @@ function antFactory(color,x,y, direction){
         color:color,
         x:x,
         y:y,
-        value:1,
+        value:0.6,
         afterPieceMove: function(state,move,prevMove) {
             if(direction == 'white' && move.y == 0 || direction == 'black' && move.y == 7)
             {
@@ -822,7 +822,7 @@ function shroomFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-        value:500,
+        value:5000,
         afterThisPieceTaken:function(state){
             state.pieces.forEach((piece) => {
                 if(piece.color == this.color){

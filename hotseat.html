@@ -304,7 +304,8 @@ let ani = function(){
                 //     }
                 // })
                 // const move = moves[selectedMove.moveCounter]
-                let move = minimax(state,'white',50)
+                state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
+                let move = minimax(state,'white',500)
 
                 
                 AIMove(move.pieceCounter, move.xClicked, move.yClicked)
