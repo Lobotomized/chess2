@@ -202,6 +202,7 @@ function hatFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        value:500,
         afterThisPieceTaken: function (state) {
             if (this.color == 'white') {
                 state.won = 'black';
