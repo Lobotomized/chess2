@@ -228,7 +228,7 @@ function clownFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-
+        value:2,
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -257,6 +257,7 @@ function pawnFactory(color, x, y) {
         moves: moves,
         x: x,
         y: y,
+        value:1,
         moved: false,
         enPassantMove:false,
         color: color,
@@ -480,6 +481,7 @@ function bishopFactory(color, x, y) {
         { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 }],
         x: x,
         y: y,
+        value:3,
         color: color
     }
 }
@@ -491,6 +493,7 @@ function rookFactory(color, x, y) {
         { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 }],
         x: x,
         y: y,
+        value:5,
         moved:false,
         color: color,
         afterPieceMove:function(){
@@ -509,6 +512,7 @@ function queenFactory(color, x, y) {
         { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 }],
         x: x,
         y: y,
+        value:9,
         color: color
     }
 }
@@ -527,6 +531,7 @@ function kingFactory(color, x, y) {
         { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }],
         x: x,
         y: y,
+        value:100000,
         color: color,
 
         conditionalMoves: function(state){
@@ -717,6 +722,7 @@ function antFactory(color,x,y, direction){
         color:color,
         x:x,
         y:y,
+        value:0.6,
         afterPieceMove: function(state,move,prevMove) {
             if(direction == 'white' && move.y == 0 || direction == 'black' && move.y == 7)
             {
@@ -751,7 +757,8 @@ function goliathBugFactory(color,x,y){
         color:color,
         weakMoves:weakMoves,
         x:x,
-        y:y
+        y:y,
+        value:7
     }
 }
 
@@ -774,7 +781,8 @@ function ladyBugFactory(color,x,y){
         color:color,
         weakMoves:weakMoves,
         x:x,
-        y:y
+        y:y,
+        value:5,
     }
 }
 
@@ -799,7 +807,8 @@ function spiderFactory(color,x,y){
         color:color,
         weakMoves:weakMoves,
         x:x,
-        y:y
+        y:y,
+        value:5
     }
 }
 
@@ -810,6 +819,7 @@ function shroomFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        value:5000,
         afterThisPieceTaken:function(state){
             state.pieces.forEach((piece) => {
                 if(piece.color == this.color){
@@ -836,6 +846,7 @@ function queenBugFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        value:2,
         afterPieceMove:function(state, move, prevMove) {
             const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
             this.x = prevMove.x;
