@@ -293,7 +293,7 @@ let ani = function(){
             state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
 
             while(state.turn === 'white'){
-                let move = minimax(state,'white',500)
+                let move = minimax(state,'white',50)
 
                 
                 AIMove(move.pieceCounter, move.xClicked, move.yClicked)
