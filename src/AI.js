@@ -2,7 +2,8 @@
 
 const AIProps = {
    state:undefined,
-   color:'white'
+   color:'white',
+   positionValue: 0.1//Math.random()
 }
 
 let pieceToValue = {
@@ -10,18 +11,23 @@ let pieceToValue = {
 }
 
 
-function evaluateBoard(colorPerspective, pieces){
+function evaluateBoard(colorPerspective, pieces, board){
     let counter = 0;
     let valueTransformer = 1;
     let valueCounter = 0;
 
     while(pieces.length > counter){
         const piece = pieces[counter]
+        lightBoardFE(piece,{pieces:pieces, board:board},'allowedMove')
+        const filtered = board.filter((square) => {
+            return square['allowedMove']
+        })
+         let magnifier = filtered.length * AIProps.positionValue*piece.posValue;
         if(colorPerspective === piece.color){
-            valueTransformer = piece.value ? piece.value : 1;
+            valueTransformer = piece.value ? piece.value + magnifier : 1 + magnifier;
         }
         else{
-            valueTransformer = piece.value ? piece.value* -1 : -1;
+            valueTransformer = piece.value ? piece.value* -1 - magnifier : -1 - magnifier;
         }
         valueCounter += valueTransformer;
         counter++;
@@ -159,7 +165,7 @@ function minimax(state,maximizer, depth){
         let badMoveValue = -999999;
         badMoves.forEach((badMove) => {
 
-            let thisValue = evaluateBoard(enemy,badMove.pieces)
+            let thisValue = evaluateBoard(enemy,badMove.pieces, state.board)
             if(thisValue > badMoveValue){
                 badMoveValue = thisValue;
                 bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
@@ -167,7 +173,6 @@ function minimax(state,maximizer, depth){
         })
         badMoveResults.push(bestBadMove)
     })
-    console.log(badMoveResults)
     badMoveResults.forEach((badMoveResult) => {
         if(badMoveResult.value < lowestBadMoveResult ){
             lowestBadMoveResult = badMoveResult.value;

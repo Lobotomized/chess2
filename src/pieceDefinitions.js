@@ -8,7 +8,8 @@ function knightFactory(color, x, y) {
         x: x,
         y: y,
         color: color,
-        value:2.5
+        value:2.5,
+        posValue:3
     }
 }
 
@@ -89,6 +90,7 @@ function unpromotablePawn(color, x, y) {
         y: y,
         moved: false,
         color: color,
+        posValue:1,
         afterPieceMove: function(){
             if (!this.moved) {
                 this.moved = true;
@@ -125,7 +127,8 @@ function ghostFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-        value:0.6
+        value:0.6,
+        posValue:1
     }
 }
 
@@ -141,7 +144,8 @@ function pigFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-        value:1.25
+        value:1.25,
+        posValue:3
     }
 }
 
@@ -157,7 +161,8 @@ function horseFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-        value:5
+        value:5,
+        posValue:3
     }
 }
 
@@ -177,7 +182,7 @@ function ricarFactory(color,x,y){
         x:x,
         y:y,
         value:2.5,
-        
+        posValue:3,
         afterThisPieceTaken:function(state){
             const copy = findCopyPieceByXY(state.pieces,this.x,this.y + direction);
             const squareCheck = state.board.find((sq) => {
@@ -203,6 +208,7 @@ function hatFactory(color,x,y){
         moves:moves,
         color:color,
         value:500,
+        posValue:4,
         x:x,
         y:y,
         afterThisPieceTaken: function (state) {
@@ -231,7 +237,7 @@ function clownFactory(color,x,y){
         x:x,
         y:y,
         value:2,
-
+        posValue:0.5,
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -264,6 +270,7 @@ function pawnFactory(color, x, y) {
         enPassantMove:false,
         color: color,
         value:1,
+        posValue:1,
         conditionalMoves: function (state) {
             let conditionalMoves = [];
             if(state){
@@ -485,6 +492,7 @@ function bishopFactory(color, x, y) {
         x: x,
         y: y,
         value:3,
+        posValue:2,
         color: color
     }
 }
@@ -497,6 +505,7 @@ function rookFactory(color, x, y) {
         x: x,
         y: y,
         value:5,
+        posValue:3,
         moved:false,
         color: color,
         afterPieceMove:function(){
@@ -516,6 +525,7 @@ function queenFactory(color, x, y) {
         x: x,
         y: y,
         value:9,
+        posValue:3,
         color: color
     }
 }
@@ -535,6 +545,7 @@ function kingFactory(color, x, y) {
         x: x,
         y: y,
         value:500,
+        posValue:1,
         color: color,
 
         conditionalMoves: function(state){
@@ -726,6 +737,7 @@ function antFactory(color,x,y, direction){
         x:x,
         y:y,
         value:0.6,
+        posValue:1,
         afterPieceMove: function(state,move,prevMove) {
             if(direction == 'white' && move.y == 0 || direction == 'black' && move.y == 7)
             {
@@ -761,6 +773,7 @@ function goliathBugFactory(color,x,y){
         weakMoves:weakMoves,
         x:x,
         y:y,
+        posValue:3,
         value:7,
     }
 }
@@ -786,6 +799,7 @@ function ladyBugFactory(color,x,y){
         x:x,
         y:y,
         value:5,
+        posValue:3,
     }
 }
 
@@ -811,7 +825,8 @@ function spiderFactory(color,x,y){
         weakMoves:weakMoves,
         x:x,
         y:y,
-        value:4.5
+        value:4.5,
+        posValue:3,
     }
 }
 
@@ -823,6 +838,7 @@ function shroomFactory(color,x,y){
         x:x,
         y:y,
         value:5000,
+        posValue:1,
         afterThisPieceTaken:function(state){
             state.pieces.forEach((piece) => {
                 if(piece.color == this.color){
@@ -859,6 +875,7 @@ function queenBugFactory(color,x,y){
         x:x,
         y:y,
         value:2.5,
+        posValue:1,
         afterPieceMove:function(state, move, prevMove) {
             const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
             this.x = prevMove.x;

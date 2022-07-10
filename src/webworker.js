@@ -155,7 +155,7 @@ const AIProps = {
          let badMoveValue = -999999;
          badMoves.forEach((badMove) => {
  
-             let thisValue = evaluateBoard(enemy,badMove.pieces)
+             let thisValue = evaluateBoard(enemy,badMove.pieces,state.board)
              if(thisValue > badMoveValue){
                  badMoveValue = thisValue;
                  bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}

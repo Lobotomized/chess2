@@ -298,7 +298,6 @@ let ani = function(){
 
             hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
             state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
-
             if(state.turn === 'white'){
                 // w = new Worker("src/webworker.js");
                 // console.log(state.pieces[10], JSON.stringify(state.pieces[10]))
