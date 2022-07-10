@@ -144,8 +144,8 @@ function pigFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-        value:1.25,
-        posValue:3
+        value:2,
+        posValue:1.5
     }
 }
 
@@ -207,8 +207,8 @@ function hatFactory(color,x,y){
         icon: color + 'Hat.png',
         moves:moves,
         color:color,
-        value:500,
-        posValue:4,
+        value:50000,
+        posValue:1.5,
         x:x,
         y:y,
         afterThisPieceTaken: function (state) {
@@ -237,7 +237,7 @@ function clownFactory(color,x,y){
         x:x,
         y:y,
         value:2,
-        posValue:0.5,
+        posValue:0.1,
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -492,7 +492,7 @@ function bishopFactory(color, x, y) {
         x: x,
         y: y,
         value:3,
-        posValue:2,
+        posValue:3,
         color: color
     }
 }
