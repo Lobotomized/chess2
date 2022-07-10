@@ -177,6 +177,12 @@ function ricarFactory(color,x,y){
         y:y,
         
         afterThisPieceTaken:function(state){
+            if(direction === undefined){
+                let direction = 1;
+                if(color == 'black'){
+                    direction = -1;
+                }
+            }
             const copy = findCopyPieceByXY(state.pieces,this.x,this.y + direction);
             const squareCheck = state.board.find((sq) => {
                 return sq.x == this.x && sq.y == this.y + direction;
@@ -702,6 +708,12 @@ function kingFactory(color, x, y) {
 }
 
 function antFactory(color,x,y, direction){
+    if(direction === undefined){
+        let direction = 1;
+        if(color == 'black'){
+            direction = -1;
+        }
+    }
     if(!direction){
         direction =  color
     }
@@ -847,7 +859,14 @@ function queenBugFactory(color,x,y){
         x:x,
         y:y,
         value:2,
+        
         afterPieceMove:function(state, move, prevMove) {
+            if(direction === undefined){
+                let direction = 1;
+                if(color == 'black'){
+                    direction = -1;
+                }
+            }
             const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;

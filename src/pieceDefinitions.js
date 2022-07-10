@@ -184,6 +184,13 @@ function ricarFactory(color,x,y){
         value:2.5,
         posValue:3,
         afterThisPieceTaken:function(state){
+            color = this.color;
+            if(color == 'black'){
+                direction = -1;
+            }
+            else{
+                direction = 1;
+            }
             const copy = findCopyPieceByXY(state.pieces,this.x,this.y + direction);
             const squareCheck = state.board.find((sq) => {
                 return sq.x == this.x && sq.y == this.y + direction;
@@ -739,6 +746,9 @@ function antFactory(color,x,y, direction){
         value:0.6,
         posValue:1,
         afterPieceMove: function(state,move,prevMove) {
+            if(!direction){
+                direction =  color
+            }
             if(direction == 'white' && move.y == 0 || direction == 'black' && move.y == 7)
             {
                 const me = state.pieces.find((piece) => {

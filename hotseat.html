@@ -9,14 +9,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Chess 2</title>
-
-    <script src="/src/loadImages.js"></script>
+        <script src="/src/loadImages.js"></script>
 
         <script src="/src/variables.js"></script>
 
-
-
-
+        <script src="/src/jsonfn.js"></script>
 
         <script src="src/selectAndMoveMethods.js"></script>
         <script src="src/pieceDefinitions.js"></script>
@@ -299,17 +296,17 @@ let ani = function(){
             hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
             state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
             if(state.turn === 'white'){
-                // w = new Worker("src/webworker.js");
-                // console.log(state.pieces[10], JSON.stringify(state.pieces[10]))
-                // w.postMessage(JSON.stringify({state:state, color:'white', depth:500}));
-                // w.onmessage = function(event){
-                //     let move = event.data
-                //     AIMove(move.pieceCounter, move.xClicked, move.yClicked)
-                // }
-                let move = minimax(state,'white',200)
+                w = new Worker("src/webworker.js");
+
+                w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500}));
+                w.onmessage = function(event){
+                    let move = JSONfn.parse(event.data)
+                    AIMove(move.pieceCounter, move.xClicked, move.yClicked)
+                }
+                // let move = minimax(state,'white',200)
 
                 
-                AIMove(move.pieceCounter, move.xClicked, move.yClicked)
+                // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
             }
         }
 
