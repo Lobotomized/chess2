@@ -296,17 +296,17 @@ let ani = function(){
             hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
             state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
             if(state.turn === 'white'){
-                w = new Worker("src/webworker.js");
+                // w = new Worker("src/webworker.js");
 
-                w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500}));
-                w.onmessage = function(event){
-                    let move = JSONfn.parse(event.data)
-                    AIMove(move.pieceCounter, move.xClicked, move.yClicked)
-                }
-                // let move = minimax(state,'white',200)
+                // w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500}));
+                // w.onmessage = function(event){
+                //     let move = JSONfn.parse(event.data)
+                //     AIMove(move.pieceCounter, move.xClicked, move.yClicked)
+                // }
+                let move = minimax(state,'white',200)
 
                 
-                // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
+                AIMove(move.pieceCounter, move.xClicked, move.yClicked)
             }
         }
 
