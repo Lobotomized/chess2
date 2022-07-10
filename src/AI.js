@@ -97,15 +97,18 @@ function generateMovesFromPieces(state,color){
             return square.allowedMove;
         })
         while(allowedMoves.length > movesCounter){
-            const newPieces = JSON.parse(JSON.stringify(state.pieces))
+            const newPieces = []//JSON.parse(JSON.stringify(state.pieces))
+
+            state.pieces.forEach((piece) => {
+                newPieces.push({...piece})
+            })
             let newMyPieces = getColorPieces(newPieces, color)
             piece = newMyPieces[piecesCounter];
 
 
             const square = allowedMoves[movesCounter]
-            playerMove({x:square.x, y:square.y},{board:state.board, pieces:newPieces, pieceSelected:piece , turn:color},true, undefined, 'allowedMove')
-
-
+            playerMove({x:square.x, y:square.y},{board:state.board, pieces:newPieces, pieceSelected:piece , turn:color},false, undefined, 'allowedMove')
+            // console.log(newPieces, '  new pieces?')
             if( square && square.allowedMove){
                 movesAndPieces.push({pieceCounter:piecesCounter,pieces:newPieces, xClicked:square.x, yClicked:square.y})
             }
@@ -164,6 +167,7 @@ function minimax(state,maximizer, depth){
         })
         badMoveResults.push(bestBadMove)
     })
+    console.log(badMoveResults)
     badMoveResults.forEach((badMoveResult) => {
         if(badMoveResult.value < lowestBadMoveResult ){
             lowestBadMoveResult = badMoveResult.value;

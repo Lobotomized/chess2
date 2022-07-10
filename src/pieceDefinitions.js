@@ -858,7 +858,7 @@ function queenBugFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-        value:3,
+        value:2.5,
         afterPieceMove:function(state, move, prevMove) {
             const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
             this.x = prevMove.x;

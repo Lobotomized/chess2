@@ -53,7 +53,6 @@
 // w.onmessage = function(){
 //     console.log('vliza tuka')
 // }
-console.log('vliza tuk')
 
 
 let ani = function(){
@@ -301,16 +300,17 @@ let ani = function(){
             state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
 
             if(state.turn === 'white'){
-                w = new Worker("static/webworker.js");
-                w.postMessage(JSON.stringify({state:state, color:'white', depth:200}));
-                w.onmessage = function(event){
-                    let move = event.data
-                    AIMove(move.pieceCounter, move.xClicked, move.yClicked)
-                }
-                // let move = minimax(state,'white',200)
+                // w = new Worker("src/webworker.js");
+                // console.log(state.pieces[10], JSON.stringify(state.pieces[10]))
+                // w.postMessage(JSON.stringify({state:state, color:'white', depth:500}));
+                // w.onmessage = function(event){
+                //     let move = event.data
+                //     AIMove(move.pieceCounter, move.xClicked, move.yClicked)
+                // }
+                let move = minimax(state,'white',200)
 
                 
-                // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
+                AIMove(move.pieceCounter, move.xClicked, move.yClicked)
             }
         }
 
