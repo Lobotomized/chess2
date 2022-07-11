@@ -1,3 +1,5 @@
+let globalPosValue = Math.random()/2.5
+
 
 function knightFactory(color, x, y) {
     return {
@@ -954,7 +956,7 @@ function evaluateBoard(colorPerspective, pieces, board){
         const filtered = board.filter((square) => {
             return square['allowedMove']
         })
-         let magnifier = filtered.length * 0.1*piece.posValue;
+         let magnifier = filtered.length * globalPosValue*piece.posValue;
         if(colorPerspective === piece.color){
             valueTransformer = piece.value ? piece.value + magnifier : 1 + magnifier;
         }
