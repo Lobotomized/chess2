@@ -288,7 +288,7 @@ function pawnFactory(color, x, y) {
                 enPassantCandidates.forEach((candidate) => {
                     if(candidate.x > this.x){
                         if(this.color == 'black'){
-                            conditionalMoves.push({ type: 'absolute', y: -1, x: -1 })
+                            conditionalMoves.push({ type: 'absolute', y: 1, x: 1 })
                         }
                         else{
                             conditionalMoves.push({ type: 'absolute', y: -1, x: 1 })
@@ -299,7 +299,7 @@ function pawnFactory(color, x, y) {
                             conditionalMoves.push({ type: 'absolute', y: 1, x: -1 })
                         }
                         else{
-                            conditionalMoves.push({ type: 'absolute', y: 1, x: 1 })
+                            conditionalMoves.push({ type: 'absolute', y: -1, x: -1 })
                         }                
                     }
                 })
