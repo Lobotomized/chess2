@@ -1,4 +1,4 @@
-let globalPosValue = Math.random()/2.5
+let globalPosValue = Math.floor(Math.random() * 1000)/1000
 
 
 function knightFactory(color, x, y) {
@@ -1109,6 +1109,14 @@ function evaluateBoard(colorPerspective, pieces, board){
             selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
         }
     })
+    if(lowestBadMoveResult > 2000){
+        badMoveResults.forEach((badMoveResult) => {
+            if(badMoveResult.value > lowestBadMoveResult ){
+                lowestBadMoveResult = badMoveResult.value;
+                selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
+            }
+        })
+    }
     return moves[selectedMove.moveCounter];
     // const move = moves[selectedMove.moveCounter]
     // return move

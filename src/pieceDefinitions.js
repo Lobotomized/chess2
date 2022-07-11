@@ -552,7 +552,7 @@ function kingFactory(color, x, y) {
         { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }],
         x: x,
         y: y,
-        value:500,
+        value:5000,
         posValue:1,
         color: color,
 

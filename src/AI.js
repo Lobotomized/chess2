@@ -179,6 +179,15 @@ function minimax(state,maximizer, depth){
             selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
         }
     })
+
+    if(lowestBadMoveResult > 2000){
+        badMoveResults.forEach((badMoveResult) => {
+            if(badMoveResult.value > lowestBadMoveResult ){
+                lowestBadMoveResult = badMoveResult.value;
+                selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
+            }
+        })
+    }
     return moves[selectedMove.moveCounter];
     // const move = moves[selectedMove.moveCounter]
     // return move
