@@ -1,6 +1,5 @@
-let globalPosValue = 0.1//Math.random();
+let globalPosValue = 0.01//Math.random();
 
-console.log(globalPosValue)
 function knightFactory(color, x, y) {
     return {
         icon: color + 'Knight.png',
