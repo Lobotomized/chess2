@@ -349,7 +349,7 @@ function pawnFactory(color, x, y) {
                 }
 
                 const enemyPiece = state.pieces.find((piece) => {
-                    return piece.x == move.x && piece.y == move.y-1 && piece.color != this.color //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
+                    return piece.x == move.x && piece.y == move.y-1 && piece.color != this.color && piece.enPassantMove //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
                 })
                 if(enemyPiece){
                     state.pieces.splice(state.pieces.indexOf(enemyPiece),1);    
@@ -364,7 +364,7 @@ function pawnFactory(color, x, y) {
                 }
 
                 const enemyPiece = state.pieces.find((piece) => {
-                    return piece.x == move.x && piece.y == move.y  + 1 && piece.color != this.color //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
+                    return piece.x == move.x && piece.y == move.y  + 1 && piece.color != this.color  &&  piece.enPassantMove// && !findCopyPieceByXY(state.pieces,move.x,move.y)
                 })
                 if(enemyPiece){
                     state.pieces.splice(state.pieces.indexOf(enemyPiece),1);

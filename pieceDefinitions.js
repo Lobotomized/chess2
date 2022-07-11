@@ -277,7 +277,7 @@ function pawnFactory(color, x, y) {
                 enPassantCandidates.forEach((candidate) => {
                     if(candidate.x > this.x){
                         if(this.color == 'black'){
-                            conditionalMoves.push({ type: 'absolute', y: -1, x: -1 })
+                            conditionalMoves.push({ type: 'absolute', y: 1, x: 1 })
                         }
                         else{
                             conditionalMoves.push({ type: 'absolute', y: -1, x: 1 })
@@ -288,13 +288,12 @@ function pawnFactory(color, x, y) {
                             conditionalMoves.push({ type: 'absolute', y: 1, x: -1 })
                         }
                         else{
-                            conditionalMoves.push({ type: 'absolute', y: 1, x: 1 })
+                            conditionalMoves.push({ type: 'absolute', y: -1, x: -1 })
                         }                
                     }
                 })
             }
-  
-
+            
             if (!this.moved) {
                 if (this.color == 'black') {
                     conditionalMoves.push(...[{ type: 'blockable', limit: 2, repeat: true, y: 1, x: 0, impotent: true }])
@@ -302,6 +301,8 @@ function pawnFactory(color, x, y) {
                 }
                 else if (this.color == 'white') {
                     conditionalMoves.push(...[{ type: 'blockable', repeat: true, limit: 2, y: -1, x: 0, impotent: true }])
+                    // console.log(conditionalMoves)
+
                 }
             }
             return conditionalMoves;
@@ -337,10 +338,10 @@ function pawnFactory(color, x, y) {
                 }
 
                 const enemyPiece = state.pieces.find((piece) => {
-                    return piece.x == move.x && piece.y == move.y -1 && piece.color != this.color && !findCopyPieceByXY(state.pieces,move.x,move.y)
+                    return piece.x == move.x && piece.y == move.y-1 && piece.color != this.color && piece.enPassantMove// && !findCopyPieceByXY(state.pieces,move.x,move.y)
                 })
                 if(enemyPiece){
-                    state.pieces.splice(state.pieces.indexOf(enemyPiece),1);
+                    state.pieces.splice(state.pieces.indexOf(enemyPiece),1);    
                     enemyPiece.x = undefined;
                     enemyPiece.y = undefined;
                 }
@@ -352,7 +353,7 @@ function pawnFactory(color, x, y) {
                 }
 
                 const enemyPiece = state.pieces.find((piece) => {
-                    return piece.x == move.x && piece.y == move.y  + 1 && piece.color != this.color && !findCopyPieceByXY(state.pieces,move.x,move.y)
+                    return piece.x == move.x && piece.y == move.y  + 1 && piece.color != this.color && piece.enPassantMove //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
                 })
                 if(enemyPiece){
                     state.pieces.splice(state.pieces.indexOf(enemyPiece),1);
