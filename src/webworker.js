@@ -186,6 +186,8 @@ function ricarFactory(color,x,y){
         posValue:3,
         afterThisPieceTaken:function(state){
             color = this.color;
+            let direction = 1;
+
             if(color == 'black'){
                 direction = -1;
             }
@@ -410,6 +412,7 @@ function dragonFactory(color,x,y){
             for (let i = state.pieces.length - 1; i >= 0; i--) {
                 const piece = state.pieces[i]
                 let tempMoves = [];
+                
                 if (piece.conditionalMoves) {
                     tempMoves = piece.conditionalMoves(state);
                 }
@@ -690,6 +693,8 @@ function kingFactory(color, x, y) {
             for (let i = state.pieces.length - 1; i >= 0; i--) {
                 const piece = state.pieces[i]
                 let tempMoves = [];
+                console.log(piece.conditionalMoves);
+
                 if (piece.conditionalMoves) {
                     tempMoves = piece.conditionalMoves(state);
                 }
@@ -747,11 +752,9 @@ function antFactory(color,x,y, direction){
         value:0.6,
         posValue:1,
         afterPieceMove: function(state,move,prevMove) {
-            if(!direction){
-                direction =  color
-            }
+            let direction = this.color;
             if(direction == 'white' && move.y == 0 || direction == 'black' && move.y == 7)
-            {
+            {   
                 const me = state.pieces.find((piece) => {
                     return piece.x == move.x && piece.y == move.y
                 })
@@ -891,7 +894,7 @@ function queenBugFactory(color,x,y){
             const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;
-            const ant = antFactory(color,move.x,move.y,direction)
+            const ant = antFactory(this.color,move.x,move.y,direction)
             state.pieces.push(ant);
             const currentShrooms = state.pieces.filter((shroom) => {
                 return shroom.icon == this.color + 'Shroom.png';
@@ -904,6 +907,7 @@ function queenBugFactory(color,x,y){
         }
     }
 }
+
 
 
 
@@ -939,25 +943,29 @@ JSONfn.parse = function(str) {
     });
 }
  
- 
- function evaluateBoard(colorPerspective, pieces){
-     let counter = 0;
-     let valueTransformer = 1;
-     let valueCounter = 0;
- 
-     while(pieces.length > counter){
-         const piece = pieces[counter]
-         if(colorPerspective === piece.color){
-             valueTransformer = piece.value ? piece.value : 1;
-         }
-         else{
-             valueTransformer = piece.value ? piece.value* -1 : -1;
-         }
-         valueCounter += valueTransformer;
-         counter++;
-     }
-     return valueCounter;
- }
+function evaluateBoard(colorPerspective, pieces, board){
+    let counter = 0;
+    let valueTransformer = 1;
+    let valueCounter = 0;
+
+    while(pieces.length > counter){
+        const piece = pieces[counter]
+        lightBoardFE(piece,{pieces:pieces, board:board},'allowedMove')
+        const filtered = board.filter((square) => {
+            return square['allowedMove']
+        })
+         let magnifier = filtered.length * 0.1*piece.posValue;
+        if(colorPerspective === piece.color){
+            valueTransformer = piece.value ? piece.value + magnifier : 1 + magnifier;
+        }
+        else{
+            valueTransformer = piece.value ? piece.value* -1 - magnifier : -1 - magnifier;
+        }
+        valueCounter += valueTransformer;
+        counter++;
+    }
+    return valueCounter;
+}
  
  //How Does a move look? 
  /*
@@ -1067,44 +1075,44 @@ JSONfn.parse = function(str) {
      return movesAndPieces
  }
  
- 
  function minimax(state,maximizer, depth){
-     const moves = generateMovesFromPieces(state,maximizer)
-     let enemy = 'black';
-     if(maximizer === 'black'){
-         enemy = 'white';
-     }
-                 
-     let selectedMove = undefined;
-     let badMoveResults= []
-     let slizedMoves = moves.slice(0,depth);
-     let lowestBadMoveResult = 99999999;
-     slizedMoves.forEach((move, index) => {
-         const badMoves = generateMovesFromPieces({board:state.board,pieces:move.pieces},enemy)
-         let bestBadMove = {};
-         let badMoveValue = -999999;
-         badMoves.forEach((badMove) => {
- 
-             let thisValue = evaluateBoard(enemy,badMove.pieces,state.board)
-             if(thisValue > badMoveValue){
-                 badMoveValue = thisValue;
-                 bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
-             }
-         })
-         badMoveResults.push(bestBadMove)
-     })
-     badMoveResults.forEach((badMoveResult) => {
-         if(badMoveResult.value < lowestBadMoveResult ){
-             lowestBadMoveResult = badMoveResult.value;
-             selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
-         }
-     })
-     return moves[selectedMove.moveCounter];
-     // const move = moves[selectedMove.moveCounter]
-     // return move
- 
-     // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
- }
+    const moves = generateMovesFromPieces(state,maximizer)
+    let enemy = 'black';
+    if(maximizer === 'black'){
+        enemy = 'white';
+    }
+                
+    let selectedMove = undefined;
+    let badMoveResults= []
+    let slizedMoves = moves.slice(0,depth);
+    let lowestBadMoveResult = 99999999;
+
+    slizedMoves.forEach((move, index) => {
+        const badMoves = generateMovesFromPieces({board:state.board,pieces:move.pieces},enemy)
+        let bestBadMove = {};
+        let badMoveValue = -999999;
+        badMoves.forEach((badMove) => {
+
+            let thisValue = evaluateBoard(enemy,badMove.pieces, state.board)
+            if(thisValue > badMoveValue){
+                badMoveValue = thisValue;
+                bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
+            }
+        })
+        badMoveResults.push(bestBadMove)
+    })
+    badMoveResults.forEach((badMoveResult) => {
+        if(badMoveResult.value < lowestBadMoveResult ){
+            lowestBadMoveResult = badMoveResult.value;
+            selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
+        }
+    })
+    return moves[selectedMove.moveCounter];
+    // const move = moves[selectedMove.moveCounter]
+    // return move
+
+    // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
+}
  
  // function minimax(state,depth,maximizer,counter){
  // //Ako Depth 0
@@ -1178,7 +1186,12 @@ JSONfn.parse = function(str) {
     }
     let tempMoves = [];
     if (piece.conditionalMoves) {
-        tempMoves = piece.conditionalMoves(state);
+        if(typeof piece.conditionalMoves === 'string'){
+            let midObj = {conditionalMoves:piece.conditionalMoves}
+           piece.conditionalMoves = JSONfn.parse(JSONfn.stringify(midObj)).conditionalMoves;
+           tempMoves =  piece.conditionalMoves(state)
+        }
+        //tempMoves = piece.conditionalMoves(state);
     }
     [...piece.moves, ...tempMoves].forEach((move) => {
         if (move.type == 'absolute') {
@@ -1360,7 +1373,6 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
         }
     }
     if (operatedPiece.afterPieceMove) {
-        console.log(operatedPiece.afterPieceMove , '   after')
         const continueTurn = operatedPiece.afterPieceMove(state, playerMove, {x:oldX, y:oldY});
 
         if (!continueTurn) {
@@ -1450,3 +1462,153 @@ self.addEventListener("message", function(e) {
 // }
 
 // timedCount();
+
+function blockableCheck(state, powerX, powerY, x, y, move, limit,myPiece, flag,counter) {
+    let toReturn;
+    if (limit === 0) {
+        return;
+    }
+    const square = state.board.find((el) => {
+        return el.x === x + powerX && el.y === y + powerY;
+    }) // Find a square for x/y
+    if (!square) {
+        return;
+    }// If such a square does not exist return undefined
+    let directionX = 0;
+    if (powerX < 0) {
+        directionX = -1;
+    }
+    else if (powerX > 0) {
+        directionX = 1;
+    }
+
+    let directionY = 0;
+    
+    if (powerY < 0) {
+        directionY = -1;
+    }
+    else if (powerY > 0) {
+        directionY = 1;
+    }
+    else { 
+        directionY = 0;
+    }
+    const secondPiece = state.pieces[findPieceByXY(state.pieces,x+powerX, y + powerY)] // The piece on the attacked square
+    //Find the direction in which we are going
+    if (!secondPiece && !(x+powerX == myPiece.x && y+powerY == myPiece.y)) {
+        //If there is  no such piece continue
+        return blockableCheck(state, powerX+directionX, powerY+directionY, x, y, move, limit - 1, myPiece,flag,counter+1)
+    }
+    else{
+        if(secondPiece){
+            if(secondPiece.x == myPiece.x && secondPiece.y == myPiece.y){
+                toReturn = 'block';
+                return 'block'
+            }
+        }
+        else{
+            if(x+powerX == myPiece.x && y+powerY == myPiece.y){
+                toReturn = 'block'
+                return 'block'
+            }
+        }
+
+    }
+    return toReturn
+}
+
+function checkEmptyHorizontalBetween(state,pieceOne, pieceTwo){
+
+    let direction = false;
+    let checker = true;
+    let actor = pieceOne
+    
+    if(pieceOne.x > pieceTwo.x){
+        direction = true;
+    }
+    let distance = 0;
+
+    if(direction){
+        distance = pieceOne.x - pieceTwo.x;
+    }
+    else{
+        distance = pieceTwo.x - pieceOne.x;
+        actor = pieceTwo
+    }
+    distance -=1;
+    while(distance > 0){            
+        if(state.pieces[findPieceByXY(state.pieces,actor.x-distance, actor.y)]){
+            checker = false;
+        }
+        distance--;
+    }
+    return checker;
+}
+
+function findPieceByXY(pieces,x,y){
+    let index =  pieces.findIndex((piece) => {
+         return piece .x == x && piece.y == y;
+     })
+     return index
+ }
+
+ function isRoadAttacked(state,enemyColor,pointOne,pointTwo){
+    let direction = false;
+    let checker = false;
+    let actor = pointOne
+
+    let myColor = 'white';
+    if(enemyColor == 'white'){
+        myColor = 'black'
+    }
+    
+    if(pointOne.x > pointTwo.x){
+        direction = true;
+    }
+    let distance = 0;
+
+    if(direction){
+        distance = pointOne.x - pointTwo.x;
+    }
+    else{
+        distance = pointTwo.x - pointOne.x;
+        actor = pointTwo
+    }
+    for(let c = distance-1; c > 0; c--){
+        if(areYouCheckedWithoutTempMoves(state,enemyColor,{x:actor.x-c,y:actor.y,color:myColor}, 'rokado')){
+            checker = true;
+        }
+
+    }
+    return checker;
+}
+
+function areYouCheckedWithoutTempMoves(state,enemyColor,me, flag){
+    let toReturn = false;
+    for (let i = state.pieces.length - 1; i >= 0; i--) {
+        const piece = state.pieces[i]
+
+        for(let ii = [...piece.moves].length-1; ii>=0; ii--){
+            const move = [...piece.moves][ii];
+            if (piece.color == enemyColor) {
+
+                if ((move.type == 'absolute' || move.type == 'takeMove') && !move.impotent) {
+                    if(piece.x + move.x == me.x && piece.y + move.y == me.y){
+                        toReturn =  true;
+                    }
+                }
+                else if (move.type == 'blockable' && !move.impotent) {
+                    if (move.repeat) {
+                        const limit = move.limit || 100;
+                        if(blockableCheck(state, move.x, move.y, piece.x, piece.y, move, limit, me,'rokado') == 'block'){
+                            toReturn = true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    return toReturn
+
+}

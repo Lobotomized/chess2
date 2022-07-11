@@ -304,8 +304,7 @@ function pawnFactory(color, x, y) {
                     }
                 })
             }
-  
-
+            
             if (!this.moved) {
                 if (this.color == 'black') {
                     conditionalMoves.push(...[{ type: 'blockable', limit: 2, repeat: true, y: 1, x: 0, impotent: true }])
@@ -313,6 +312,8 @@ function pawnFactory(color, x, y) {
                 }
                 else if (this.color == 'white') {
                     conditionalMoves.push(...[{ type: 'blockable', repeat: true, limit: 2, y: -1, x: 0, impotent: true }])
+                    // console.log(conditionalMoves)
+
                 }
             }
             return conditionalMoves;
@@ -746,6 +747,8 @@ function antFactory(color,x,y, direction){
         value:0.6,
         posValue:1,
         afterPieceMove: function(state,move,prevMove) {
+            let color = this.color;
+            let direction = color;
             if(!direction){
                 direction =  color
             }
@@ -887,6 +890,7 @@ function queenBugFactory(color,x,y){
         value:2.5,
         posValue:1,
         afterPieceMove:function(state, move, prevMove) {
+            let color = this.color;
             const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;
