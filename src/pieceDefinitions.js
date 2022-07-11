@@ -746,13 +746,13 @@ function antFactory(color,x,y, direction){
         y:y,
         value:0.6,
         posValue:1,
+        direction:direction,
         afterPieceMove: function(state,move,prevMove) {
             let color = this.color;
-            let direction = color;
-            if(!direction){
-                direction =  color
+            if(!this.direction){
+                this.direction =  color
             }
-            if(direction == 'white' && move.y == 0 || direction == 'black' && move.y == 7)
+            if(this.direction == 'white' && move.y == 0 || this.direction == 'black' && move.y == 7)
             {
                 const me = state.pieces.find((piece) => {
                     return piece.x == move.x && piece.y == move.y
