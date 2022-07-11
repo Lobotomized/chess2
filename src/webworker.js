@@ -1,4 +1,4 @@
-let globalPosValue = Math.floor(Math.random() * 1000)/1000
+let globalPosValue = Math.random();
 
 
 function knightFactory(color, x, y) {
