@@ -143,7 +143,7 @@ function ghostFactory(color,x,y){
         x:x,
         y:y,
         value:0.6,
-        posValue:1
+        posValue:posValue[getRndInteger(1,4)-1]
     }
 }
 
@@ -160,7 +160,7 @@ function pigFactory(color,x,y){
         x:x,
         y:y,
         value:2,
-        posValue:1.5
+        posValue:posValue[getRndInteger(3,6)-1]
     }
 }
 
@@ -177,7 +177,7 @@ function horseFactory(color,x,y){
         x:x,
         y:y,
         value:5,
-        posValue:3
+        posValue:posValue[getRndInteger(1,6)-1]
     }
 }
 
@@ -197,7 +197,7 @@ function ricarFactory(color,x,y){
         x:x,
         y:y,
         value:2.5,
-        posValue:3,
+        posValue:posValue[getRndInteger(1,6)-1],
         afterThisPieceTaken:function(state){
             color = this.color;
             if(color == 'black'){
@@ -230,7 +230,7 @@ function hatFactory(color,x,y){
         moves:moves,
         color:color,
         value:50000,
-        posValue:1.5,
+        posValue:posValue[getRndInteger(1,6)-1],
         x:x,
         y:y,
         afterThisPieceTaken: function (state) {
@@ -259,7 +259,7 @@ function clownFactory(color,x,y){
         x:x,
         y:y,
         value:2,
-        posValue:0.1,
+        posValue:posValue[getRndInteger(1,2)-1],
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -572,7 +572,7 @@ function kingFactory(color, x, y) {
         x: x,
         y: y,
         value:5000,
-        posValue:1,
+        posValue:posValue[getRndInteger(1,3)-1],
         color: color,
 
         conditionalMoves: function(state){
@@ -764,7 +764,7 @@ function antFactory(color,x,y, direction){
         x:x,
         y:y,
         value:0.6,
-        posValue:1,
+        posValue:posValue[getRndInteger(1,3)-1],
         direction:direction,
         afterPieceMove: function(state,move,prevMove) {
             let color = this.color;
@@ -805,7 +805,7 @@ function goliathBugFactory(color,x,y){
         weakMoves:weakMoves,
         x:x,
         y:y,
-        posValue:3,
+        posValue:posValue[getRndInteger(1,6)-1],
         value:7,
     }
 }
@@ -831,7 +831,7 @@ function ladyBugFactory(color,x,y){
         x:x,
         y:y,
         value:5,
-        posValue:3,
+        posValue:posValue[getRndInteger(1,6)-1],
     }
 }
 
@@ -858,7 +858,7 @@ function spiderFactory(color,x,y){
         x:x,
         y:y,
         value:4.5,
-        posValue:3,
+        posValue:posValue[getRndInteger(1,6)-1],
     }
 }
 
@@ -907,7 +907,7 @@ function queenBugFactory(color,x,y){
         x:x,
         y:y,
         value:2.5,
-        posValue:1,
+        posValue:posValue[getRndInteger(1,3)-1],
         afterPieceMove:function(state, move, prevMove) {
             let color = this.color;
             const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
