@@ -340,13 +340,8 @@ function pawnFactory(color, x, y) {
                     { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 })
             }
 
-            if(this.enPassantMove){
-                this.enPassantMove = false;
-            }
+
             if(this.color == 'black'){
-                if(move.y == prevMove.y + 2){
-                    this.enPassantMove = true;
-                }
 
                 const enemyPiece = state.pieces.find((piece) => {
                     return piece.x == move.x && piece.y == move.y-1 && piece.color != this.color && piece.enPassantMove //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
@@ -359,9 +354,7 @@ function pawnFactory(color, x, y) {
 
             }
             else{
-                if(move.y == prevMove.y -2){
-                    this.enPassantMove = true;
-                }
+
 
                 const enemyPiece = state.pieces.find((piece) => {
                     return piece.x == move.x && piece.y == move.y  + 1 && piece.color != this.color  &&  piece.enPassantMove// && !findCopyPieceByXY(state.pieces,move.x,move.y)
@@ -377,7 +370,19 @@ function pawnFactory(color, x, y) {
             return true;
         },
         afterPlayerMove: function (state,move,prevMove){
+            console.log(prevMove, move, ' wtf')
+            this.enPassantMove = false;
+            if(this.color === 'black'){
+                if(this.y == prevMove.y + 2 && this.x === prevMove.x){
+                    this.enPassantMove = true;
+                }
+            }
 
+            if(this.color === 'white'){
+                if(this.y == prevMove.y - 2 && this.x === prevMove.x){
+                    this.enPassantMove = true;
+                }
+            }
         }
     }
 }
