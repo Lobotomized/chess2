@@ -504,7 +504,7 @@ function bishopFactory(color, x, y) {
         x: x,
         y: y,
         value:3,
-        posValue:3,
+        posValue:2,
         color: color
     }
 }
@@ -537,7 +537,7 @@ function queenFactory(color, x, y) {
         x: x,
         y: y,
         value:9,
-        posValue:3,
+        posValue:2,
         color: color
     }
 }

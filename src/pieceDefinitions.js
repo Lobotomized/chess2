@@ -1,3 +1,18 @@
+function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+let posValue = [
+    0.1,
+    0.5,
+    1,
+    2,
+    3,
+    4
+]
+
+
+
 function knightFactory(color, x, y) {
     return {
         icon: color + 'Knight.png',
@@ -9,7 +24,7 @@ function knightFactory(color, x, y) {
         y: y,
         color: color,
         value:2.5,
-        posValue:3
+        posValue:posValue[getRndInteger(1,6)-1]
     }
 }
 
@@ -277,7 +292,7 @@ function pawnFactory(color, x, y) {
         enPassantMove:false,
         color: color,
         value:1,
-        posValue:1,
+        posValue:posValue[getRndInteger(1,3)-1],
         conditionalMoves: function (state) {
             let conditionalMoves = [];
             if(state){
@@ -370,7 +385,6 @@ function pawnFactory(color, x, y) {
             return true;
         },
         afterPlayerMove: function (state,move,prevMove){
-            console.log(prevMove, move, ' wtf')
             this.enPassantMove = false;
             if(this.color === 'black'){
                 if(this.y == prevMove.y + 2 && this.x === prevMove.x){
@@ -505,7 +519,7 @@ function bishopFactory(color, x, y) {
         x: x,
         y: y,
         value:3,
-        posValue:3,
+        posValue:posValue[getRndInteger(1,6)-1],
         color: color
     }
 }
@@ -518,7 +532,7 @@ function rookFactory(color, x, y) {
         x: x,
         y: y,
         value:5,
-        posValue:3,
+        posValue:posValue[getRndInteger(1,6)-1],
         moved:false,
         color: color,
         afterPieceMove:function(){
@@ -538,7 +552,7 @@ function queenFactory(color, x, y) {
         x: x,
         y: y,
         value:9,
-        posValue:3,
+        posValue:posValue[getRndInteger(1,6)-1],
         color: color
     }
 }
