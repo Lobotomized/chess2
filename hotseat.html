@@ -277,8 +277,35 @@ let ani = function(){
         const AIColor = 'white';
         const hotseat = false;
         const state = hotseatGame.state;
+        const AIvsAI = false;
         
-        if(hotseat || state.turn !=  AIColor){
+        if(AIvsAI)
+        {
+            state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
+            if(state.turn === 'black'){
+                w = new Worker("src/webworker.js");
+
+                w.postMessage(JSONfn.stringify({state:state, color:'black', depth:500}));
+                w.onmessage = function(event){
+                    let move = JSONfn.parse(event.data)
+                    AIMove(move.pieceCounter, move.xClicked, move.yClicked, 'black')
+                }
+            }
+            if(state.turn === 'white'){
+                w = new Worker("src/webworker.js");
+
+                w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500}));
+                w.onmessage = function(event){
+                    let move = JSONfn.parse(event.data)
+                    AIMove(move.pieceCounter, move.xClicked, move.yClicked, 'white')
+                }
+                // let move = minimax(state,'white',200)
+
+                
+                // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
+            }
+        }
+        else if(hotseat || state.turn !=  AIColor){
             var element = canvas, offsetX = 0, offsetY = 0, mx, my;
 
             // Compute the total offset. It's possible to cache this if you want
@@ -301,7 +328,7 @@ let ani = function(){
                 w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500}));
                 w.onmessage = function(event){
                     let move = JSONfn.parse(event.data)
-                    AIMove(move.pieceCounter, move.xClicked, move.yClicked)
+                    AIMove(move.pieceCounter, move.xClicked, move.yClicked, 'white')
                 }
                 // let move = minimax(state,'white',200)
 

@@ -229,7 +229,7 @@ function hatFactory(color,x,y){
         icon: color + 'Hat.png',
         moves:moves,
         color:color,
-        value:50000,
+        value:2000,
         posValue:posValue[getRndInteger(1,6)-1],
         x:x,
         y:y,
@@ -571,7 +571,7 @@ function kingFactory(color, x, y) {
         { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }],
         x: x,
         y: y,
-        value:5000,
+        value:2000,
         posValue:posValue[getRndInteger(1,3)-1],
         color: color,
 
@@ -869,7 +869,7 @@ function shroomFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-        value:5000,
+        value:1000,
         posValue:1,
         afterThisPieceTaken:function(state){
             state.pieces.forEach((piece) => {

@@ -64,10 +64,11 @@ function AISetup(hotseatGame, AIColor){
     AIProps.color = AIColor;
 }
 
-function AIMove(pieceIndex, xClicked, yClicked){
+function AIMove(pieceIndex, xClicked, yClicked, color){
     const hotseatGame = AIProps.hotseatGame;
+    const theColor = color? color : AIProps.color;
     const state = hotseatGame.state;
-    const myPieces = getColorPieces(AIProps.hotseatGame.state.pieces,AIProps.color);
+    const myPieces = getColorPieces(AIProps.hotseatGame.state.pieces,theColor);
     selectPiece({x:myPieces[pieceIndex].x, y:myPieces[pieceIndex].y},state)
 
     const selectedPiece = state.pieceSelected;
