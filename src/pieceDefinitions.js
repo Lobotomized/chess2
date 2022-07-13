@@ -413,10 +413,10 @@ function pawnFactory(color, x, y) {
                 direction = 1;
             }
             if(!direction){
-                this.value += this.y*0.1
+                this.value = 1 + this.y*0.1
             }
             else{
-                this.value += (7-this.y)*0.1
+                this.value = 1 + (7-this.y)*0.1
             }
             this.enPassantMove = false;
             if(this.color === 'black'){
@@ -585,7 +585,7 @@ function queenFactory(color, x, y) {
         x: x,
         y: y,
         value:9,
-        posValue:posValue[getRndInteger(1,6)-1],
+        posValue:posValue[getRndInteger(1,3)-1],
         color: color
     }
 }
