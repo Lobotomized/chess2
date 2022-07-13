@@ -159,7 +159,7 @@ function pigFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-        value:2,
+        value:1.66,
         posValue:posValue[getRndInteger(3,6)-1]
     }
 }
@@ -198,6 +198,26 @@ function ricarFactory(color,x,y){
         y:y,
         value:2.5,
         posValue:posValue[getRndInteger(1,6)-1],
+        afterPlayerMove:function(state){
+            color = this.color;
+            if(color == 'black'){
+                direction = -1;
+            }
+            else{
+                direction = 1;
+            }
+            const copy = findCopyPieceByXY(state.pieces,this.x,this.y + direction);
+            const squareCheck = state.board.find((sq) => {
+                return sq.x == this.x && sq.y == this.y + direction;
+            })
+            if(copy || squareCheck != undefined){
+                this.value = 4;
+            }
+            else{
+                this.value = 2.5;
+            }
+        },
+        
         afterThisPieceTaken:function(state){
             color = this.color;
             if(color == 'black'){
@@ -385,6 +405,19 @@ function pawnFactory(color, x, y) {
             return true;
         },
         afterPlayerMove: function (state,move,prevMove){
+            color = this.color;
+            if(color == 'black'){
+                direction = -1;
+            }
+            else{
+                direction = 1;
+            }
+            if(!direction){
+                this.value += this.y*0.1
+            }
+            else{
+                this.value += (7-this.y)*0.1
+            }
             this.enPassantMove = false;
             if(this.color === 'black'){
                 if(this.y == prevMove.y + 2 && this.x === prevMove.x){
@@ -806,7 +839,7 @@ function goliathBugFactory(color,x,y){
         x:x,
         y:y,
         posValue:posValue[getRndInteger(1,6)-1],
-        value:7,
+        value:7.5,
     }
 }
 
@@ -830,7 +863,7 @@ function ladyBugFactory(color,x,y){
         weakMoves:weakMoves,
         x:x,
         y:y,
-        value:5,
+        value:5.5,
         posValue:posValue[getRndInteger(1,6)-1],
     }
 }
@@ -857,7 +890,7 @@ function spiderFactory(color,x,y){
         weakMoves:weakMoves,
         x:x,
         y:y,
-        value:4.5,
+        value:5,
         posValue:posValue[getRndInteger(1,6)-1],
     }
 }
@@ -879,6 +912,15 @@ function shroomFactory(color,x,y){
                             state.won = giveOppositeColor(this.color)
                         }
                         else{
+                            if(piece.icon.contains('Ant.png')){
+                                piece.value = 0.4
+                            }
+                            else if(piece.icon.contains('Shroom.ong')){
+                                piece.value = 5000;
+                            }
+                            else{
+                                piece.value = 2.5;
+                            }
                             piece.moves = piece.weakMoves;
                         }
                     }

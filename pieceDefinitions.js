@@ -846,6 +846,15 @@ function shroomFactory(color,x,y){
                         }
                         else{
                             piece.moves = piece.weakMoves;
+                            if(piece.icon.contains('Ant.png')){
+                                piece.value = 0.4
+                            }
+                            else if(piece.icon.contains('Shroom.ong')){
+                                piece.value = 5000;
+                            }
+                            else{
+                                piece.value = 2.5;
+                            }
                         }
                     }
                 }
