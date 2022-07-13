@@ -92,7 +92,9 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         pawnFactory('black', 0,1), pawnFactory('black', 1,1) ,
         pawnFactory('black', 2,1), pawnFactory('black', 3,1),
         pawnFactory('black', 4,1), pawnFactory('black', 5,1),
-        pawnFactory('black', 6,1), pawnFactory('black', 7,1))
+        pawnFactory('black', 6,1), pawnFactory('black', 7,1)
+        
+        )
     }
     else if(raceBlack == 'medieval'){
         pieces.push(

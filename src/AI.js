@@ -181,14 +181,14 @@ function minimax(state,maximizer, depth){
         }
     })
 
-    if(lowestBadMoveResult > 2000){
-        badMoveResults.forEach((badMoveResult) => {
-            if(badMoveResult.value > lowestBadMoveResult ){
-                lowestBadMoveResult = badMoveResult.value;
-                selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
-            }
-        })
-    }
+    //if(lowestBadMoveResult > 2000){
+        // badMoveResults.forEach((badMoveResult) => {
+        //     if(badMoveResult.value > lowestBadMoveResult ){
+        //         lowestBadMoveResult = badMoveResult.value;
+        //         selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
+        //     }
+        // })
+   // }
     return moves[selectedMove.moveCounter];
     // const move = moves[selectedMove.moveCounter]
     // return move
@@ -196,67 +196,6 @@ function minimax(state,maximizer, depth){
     // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
 }
 
-// function minimax(state,depth,maximizer,counter){
-// //Ako Depth 0
-//     if(depth === 0){
-
-//         /*
-//             Ako Depth e 0 trqbva da se vyrne tekushtiqt hod, i valueto na tekushtiqt hod
-
-//         */
-//         let maximizingPieces = getColorPieces(state.pieces,'black').length
-//         let minimizingPieces = getColorPieces(state.pieces, 'white').length
-//         //Nameri koi si za da iz4islish value
-//         return {value:Math.random(), moveCounter:counter} //EvaluateBoard(board)
-//     }
-
-
-// // Ako Depth ne e 0
-
-// /* 
-//     Ako Depth ne e 0 
-
-
-//     Trqbva da se buubble upne valueto na vseki hod ot minimax i samiq hod da se podnovi s noviqt hod
-// */
-
-
-//    let value;
-//    if(maximizer == 'black'){
-//     value = {value:-999999};
-//     let counter = 0;
-//     const possibleMoves = generateMovesFromPieces(state,maximizer);
-//     while(counter <= possibleMoves.length -1){
-//         const moveAndValue = minimax({pieces:possibleMoves[counter].pieces, board:state.board},
-//              depth-1,'white',counter);
-//         value = max(value,moveAndValue)
-//         counter++;
-//     }
-//     return value;
-//    }
-
-
-   
-//    else{
-//     value = {value:999999};
-//     let counter = 0;
-//     const possibleMoves = generateMovesFromPieces(state,maximizer);
-//     while(counter <= possibleMoves.length -1){
-//         const moveAndValue =  minimax({pieces:possibleMoves[counter].pieces, board:state.board}
-//             ,depth-1,'black',counter);
-//         value = min(value, moveAndValue)
-
-//         counter++;
-//     }
-//     // console.log('gets here ever  ' , value)
-
-//     return value;
-//    }
-
-
-//        //Trqbva da vryshta hod, koito da se igrae 
-
-// }
 
 function max(objOne, objTwo){
     if(objOne.value > objTwo.value){

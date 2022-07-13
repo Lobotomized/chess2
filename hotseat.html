@@ -289,6 +289,9 @@ let ani = function(){
                 w.onmessage = function(event){
                     let move = JSONfn.parse(event.data)
                     AIMove(move.pieceCounter, move.xClicked, move.yClicked, 'black')
+                    if(state.turn === 'black'){
+                        w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500, removedTurns:[...event.data.removedTurns, {...move}]}));
+                    }
                 }
             }
             if(state.turn === 'white'){
@@ -298,6 +301,9 @@ let ani = function(){
                 w.onmessage = function(event){
                     let move = JSONfn.parse(event.data)
                     AIMove(move.pieceCounter, move.xClicked, move.yClicked, 'white')
+                    if(state.turn === 'white'){
+                        w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500, removedTurns:[...event.data.removedTurns, {...move}]}));
+                    }
                 }
                 // let move = minimax(state,'white',200)
 
