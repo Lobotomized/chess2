@@ -347,7 +347,6 @@ function pawnFactory(color, x, y) {
                 }
                 else if (this.color == 'white') {
                     conditionalMoves.push(...[{ type: 'blockable', repeat: true, limit: 2, y: -1, x: 0, impotent: true }])
-                    // console.log(conditionalMoves)
 
                 }
             }
@@ -912,10 +911,10 @@ function shroomFactory(color,x,y){
                             state.won = giveOppositeColor(this.color)
                         }
                         else{
-                            if(piece.icon.contains('Ant.png')){
+                            if(piece.icon.includes('Ant.png')){
                                 piece.value = 0.4
                             }
-                            else if(piece.icon.contains('Shroom.ong')){
+                            else if(piece.icon.includes('Shroom.ong')){
                                 piece.value = 5000;
                             }
                             else{
