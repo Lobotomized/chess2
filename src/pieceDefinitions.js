@@ -1,3 +1,18 @@
+function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+let posValue = [
+    0.1,
+    0.5,
+    1,
+    2,
+    3,
+    4
+]
+
+
+
 function knightFactory(color, x, y) {
     return {
         icon: color + 'Knight.png',
@@ -7,9 +22,13 @@ function knightFactory(color, x, y) {
         { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }],
         x: x,
         y: y,
-        color: color
+        color: color,
+        value:2.5,
+        posValue:posValue[getRndInteger(1,6)-1]
     }
 }
+
+
 
 function mongolianKnightFactory(color, x, y) {
     return {
@@ -44,6 +63,7 @@ function weakPawn(color,x,y){
         y: y,
         moved: false,
         color: color,
+        value:1,
         afterPieceMove: function (state, move) {
             //return false if you want to prevent next turn and true if you want to continue it
             if (!this.moved) {
@@ -71,6 +91,22 @@ function weakPawn(color,x,y){
     }
 }
 
+function swordsMen(color, x, y){
+    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
+    }
+    return {
+        icon: color + 'Swordsmen.svg',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
 
 function unpromotablePawn(color, x, y) {
     let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'takeMove', y: -1, x: -1 }, { type: 'takeMove', y: -1, x: 1 }]
@@ -87,6 +123,7 @@ function unpromotablePawn(color, x, y) {
         y: y,
         moved: false,
         color: color,
+        posValue:1,
         afterPieceMove: function(){
             if (!this.moved) {
                 this.moved = true;
@@ -122,7 +159,9 @@ function ghostFactory(color,x,y){
         moves:moves,
         color:color,
         x:x,
-        y:y
+        y:y,
+        value:0.6,
+        posValue:posValue[getRndInteger(1,4)-1]
     }
 }
 
@@ -137,7 +176,9 @@ function pigFactory(color,x,y){
         moves:moves,
         color:color,
         x:x,
-        y:y
+        y:y,
+        value:1.66,
+        posValue:posValue[getRndInteger(3,6)-1]
     }
 }
 
@@ -152,7 +193,9 @@ function horseFactory(color,x,y){
         moves:moves,
         color:color,
         x:x,
-        y:y
+        y:y,
+        value:5,
+        posValue:posValue[getRndInteger(1,6)-1]
     }
 }
 
@@ -171,8 +214,36 @@ function ricarFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        value:2.5,
+        posValue:posValue[getRndInteger(1,6)-1],
+        afterPlayerMove:function(state){
+            color = this.color;
+            if(color == 'black'){
+                direction = -1;
+            }
+            else{
+                direction = 1;
+            }
+            const copy = findCopyPieceByXY(state.pieces,this.x,this.y + direction);
+            const squareCheck = state.board.find((sq) => {
+                return sq.x == this.x && sq.y == this.y + direction;
+            })
+            if(copy || squareCheck != undefined){
+                this.value = 4;
+            }
+            else{
+                this.value = 2.5;
+            }
+        },
         
         afterThisPieceTaken:function(state){
+            color = this.color;
+            if(color == 'black'){
+                direction = -1;
+            }
+            else{
+                direction = 1;
+            }
             const copy = findCopyPieceByXY(state.pieces,this.x,this.y + direction);
             const squareCheck = state.board.find((sq) => {
                 return sq.x == this.x && sq.y == this.y + direction;
@@ -196,6 +267,8 @@ function hatFactory(color,x,y){
         icon: color + 'Hat.png',
         moves:moves,
         color:color,
+        value:2000,
+        posValue:posValue[getRndInteger(1,6)-1],
         x:x,
         y:y,
         afterThisPieceTaken: function (state) {
@@ -223,7 +296,8 @@ function clownFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-
+        value:2,
+        posValue:posValue[getRndInteger(1,2)-1],
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -255,6 +329,8 @@ function pawnFactory(color, x, y) {
         moved: false,
         enPassantMove:false,
         color: color,
+        value:1,
+        posValue:posValue[getRndInteger(1,3)-1],
         conditionalMoves: function (state) {
             let conditionalMoves = [];
             if(state){
@@ -281,8 +357,7 @@ function pawnFactory(color, x, y) {
                     }
                 })
             }
-  
-
+            
             if (!this.moved) {
                 if (this.color == 'black') {
                     conditionalMoves.push(...[{ type: 'blockable', limit: 2, repeat: true, y: 1, x: 0, impotent: true }])
@@ -290,6 +365,7 @@ function pawnFactory(color, x, y) {
                 }
                 else if (this.color == 'white') {
                     conditionalMoves.push(...[{ type: 'blockable', repeat: true, limit: 2, y: -1, x: 0, impotent: true }])
+
                 }
             }
             return conditionalMoves;
@@ -316,16 +392,11 @@ function pawnFactory(color, x, y) {
                     { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 })
             }
 
-            if(this.enPassantMove){
-                this.enPassantMove = false;
-            }
+
             if(this.color == 'black'){
-                if(move.y == prevMove.y + 2){
-                    this.enPassantMove = true;
-                }
 
                 const enemyPiece = state.pieces.find((piece) => {
-                    return piece.x == move.x && piece.y == move.y-1 && piece.color != this.color //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
+                    return piece.x == move.x && piece.y == move.y-1 && piece.color != this.color && piece.enPassantMove //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
                 })
                 if(enemyPiece){
                     state.pieces.splice(state.pieces.indexOf(enemyPiece),1);    
@@ -335,12 +406,10 @@ function pawnFactory(color, x, y) {
 
             }
             else{
-                if(move.y == prevMove.y -2){
-                    this.enPassantMove = true;
-                }
+
 
                 const enemyPiece = state.pieces.find((piece) => {
-                    return piece.x == move.x && piece.y == move.y  + 1 && piece.color != this.color //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
+                    return piece.x == move.x && piece.y == move.y  + 1 && piece.color != this.color  &&  piece.enPassantMove// && !findCopyPieceByXY(state.pieces,move.x,move.y)
                 })
                 if(enemyPiece){
                     state.pieces.splice(state.pieces.indexOf(enemyPiece),1);
@@ -353,7 +422,31 @@ function pawnFactory(color, x, y) {
             return true;
         },
         afterPlayerMove: function (state,move,prevMove){
+            color = this.color;
+            if(color == 'black'){
+                direction = -1;
+            }
+            else{
+                direction = 1;
+            }
+            if(!direction){
+                this.value = 1 + this.y*0.1
+            }
+            else{
+                this.value = 1 + (7-this.y)*0.1
+            }
+            this.enPassantMove = false;
+            if(this.color === 'black'){
+                if(this.y == prevMove.y + 2 && this.x === prevMove.x){
+                    this.enPassantMove = true;
+                }
+            }
 
+            if(this.color === 'white'){
+                if(this.y == prevMove.y - 2 && this.x === prevMove.x){
+                    this.enPassantMove = true;
+                }
+            }
         }
     }
 }
@@ -475,6 +568,8 @@ function bishopFactory(color, x, y) {
         { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 }],
         x: x,
         y: y,
+        value:3,
+        posValue:posValue[getRndInteger(1,6)-1],
         color: color
     }
 }
@@ -486,6 +581,8 @@ function rookFactory(color, x, y) {
         { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 }],
         x: x,
         y: y,
+        value:5,
+        posValue:posValue[getRndInteger(1,6)-1],
         moved:false,
         color: color,
         afterPieceMove:function(){
@@ -504,6 +601,8 @@ function queenFactory(color, x, y) {
         { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 }],
         x: x,
         y: y,
+        value:9,
+        posValue:posValue[getRndInteger(1,3)-1],
         color: color
     }
 }
@@ -522,6 +621,8 @@ function kingFactory(color, x, y) {
         { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }],
         x: x,
         y: y,
+        value:2000,
+        posValue:posValue[getRndInteger(1,3)-1],
         color: color,
 
         conditionalMoves: function(state){
@@ -712,8 +813,15 @@ function antFactory(color,x,y, direction){
         color:color,
         x:x,
         y:y,
+        value:0.6,
+        posValue:posValue[getRndInteger(1,3)-1],
+        direction:direction,
         afterPieceMove: function(state,move,prevMove) {
-            if(direction == 'white' && move.y == 0 || direction == 'black' && move.y == 7)
+            let color = this.color;
+            if(!this.direction){
+                this.direction =  color
+            }
+            if(this.direction == 'white' && move.y == 0 || this.direction == 'black' && move.y == 7)
             {
                 const me = state.pieces.find((piece) => {
                     return piece.x == move.x && piece.y == move.y
@@ -746,7 +854,9 @@ function goliathBugFactory(color,x,y){
         color:color,
         weakMoves:weakMoves,
         x:x,
-        y:y
+        y:y,
+        posValue:posValue[getRndInteger(1,6)-1],
+        value:7.5,
     }
 }
 
@@ -769,7 +879,9 @@ function ladyBugFactory(color,x,y){
         color:color,
         weakMoves:weakMoves,
         x:x,
-        y:y
+        y:y,
+        value:5.5,
+        posValue:posValue[getRndInteger(1,6)-1],
     }
 }
 
@@ -794,7 +906,9 @@ function spiderFactory(color,x,y){
         color:color,
         weakMoves:weakMoves,
         x:x,
-        y:y
+        y:y,
+        value:5,
+        posValue:posValue[getRndInteger(1,6)-1],
     }
 }
 
@@ -805,6 +919,8 @@ function shroomFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        value:1000,
+        posValue:1,
         afterThisPieceTaken:function(state){
             state.pieces.forEach((piece) => {
                 if(piece.color == this.color){
@@ -813,6 +929,15 @@ function shroomFactory(color,x,y){
                             state.won = giveOppositeColor(this.color)
                         }
                         else{
+                            if(piece.icon.includes('Ant.png')){
+                                piece.value = 0.4
+                            }
+                            else if(piece.icon.includes('Shroom.ong')){
+                                piece.value = 5000;
+                            }
+                            else{
+                                piece.value = 2.5;
+                            }
                             piece.moves = piece.weakMoves;
                         }
                     }
@@ -840,7 +965,10 @@ function queenBugFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        value:2.5,
+        posValue:posValue[getRndInteger(1,3)-1],
         afterPieceMove:function(state, move, prevMove) {
+            let color = this.color;
             const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;

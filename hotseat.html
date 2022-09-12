@@ -9,19 +9,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Chess 2</title>
-
-    <script src="/src/loadImages.js"></script>
+        <script src="/src/loadImages.js"></script>
 
         <script src="/src/variables.js"></script>
 
-
-
-
+        <script src="/src/jsonfn.js"></script>
 
         <script src="src/selectAndMoveMethods.js"></script>
         <script src="src/pieceDefinitions.js"></script>
         <script src="/src/globby.js"></script>
         <script src="/src/helperFunctions.js"></script>
+        <script src="/src/AI.js"></script>
+
         <link rel="stylesheet" href="/src/main.css">
 
 </head>
@@ -46,6 +45,13 @@
 
 
 <script>
+
+
+// w.onmessage = function(){
+//     console.log('vliza tuka')
+// }
+
+
 let ani = function(){
     animate(hotseatGame.returnState())
 }
@@ -78,6 +84,7 @@ let ani = function(){
 
     hotseatGame.state.pieces.length = 0;
     hotseatGame.state.board.length = 0;
+  //  evaluateBoard('white', hotseatGame.state.pieces)
     for (let x = 0; x <= 7; x++) {
         for (let y = 0; y <= 7; y++) {
             hotseatGame.state.board.push({ light: false, x: x, y: y })
@@ -185,7 +192,6 @@ let ani = function(){
                     drawLightedSquare(x * squareLength, y * squareLength, squareLength);
                 }
                 if(sq.red){
-                    console.log('a tuk')
                     drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength)
                 }
                 else if(sq.grey){
@@ -232,29 +238,97 @@ let ani = function(){
 
                 }
             }
+
+
         }
         else {
             myTurnH1.innerText = 'Waiting for Opponent'
         }
 
-    }
+    } 
+    AISetup(hotseatGame,'white');
     
     canvas.addEventListener('click', (e) => {
-        var element = canvas, offsetX = 0, offsetY = 0, mx, my;
-
-        // Compute the total offset. It's possible to cache this if you want
-        if (element.offsetParent !== undefined) {
-            do {
-                offsetX += element.offsetLeft;
-                offsetY += element.offsetTop;
-            } while ((element = element.offsetParent));
-        }
+        const AIColor = 'white';
+        const hotseat = false;
+        const state = hotseatGame.state;
+        const AIvsAI = false;
         
-        mx = e.pageX - offsetX;
-        my = e.pageY - offsetY;
+        if(AIvsAI)
+        {
+            state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
+            if(state.turn === 'black'){
+                w = new Worker("src/webworker.js");
 
-        hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
+                w.postMessage(JSONfn.stringify({state:state, color:'black', depth:500}));
+                w.onmessage = function(event){
+                    let move = JSONfn.parse(event.data)
+                    AIMove(move.pieceCounter, move.xClicked, move.yClicked, 'black')
+                    if(state.turn === 'black'){
+                        w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500, removedTurns:[...event.data.removedTurns, {...move}]}));
+                    }
+                }
+            }
+            if(state.turn === 'white'){
+                w = new Worker("src/webworker.js");
+
+                w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500}));
+                w.onmessage = function(event){
+                    let move = JSONfn.parse(event.data)
+                    AIMove(move.pieceCounter, move.xClicked, move.yClicked, 'white')
+                    if(state.turn === 'white'){
+                        w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500, removedTurns:[...event.data.removedTurns, {...move}]}));
+                    }
+                }
+                // let move = minimax(state,'white',200)
+
+                
+                // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
+            }
+        }
+        else if(hotseat || state.turn !=  AIColor){
+            var element = canvas, offsetX = 0, offsetY = 0, mx, my;
+
+            // Compute the total offset. It's possible to cache this if you want
+            if (element.offsetParent !== undefined) {
+                do {
+                    offsetX += element.offsetLeft;
+                    offsetY += element.offsetTop;
+                } while ((element = element.offsetParent));
+            }
+
+            mx = e.pageX - offsetX;
+            my = e.pageY - offsetY;
+            
+
+            hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
+            state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
+            if(state.turn === 'white'){
+                w = new Worker("src/webworker.js");
+
+                w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500}));
+                w.onmessage = function(event){
+                    let move = JSONfn.parse(event.data)
+                    AIMove(move.pieceCounter, move.xClicked, move.yClicked, 'white')
+                }
+                // let move = minimax(state,'white',200)
+
+                
+                // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
+            }
+        }
+
+        function getRndInteger(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+
+        
+        
+        //
         // hotseatGame.move('black',  { x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
+        //evaluateBoard('white',state.pieces,state);
+
     })
 
     canvas.addEventListener('mousemove', (e) => {

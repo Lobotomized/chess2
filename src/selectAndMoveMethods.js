@@ -11,12 +11,13 @@ function lightBoard(piece, state, flag) {
     if (piece.conditionalMoves) {
         tempMoves = piece.conditionalMoves(state);
     }
+
     [...piece.moves, ...tempMoves].forEach((move) => {
         if (move.type == 'absolute') {
             const square = state.board.find((el) => {
                 return el.x === piece.x + move.x && el.y === piece.y + move.y
             })
-            if (square) {
+            if (square) {       
                 const innerPiece = pieceFromSquare(square, state.pieces)
                 if (innerPiece) {
                     if (innerPiece.color != piece.color && !move.impotent) {
@@ -27,6 +28,8 @@ function lightBoard(piece, state, flag) {
                     square[flag] = true;
                 }
             }
+
+
         }
         else if (move.type == 'allMine') {
             state.board.forEach((square) => {
@@ -153,33 +156,37 @@ function pickARace(race,state,playerRef){
     }
 }
 
-function playerMove(playerMove, state,alwaysLight) {
+function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
     // if legal move return true else return false
+    let light = specialFlag || 'light';
     const x = playerMove.x;
     const y = playerMove.y;
+    const operatedPiece = selectedForced ? selectedForced : state.pieceSelected
     const square = state.board.find((sq) => {
         return sq.x === x && sq.y === y;
     })
+
     if (!square) {
         return false;
     }
-    if (!square.light) {
+    if (!square[light] && !alwaysLight) {
         return false; // Square wasn't lighted in the lightBoard stage so the move is not legal
     }
 
     const enemyPiece = state.pieces.find((ePiece) => {
-        return ePiece.x === x && ePiece.y === y && ePiece.color != state.pieceSelected.color
+        return ePiece.x === x && ePiece.y === y && ePiece.color != operatedPiece.color
     })
+
 
     const friendlyPiece = state.pieces.find((ePiece) => {
-        return ePiece.x === x && ePiece.y === y && ePiece.color == state.pieceSelected.color
+        return ePiece.x === x && ePiece.y === y && ePiece.color == operatedPiece.color
     })
 
-    const oldX = state.pieceSelected.x;
-    const oldY = state.pieceSelected.y;
+    const oldX = operatedPiece.x;
+    const oldY = operatedPiece.y;
 
-    state.pieceSelected.x = x;
-    state.pieceSelected.y = y;
+    operatedPiece.x = x;
+    operatedPiece.y = y;
     let continueTurn = true;
 
     for (let i = state.pieces.length - 1; i >= 0; i--) {
@@ -196,8 +203,9 @@ function playerMove(playerMove, state,alwaysLight) {
         }
     }
     if(!continueTurn){
-        state.pieceSelected.x = oldX;
-        state.pieceSelected.y = oldY;
+
+        operatedPiece.x = oldX;
+        operatedPiece.y = oldY;
         return false;
     }
     else{
@@ -205,29 +213,30 @@ function playerMove(playerMove, state,alwaysLight) {
             if (enemyPiece.afterThisPieceTaken) {
                 enemyPiece.afterThisPieceTaken(state)
             }
-            if (state.pieceSelected.afterEnemyPieceTaken) {
-                state.pieceSelected.afterEnemyPieceTaken(enemyPiece, state);
+            if (operatedPiece.afterEnemyPieceTaken) {
+                operatedPiece.afterEnemyPieceTaken(enemyPiece, state);
             }
             enemyPiece.x = undefined;
             enemyPiece.y = undefined;
+            
             state.pieces.splice(state.pieces.indexOf(enemyPiece), 1)
         }
     }
 
-    if (state.pieceSelected.afterPieceMove) {
-        const continueTurn = state.pieceSelected.afterPieceMove(state, playerMove, {x:oldX, y:oldY});
-
+    if (operatedPiece.afterPieceMove) {
+        // console.log(operatedPiece)
+        const continueTurn = operatedPiece.afterPieceMove(state, playerMove, {x:oldX, y:oldY});
+        
         if (!continueTurn) {
-            state.pieceSelected.x = oldX;
-            state.pieceSelected.y = oldY;
+            operatedPiece.x = oldX;
+            operatedPiece.y = oldY;
             return false;
         }
     }
-    state.oldMove = {oldX:oldX,oldY:oldY,currentY:state.pieceSelected.y,currentX:state.pieceSelected.x}
+    state.oldMove = {oldX:oldX,oldY:oldY,currentY:operatedPiece.y,currentX:operatedPiece.x}
     state.pieceSelected = undefined;
-    
     closeLights(state.board)
-    
+
     return true;
 }
 

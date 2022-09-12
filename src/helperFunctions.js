@@ -92,7 +92,9 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         pawnFactory('black', 0,1), pawnFactory('black', 1,1) ,
         pawnFactory('black', 2,1), pawnFactory('black', 3,1),
         pawnFactory('black', 4,1), pawnFactory('black', 5,1),
-        pawnFactory('black', 6,1), pawnFactory('black', 7,1))
+        pawnFactory('black', 6,1), pawnFactory('black', 7,1)
+        
+        )
     }
     else if(raceBlack == 'medieval'){
         pieces.push(
@@ -118,13 +120,18 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         pawnFactory('white', 0,6), pawnFactory('white', 1,6) ,
         pawnFactory('white', 2,6), pawnFactory('white', 3,6),
         pawnFactory('white', 4,6), pawnFactory('white', 5,6),
-        pawnFactory('white', 6,6), pawnFactory('white', 7,6),)
+        pawnFactory('white', 6,6), pawnFactory('white', 7,6),
+        
+        )
+    }
+    if(raceWhite == 'test'){
+        pieces.push( swordsMen('white', 1,6),  swordsMen('white', 0,6) )
     }
     else if(raceWhite == 'medieval'){
         pieces.push(
-                                ghostFactory('white',2,5),ghostFactory('white',3,5),ghostFactory('white',4,5),ghostFactory('white',5,5),
+                                 ghostFactory('white',2,5),ghostFactory('white',3,5),ghostFactory('white',4,5),ghostFactory('white',5,5),
                                 pigFactory('white',2,6),  horseFactory('white',3,6),horseFactory('white',4,6),pigFactory('white',5,6),
-                clownFactory('white',1,7),ricarFactory('white',2,7),hatFactory('white',3,7),hatFactory('white',4,7),ricarFactory('white',5,7),clownFactory('white',6,7)
+                 clownFactory('white',1,7),ricarFactory('white',2,7),hatFactory('white',3,7),hatFactory('white',4,7),ricarFactory('white',5,7),clownFactory('white',6,7)
             )
     }
     else if(raceWhite == 'bug'){
@@ -185,7 +192,12 @@ function drawPiece(x, y, img, size) {
         case 'whiteKing.png':
             ctx.drawImage(wKing, 0, 0, 500, 500, x * size, y * size, size, size);
             break;
-
+        case 'whiteSwordsmen.svg':
+            ctx.drawImage(wSwordsmen, 0, 0, 700, 700, x * size, y * size, size, size);
+            break;
+        case 'blackSwordsmen.svg':
+            ctx.drawImage(bSwordsmen, 0, 0, 700, 700, x * size, y * size, size, size);
+            break;
         case 'blackPig.png':
             ctx.drawImage(bPig, 0, 0, 500, 500, x * size, y * size, size, size);
             break;
@@ -204,7 +216,19 @@ function drawPiece(x, y, img, size) {
         case 'whiteRicar.png':
             ctx.drawImage(wRicar, 0, 0, 500, 500, x * size, y * size, size, size);
             break;
+        case 'blackPlagueDoctor.png':
+            ctx.drawImage(bPlagueDoctor, 0, 0, 500, 500, x * size, y * size, size, size);
+            break;
+        case 'whitePlagueDoctor.png':
+            ctx.drawImage(wPlagueDoctor, 0, 0, 500, 500, x * size, y * size, size, size);
+            break;
 
+        case 'blackStarMan.png':
+            ctx.drawImage(bStarMan, 0, 0, 500, 500, x * size, y * size, size, size);
+            break;
+        case 'whiteStarMan.png':
+            ctx.drawImage(wStarMan, 0, 0, 500, 500, x * size, y * size, size, size);
+            break;
         case 'blackClown.png':
             ctx.drawImage(bClown, 0, 0, 500, 500, x * size, y * size, size, size);
             break;
@@ -480,7 +504,7 @@ function findPieceByXY(pieces,x,y){
 
 }
 
- function     areYouCheckedWithoutTempMoves(state,enemyColor,me, flag){
+ function areYouCheckedWithoutTempMoves(state,enemyColor,me, flag){
     let toReturn = false;
     for (let i = state.pieces.length - 1; i >= 0; i--) {
         const piece = state.pieces[i]

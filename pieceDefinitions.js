@@ -177,6 +177,12 @@ function ricarFactory(color,x,y){
         y:y,
         
         afterThisPieceTaken:function(state){
+            if(direction === undefined){
+                let direction = 1;
+                if(color == 'black'){
+                    direction = -1;
+                }
+            }
             const copy = findCopyPieceByXY(state.pieces,this.x,this.y + direction);
             const squareCheck = state.board.find((sq) => {
                 return sq.x == this.x && sq.y == this.y + direction;
@@ -202,6 +208,7 @@ function hatFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        value:500,
         afterThisPieceTaken: function (state) {
             if (this.color == 'white') {
                 state.won = 'black';
@@ -227,7 +234,7 @@ function clownFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-
+        value:2,
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -256,6 +263,7 @@ function pawnFactory(color, x, y) {
         moves: moves,
         x: x,
         y: y,
+        value:1,
         moved: false,
         enPassantMove:false,
         color: color,
@@ -269,7 +277,7 @@ function pawnFactory(color, x, y) {
                 enPassantCandidates.forEach((candidate) => {
                     if(candidate.x > this.x){
                         if(this.color == 'black'){
-                            conditionalMoves.push({ type: 'absolute', y: -1, x: -1 })
+                            conditionalMoves.push({ type: 'absolute', y: 1, x: 1 })
                         }
                         else{
                             conditionalMoves.push({ type: 'absolute', y: -1, x: 1 })
@@ -280,13 +288,12 @@ function pawnFactory(color, x, y) {
                             conditionalMoves.push({ type: 'absolute', y: 1, x: -1 })
                         }
                         else{
-                            conditionalMoves.push({ type: 'absolute', y: 1, x: 1 })
+                            conditionalMoves.push({ type: 'absolute', y: -1, x: -1 })
                         }                
                     }
                 })
             }
-  
-
+            
             if (!this.moved) {
                 if (this.color == 'black') {
                     conditionalMoves.push(...[{ type: 'blockable', limit: 2, repeat: true, y: 1, x: 0, impotent: true }])
@@ -294,6 +301,8 @@ function pawnFactory(color, x, y) {
                 }
                 else if (this.color == 'white') {
                     conditionalMoves.push(...[{ type: 'blockable', repeat: true, limit: 2, y: -1, x: 0, impotent: true }])
+                    // console.log(conditionalMoves)
+
                 }
             }
             return conditionalMoves;
@@ -320,31 +329,24 @@ function pawnFactory(color, x, y) {
                     { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 })
             }
 
-            if(this.enPassantMove){
-                this.enPassantMove = false;
-            }
+
             if(this.color == 'black'){
-                if(move.y == prevMove.y + 2){
-                    this.enPassantMove = true;
-                }
 
                 const enemyPiece = state.pieces.find((piece) => {
-                    return piece.x == move.x && piece.y == move.y -1 && piece.color != this.color && !findCopyPieceByXY(state.pieces,move.x,move.y)
+                    return piece.x == move.x && piece.y == move.y-1 && piece.color != this.color //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
                 })
                 if(enemyPiece){
-                    state.pieces.splice(state.pieces.indexOf(enemyPiece),1);
+                    state.pieces.splice(state.pieces.indexOf(enemyPiece),1);    
                     enemyPiece.x = undefined;
                     enemyPiece.y = undefined;
                 }
 
             }
             else{
-                if(move.y == prevMove.y -2){
-                    this.enPassantMove = true;
-                }
+
 
                 const enemyPiece = state.pieces.find((piece) => {
-                    return piece.x == move.x && piece.y == move.y  + 1 && piece.color != this.color && !findCopyPieceByXY(state.pieces,move.x,move.y)
+                    return piece.x == move.x && piece.y == move.y  + 1 && piece.color != this.color //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
                 })
                 if(enemyPiece){
                     state.pieces.splice(state.pieces.indexOf(enemyPiece),1);
@@ -357,7 +359,18 @@ function pawnFactory(color, x, y) {
             return true;
         },
         afterPlayerMove: function (state,move,prevMove){
+            this.enPassantMove = false;
+            if(this.color === 'black'){
+                if(this.y == prevMove.y + 2 && this.x === prevMove.x){
+                    this.enPassantMove = true;
+                }
+            }
 
+            if(this.color === 'white'){
+                if(this.y == prevMove.y - 2 && this.x === prevMove.x){
+                    this.enPassantMove = true;
+                }
+            }
         }
     }
 }
@@ -479,6 +492,7 @@ function bishopFactory(color, x, y) {
         { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 }],
         x: x,
         y: y,
+        value:3,
         color: color
     }
 }
@@ -490,6 +504,7 @@ function rookFactory(color, x, y) {
         { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 }],
         x: x,
         y: y,
+        value:5,
         moved:false,
         color: color,
         afterPieceMove:function(){
@@ -508,6 +523,7 @@ function queenFactory(color, x, y) {
         { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 }],
         x: x,
         y: y,
+        value:9,
         color: color
     }
 }
@@ -526,6 +542,7 @@ function kingFactory(color, x, y) {
         { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }],
         x: x,
         y: y,
+        value:100000,
         color: color,
 
         conditionalMoves: function(state){
@@ -696,6 +713,12 @@ function kingFactory(color, x, y) {
 }
 
 function antFactory(color,x,y, direction){
+    if(direction === undefined){
+        let direction = 1;
+        if(color == 'black'){
+            direction = -1;
+        }
+    }
     if(!direction){
         direction =  color
     }
@@ -716,6 +739,7 @@ function antFactory(color,x,y, direction){
         color:color,
         x:x,
         y:y,
+        value:0.6,
         afterPieceMove: function(state,move,prevMove) {
             if(direction == 'white' && move.y == 0 || direction == 'black' && move.y == 7)
             {
@@ -750,7 +774,8 @@ function goliathBugFactory(color,x,y){
         color:color,
         weakMoves:weakMoves,
         x:x,
-        y:y
+        y:y,
+        value:7
     }
 }
 
@@ -773,7 +798,8 @@ function ladyBugFactory(color,x,y){
         color:color,
         weakMoves:weakMoves,
         x:x,
-        y:y
+        y:y,
+        value:5,
     }
 }
 
@@ -798,7 +824,8 @@ function spiderFactory(color,x,y){
         color:color,
         weakMoves:weakMoves,
         x:x,
-        y:y
+        y:y,
+        value:5
     }
 }
 
@@ -809,6 +836,7 @@ function shroomFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        value:5000,
         afterThisPieceTaken:function(state){
             state.pieces.forEach((piece) => {
                 if(piece.color == this.color){
@@ -818,6 +846,15 @@ function shroomFactory(color,x,y){
                         }
                         else{
                             piece.moves = piece.weakMoves;
+                            if(piece.icon.contains('Ant.png')){
+                                piece.value = 0.4
+                            }
+                            else if(piece.icon.contains('Shroom.ong')){
+                                piece.value = 5000;
+                            }
+                            else{
+                                piece.value = 2.5;
+                            }
                         }
                     }
                 }
@@ -835,7 +872,15 @@ function queenBugFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        value:2,
+        
         afterPieceMove:function(state, move, prevMove) {
+            if(direction === undefined){
+                let direction = 1;
+                if(color == 'black'){
+                    direction = -1;
+                }
+            }
             const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;
