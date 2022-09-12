@@ -147,56 +147,6 @@ function generateMovesFromPieces(state,color){
     return movesAndPieces
 }
 
-
-function minimax(state,maximizer, depth){
-    const moves = generateMovesFromPieces(state,maximizer)
-    let enemy = 'black';
-    if(maximizer === 'black'){
-        enemy = 'white';
-    }
-                
-    let selectedMove = undefined;
-    let badMoveResults= []
-    let slizedMoves = moves.slice(0,depth);
-    let lowestBadMoveResult = 99999999;
-
-    slizedMoves.forEach((move, index) => {
-        const badMoves = generateMovesFromPieces({board:state.board,pieces:move.pieces},enemy)
-        let bestBadMove = {};
-        let badMoveValue = -999999;
-        badMoves.forEach((badMove) => {
-
-            let thisValue = evaluateBoard(enemy,badMove.pieces, state.board)
-            if(thisValue > badMoveValue){
-                badMoveValue = thisValue;
-                bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
-            }
-        })
-        badMoveResults.push(bestBadMove)
-    })
-    badMoveResults.forEach((badMoveResult) => {
-        if(badMoveResult.value < lowestBadMoveResult ){
-            lowestBadMoveResult = badMoveResult.value;
-            selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
-        }
-    })
-
-    //if(lowestBadMoveResult > 2000){
-        // badMoveResults.forEach((badMoveResult) => {
-        //     if(badMoveResult.value > lowestBadMoveResult ){
-        //         lowestBadMoveResult = badMoveResult.value;
-        //         selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
-        //     }
-        // })
-   // }
-    return moves[selectedMove.moveCounter];
-    // const move = moves[selectedMove.moveCounter]
-    // return move
-
-    // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
-}
-
-
 function max(objOne, objTwo){
     if(objOne.value > objTwo.value){
         return objOne

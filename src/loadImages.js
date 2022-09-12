@@ -29,6 +29,12 @@ bKing.src = '/static/blackKing.png';
 const wKing = new Image(); 
 wKing.src = '/static/whiteKing.png';
 
+const wSwordsmen = new Image();
+wSwordsmen.src = '/static/whiteSwordsmen.svg';
+
+const bSwordsmen = new Image();
+bSwordsmen.src = '/static/bSwordsmen.svg';
+
 const bPawn = new Image();
 bPawn.src = '/static/blackPawn.png';
 
@@ -79,6 +85,18 @@ wRicar.src = '/static/whiteRicar.png';
 
 const bRicar = new Image();
 bRicar.src = '/static/blackRicar.png';
+
+const wPlagueDoctor = new Image();
+wPlagueDoctor.src = '/static/whitePlagueDoctor.png'
+
+const bPlagueDoctor = new Image();
+bPlagueDoctor.src = '/static/blackPlagueDoctor.png'
+
+const wStarMan = new Image();
+wStarMan.src = '/static/whiteStarMan.png'
+
+const bStarMan = new Image();
+bStarMan.src = '/static/blackStarMan.png'
 
 
 //

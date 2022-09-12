@@ -124,6 +124,9 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         
         )
     }
+    if(raceWhite == 'test'){
+        pieces.push( swordsMen('white', 1,6),  swordsMen('white', 0,6) )
+    }
     else if(raceWhite == 'medieval'){
         pieces.push(
                                  ghostFactory('white',2,5),ghostFactory('white',3,5),ghostFactory('white',4,5),ghostFactory('white',5,5),
@@ -189,7 +192,12 @@ function drawPiece(x, y, img, size) {
         case 'whiteKing.png':
             ctx.drawImage(wKing, 0, 0, 500, 500, x * size, y * size, size, size);
             break;
-
+        case 'whiteSwordsmen.svg':
+            ctx.drawImage(wSwordsmen, 0, 0, 700, 700, x * size, y * size, size, size);
+            break;
+        case 'blackSwordsmen.svg':
+            ctx.drawImage(bSwordsmen, 0, 0, 700, 700, x * size, y * size, size, size);
+            break;
         case 'blackPig.png':
             ctx.drawImage(bPig, 0, 0, 500, 500, x * size, y * size, size, size);
             break;
@@ -208,7 +216,19 @@ function drawPiece(x, y, img, size) {
         case 'whiteRicar.png':
             ctx.drawImage(wRicar, 0, 0, 500, 500, x * size, y * size, size, size);
             break;
+        case 'blackPlagueDoctor.png':
+            ctx.drawImage(bPlagueDoctor, 0, 0, 500, 500, x * size, y * size, size, size);
+            break;
+        case 'whitePlagueDoctor.png':
+            ctx.drawImage(wPlagueDoctor, 0, 0, 500, 500, x * size, y * size, size, size);
+            break;
 
+        case 'blackStarMan.png':
+            ctx.drawImage(bStarMan, 0, 0, 500, 500, x * size, y * size, size, size);
+            break;
+        case 'whiteStarMan.png':
+            ctx.drawImage(wStarMan, 0, 0, 500, 500, x * size, y * size, size, size);
+            break;
         case 'blackClown.png':
             ctx.drawImage(bClown, 0, 0, 500, 500, x * size, y * size, size, size);
             break;
