@@ -126,7 +126,7 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     }
     if(raceWhite == 'test'){
         pieces.push( swordsMen('white', 1,6),  northernKing('white', 0,6), fencer('white', 2,6), shield('white',3,6),
-                     pikeman('white',4,6), general('white',5,6), plagueDoctor('white',6,6), kolba('white',7,6) )
+                     pikeman('white',4,6), general('white',5,6), plagueDoctor('white',6,6), kolba('white',7,6), starMan('white',7,7) )
     }
     else if(raceWhite == 'medieval'){
         pieces.push(
