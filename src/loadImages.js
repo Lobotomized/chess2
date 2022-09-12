@@ -181,3 +181,15 @@ wPikeman.src = '/static/whitePikeman.svg'
 
 const bPikeman = new Image();
 bPikeman.src = '/static/blackPikeman.svg'
+
+const wDragon = new Image();
+wDragon.src = '/static/whiteDragon.svg'
+
+const bDragon = new Image();
+bDragon.src = '/static/blackDragon.svg'
+
+const wSleepingDragon = new Image();
+wSleepingDragon.src = '/static/whiteSleepingDragon.svg'
+
+const bSleepingDragon = new Image();
+bSleepingDragon.src = '/static/blackSleepingDragon.svg'

@@ -5,7 +5,7 @@ const io = require('socket.io')(http);
 const newG = require('./globby').newIOServerV2;
 const {miniChess, randomChess,  catchTheDragon, mongolianChess, classicChess, raceChess, raceChoiceChess} = require('./boardGeneration')
 const { selectPiece, playerMove, checkTurn, changeTurn, lightBoard, closeLights, pickARace } = require('./selectAndMovemethods')
-const {kingFactory, hatFactory, shroomFactory} = require('./pieceDefinitions')
+const {kingFactory, hatFactory, shroomFactory, northernKing} = require('./pieceDefinitions')
 app.use('/static', express.static('public'))
 app.use('/src', express.static('src'))
 
@@ -42,6 +42,9 @@ let lobby = newG({properties:{
                     else if(move.x === 1 && move.y ==3){
                         state.whiteRace = 'bug'
                     }
+                    else if(move.x === 1 && move.y ==4){
+                        state.whiteRace = 'promoters'
+                    }
                 }
                 else if(player.ref == state.black){
                     if(move.x  == 1 && move.y == 1){
@@ -52,6 +55,9 @@ let lobby = newG({properties:{
                     }
                     else if(move.x === 1 && move.y ==3){
                         state.blackRace = 'bug'
+                    }
+                    else if(move.x === 1 && move.y ==4){
+                        state.blackRace = 'promoters'
                     }
                 }
 
@@ -122,6 +128,10 @@ let lobby = newG({properties:{
                     search.x = 1;
                     search.y = 3;
                 }
+                else if(copyState.blackRace == 'promoters'){
+                    search.x = 1;
+                    search.y = 4;
+                }
             }
             else{
                 if(copyState.whiteRace == 'medieval'){
@@ -135,6 +145,10 @@ let lobby = newG({properties:{
                 else if(copyState.whiteRace == 'bug'){
                     search.x = 1;
                     search.y = 3;
+                }
+                else if(copyState.whiteRace == 'promoters'){
+                    search.x = 1;
+                    search.y = 4;
                 }
             }
         }
@@ -246,7 +260,7 @@ let lobby = newG({properties:{
                     }
                 }
 
-                state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3))
+                state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4))
                 state.gameType = 'raceChoiceChess'
                 state.turn = 'menu'
             }
