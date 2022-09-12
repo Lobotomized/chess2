@@ -59,9 +59,11 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         )
     }
     else if(raceWhite === 'promoters'){
-        pieces.push(swordsMen('black', 0,1), pikeman('black',1,1),swordsMen('black', 2,1), pikeman('black',3,1),pikeman('black', 4,1), swordsMen('black',5,1),pikeman('black', 6,1), swordsMen('black',7,1),
+        pieces.push(
+            swordsMen('black', 0,1), pikeman('black',1,1),swordsMen('black', 2,1), pikeman('black',3,1),pikeman('black', 4,1), swordsMen('black',5,1),pikeman('black', 6,1), swordsMen('black',7,1),
                                              shield('black',1,2),                                                                                              shield('black',6,2),
-                    sleepingDragon('black',0,0),kolba('black',1,0),kolba('black',2,0), plagueDoctor('black',3,0),northernKing('black',4,0), fencer('black',5,0),fencer('black',6,0), sleepingDragon('black',7,0),)
+                    sleepingDragon('black',0,0),kolba('black',1,0),kolba('black',2,0), plagueDoctor('black',3,0),northernKing('black',4,0), fencer('black',5,0),fencer('black',6,0), sleepingDragon('black',7,0),
+                    )
     }
 
     if(raceWhite == 'classic'){
@@ -90,9 +92,11 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         )
     }
     else if(raceWhite === 'promoters'){
-        pieces.push(            swordsMen('white', 0,6), pikeman('white',1,6),swordsMen('white', 2,6), pikeman('white',3,6),pikeman('white', 4,6), swordsMen('white',5,6),pikeman('white', 6,6), swordsMen('white',7,6),
+        pieces.push(
+            swordsMen('white', 0,6), pikeman('white',1,6),swordsMen('white', 2,6), pikeman('white',3,6),pikeman('white', 4,6), swordsMen('white',5,6),pikeman('white', 6,6), swordsMen('white',7,6),
         shield('white',1,5),                                                                                              shield('white',6,5),
-        sleepingDragon('white',0,7),kolba('white',1,7),kolba('white',2,7), plagueDoctor('white',3,7),northernKing('white',4,7), fencer('white',5,7),fencer('white',6,7), sleepingDragon('white',7,7),)
+        sleepingDragon('white',0,7),kolba('white',1,7),kolba('white',2,7), plagueDoctor('white',3,7),northernKing('white',4,7), fencer('white',5,7),fencer('white',6,7), sleepingDragon('white',7,7),
+        )
     }
 
 

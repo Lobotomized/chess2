@@ -931,12 +931,14 @@ function northernKing(color, x, y){
         color: color,
         value:250,
         afterThisPieceTaken: function (state) {
-            if (this.color == 'white') {
-                state.won = 'black';
+
+            let find = state.pieces.find((el) => {
+                el.icon === this.color + 'PlagueDoctor.png'
+            })
+            if(!find){
+                state.won = giveOppositeColor(this.color);
             }
-            else if (this.color == 'black') {
-                state.won = 'white';
-            }
+
         },
         afterPieceMove:function(state, move, prevMove){
             let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
@@ -979,12 +981,12 @@ function northernKing(color, x, y){
 }
 
 function pikeman(color, x, y){
-    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0, impotent:true }, {type:'takeMove', y:-2, x:0}
-                 , {type:'takeMove', y:-2, x:1}, {type:'takeMove', y:-2, x:-1}]
+    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'takeMove', y: -2, x: -1 }, { type: 'takeMove', y: -2, x: 1 }, { type: 'takeMove', y: -2, x: 0 }]
 
     if (color == 'black') {
-        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0, impotent:true }, {type:'takeMove', y:1, x:0}
-        , {type:'takeMove', y:2, x:1}, {type:'takeMove', y:2, x:-1}]    }
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'takeMove', y: 2, x: -1 }, { type: 'takeMove', y: 2, x: 1 }, { type: 'takeMove', y: 2, x: 1 }];
+    }
+
     return {
         icon: color + 'Pikeman.svg',
         moves: moves,
@@ -1080,11 +1082,11 @@ function plagueDoctor(color, x, y){
         color: color,
         value:250,
         afterThisPieceTaken: function (state) {
-            if (this.color == 'white') {
-                state.won = 'black';
-            }
-            else if (this.color == 'black') {
-                state.won = 'white';
+            let find = state.pieces.find((el) => {
+                el.icon === this.color + 'NorthernKing.svg'
+            })
+            if(!find){
+                state.won = giveOppositeColor(this.color);
             }
         },
         afterPieceMove:function(state, move, prevMove){
