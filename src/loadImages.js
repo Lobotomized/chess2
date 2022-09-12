@@ -29,11 +29,6 @@ bKing.src = '/static/blackKing.png';
 const wKing = new Image(); 
 wKing.src = '/static/whiteKing.png';
 
-const wSwordsmen = new Image();
-wSwordsmen.src = '/static/whiteSwordsmen.svg';
-
-const bSwordsmen = new Image();
-bSwordsmen.src = '/static/bSwordsmen.svg';
 
 const bPawn = new Image();
 bPawn.src = '/static/blackPawn.png';
@@ -86,17 +81,7 @@ wRicar.src = '/static/whiteRicar.png';
 const bRicar = new Image();
 bRicar.src = '/static/blackRicar.png';
 
-const wPlagueDoctor = new Image();
-wPlagueDoctor.src = '/static/whitePlagueDoctor.png'
 
-const bPlagueDoctor = new Image();
-bPlagueDoctor.src = '/static/blackPlagueDoctor.png'
-
-const wStarMan = new Image();
-wStarMan.src = '/static/whiteStarMan.png'
-
-const bStarMan = new Image();
-bStarMan.src = '/static/blackStarMan.png'
 
 
 //
@@ -138,3 +123,61 @@ wAnt.src = '/static/whiteAnt.png';
 
 const wQueenBug = new Image();
 wQueenBug.src = '/static/whiteQueenBug.png';
+
+
+//New pieces
+
+const wSwordsmen = new Image();
+wSwordsmen.src = '/static/whiteSwordsmen.svg';
+
+const bSwordsmen = new Image();
+bSwordsmen.src = '/static/blackSwordsmen.svg';
+
+const wPlagueDoctor = new Image();
+wPlagueDoctor.src = '/static/whitePlagueDoctor.png'
+
+const bPlagueDoctor = new Image();
+bPlagueDoctor.src = '/static/blackPlagueDoctor.png'
+
+const wGeneral = new Image();
+wGeneral.src = '/static/whiteGeneral.svg'
+
+const bGeneral = new Image();
+bGeneral.src = '/static/blackGeneral.svg'
+
+const wStarMan = new Image();
+wStarMan.src = '/static/whiteStarMan.png'
+
+const bStarMan = new Image();
+bStarMan.src = '/static/blackStarMan.png'
+
+const bFencer = new Image();
+bFencer.src = '/static/blackFencer.svg'
+
+const wFencer = new Image();
+wFencer.src = '/static/whiteFencer.svg'
+
+const wKolba = new Image();
+wKolba.src = '/static/whiteKolba.svg'
+
+const bKolba = new Image();
+bKolba.src = '/static/blackKolba.svg'
+
+const wNorthernKing = new Image();
+wNorthernKing.src = '/static/whiteNorthernKing.svg'
+
+const bNorthernKing = new Image();
+bNorthernKing.src = '/static/blackNorthernKing.svg'
+
+
+const wShield = new Image();
+wShield.src = '/static/whiteShield.svg'
+
+const bShield = new Image();
+bShield.src = '/static/blackShield.svg'
+
+const wPikeman = new Image();
+wPikeman.src = '/static/whitePikeman.svg'
+
+const bPikeman = new Image();
+bPikeman.src = '/static/blackPikeman.svg'

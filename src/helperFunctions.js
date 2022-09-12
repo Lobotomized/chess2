@@ -125,7 +125,8 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         )
     }
     if(raceWhite == 'test'){
-        pieces.push( swordsMen('white', 1,6),  swordsMen('white', 0,6) )
+        pieces.push( swordsMen('white', 1,6),  northernKing('white', 0,6), fencer('white', 2,6), shield('white',3,6),
+                     pikeman('white',4,6), general('white',5,6), plagueDoctor('white',6,6), kolba('white',7,6) )
     }
     else if(raceWhite == 'medieval'){
         pieces.push(
@@ -191,12 +192,6 @@ function drawPiece(x, y, img, size) {
             break;
         case 'whiteKing.png':
             ctx.drawImage(wKing, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteSwordsmen.svg':
-            ctx.drawImage(wSwordsmen, 0, 0, 700, 700, x * size, y * size, size, size);
-            break;
-        case 'blackSwordsmen.svg':
-            ctx.drawImage(bSwordsmen, 0, 0, 700, 700, x * size, y * size, size, size);
             break;
         case 'blackPig.png':
             ctx.drawImage(bPig, 0, 0, 500, 500, x * size, y * size, size, size);
@@ -284,6 +279,66 @@ function drawPiece(x, y, img, size) {
             break;
         case 'whiteShroom.png':
             ctx.drawImage(wShroom, 0, 0, 500, 500, x * size, y * size, size, size);
+            break;
+
+            //New
+        case 'whiteSwordsmen.svg':
+            ctx.drawImage(wSwordsmen, 0, 0, 700, 700, x * size, y * size, size, size);
+            break;
+        case 'blackSwordsmen.svg':
+            ctx.drawImage(bSwordsmen, 0, 0, 700, 700, x * size, y * size, size, size);
+            break;
+        case 'whitePlagueDoctor.png':
+            ctx.drawImage(wSwordsmen, 0, 0, 500, 500, x * size, y * size, size, size);
+            break;
+        case 'blackPlagueDoctor.png':
+            ctx.drawImage(bSwordsmen, 0, 0, 500, 500, x * size, y * size, size, size);
+            break;
+        case 'whiteStarMan.png':
+            ctx.drawImage(wStarMan, 0, 0, 500, 500, x * size, y * size, size, size);
+            break;
+        case 'blackStarMan.png':
+            ctx.drawImage(bStarMan, 0, 0, 500, 500, x * size, y * size, size, size);
+            break;
+
+        case 'whiteKolba.png':
+            ctx.drawImage(wKolba, 0, 0, 750, 750, x * size, y * size, size, size);
+            break;
+        case 'blackKolba.png':
+            ctx.drawImage(bKolba, 0, 0, 750, 750, x * size, y * size, size, size);
+            break;
+            
+        case 'whiteFencer.svg':
+            ctx.drawImage(wFencer, 0, 0, 700, 700, x * size, y * size, size, size);
+            break;
+        case 'blackFencer.svg':
+            ctx.drawImage(bFencer, 0, 0, 700, 700, x * size, y * size, size, size);
+            break;
+
+        case 'whiteNorthernKing.svg':
+            ctx.drawImage(wNorthernKing, 0, 0, 700, 700, x * size, y * size, size, size);
+            break;
+        case 'blackNorthernKing.svg':
+            ctx.drawImage(bNorthernKing, 0, 0, 700, 700, x * size, y * size, size, size);
+            break;
+        case 'whiteShield.svg':
+            ctx.drawImage(wShield, 0, 0, 700, 700, x * size, y * size, size, size);
+            break;
+        case 'blackShield.svg':
+            ctx.drawImage(bShield, 0, 0, 700, 700, x * size, y * size, size, size);
+            break;
+        case 'whitePikeman.svg':
+            ctx.drawImage(wPikeman, 0, 0, 800, 800, x * size, y * size, size, size);
+            break;
+        case 'blackPikeman.svg':
+            ctx.drawImage(bPikeman, 0, 0, 700, 700, x * size, y * size, size, size);
+            break;
+
+        case 'whiteGeneral.svg':
+            ctx.drawImage(wGeneral, 0, 0, 600, 600, x * size, y * size, size, size);
+            break;
+        case 'blackGeneral.svg':
+            ctx.drawImage(bGeneral, 0, 0, 600, 600, x * size, y * size, size, size);
             break;
     }
 }

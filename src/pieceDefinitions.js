@@ -91,23 +91,6 @@ function weakPawn(color,x,y){
     }
 }
 
-function swordsMen(color, x, y){
-    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
-
-    if (color == 'black') {
-        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
-    }
-    return {
-        icon: color + 'Swordsmen.svg',
-        moves: moves,
-        x: x,
-        y: y,
-        color: color,
-        value:1,
-        posValue:0.1,
-    }
-}
-
 function unpromotablePawn(color, x, y) {
     let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'takeMove', y: -1, x: -1 }, { type: 'takeMove', y: -1, x: 1 }]
 
@@ -986,3 +969,141 @@ function queenBugFactory(color,x,y){
     }
 }
 
+
+
+function swordsMen(color, x, y){
+    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
+    }
+    return {
+        icon: color + 'Swordsmen.svg',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+
+function northernKing(color, x, y){
+    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
+    }
+    return {
+        icon: color + 'NorthernKing.svg',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+function pikeman(color, x, y){
+    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
+    }
+    return {
+        icon: color + 'Pikeman.svg',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+function kolba(color, x, y){
+    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
+    }
+    return {
+        icon: color + 'Kolba.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+function fencer(color, x, y){
+    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
+    }
+    return {
+        icon: color + 'Fencer.svg',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+function general(color, x, y){
+    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
+    }
+    return {
+        icon: color + 'General.svg',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+function shield(color, x, y){
+    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
+    }
+    return {
+        icon: color + 'Shield.svg',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+function plagueDoctor(color, x, y){
+    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
+    }
+    return {
+        icon: color + 'PlagueDoctor.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
