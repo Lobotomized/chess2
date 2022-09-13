@@ -1055,7 +1055,7 @@ function general(color, x, y){
 
 function shield(color, x, y){
     let moves = [{ type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },{ type: 'blockable', 
-    repeat:true, limit:1, y: -1, x: 0, impotent:true }, { type: 'blockable', repeat:true, limit:1, y: 1, x: 0, impotent:true }]
+    repeat:true, limit:1, y: -1, x: 0}, { type: 'blockable', repeat:true, limit:1, y: 1, x: 0 }]
 
     return {
         icon: color + 'Shield.png',

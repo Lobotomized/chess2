@@ -1014,6 +1014,26 @@ function northernKing(color, x, y){
 
         },
         afterPieceMove:function(state, move, prevMove){
+
+            if(this.color === 'black'){
+                if(this.y === 7){
+                    this.value = 1000;
+                    state.won = 'black';
+                }
+                else{
+                    this.value = 800 + 0.5*y;
+                }
+            }
+            else if(this.color === 'white' && this.y === 0){
+                if(this.y === 0){
+                    this.value = 1000;
+                    state.won = 'white';
+                }
+                else{
+                    this.value = 800 + 0.5*y;
+                }            
+            }
+
             this.value += 2;
             let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
             let fencerPower = this.color === 'black' ? this.y : 7-this.y;
@@ -1129,7 +1149,7 @@ function general(color, x, y){
 
 function shield(color, x, y){
     let moves = [{ type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },{ type: 'blockable', 
-    repeat:true, limit:1, y: -1, x: 0, impotent:true }, { type: 'blockable', repeat:true, limit:1, y: 1, x: 0, impotent:true }]
+    repeat:true, limit:1, y: -1, x: 0}, { type: 'blockable', repeat:true, limit:1, y: 1, x: 0 }]
 
     return {
         icon: color + 'Shield.png',
@@ -1155,7 +1175,7 @@ function plagueDoctor(color, x, y){
         y: y,
         color: color,
         value:800,
-        posValue:1,
+        posValue:0.5,
         afterThisPieceTaken: function (state) {
             let find = state.pieces.find((el) => {
                 return el.icon === this.color + 'NorthernKing.png'
@@ -1165,7 +1185,26 @@ function plagueDoctor(color, x, y){
             }
         },
         afterPieceMove:function(state, move, prevMove){
-            this.value +=2;
+
+            if(this.color === 'black'){
+                if(this.y === 7){
+                    this.value = 1000;
+                    state.won = 'black';
+                }
+                else{
+                    this.value = 800 + 0.5*y;
+                }
+            }
+            else if(this.color === 'white' && this.y === 0){
+                if(this.y === 0){
+                    this.value = 1000;
+                    state.won = 'white';
+                }
+                else{
+                    this.value = 800 + 0.5*y;
+                }            
+            }
+
             let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
             let kolbaPower = this.color === 'black' ? this.y : 7-this.y;
             if(promoteCondition){
