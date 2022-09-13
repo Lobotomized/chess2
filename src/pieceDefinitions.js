@@ -1021,7 +1021,7 @@ function northernKing(color, x, y){
 
             if(promoteCondition){
                 state.pieces.forEach((piece) => {
-                    if(piece.color === this.color && (piece.icon === piece.color + 'Ghost.png' || piece.icon === piece.color + 'Swordsmen.png')){
+                    if(piece.color === this.color && (piece.icon === piece.color + 'Pikeman.png' || piece.icon === piece.color + 'Swordsmen.png')){
                         piece.icon =  piece.color+'Knight.png';
                         piece.moves = [{ type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
                         { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 },
