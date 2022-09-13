@@ -900,10 +900,10 @@ function queenBugFactory(color,x,y){
 
 
 function swordsMen(color, x, y){
-    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
+    let moves = [{ type: 'absolute',  y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
 
     if (color == 'black') {
-        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
+        moves = [{ type: 'absolute',  y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
     }
     return {
         icon: color + 'Swordsmen.png',
