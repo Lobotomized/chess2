@@ -78,6 +78,7 @@ let ani = function(){
     let state;
     let hoveredPiece;
     let playerRef;
+    let w;
 
     hotseatGame.join('white', 'white');
     hotseatGame.join('black','black');
@@ -250,14 +251,17 @@ let ani = function(){
 
     canvas.addEventListener('click', (e) => {
         const AIColor = null;
-        const hotseat = false;
+        const hotseat = true;
         const state = hotseatGame.state;
         const AIvsAI = false;
-        
+        if(w){
+            w.terminate();
+        }
         if(AIvsAI)
         {
             state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
             if(state.turn === 'black'){
+                
                 w = new Worker("src/webworker.js");
 
                 w.postMessage(JSONfn.stringify({state:state, color:'black', depth:500}));
@@ -277,6 +281,7 @@ let ani = function(){
                     let move = JSONfn.parse(event.data)
                     AIMove(move.pieceCounter, move.xClicked, move.yClicked, 'white')
                     if(state.turn === 'white'){
+                        
                         w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500, removedTurns:[...event.data.removedTurns, {...move}]}));
                     }
                 }

@@ -110,9 +110,11 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         )
     }
     else if(raceBlack === 'promoters'){
-        pieces.push(swordsMen('black', 0,2), pikeman('black',1,2),swordsMen('black', 2,2), pikeman('black',3,2),pikeman('black', 4,2), swordsMen('black',5,2),pikeman('black', 6,2), swordsMen('black',7,2),
-        shield('black',1,1),                                                                                              shield('black',6,1),
-        sleepingDragon('black',0,0),kolba('black',1,0),kolba('black',2,0), plagueDoctor('black',3,0),northernKing('black',4,0), fencer('black',5,0),fencer('black',6,0), sleepingDragon('black',7,0),)
+        pieces.push(
+            pikeman('black', 0,2), swordsMen('black',1,2),pikeman('black', 2,2), swordsMen('black',3,2),swordsMen('black', 4,2), pikeman('black',5,2),swordsMen('black', 6,2), pikeman('black',7,2),
+                shield('black',1,1),                                                                                              shield('black',6,1),
+        sleepingDragon('black',0,0),kolba('black',1,0),kolba('black',2,0), plagueDoctor('black',3,0),northernKing('black',4,0), fencer('black',5,0),fencer('black',6,0), sleepingDragon('black',7,0)
+        )
     }
 
     if(raceWhite == 'classic'){
@@ -131,8 +133,8 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     }
     else if(raceWhite == 'promoters'){
         pieces.push(
-            swordsMen('white', 0,5), pikeman('white',1,5),swordsMen('white', 2,5), pikeman('white',3,5),pikeman('white', 4,5), swordsMen('white',5,5),pikeman('white', 6,5), swordsMen('white',7,5),
-        shield('white',1,6),                                                                                              shield('white',6,6),
+            pikeman('white', 0,5), swordsMen('white',1,5),pikeman('white', 2,5), swordsMen('white',3,5),swordsMen('white', 4,5), pikeman('white',5,5),swordsMen('white', 6,5), pikeman('white',7,5),
+                    shield('white',1,6),                                                                                              shield('white',6,6),
         sleepingDragon('white',0,7),kolba('white',1,7),kolba('white',2,7), plagueDoctor('white',3,7),northernKing('white',4,7), fencer('white',5,7),fencer('white',6,7), sleepingDragon('white',7,7),
         )
 
@@ -340,7 +342,7 @@ function drawPiece(x, y, img, size) {
             ctx.drawImage(wPikeman, 0, 0, 800, 800, x * size, y * size, size, size);
             break;
         case 'blackPikeman.png':
-            ctx.drawImage(bPikeman, 0, 0, 700, 700, x * size, y * size, size, size);
+            ctx.drawImage(bPikeman, 0, 0, 800, 800, x * size, y * size, size, size);
             break;
 
         case 'whiteGeneral.png':

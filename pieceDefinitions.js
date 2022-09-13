@@ -993,7 +993,7 @@ function pikeman(color, x, y){
         x: x,
         y: y,
         color: color,
-        value:1,
+        value:1.2,
         posValue:0.1,
     }
 }

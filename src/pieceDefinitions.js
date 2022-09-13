@@ -1043,7 +1043,8 @@ function northernKing(color, x, y){
                 state.pieces.forEach((piece) => {
                     if(piece.color === this.color && (piece.icon === piece.color + 'Pikeman.png' || piece.icon === piece.color + 'Swordsmen.png')){
                         piece.icon =  piece.color+'Knight.png';
-                        piece.moves = [{ type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
+                        piece.moves = [
+                        { type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
                         { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 },
                         { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: 1, x: -2 },
                         { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }]
@@ -1075,12 +1076,14 @@ function northernKing(color, x, y){
 }
 
 function pikeman(color, x, y){
-    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0, impotent:true }, 
-    {type:'takeMove', y:-2, x:0}, {type:'takeMove', y:-2, x:1}, {type:'takeMove', y:-2, x:-1}
+    let moves = [
+        { type: 'absolute', impotent: true, y: -1, x: 0, impotent:true }, { type: 'absolute', impotent: true, y: 0, x: -1, impotent:true }, { type: 'absolute', impotent: true, y: 0, x: 1, impotent:true }, 
+        {type:'takeMove', y:-2, x:0}, {type:'takeMove', y:-2, x:1}, {type:'takeMove', y:-2, x:-1}
                 ]
 
     if (color == 'black') {
-        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0, impotent:true }, {type:'takeMove', y:2, x:0}, {type:'takeMove', y:2, x:1}, {type:'takeMove', y:2, x:-1}]}
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0, impotent:true },{ type: 'absolute', impotent: true, y: 0, x: -1, impotent:true }, { type: 'absolute', impotent: true, y: 0, x: 1, impotent:true }, 
+         {type:'takeMove', y:2, x:0}, {type:'takeMove', y:2, x:1}, {type:'takeMove', y:2, x:-1}]}
     return {
         icon: color + 'Pikeman.png',
         moves: moves,
