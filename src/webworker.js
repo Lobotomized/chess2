@@ -56,6 +56,10 @@ function evaluateBoard(colorPerspective, pieces, board){
             return square['allowedMove']
         })
          let magnifier = filtered.length * globalPosValue*piece.posValue;
+         if(isNaN(magnifier)){
+            console.log(piece.value, magnifier , filtered.length , globalPosValue, piece.posValue)
+
+         }
         if(colorPerspective === piece.color){
             valueTransformer = piece.value ? piece.value + magnifier : 1 + magnifier;
         }
@@ -90,9 +94,7 @@ function evaluateBoard(colorPerspective, pieces, board){
          let movesCounter = 0;
          let piece = myPieces[piecesCounter]
          lightBoardFE(piece,{pieces:state.pieces, board:state.board},'allowedMove')
-         // console.log(piece.moves.length, movesCounter, '  piece')
-                 //     const result = playerMove({x:piece.x+move.x, y:piece.y+move.y},{board:state.board, pieces:newPieces, pieceSelected:piece},true, undefined, 'allowedMove')
- 
+       
          const allowedMoves = state.board.filter((square) => {
              return square.allowedMove;
          })
@@ -127,7 +129,7 @@ function evaluateBoard(colorPerspective, pieces, board){
     let badMoveResults= []
     let slizedMoves = moves.slice(0,depth);
     let lowestBadMoveResult = 99999999;
-
+    
     slizedMoves.forEach((move, index) => {
         let isItBanned;
         if(removedTurns){
@@ -158,6 +160,7 @@ function evaluateBoard(colorPerspective, pieces, board){
             selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
         }
     })
+
    // if(lowestBadMoveResult > 2000){
         // badMoveResults.forEach((badMoveResult) => {
         //     if(badMoveResult.value > lowestBadMoveResult ){
@@ -285,7 +288,6 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
         blockableSpecialFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1, flag,secondFlag)
     }
     else if (!move.impotent) {
-        // console.log(state, state.pieces)
         let selectedPiece = pieceFromXY(x,y,state.pieces)
         square[flag] = true;
 

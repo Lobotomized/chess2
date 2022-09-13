@@ -1001,7 +1001,8 @@ function northernKing(color, x, y){
         x: x,
         y: y,
         color: color,
-        value:250,
+        value:1000,
+        posValue:1,
         afterThisPieceTaken: function (state) {
 
             let find = state.pieces.find((el) => {
@@ -1013,6 +1014,7 @@ function northernKing(color, x, y){
 
         },
         afterPieceMove:function(state, move, prevMove){
+            this.value += 2;
             let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
             let fencerPower = this.color === 'black' ? this.y : 7-this.y;
 
@@ -1152,7 +1154,8 @@ function plagueDoctor(color, x, y){
         x: x,
         y: y,
         color: color,
-        value:250,
+        value:1000,
+        posValue:1,
         afterThisPieceTaken: function (state) {
             let find = state.pieces.find((el) => {
                 el.icon === this.color + 'NorthernKing.png'
@@ -1162,6 +1165,7 @@ function plagueDoctor(color, x, y){
             }
         },
         afterPieceMove:function(state, move, prevMove){
+            this.value +=2;
             let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
             let kolbaPower = this.color === 'black' ? this.y : 7-this.y;
             if(promoteCondition){
