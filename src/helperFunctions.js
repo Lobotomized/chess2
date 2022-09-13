@@ -296,10 +296,10 @@ function drawPiece(x, y, img, size) {
             break;
 
             //New
-        case 'whiteSwordsmen.svg':
+        case 'whiteSwordsmen.png':
             ctx.drawImage(wSwordsmen, 0, 0, 700, 700, x * size, y * size, size, size);
             break;
-        case 'blackSwordsmen.svg':
+        case 'blackSwordsmen.png':
             ctx.drawImage(bSwordsmen, 0, 0, 700, 700, x * size, y * size, size, size);
             break;
         case 'whitePlagueDoctor.png':
@@ -316,55 +316,55 @@ function drawPiece(x, y, img, size) {
             break;
 
         case 'whiteKolba.png':
-            ctx.drawImage(wKolba, 0, 0, 750, 750, x * size, y * size, size, size);
+            ctx.drawImage(wKolba, 0, 0,1050, 1050, x * size, y * size, size, size);
             break;
         case 'blackKolba.png':
-            ctx.drawImage(bKolba, 0, 0, 750, 750, x * size, y * size, size, size);
+            ctx.drawImage(bKolba, 0, 0, 1050, 1050, x * size, y * size, size, size);
             break;
             
-        case 'whiteFencer.svg':
+        case 'whiteFencer.png':
             ctx.drawImage(wFencer, 0, 0, 700, 700, x * size, y * size, size, size);
             break;
-        case 'blackFencer.svg':
+        case 'blackFencer.png':
             ctx.drawImage(bFencer, 0, 0, 700, 700, x * size, y * size, size, size);
             break;
 
-        case 'whiteNorthernKing.svg':
+        case 'whiteNorthernKing.png':
             ctx.drawImage(wNorthernKing, 0, 0, 700, 700, x * size, y * size, size, size);
             break;
-        case 'blackNorthernKing.svg':
+        case 'blackNorthernKing.png':
             ctx.drawImage(bNorthernKing, 0, 0, 700, 700, x * size, y * size, size, size);
             break;
-        case 'whiteShield.svg':
+        case 'whiteShield.png':
             ctx.drawImage(wShield, 0, 0, 700, 700, x * size, y * size, size, size);
             break;
-        case 'blackShield.svg':
+        case 'blackShield.png':
             ctx.drawImage(bShield, 0, 0, 700, 700, x * size, y * size, size, size);
             break;
-        case 'whitePikeman.svg':
+        case 'whitePikeman.png':
             ctx.drawImage(wPikeman, 0, 0, 800, 800, x * size, y * size, size, size);
             break;
-        case 'blackPikeman.svg':
+        case 'blackPikeman.png':
             ctx.drawImage(bPikeman, 0, 0, 700, 700, x * size, y * size, size, size);
             break;
 
-        case 'whiteGeneral.svg':
+        case 'whiteGeneral.png':
             ctx.drawImage(wGeneral, 0, 0, 600, 600, x * size, y * size, size, size);
             break;
-        case 'blackGeneral.svg':
+        case 'blackGeneral.png':
             ctx.drawImage(bGeneral, 0, 0, 600, 600, x * size, y * size, size, size);
             break;
 
-        case 'whiteDragon.svg':
+        case 'whiteDragon.png':
             ctx.drawImage(wDragon, 0, 0, 600, 600, x * size, y * size, size, size);
             break;
-        case 'blackDragon.svg':
+        case 'blackDragon.png':
             ctx.drawImage(bDragon, 0, 0, 600, 600, x * size, y * size, size, size);
             break;
-        case 'whiteSleepingDragon.svg':
+        case 'whiteSleepingDragon.png':
             ctx.drawImage(wSleepingDragon, 0, 0, 600, 600, x * size, y * size, size, size);
             break;
-        case 'blackSleepingDragon.svg':
+        case 'blackSleepingDragon.png':
             ctx.drawImage(bSleepingDragon, 0, 0, 600, 600, x * size, y * size, size, size);
             break;
     }

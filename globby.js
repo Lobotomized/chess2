@@ -247,7 +247,6 @@ const newGame = function (properties) {
 
             moveFunction(player, move, state)
         }
-
         this.timeFunction = () => {
 
             const blocker = startBlockerFunction(minPlayers, maxPlayers, state.playersConfigArray, state)

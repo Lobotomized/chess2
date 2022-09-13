@@ -128,10 +128,10 @@ wQueenBug.src = '/static/whiteQueenBug.png';
 //New pieces
 
 const wSwordsmen = new Image();
-wSwordsmen.src = '/static/whiteSwordsmen.svg';
+wSwordsmen.src = '/static/whiteSwordsmen.png';
 
 const bSwordsmen = new Image();
-bSwordsmen.src = '/static/blackSwordsmen.svg';
+bSwordsmen.src = '/static/blackSwordsmen.png';
 
 const wPlagueDoctor = new Image();
 wPlagueDoctor.src = '/static/whitePlagueDoctor.png'
@@ -140,10 +140,10 @@ const bPlagueDoctor = new Image();
 bPlagueDoctor.src = '/static/blackPlagueDoctor.png'
 
 const wGeneral = new Image();
-wGeneral.src = '/static/whiteGeneral.svg'
+wGeneral.src = '/static/whiteGeneral.png'
 
 const bGeneral = new Image();
-bGeneral.src = '/static/blackGeneral.svg'
+bGeneral.src = '/static/blackGeneral.png'
 
 const wStarMan = new Image();
 wStarMan.src = '/static/whiteStarMan.png'
@@ -152,44 +152,44 @@ const bStarMan = new Image();
 bStarMan.src = '/static/blackStarMan.png'
 
 const bFencer = new Image();
-bFencer.src = '/static/blackFencer.svg'
+bFencer.src = '/static/blackFencer.png'
 
 const wFencer = new Image();
-wFencer.src = '/static/whiteFencer.svg'
+wFencer.src = '/static/whiteFencer.png'
 
 const wKolba = new Image();
-wKolba.src = '/static/whiteKolba.svg'
+wKolba.src = '/static/whiteKolba.png'
 
 const bKolba = new Image();
-bKolba.src = '/static/blackKolba.svg'
+bKolba.src = '/static/blackKolba.png'
 
 const wNorthernKing = new Image();
-wNorthernKing.src = '/static/whiteNorthernKing.svg'
+wNorthernKing.src = '/static/whiteNorthernKing.png'
 
 const bNorthernKing = new Image();
-bNorthernKing.src = '/static/blackNorthernKing.svg'
+bNorthernKing.src = '/static/blackNorthernKing.png'
 
 
 const wShield = new Image();
-wShield.src = '/static/whiteShield.svg'
+wShield.src = '/static/whiteShield.png'
 
 const bShield = new Image();
-bShield.src = '/static/blackShield.svg'
+bShield.src = '/static/blackShield.png'
 
 const wPikeman = new Image();
-wPikeman.src = '/static/whitePikeman.svg'
+wPikeman.src = '/static/whitePikeman.png'
 
 const bPikeman = new Image();
-bPikeman.src = '/static/blackPikeman.svg'
+bPikeman.src = '/static/blackPikeman.png'
 
 const wDragon = new Image();
-wDragon.src = '/static/whiteDragon.svg'
+wDragon.src = '/static/whiteDragon.png'
 
 const bDragon = new Image();
-bDragon.src = '/static/blackDragon.svg'
+bDragon.src = '/static/blackDragon.png'
 
 const wSleepingDragon = new Image();
-wSleepingDragon.src = '/static/whiteSleepingDragon.svg'
+wSleepingDragon.src = '/static/whiteSleepingDragon.png'
 
 const bSleepingDragon = new Image();
-bSleepingDragon.src = '/static/blackSleepingDragon.svg'
+bSleepingDragon.src = '/static/blackSleepingDragon.png'

@@ -250,6 +250,7 @@ function selectPiece(playerMove, state) {
         return;
     }
     state.pieceSelected = piece;
+
     lightBoard(piece, state)
 }
 

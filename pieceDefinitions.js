@@ -906,7 +906,7 @@ function swordsMen(color, x, y){
         moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
     }
     return {
-        icon: color + 'Swordsmen.svg',
+        icon: color + 'Swordsmen.png',
         moves: moves,
         x: x,
         y: y,
@@ -924,7 +924,7 @@ function northernKing(color, x, y){
         moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }];
     }
     return {
-        icon: color + 'NorthernKing.svg',
+        icon: color + 'NorthernKing.png',
         moves: moves,
         x: x,
         y: y,
@@ -947,7 +947,7 @@ function northernKing(color, x, y){
 
             if(promoteCondition){
                 state.pieces.forEach((piece) => {
-                    if(piece.color === this.color && (piece.icon === piece.color + 'Pikeman.svg' || piece.icon === piece.color + 'Swordsmen.svg')){
+                    if(piece.color === this.color && (piece.icon === piece.color + 'Pikeman.png' || piece.icon === piece.color + 'Swordsmen.png')){
                         piece.icon =  piece.color+'Knight.png';
                         piece.moves = [{ type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
                         { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 },
@@ -961,7 +961,7 @@ function northernKing(color, x, y){
 
 
             state.pieces.forEach((piece) => {
-                if(piece.color === this.color && piece.icon === piece.color + 'Fencer.svg'){
+                if(piece.color === this.color && piece.icon === piece.color + 'Fencer.png'){
                     piece.moves =  [];
                     for(let i = fencerPower; i>=0; i--){
                         piece.moves.push(
@@ -988,7 +988,7 @@ function pikeman(color, x, y){
     }
 
     return {
-        icon: color + 'Pikeman.svg',
+        icon: color + 'Pikeman.png',
         moves: moves,
         x: x,
         y: y,
@@ -1026,7 +1026,7 @@ function fencer(color, x, y){
     let moves = []
 
     return {
-        icon: color + 'Fencer.svg',
+        icon: color + 'Fencer.png',
         moves: moves,
         x: x,
         y: y,
@@ -1043,7 +1043,7 @@ function general(color, x, y){
         moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
     }
     return {
-        icon: color + 'General.svg',
+        icon: color + 'General.png',
         moves: moves,
         x: x,
         y: y,
@@ -1058,7 +1058,7 @@ function shield(color, x, y){
     repeat:true, limit:1, y: -1, x: 0, impotent:true }, { type: 'blockable', repeat:true, limit:1, y: 1, x: 0, impotent:true }]
 
     return {
-        icon: color + 'Shield.svg',
+        icon: color + 'Shield.png',
         moves: moves,
         x: x,
         y: y,
@@ -1083,7 +1083,7 @@ function plagueDoctor(color, x, y){
         value:250,
         afterThisPieceTaken: function (state) {
             let find = state.pieces.find((el) => {
-                el.icon === this.color + 'NorthernKing.svg'
+                el.icon === this.color + 'NorthernKing.png'
             })
             if(!find){
                 state.won = giveOppositeColor(this.color);
@@ -1094,8 +1094,8 @@ function plagueDoctor(color, x, y){
             let kolbaPower = this.color === 'black' ? this.y : 7-this.y;
             if(promoteCondition){
                 state.pieces.forEach((piece) => {
-                    if(piece.color === this.color && piece.icon === piece.color + 'SleepingDragon.svg'){
-                        piece.icon =  piece.color+'Dragon.svg';
+                    if(piece.color === this.color && piece.icon === piece.color + 'SleepingDragon.png'){
+                        piece.icon =  piece.color+'Dragon.png';
                         piece.moves =  [{ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
                         { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
                         { type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
@@ -1145,7 +1145,7 @@ function sleepingDragon(color,x,y){
     let moves = []
 
     return {
-        icon: color + 'SleepingDragon.svg',
+        icon: color + 'SleepingDragon.png',
         moves: moves,
         x: x,
         y: y,
