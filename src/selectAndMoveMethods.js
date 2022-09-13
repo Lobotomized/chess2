@@ -218,7 +218,6 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
             }
             enemyPiece.x = undefined;
             enemyPiece.y = undefined;
-            console.log(enemyPiece);
             state.pieces.splice(state.pieces.indexOf(enemyPiece), 1)
         }
     }

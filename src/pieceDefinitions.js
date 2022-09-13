@@ -1004,9 +1004,9 @@ function northernKing(color, x, y){
         value:800,
         posValue:1,
         afterThisPieceTaken: function (state) {
-
+            
             let find = state.pieces.find((el) => {
-                el.icon === this.color + 'PlagueDoctor.png'
+                return el.icon === this.color + 'PlagueDoctor.png'
             })
             if(!find){
                 state.won = giveOppositeColor(this.color);
@@ -1158,7 +1158,7 @@ function plagueDoctor(color, x, y){
         posValue:1,
         afterThisPieceTaken: function (state) {
             let find = state.pieces.find((el) => {
-                el.icon === this.color + 'NorthernKing.png'
+                return el.icon === this.color + 'NorthernKing.png'
             })
             if(!find){
                 state.won = giveOppositeColor(this.color);
