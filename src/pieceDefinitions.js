@@ -1001,7 +1001,7 @@ function northernKing(color, x, y){
         x: x,
         y: y,
         color: color,
-        value:1000,
+        value:800,
         posValue:1,
         afterThisPieceTaken: function (state) {
 
@@ -1154,7 +1154,7 @@ function plagueDoctor(color, x, y){
         x: x,
         y: y,
         color: color,
-        value:1000,
+        value:800,
         posValue:1,
         afterThisPieceTaken: function (state) {
             let find = state.pieces.find((el) => {
