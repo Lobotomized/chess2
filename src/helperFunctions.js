@@ -131,10 +131,10 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     }
     else if(raceWhite == 'promoters'){
         pieces.push(
-            swordsMen('white', 0,6), pikeman('white',1,6),swordsMen('white', 2,6), pikeman('white',3,6),pikeman('white', 4,6), swordsMen('white',5,6),pikeman('white', 6,6), swordsMen('white',7,6),
-                                     shield('white',1,5),                                                                                              shield('white',6,5),
-            sleepingDragon('white',0,7),kolba('white',1,7),kolba('white',2,7), plagueDoctor('white',3,7),northernKing('white',4,7), fencer('white',5,7),fencer('white',6,7), sleepingDragon('white',7,7),
-                                     )
+            swordsMen('white', 0,5), pikeman('white',1,5),swordsMen('white', 2,5), pikeman('white',3,5),pikeman('white', 4,5), swordsMen('white',5,5),pikeman('white', 6,5), swordsMen('white',7,5),
+        shield('white',1,6),                                                                                              shield('white',6,6),
+        sleepingDragon('white',0,7),kolba('white',1,7),kolba('white',2,7), plagueDoctor('white',3,7),northernKing('white',4,7), fencer('white',5,7),fencer('white',6,7), sleepingDragon('white',7,7),
+        )
 
     }
     else if(raceWhite == 'medieval'){
