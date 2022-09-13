@@ -1062,7 +1062,7 @@ function pikeman(color, x, y){
         moves = [{ type: 'absolute', impotent: true, y: 1, x: 0, impotent:true }, {type:'takeMove', y:1, x:0}
         , {type:'takeMove', y:2, x:1}, {type:'takeMove', y:2, x:-1}]    }
     return {
-        icon: color + 'Ghost.png',
+        icon: color + 'Pikeman.png',
         moves: moves,
         x: x,
         y: y,
