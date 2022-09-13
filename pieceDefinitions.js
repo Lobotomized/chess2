@@ -918,10 +918,10 @@ function swordsMen(color, x, y){
 
 
 function northernKing(color, x, y){
-    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }]
+    let moves = [{ type: 'absolute',  y: -1, x: 0 }]
 
     if (color == 'black') {
-        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }];
+        moves = [{ type: 'absolute',  y: 1, x: 0 }];
     }
     return {
         icon: color + 'NorthernKing.png',
@@ -954,7 +954,7 @@ function northernKing(color, x, y){
                         { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: 1, x: -2 },
                         { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }]
                         piece.value = 2.5;
-                        piece.posValue = posValue[getRndInteger(1,6)-1];
+                        piece.posValue = 0.3;
                     }
                 })
             }
@@ -984,7 +984,7 @@ function pikeman(color, x, y){
     let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'takeMove', y: -2, x: -1 }, { type: 'takeMove', y: -2, x: 1 }, { type: 'takeMove', y: -2, x: 0 }]
 
     if (color == 'black') {
-        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'takeMove', y: 2, x: -1 }, { type: 'takeMove', y: 2, x: 1 }, { type: 'takeMove', y: 2, x: 1 }];
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'takeMove', y: 2, x: -1 }, { type: 'takeMove', y: 2, x: 1 }, { type: 'takeMove', y: 2, x: 0 }];
     }
 
     return {
@@ -1069,10 +1069,10 @@ function shield(color, x, y){
 }
 
 function plagueDoctor(color, x, y){
-    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }]
+    let moves = [{ type: 'absolute',  y: -1, x: 0 }]
 
     if (color == 'black') {
-        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }];
+        moves = [{ type: 'absolute',  y: 1, x: 0 }];
     }
     return {
         icon: color + 'PlagueDoctor.png',
@@ -1104,7 +1104,7 @@ function plagueDoctor(color, x, y){
                         { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }
                     ],
                         piece.value = 8.5;
-                        piece.posValue = posValue[getRndInteger(1,6)-1];
+                        piece.posValue = 0.3;
                     }
                 })
             }

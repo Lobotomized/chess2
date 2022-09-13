@@ -990,10 +990,10 @@ function swordsMen(color, x, y){
 
 
 function northernKing(color, x, y){
-    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }]
+    let moves = [{ type: 'absolute',  y: -1, x: 0 }]
 
     if (color == 'black') {
-        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }];
+        moves = [{ type: 'absolute',  y: 1, x: 0 }];
     }
     return {
         icon: color + 'NorthernKing.png',
@@ -1054,13 +1054,11 @@ function northernKing(color, x, y){
 
 function pikeman(color, x, y){
     let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0, impotent:true }, 
-    {type:'takeMove', y:-2, x:0}
-                 , {type:'takeMove', y:-2, x:1}, {type:'takeMove', y:-2, x:-1}
+    {type:'takeMove', y:-2, x:0}, {type:'takeMove', y:-2, x:1}, {type:'takeMove', y:-2, x:-1}
                 ]
 
     if (color == 'black') {
-        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0, impotent:true }, {type:'takeMove', y:1, x:0}
-        , {type:'takeMove', y:2, x:1}, {type:'takeMove', y:2, x:-1}]    }
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0, impotent:true }, {type:'takeMove', y:2, x:0}, {type:'takeMove', y:2, x:1}, {type:'takeMove', y:2, x:-1}]}
     return {
         icon: color + 'Pikeman.png',
         moves: moves,
@@ -1143,10 +1141,10 @@ function shield(color, x, y){
 }
 
 function plagueDoctor(color, x, y){
-    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }]
+    let moves = [{ type: 'absolute',  y: -1, x: 0 }]
 
     if (color == 'black') {
-        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }];
+        moves = [{ type: 'absolute',  y: 1, x: 0 }];
     }
     return {
         icon: color + 'PlagueDoctor.png',
