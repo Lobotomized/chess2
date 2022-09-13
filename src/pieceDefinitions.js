@@ -1014,14 +1014,13 @@ function northernKing(color, x, y){
 
         },
         afterPieceMove:function(state, move, prevMove){
-
             if(this.color === 'black'){
                 if(this.y === 7){
                     this.value = 1000;
                     state.won = 'black';
                 }
                 else{
-                    this.value = 800 + 0.5*y;
+                    this.value = 800 + 0.5*this.y;
                 }
             }
             else if(this.color === 'white' && this.y === 0){
@@ -1030,7 +1029,7 @@ function northernKing(color, x, y){
                     state.won = 'white';
                 }
                 else{
-                    this.value = 800 + 0.5*y;
+                    this.value = 800 + 0.5*this.y;
                 }            
             }
 
@@ -1114,7 +1113,6 @@ function kolba(color, x, y){
             this.icon = this.color + iconCode;
             this.value = enemyPiece.value;
             this.posValue = enemyPiece.posValue;
-            console.log('vliza tuka')
         }
     }
 }
@@ -1195,7 +1193,7 @@ function plagueDoctor(color, x, y){
                     state.won = 'black';
                 }
                 else{
-                    this.value = 800 + 0.5*y;
+                    this.value = 800 + 0.5*this.y;
                 }
             }
             else if(this.color === 'white' && this.y === 0){
@@ -1204,7 +1202,7 @@ function plagueDoctor(color, x, y){
                     state.won = 'white';
                 }
                 else{
-                    this.value = 800 + 0.5*y;
+                    this.value = 800 + 0.5*this.y;
                 }            
             }
 

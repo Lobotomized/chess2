@@ -56,10 +56,6 @@ function evaluateBoard(colorPerspective, pieces, board){
             return square['allowedMove']
         })
          let magnifier = filtered.length * globalPosValue*piece.posValue;
-         if(isNaN(magnifier)){
-            console.log(piece.value, magnifier , filtered.length , globalPosValue, piece.posValue)
-
-         }
         if(colorPerspective === piece.color){
             valueTransformer = piece.value ? piece.value + magnifier : 1 + magnifier;
         }

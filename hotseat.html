@@ -46,6 +46,7 @@
 
 <script>
 
+const AIColor = getParams(window.location.href).AIColor
 
 // w.onmessage = function(){
 //     console.log('vliza tuka')
@@ -250,7 +251,6 @@ let ani = function(){
     AISetup(hotseatGame,'white');
 
     canvas.addEventListener('click', (e) => {
-        const AIColor = null;
         const hotseat = true;
         const state = hotseatGame.state;
         const AIvsAI = false;

@@ -223,7 +223,6 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
     }
 
     if (operatedPiece.afterPieceMove) {
-        // console.log(operatedPiece)
         const continueTurn = operatedPiece.afterPieceMove(state, playerMove, {x:oldX, y:oldY});
         
         if (!continueTurn) {
