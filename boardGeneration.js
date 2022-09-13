@@ -92,8 +92,8 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         )
     }
     else if(raceWhite === 'promoters'){
-        pieces.push(swordsMen('black', 0,1), pikeman('black',1,1),swordsMen('black', 2,1), pikeman('black',3,1),pikeman('black', 4,1), swordsMen('black',5,1),pikeman('black', 6,1), swordsMen('black',7,1),
-                shield('black',1,2),                                                                                              shield('black',6,2),
+        pieces.push(swordsMen('black', 0,2), pikeman('black',1,2),swordsMen('black', 2,2), pikeman('black',3,2),pikeman('black', 4,2), swordsMen('black',5,2),pikeman('black', 6,2), swordsMen('black',7,2),
+                shield('black',1,1),                                                                                              shield('black',6,1),
         sleepingDragon('black',0,0),kolba('black',1,0),kolba('black',2,0), plagueDoctor('black',3,0),northernKing('black',4,0), fencer('black',5,0),fencer('black',6,0), sleepingDragon('black',7,0),)
     }
 
