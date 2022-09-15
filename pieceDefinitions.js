@@ -975,7 +975,7 @@ function northernKing(color, x, y){
                         { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: 1, x: -2 },
                         { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }]
                         piece.value = 2.5;
-                        piece.posValue = posValue[getRndInteger(1,6)-1];
+                        piece.posValue = 0.4;
                     }
                 })
             }
@@ -1149,7 +1149,7 @@ function plagueDoctor(color, x, y){
                         { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }
                     ],
                         piece.value = 8.5;
-                        piece.posValue = posValue[getRndInteger(1,6)-1];
+                        piece.posValue = 0.2;
                     }
                 })
             }

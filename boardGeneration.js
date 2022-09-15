@@ -58,7 +58,7 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         shroomFactory('black',0,0),spiderFactory('black',1,0),   ladyBugFactory('black',2,0),    goliathBugFactory('black',3,0),   goliathBugFactory('black',4,0),ladyBugFactory('black', 5,0), spiderFactory('black',6,0), shroomFactory('black',7,0)
         )
     }
-    else if(raceWhite === 'promoters'){
+    else if(raceBlack === 'promoters'){
         pieces.push(
             pikeman('black', 0,2), swordsMen('black',1,2),pikeman('black', 2,2), swordsMen('black',3,2),swordsMen('black', 4,2), pikeman('black',5,2),swordsMen('black', 6,2), pikeman('black',7,2),
                 shield('black',1,1),                                                                                              shield('black',6,1),
