@@ -916,7 +916,6 @@ function swordsMen(color, x, y){
     }
 }
 
-
 function northernKing(color, x, y){
     let moves = [{ type: 'absolute',  y: -1, x: 0 }]
 
@@ -929,11 +928,12 @@ function northernKing(color, x, y){
         x: x,
         y: y,
         color: color,
-        value:250,
+        value:800,
+        posValue:1,
         afterThisPieceTaken: function (state) {
-
+            
             let find = state.pieces.find((el) => {
-                el.icon === this.color + 'PlagueDoctor.png'
+                return el.icon === this.color + 'PlagueDoctor.png'
             })
             if(!find){
                 state.won = giveOppositeColor(this.color);
@@ -941,6 +941,26 @@ function northernKing(color, x, y){
 
         },
         afterPieceMove:function(state, move, prevMove){
+            if(this.color === 'black'){
+                if(this.y === 7){
+                    this.value = 1000;
+                    state.won = 'black';
+                }
+                else{
+                    this.value = 800 + 0.5*this.y;
+                }
+            }
+            else if(this.color === 'white' && this.y === 0){
+                if(this.y === 0){
+                    this.value = 1000;
+                    state.won = 'white';
+                }
+                else{
+                    this.value = 800 + 0.5*this.y;
+                }            
+            }
+
+            this.value += 2;
             let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
             let fencerPower = this.color === 'black' ? this.y : 7-this.y;
 
@@ -949,12 +969,13 @@ function northernKing(color, x, y){
                 state.pieces.forEach((piece) => {
                     if(piece.color === this.color && (piece.icon === piece.color + 'Pikeman.png' || piece.icon === piece.color + 'Swordsmen.png')){
                         piece.icon =  piece.color+'Knight.png';
-                        piece.moves = [{ type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
+                        piece.moves = [
+                        { type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
                         { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 },
                         { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: 1, x: -2 },
                         { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }]
                         piece.value = 2.5;
-                        piece.posValue = 0.3;
+                        piece.posValue = posValue[getRndInteger(1,6)-1];
                     }
                 })
             }
@@ -981,11 +1002,14 @@ function northernKing(color, x, y){
 }
 
 function pikeman(color, x, y){
-    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'takeMove', y: -2, x: -1 }, { type: 'takeMove', y: -2, x: 1 }, { type: 'takeMove', y: -2, x: 0 }]
+    let moves = [
+        { type: 'absolute', impotent: true, y: -1, x: 0, impotent:true }, { type: 'absolute', impotent: true, y: 0, x: -1, impotent:true }, { type: 'absolute', impotent: true, y: 0, x: 1, impotent:true }, 
+        {type:'takeMove', y:-2, x:0}, {type:'takeMove', y:-2, x:1}, {type:'takeMove', y:-2, x:-1}
+                ]
 
     if (color == 'black') {
-        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'takeMove', y: 2, x: -1 }, { type: 'takeMove', y: 2, x: 1 }, { type: 'takeMove', y: 2, x: 0 }];
-    }
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0, impotent:true },{ type: 'absolute', impotent: true, y: 0, x: -1, impotent:true }, { type: 'absolute', impotent: true, y: 0, x: 1, impotent:true }, 
+         {type:'takeMove', y:2, x:0}, {type:'takeMove', y:2, x:1}, {type:'takeMove', y:2, x:-1}]}
 
     return {
         icon: color + 'Pikeman.png',
@@ -1080,16 +1104,37 @@ function plagueDoctor(color, x, y){
         x: x,
         y: y,
         color: color,
-        value:250,
+        value:800,
+        posValue:0.5,
         afterThisPieceTaken: function (state) {
             let find = state.pieces.find((el) => {
-                el.icon === this.color + 'NorthernKing.png'
+                return el.icon === this.color + 'NorthernKing.png'
             })
             if(!find){
                 state.won = giveOppositeColor(this.color);
             }
         },
         afterPieceMove:function(state, move, prevMove){
+
+            if(this.color === 'black'){
+                if(this.y === 7){
+                    this.value = 1000;
+                    state.won = 'black';
+                }
+                else{
+                    this.value = 800 + 0.5*this.y;
+                }
+            }
+            else if(this.color === 'white' && this.y === 0){
+                if(this.y === 0){
+                    this.value = 1000;
+                    state.won = 'white';
+                }
+                else{
+                    this.value = 800 + 0.5*this.y;
+                }            
+            }
+
             let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
             let kolbaPower = this.color === 'black' ? this.y : 7-this.y;
             if(promoteCondition){
@@ -1104,7 +1149,7 @@ function plagueDoctor(color, x, y){
                         { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }
                     ],
                         piece.value = 8.5;
-                        piece.posValue = 0.3;
+                        piece.posValue = posValue[getRndInteger(1,6)-1];
                     }
                 })
             }
