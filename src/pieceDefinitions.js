@@ -1035,7 +1035,7 @@ function northernKing(color, x, y){
 
             this.value += 2;
             let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
-            let fencerPower = this.color === 'black' ? this.y : 7-this.y;
+            let fencerPower = this.color === 'black' ? this.y+1 : 6-this.y;
 
 
             if(promoteCondition){
@@ -1047,7 +1047,7 @@ function northernKing(color, x, y){
                         { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 },
                         { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: 1, x: -2 },
                         { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }]
-                        piece.value = 2.5;
+                        piece.value = fencerPower;
                         piece.posValue = posValue[getRndInteger(1,6)-1];
                     }
                 })
@@ -1094,7 +1094,7 @@ function pikeman(color, x, y){
     }
 }
 
-function kolba(color, x, y){
+function copier(color, x, y){
     let moves = []
 
     return {
@@ -1114,6 +1114,30 @@ function kolba(color, x, y){
             this.value = enemyPiece.value;
             this.posValue = enemyPiece.posValue;
         }
+    }
+}
+
+
+function kolba(color, x, y){
+    let moves = []
+
+    return {
+        icon: color + 'Kolba.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:2.5,
+        posValue:0.1,
+        // afterEnemyPieceTaken:function(enemyPiece,state){
+        //     this.moves = enemyPiece.moves;
+        //     let iconCode = enemyPiece.icon.replace('black', '');
+        //     iconCode = iconCode.replace('white', "");
+
+        //     this.icon = this.color + iconCode;
+        //     this.value = enemyPiece.value;
+        //     this.posValue = enemyPiece.posValue;
+        // }
     }
 }
 
@@ -1207,7 +1231,7 @@ function plagueDoctor(color, x, y){
             }
 
             let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
-            let kolbaPower = this.color === 'black' ? this.y : 7-this.y;
+            let kolbaPower = this.color === 'black' ? this.y+1 : 6-this.y;
             if(promoteCondition){
                 state.pieces.forEach((piece) => {
                     if(piece.color === this.color && piece.icon === piece.color + 'SleepingDragon.png'){
@@ -1226,12 +1250,15 @@ function plagueDoctor(color, x, y){
             }
             state.pieces.forEach((piece) => {
                 if(piece.color === this.color && piece.icon === piece.color + 'Kolba.png'){
-                    piece.moves = [{ type: 'blockable', repeat: true, x: 0, y: -1, limit:kolbaPower }, { type: 'blockable', repeat: true, x: 0, y: 1,limit:kolbaPower },
-                    { type: 'blockable', repeat: true, x: -1, y: 0 ,limit:kolbaPower}, { type: 'blockable', repeat: true, x: 1, y: 0 ,limit:kolbaPower},
-                    { type: 'blockable', repeat: true, x: -1, y: -1 ,limit:kolbaPower}, { type: 'blockable', repeat: true, x: 1, y: 1 ,limit:kolbaPower},
-                    { type: 'blockable', repeat: true, x: -1, y: 1 ,limit:kolbaPower}, { type: 'blockable', repeat: true, x: 1, y: -1 ,limit:kolbaPower}];
-                    piece.value = kolbaPower*1
-                   
+                    for(let i = kolbaPower; i>=0; i--){
+                        piece.moves.push(
+                            {type: 'absolute', y: i, x: 0 },
+                            {type: 'absolute', y:-i, x:0},
+                            {type: 'absolute', y:0, x:i},
+                            {type: 'absolute', y:0, x:-i},
+                              )
+                    }
+                    piece.value = kolbaPower 
                 }
             })
             return true;
