@@ -1040,8 +1040,7 @@ const {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecke
     
                 this.value += 2;
                 let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
-                let fencerPower = this.color === 'black' ? this.y+1 : 6-this.y;
-    
+                let fencerPower = this.color === 'black' ? this.y+1 : 8-this.y;
     
                 if(promoteCondition){
                     state.pieces.forEach((piece) => {
@@ -1236,7 +1235,7 @@ const {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecke
                 }
     
                 let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
-                let kolbaPower = this.color === 'black' ? this.y+1 : 6-this.y;
+                let kolbaPower = this.color === 'black' ? this.y+1 : 8-this.y;
                 if(promoteCondition){
                     state.pieces.forEach((piece) => {
                         if(piece.color === this.color && piece.icon === piece.color + 'SleepingDragon.png'){
