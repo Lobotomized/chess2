@@ -417,6 +417,7 @@ function lightBoardFE(piece, state, flag,blockedFlag) {
         return;
     }
     let tempMoves = [];
+    
     if (piece.conditionalMoves) {
         tempMoves = piece.conditionalMoves(state);
     }

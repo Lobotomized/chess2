@@ -107,7 +107,6 @@ let ani = function(){
         canvas.width = squareLength * boardWidth + squareLength;
         canvas.height = squareLength * boardWidth + squareLength;
         state = secretState;
-
         if(hoveredPiece){
             if(hoveredPiece.color != hotseatGame.state.turn && hotseatGame.state.turn != undefined){
                 lightBoardFE(hoveredPiece,state,'red','grey')

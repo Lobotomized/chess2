@@ -850,18 +850,8 @@ function goliathBugFactory(color,x,y){
 
 function ladyBugFactory(color,x,y){
     let moves = [
-        { type: 'blockable', repeat: true, x: 1, y: 1, offsetY:1, limit:2, offsetCountsAsBlock:true },{ type: 'blockable', repeat: true, x: -1, y: 1, offsetY:1, limit:2, offsetCountsAsBlock:true },
-        { type: 'blockable', repeat: true, x: 1, y: -1, offsetY:-1, limit:2, offsetCountsAsBlock:true },{ type: 'blockable', repeat: true, x: -1, y: -1, offsetY:-1, limit:2, offsetCountsAsBlock:true },
-
-        { type: 'blockable', repeat: true, x: 1, y: 1, offsetX:1, limit:2, offsetCountsAsBlock:true },{ type: 'blockable', repeat: true, x: 1, y: -1, offsetX:1, limit:2, offsetCountsAsBlock:true },
-        { type: 'blockable', repeat: true, x: -1, y: -1, offsetX:-1, limit:2, offsetCountsAsBlock:true },{ type: 'blockable', repeat: true, x: -1, y: 1, offsetX:-1, limit:2, offsetCountsAsBlock:true },
-        
-        // { type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
-        // { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
-        // { type: 'absolute', x: -1, y: -1 }, { type: 'absolute', x: 1, y: 1 },
-        // { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }
-
-
+        { type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
+        { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
     ]
 
     let weakMoves = [{ type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
@@ -870,6 +860,65 @@ function ladyBugFactory(color,x,y){
     { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }]
 
     return {
+        conditionalMoves: function (state) {
+            const arrToReturn =[]
+
+            const shrooms = state.pieces.filter((piece)=> {
+                return piece.color === this.color && piece.icon === this.color+'Shroom.png'
+            })
+
+            if(shrooms.length < 2){
+                return [];
+            }
+
+            const blockedUp = state.pieces.find((piece) => {
+                return piece.y === this.y + 1 && this.x === piece.x;
+            })
+
+            const blockedDown = state.pieces.find((piece) => {
+                return piece.y === this.y - 1 && this.x === piece.x;
+            })
+
+            const blockedLeft = state.pieces.find((piece) => {
+                return piece.y === this.y && this.x === piece.x + 1;
+            })
+
+            const blockedRight = state.pieces.find((piece) => {
+                return piece.y === this.y && this.x === piece.x - 1;
+            })
+
+            if(!blockedUp){
+                arrToReturn.push(
+                    { type: 'blockable', repeat: true, x: 1, y: 1, offsetY:1, limit:2, offsetCountsAsBlock:true },
+                    { type: 'blockable', repeat: true, x: -1, y: 1, offsetY:1, limit:2, offsetCountsAsBlock:true },
+                )
+            }
+
+            if(!blockedDown){
+                arrToReturn.push(
+                    { type: 'blockable', repeat: true, x: 1, y: -1, offsetY:-1, limit:2, offsetCountsAsBlock:true },
+                    { type: 'blockable', repeat: true, x: -1, y: -1, offsetY:-1, limit:2, offsetCountsAsBlock:true },
+                )
+            }
+
+            if(!blockedRight){
+                arrToReturn.push(
+                    { type: 'blockable', repeat: true, x: 1, y: 1, offsetX:1, limit:2, offsetCountsAsBlock:true },
+                    { type: 'blockable', repeat: true, x: 1, y: -1, offsetX:1, limit:2, offsetCountsAsBlock:true },
+
+                )
+            }
+
+            if(!blockedLeft){
+                arrToReturn.push(
+                    { type: 'blockable', repeat: true, x: -1, y: -1, offsetX:-1, limit:2, offsetCountsAsBlock:true },
+                    { type: 'blockable', repeat: true, x: -1, y: 1, offsetX:-1, limit:2, offsetCountsAsBlock:true },
+                )
+            }
+
+            return arrToReturn
+
+        },
         icon: color+'LadyBug.png',
         moves:moves,
         color:color,
