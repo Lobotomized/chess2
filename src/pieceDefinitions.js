@@ -480,7 +480,10 @@ function dragonFactory(color,x,y){
                         else if (move.type == 'blockable'  && !move.impotent) {
                             if (move.repeat) {
                                 const limit = move.limit || 100;
-                                if(blockableCheck(state, move.x, move.y, piece.x, piece.y, move, limit, this) == 'block'){
+                                const offsetX = move.offsetX || 0;
+                                const offsetY = move.offsetY || 0;
+                                
+                                if(blockableCheck(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, this) == 'block'){
                                     state.message = "Playing this move will leave you checked!"
                                     return true
                                 }
@@ -761,7 +764,9 @@ function kingFactory(color, x, y) {
                             if (move.repeat) {
 
                                 const limit = move.limit || 100;
-                                if(blockableCheck(state, move.x, move.y, piece.x, piece.y, move, limit, this) == 'block'){
+                                const offsetX = move.offsetX || 0;
+                                const offsetY = move.offsetY || 0;
+                                if(blockableCheck(state, move.x, move.y, piece.x+offsetX, piece.y+offsetY, move, limit, this) == 'block'){
                                     state.message = "Playing this move will leave you checked!"
                                     return true
                                 }
@@ -844,12 +849,20 @@ function goliathBugFactory(color,x,y){
 }
 
 function ladyBugFactory(color,x,y){
-    let moves = [{ type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
-    { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 }, 
-    { type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
-    { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
-    { type: 'absolute', x: -1, y: -1 }, { type: 'absolute', x: 1, y: 1 },
-    { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }]
+    let moves = [
+        { type: 'blockable', repeat: true, x: 1, y: 1, offsetY:1, limit:2, offsetCountsAsBlock:true },{ type: 'blockable', repeat: true, x: -1, y: 1, offsetY:1, limit:2, offsetCountsAsBlock:true },
+        { type: 'blockable', repeat: true, x: 1, y: -1, offsetY:-1, limit:2, offsetCountsAsBlock:true },{ type: 'blockable', repeat: true, x: -1, y: -1, offsetY:-1, limit:2, offsetCountsAsBlock:true },
+
+        { type: 'blockable', repeat: true, x: 1, y: 1, offsetX:1, limit:2, offsetCountsAsBlock:true },{ type: 'blockable', repeat: true, x: 1, y: -1, offsetX:1, limit:2, offsetCountsAsBlock:true },
+        { type: 'blockable', repeat: true, x: -1, y: -1, offsetX:-1, limit:2, offsetCountsAsBlock:true },{ type: 'blockable', repeat: true, x: -1, y: 1, offsetX:-1, limit:2, offsetCountsAsBlock:true },
+        
+        { type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
+        { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
+        { type: 'absolute', x: -1, y: -1 }, { type: 'absolute', x: 1, y: 1 },
+        { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }
+
+
+    ]
 
     let weakMoves = [{ type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
     { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },

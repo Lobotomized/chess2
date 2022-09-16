@@ -57,7 +57,9 @@ function lightBoard(piece, state, flag) {
         else if (move.type == 'blockable') {
             if (move.repeat) {
                 const limit = move.limit || 100;
-                blockableFunction(state, move.x, move.y, piece.x, piece.y, move, limit, flag);
+                const offsetX = move.offsetX || 0;
+                const offsetY = move.offsetY || 0;
+                blockableFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag);
             }
         }
     })

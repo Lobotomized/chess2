@@ -467,7 +467,9 @@ function lightBoardFE(piece, state, flag,blockedFlag) {
         else if (move.type == 'blockable') {
             if (move.repeat) {
                 const limit = move.limit || 100;
-                blockableSpecialFunction(state, move.x, move.y, piece.x, piece.y, move, limit, flag,blockedFlag);
+                const offsetX = move.offsetX || 0;
+                const offsetY = move.offsetY || 0;
+                blockableSpecialFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag,blockedFlag);
             }
         }
     })
@@ -570,7 +572,9 @@ function findPieceByXY(pieces,x,y){
                 else if (move.type == 'blockable' && !move.impotent) {
                     if (move.repeat) {
                         const limit = move.limit || 100;
-                        if(blockableCheck(state, move.x, move.y, piece.x, piece.y, move, limit, me) == 'block'){
+                        const offsetX = move.offsetX || 0;
+                        const offsetY = move.offsetY || 0;
+                        if(blockableCheck(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, me) == 'block'){
                             return true;
                         }
                     }
@@ -600,7 +604,9 @@ function findPieceByXY(pieces,x,y){
                 else if (move.type == 'blockable' && !move.impotent) {
                     if (move.repeat) {
                         const limit = move.limit || 100;
-                        if(blockableCheck(state, move.x, move.y, piece.x, piece.y, move, limit, me,'rokado') == 'block'){
+                        const offsetX = move.offsetX || 0;
+                        const offsetY = move.offsetY || 0;
+                        if(blockableCheck(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, me,'rokado') == 'block'){
                             toReturn = true;
                         }
                     }

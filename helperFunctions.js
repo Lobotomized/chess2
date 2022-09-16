@@ -74,7 +74,9 @@ module.exports = {
                     else if (move.type == 'blockable' && !move.impotent) {
                         if (move.repeat) {
                             const limit = move.limit || 100;
-                            if(module.exports.blockableCheck(state, move.x, move.y, piece.x, piece.y, move, limit, me) == 'block'){
+                            const offsetX = move.offsetX || 0;
+                            const offsetY = move.offsetY || 0;
+                            if(module.exports.blockableCheck(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, me) == 'block'){
                                 return true;
                             }
                         }
@@ -103,7 +105,10 @@ module.exports = {
                     else if (move.type == 'blockable' && !move.impotent) {
                         if (move.repeat) {
                             const limit = move.limit || 100;
-                            if(module.exports.blockableCheck(state, move.x, move.y, piece.x, piece.y, move, limit, me,'rokado') == 'block'){
+                            const offsetX = move.offsetX || 0;
+                            const offsetY = move.offsetY || 0;
+                            console.log(offsetX, offsetY)
+                            if(module.exports.blockableCheck(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, me,'rokado') == 'block'){
                                 toReturn = true;
                             }
                         }
