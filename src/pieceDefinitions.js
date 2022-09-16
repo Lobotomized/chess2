@@ -856,10 +856,10 @@ function ladyBugFactory(color,x,y){
         { type: 'blockable', repeat: true, x: 1, y: 1, offsetX:1, limit:2, offsetCountsAsBlock:true },{ type: 'blockable', repeat: true, x: 1, y: -1, offsetX:1, limit:2, offsetCountsAsBlock:true },
         { type: 'blockable', repeat: true, x: -1, y: -1, offsetX:-1, limit:2, offsetCountsAsBlock:true },{ type: 'blockable', repeat: true, x: -1, y: 1, offsetX:-1, limit:2, offsetCountsAsBlock:true },
         
-        { type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
-        { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
-        { type: 'absolute', x: -1, y: -1 }, { type: 'absolute', x: 1, y: 1 },
-        { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }
+        // { type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
+        // { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
+        // { type: 'absolute', x: -1, y: -1 }, { type: 'absolute', x: 1, y: 1 },
+        // { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }
 
 
     ]
