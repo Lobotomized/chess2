@@ -1370,8 +1370,7 @@ function cyborgFactory(color,x,y){
     ]
 
     if (color == 'black') {
-        moves = [{ type: 'absolute', impotent: true, y: 2, x: 0 }, 
-        { type: 'takeMove', y: 1, x: -1 }, { type: 'takeMove', y: 1, x: 1 },
+        moves = [{ type: 'absolute',  y: 2, x: 0 }, 
         { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
         { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
         { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },

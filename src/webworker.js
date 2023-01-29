@@ -198,7 +198,9 @@ function evaluateBoard(colorPerspective, pieces, board){
             if (square) {
                 const innerPiece = pieceFromSquare(square, state.pieces)
                 if (innerPiece) {
-                    if (innerPiece.color != piece.color && !move.impotent) {
+                    let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
+                    let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
+                    if ((checkForEnemies || checkForFriends) && !move.impotent) {
                         square[flag] = true;
                     }
                     else{
@@ -228,7 +230,9 @@ function evaluateBoard(colorPerspective, pieces, board){
             if (square) {
                 const innerPiece = pieceFromSquare(square, state.pieces)
                 if (innerPiece) {
-                    if (innerPiece.color != piece.color && !move.impotent) {
+                    let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
+                    let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
+                    if ((checkForEnemies || checkForFriends) && !move.impotent) {
                         square[flag] = true;
                     }
                 }
@@ -239,13 +243,13 @@ function evaluateBoard(colorPerspective, pieces, board){
                 const limit = move.limit || 100;
                 const offsetX = move.offsetX || 0;
                 const offsetY = move.offsetY || 0;
-                blockableSpecialFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag,blockedFlag);
+                blockableSpecialFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag,blockedFlag, move.missedSquareX, move.missedSquareY);
             }
         }
     })
 }
 
-function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag,secondFlag) {
+function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag,secondFlag,missedSquareX,missedSquareY) {
     if (!flag) {
         flag = 'light'
     }
@@ -260,6 +264,16 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
     }
     const piece = pieceFromSquare(square, state.pieces)
 
+
+    
+    if(!missedSquareX){
+        missedSquareX = 0;
+    }
+
+    if(!missedSquareY){
+        missedSquareY = 0;
+    }
+    
     let directionX = 0;
     if (powerX < 0) {
         directionX = -1;
@@ -283,9 +297,9 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
 
     if (!piece) {
         square[flag] = true;
-        blockableSpecialFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1, flag,secondFlag)
+        blockableSpecialFunction(state, powerX + directionX + missedSquareX, powerY + directionY + missedSquareY, x, y, move, limit - 1, flag,secondFlag,missedSquareX,missedSquareY)
     }
-    else if (!move.impotent) {
+    else if (((state.turn != piece.color && !move.friendlyPieces) || (state.turn === piece.color && move.friendlyPieces)) && !move.impotent) {
         let selectedPiece = pieceFromXY(x,y,state.pieces)
         square[flag] = true;
 
@@ -297,7 +311,7 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
             }
         }
         
-        blockableSpecialFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1, secondFlag,secondFlag)
+        blockableSpecialFunction(state, powerX + directionX + missedSquareX, powerY + directionY + missedSquareY, x, y, move, limit - 1, secondFlag,secondFlag,missedSquareX,missedSquareY)
     }
 
     return;

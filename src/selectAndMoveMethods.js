@@ -20,10 +20,10 @@ function lightBoard(piece, state, flag) {
             if (square) {       
                 const innerPiece = pieceFromSquare(square, state.pieces)
                 if (innerPiece) {
-                    let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
-                    let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
+                    let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces && !move.impotent;
+                    let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces && !move.impotent;
 
-                    if (checkForFriends || checkForEnemies) {
+                    if ((checkForFriends || checkForEnemies) && !move.impotent) {
                         square[flag] = true;
                     }
                 }
@@ -53,7 +53,7 @@ function lightBoard(piece, state, flag) {
                 if (innerPiece) {
                     let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
                     let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
-                    if (checkForEnemies || checkForFriends) {
+                    if ((checkForFriends || checkForEnemies) && !move.impotent) {
                         square[flag] = true;
                     }
                 }
@@ -119,7 +119,7 @@ function blockableFunction(state, powerX, powerY, x, y, move, limit, flag, misse
         square[flag] = true;
         blockableFunction(state, powerX + directionX+missedSquareX, powerY + directionY + missedSquareY, x, y, move, limit - 1, flag, missedSquareX, missedSquareY)
     }
-    else if ((state.turn != piece.color && !move.friendlyPieces) || (state.turn === piece.color && move.friendlyPieces)) { 
+    else if (((state.turn != piece.color && !move.friendlyPieces) || (state.turn === piece.color && move.friendlyPieces)) && !move.impotent) { 
         square[flag] = true;
     }
 
