@@ -5,7 +5,7 @@ const io = require('socket.io')(http);
 const newG = require('./globby').newIOServerV2;
 const {miniChess, randomChess,  catchTheDragon, mongolianChess, classicChess, raceChess, raceChoiceChess} = require('./boardGeneration')
 const { selectPiece, playerMove, checkTurn, changeTurn, lightBoard, closeLights, pickARace } = require('./selectAndMovemethods')
-const {kingFactory, hatFactory, shroomFactory, northernKing} = require('./pieceDefinitions')
+const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFactory} = require('./pieceDefinitions')
 app.use('/static', express.static('public'))
 app.use('/src', express.static('src'))
 
@@ -45,6 +45,9 @@ let lobby = newG({properties:{
                     else if(move.x === 1 && move.y ==4){
                         state.whiteRace = 'promoters'
                     }
+                    else if(move.x === 1 && move.y ==5){
+                        state.whiteRace = 'cyborgs'
+                    }
                 }
                 else if(player.ref == state.black){
                     if(move.x  == 1 && move.y == 1){
@@ -58,6 +61,9 @@ let lobby = newG({properties:{
                     }
                     else if(move.x === 1 && move.y ==4){
                         state.blackRace = 'promoters'
+                    }
+                    else if(move.x === 1 && move.y ==5){
+                        state.blackRace = 'cyborgs'
                     }
                 }
 
@@ -112,7 +118,6 @@ let lobby = newG({properties:{
         }
     },
     statePresenter: function (copyState, playerRef) {
-        console.log(copyState)
         let search = {x:undefined,y:undefined}
         copyState.playerRef = playerRef;
         if(!copyState.blackRace || !copyState.whiteRace){
@@ -133,6 +138,10 @@ let lobby = newG({properties:{
                     search.x = 1;
                     search.y = 4;
                 }
+                else if(copyState.blackRace == 'cyborgs'){
+                    search.x = 1;
+                    search.y = 5;
+                }
             }
             else{
                 if(copyState.whiteRace == 'medieval'){
@@ -151,7 +160,12 @@ let lobby = newG({properties:{
                     search.x = 1;
                     search.y = 4;
                 }
+                else if(copyState.whiteRace == 'cyborgs'){
+                    search.x = 1;
+                    search.y = 5;
+                }
             }
+
         }
         copyState.board.forEach((sq) => {
             if(sq.x == search.x && sq.y == search.y){
@@ -261,7 +275,7 @@ let lobby = newG({properties:{
                     }
                 }
 
-                state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4))
+                state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4), empoweredCrystalFactory('white',1,5))
                 state.gameType = 'raceChoiceChess'
                 state.turn = 'menu'
             }

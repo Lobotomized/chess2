@@ -1363,6 +1363,237 @@ const {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecke
             posValue:0.1,
         }
     }
+
+
+    
+function cyborgFactory(color,x,y){
+    let moves = [{ type: 'absolute', y: -2, x: 0 },
+        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+
+    ]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute',  y: 2, x: 0 }, 
+        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }];
+    }
+    return {
+        icon: color + 'Cyborg.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:0.3,
+        posValue:0.1,
+    }
+}
+
+function bootVesselFactory(color,x,y){
+    let moves = [
+    { type: 'blockable', repeat: true, x: 1, y: 1, missedSquareX:1, missedSquareY:1, offsetX:1, offsetY:1 }, 
+    { type: 'blockable', repeat: true, x: -1, y: -1, missedSquareX:-1, missedSquareY:-1, offsetX:-1, offsetY:-1 },
+    { type: 'blockable', repeat: true, x: 1, y: -1, missedSquareX:1, missedSquareY:-1, offsetX:1, offsetY:-1 },
+    { type: 'blockable', repeat: true, x: -1, y: 1, missedSquareX:-1, missedSquareY:1, offsetX:-1, offsetY:1 },
+
+    { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+    { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+    { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+    { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+    ]
+
+    return{
+        icon: color + 'Bootvessel.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:2,
+        posValue:0.3,
+    }
+}
+
+function empoweredCrystalFactory(color,x,y){
+    let moves = [
+        { type: 'blockable', repeat: true, x: 0, y: -1, missedSquareY:-1, offsetY:-1 }, { type: 'blockable', repeat: true, x: 0, y: 1, missedSquareY:1, offsetY:1 },
+        { type: 'blockable', repeat: true, x: -1, y: 0, missedSquareX:-1 , offsetX:-1 }, { type: 'blockable', repeat: true, x: 1, y: 0, missedSquareX:1, offsetX:1 },
+        { type: 'blockable', repeat: true, x: -1, y: -1, missedSquareX:-1, missedSquareY:-1, offsetX:-1, offsetY:-1 }, 
+        { type: 'blockable', repeat: true, x: 1, y: 1, missedSquareX:1, missedSquareY:1, offsetX:-1, offsetY:-1},
+        { type: 'blockable', repeat: true, x: -1, y: 1, missedSquareX:-1,missedSquareY:1, offsetX:-1, offsetY:1 }, 
+        { type: 'blockable', repeat: true, x: 1, y: -1, missedSquareX:1,missedSquareY:-1, offsetX:1, offsetY:-1 },
+
+        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+    ]
+
+    return{
+        icon: color + 'CrystalEmpowered.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1000,
+        posValue:posValue[getRndInteger(1,3)-1],
+        afterThisPieceTaken:function(state){
+            state.pieces.forEach((piece) => {
+                if(piece.color == this.color){
+                    if(piece.icon.includes('Crystal.png')){
+                        piece.moves = this.moves;
+                        piece.icon = this.icon;
+                    }
+                }
+            })
+        }
+    }
+}
+
+
+function executorFactory(color,x,y){
+    let moves = [
+        { type: 'blockable', repeat: true, x: 0, y: -1, offsetY:-1, missedSquareY:-1 }, { type: 'blockable', repeat: true, x: 0, y: 1,offsetY:1, missedSquareY:1 },
+        { type: 'blockable', repeat: true, x: -1, y: 0, offsetX:-1, missedSquareX:-1 }, { type: 'blockable', repeat: true, x: 1, y: 0, missedSquareX:1 , offsetX:1, },
+
+        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+    ]
+
+    return{
+        icon: color + 'Executor.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:5,
+        posValue:posValue[getRndInteger(1,3)-1],
+    }
+}
+
+function crystalFactory(color,x,y){
+    return {
+        icon: color + 'Crystal.png',
+        vulnerable: true,
+        moved: false,
+        moves: [{ type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
+        { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
+        { type: 'absolute', x: -1, y: -1 }, { type: 'absolute', x: 1, y: 1 },
+        { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 },
+    
+        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+    ],
+        x: x,
+        y: y,
+        value:1000,
+        posValue:posValue[getRndInteger(1,3)-1],
+        color: color,
+
+        afterThisPieceTaken:function(state){
+            state.pieces.forEach((piece) => {
+                if(piece.color == this.color){
+                    if(piece.icon.includes('CrystalEmpowered.png')){
+                        piece.moves = this.moves;
+                        piece.icon = this.icon;
+                        piece.value = this.value;
+                        piece.posValue = this.posValue;
+                    }
+                }
+            })
+        }
+    }
+}
+
+
+function juggernautFactory(color,x,y){
+    let moves = [
+        { type: 'blockable', repeat: true, x: 0, y: -1, limit:2 },
+        { type: 'blockable', repeat: true, x: 0, y: 1, limit:2 },
+        { type: 'blockable', repeat: true, x: 1, y: 0, limit:2 },
+        { type: 'blockable', repeat: true, x: -1, y: 0, limit:2 },
+
+
+        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+    ]
+    
+
+    return {
+        icon: color + 'Juggernaut.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:2.5,
+        posValue:0.3,
+
+        
+        friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
+            if(friendlyPiece)
+            {
+                if(friendlyPiece == state.pieceSelected){
+                    return true;
+                }
+                friendlyPiece.x = prevMove.x;
+                friendlyPiece.y = prevMove.y;
+            }
+        }
+        ,
+
+        conditionalMoves: function (state) {
+            const blockedUp = state.pieces.find((piece) => {
+                return piece.y === this.y + 1 && this.x === piece.x || piece.y === this.y + 2 && this.x === piece.x;
+            })
+
+            const blockedDown = state.pieces.find((piece) => {
+                return piece.y === this.y - 1 && this.x === piece.x || piece.y === this.y - 2 && this.x === piece.x;
+            })
+
+            const blockedLeft = state.pieces.find((piece) => {
+                return piece.y === this.y && this.x === piece.x + 1 || piece.y === this.y && this.x === piece.x + 2;
+            })
+
+            const blockedRight = state.pieces.find((piece) => {
+                return piece.y === this.y  && this.x === piece.x -1 || piece.y === this.y && this.x === piece.x - 2;
+            })
+            let toReturn = [];
+
+            if(!blockedUp){
+                toReturn.push(
+                    { type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 }
+                )
+            }
+            if(!blockedDown){
+                toReturn.push(
+                    { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 }
+                )
+            }
+
+            if(!blockedLeft){
+                toReturn.push(
+                    { type: 'absolute', y: -1, x: -2 }, { type: 'absolute', y: 1, x: -2 }
+                )       
+            }
+
+            if(!blockedRight){
+                toReturn.push(
+                    { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: -1, x: 2 }
+                )
+            }
+            return toReturn;
+        }
+    }
+}
 module.exports = {
     queenBugFactory:queenBugFactory,
     kingFactory: kingFactory,
@@ -1395,5 +1626,11 @@ module.exports = {
     shield:shield,
     plagueDoctor:plagueDoctor,
     starMan:starMan,
-    sleepingDragon:sleepingDragon
+    sleepingDragon:sleepingDragon,
+    cyborgFactory:cyborgFactory,
+    crystalFactory:crystalFactory,
+    empoweredCrystalFactory:empoweredCrystalFactory,
+    executorFactory:executorFactory,
+    juggernautFactory:juggernautFactory,
+    bootVesselFactory:bootVesselFactory
 }

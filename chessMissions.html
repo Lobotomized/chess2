@@ -314,9 +314,12 @@
         mx = e.pageX - offsetX;
         my = e.pageY - offsetY;
         if(IAM == 'black' && boardHeight){
+            console.log(parseInt(mx / squareLength),reverseNumber(parseInt(my / squareLength),boardHeight))
+
             socket.emit('move', { x: parseInt(mx / squareLength), y: reverseNumber(parseInt(my / squareLength),boardHeight) })
         }
         else{
+            console.log(parseInt(mx / squareLength), parseInt(my / squareLength) )
             socket.emit('move', { x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
         }
     })

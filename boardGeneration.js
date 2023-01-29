@@ -3,7 +3,9 @@ const { kingFactory, knightFactory, mongolianKnightFactory, bishopFactory, rookF
         clownFactory, ricarFactory, horseFactory, hatFactory, ghostFactory, pigFactory, ladyBugFactory, queenBugFactory, goliathBugFactory, antFactory,
         shroomFactory, spiderFactory,
 
-        swordsMen, pikeman, sleepingDragon,kolba,fencer, shield, plagueDoctor, northernKing
+        swordsMen, pikeman, sleepingDragon,kolba,fencer, shield, plagueDoctor, northernKing,
+
+        cyborgFactory, executorFactory,crystalFactory,empoweredCrystalFactory,juggernautFactory,bootVesselFactory
 
 } = require('./pieceDefinitions')
 
@@ -65,6 +67,12 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         sleepingDragon('black',0,0),kolba('black',1,0),kolba('black',2,0), plagueDoctor('black',3,0),northernKing('black',4,0), fencer('black',5,0),fencer('black',6,0), sleepingDragon('black',7,0)
         )
     }
+    else if(raceBlack == 'cyborgs'){
+       pieces.push(
+            cyborgFactory('black',0,2),   cyborgFactory('black',1,2),cyborgFactory('black',2,2),        cyborgFactory('black',3,2),    cyborgFactory('black',4,2),      cyborgFactory('black',5,2), cyborgFactory('black',6,2),    cyborgFactory('black',7,2),
+            juggernautFactory('black',0,0),crystalFactory('black',1,0),  executorFactory('black',2,0), bootVesselFactory('black',3,0),   bootVesselFactory('black',4,0),executorFactory('black', 5,0), empoweredCrystalFactory('black',6,0),juggernautFactory('black',7,0),
+            )
+    }
 
     if(raceWhite == 'classic'){
         pieces.push( rookFactory('white', 0,7), 
@@ -98,6 +106,12 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         sleepingDragon('white',0,7),kolba('white',1,7),kolba('white',2,7), plagueDoctor('white',3,7),northernKing('white',4,7), fencer('white',5,7),fencer('white',6,7), sleepingDragon('white',7,7),
         )
    
+    }
+    else if(raceWhite === 'cyborgs'){
+        pieces.push(
+            cyborgFactory('white',0,5),   cyborgFactory('white',1,5),cyborgFactory('white',2,5),        cyborgFactory('white',3,5),    cyborgFactory('white',4,5),      cyborgFactory('white',5,5), cyborgFactory('white',6,5),    cyborgFactory('white',7,5),
+            juggernautFactory('white',0,7),crystalFactory('white',1,7),  executorFactory('white',2,7), bootVesselFactory('white',3,7),   bootVesselFactory('white',4,7),executorFactory('white', 5,7), empoweredCrystalFactory('white',6,7),juggernautFactory('white',7,7),
+            )
     }
 
 

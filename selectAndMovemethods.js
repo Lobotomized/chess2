@@ -12,15 +12,19 @@ function lightBoard(piece, state, flag) {
     if (piece.conditionalMoves) {
         tempMoves = piece.conditionalMoves(state);
     }
+
     [...piece.moves, ...tempMoves].forEach((move) => {
         if (move.type == 'absolute') {
             const square = state.board.find((el) => {
                 return el.x === piece.x + move.x && el.y === piece.y + move.y
             })
-            if (square) {
+            if (square) {       
                 const innerPiece = pieceFromSquare(square, state.pieces)
                 if (innerPiece) {
-                    if (innerPiece.color != piece.color && !move.impotent) {
+                    let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces && !move.impotent;
+                    let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces && !move.impotent;
+
+                    if ((checkForFriends || checkForEnemies) && !move.impotent) {
                         square[flag] = true;
                     }
                 }
@@ -28,6 +32,8 @@ function lightBoard(piece, state, flag) {
                     square[flag] = true;
                 }
             }
+
+
         }
         else if (move.type == 'allMine') {
             state.board.forEach((square) => {
@@ -46,7 +52,9 @@ function lightBoard(piece, state, flag) {
             if (square) {
                 const innerPiece = pieceFromSquare(square, state.pieces)
                 if (innerPiece) {
-                    if (innerPiece.color != piece.color && !move.impotent) {
+                    let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
+                    let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
+                    if ((checkForFriends || checkForEnemies) && !move.impotent) {
                         square[flag] = true;
                     }
                 }
@@ -62,6 +70,7 @@ function lightBoard(piece, state, flag) {
         }
     })
 }
+
 
 
 
