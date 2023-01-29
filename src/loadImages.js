@@ -193,3 +193,43 @@ wSleepingDragon.src = '/static/whiteSleepingDragon.png'
 
 const bSleepingDragon = new Image();
 bSleepingDragon.src = '/static/blackSleepingDragon.png'
+
+
+//
+
+const wCyborg = new Image();
+wCyborg.src = '/static/whiteCyborg.png'
+
+const bCyborg = new Image();
+bCyborg.src = '/static/blackCyborg.png'
+
+const wBootvessel = new Image();
+wBootvessel.src = '/static/whiteBootvessel.png'
+
+const bBootvessel = new Image();
+bBootvessel.src = '/static/blackBootvessel.png'
+
+const wCrystal = new Image();
+wCrystal.src = '/static/whiteCrystal.png'
+
+const bCrystal = new Image();
+bCrystal.src = '/static/blackCrystal.png'
+
+
+const wCrystalEmpowered = new Image();
+wCrystalEmpowered.src = '/static/whiteCrystalEmpowered.png'
+
+const bCrystalEmpowered = new Image();
+bCrystalEmpowered.src = '/static/blackCrystalEmpowered.png'
+
+const wExecutor = new Image();
+wExecutor.src = '/static/whiteExecutor.png'
+
+const bExecutor = new Image();
+bExecutor.src = '/static/blackExecutor.png'
+
+const bJuggernaut = new Image();
+bJuggernaut.src = '/static/blackJuggernaut.png'
+
+const wJuggernaut = new Image();
+wJuggernaut.src = '/static/whiteJuggernaut.png'

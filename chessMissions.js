@@ -112,6 +112,7 @@ let lobby = newG({properties:{
         }
     },
     statePresenter: function (copyState, playerRef) {
+        console.log(copyState)
         let search = {x:undefined,y:undefined}
         copyState.playerRef = playerRef;
         if(!copyState.blackRace || !copyState.whiteRace){

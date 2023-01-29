@@ -116,6 +116,15 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         sleepingDragon('black',0,0),kolba('black',1,0),kolba('black',2,0), plagueDoctor('black',3,0),northernKing('black',4,0), fencer('black',5,0),fencer('black',6,0), sleepingDragon('black',7,0)
         )
     }
+    else if(raceBlack == 'cyborgs'){
+        console.log('here?')
+        
+        pieces.push(
+            cyborgFactory('black',0,2),   cyborgFactory('black',1,2),cyborgFactory('black',2,2),        cyborgFactory('black',3,2),    cyborgFactory('black',4,2),      cyborgFactory('black',5,2), cyborgFactory('black',6,2),    cyborgFactory('black',7,2),
+            juggernautFactory('black',0,0),crystalFactory('black',1,0),  executorFactory('black',2,0), bootVesselFactory('black',3,0),   bootVesselFactory('black',4,0),executorFactory('black', 5,0), empoweredCrystalFactory('black',6,0),juggernautFactory('black',7,0),
+            )
+    }
+
 
     if(raceWhite == 'classic'){
         pieces.push( rookFactory('white', 0,7), 
@@ -151,6 +160,15 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         antFactory('white',0,6),   queenBugFactory('white',1,6),antFactory('white',2,6),        antFactory('white',3,6),    antFactory('white',4,6),      antFactory('white',5,6), queenBugFactory('white',6,6),    antFactory('white',7,6),
         shroomFactory('white',0,7),spiderFactory('white',1,7),  ladyBugFactory('white',2,7), goliathBugFactory('white',3,7),   goliathBugFactory('white',4,7),ladyBugFactory('white', 5,7), spiderFactory('white',6,7),shroomFactory('white',7,7)
         )
+    }
+
+    else if(raceWhite == 'cyborgs'){
+        console.log('here?')
+        
+        pieces.push(
+            cyborgFactory('white',0,5),   cyborgFactory('white',1,5),cyborgFactory('white',2,5),        cyborgFactory('white',3,5),    cyborgFactory('white',4,5),      cyborgFactory('white',5,5), cyborgFactory('white',6,5),    cyborgFactory('white',7,5),
+            juggernautFactory('white',0,7),crystalFactory('white',1,7),  executorFactory('white',2,7), bootVesselFactory('white',3,7),   bootVesselFactory('white',4,7),executorFactory('white', 5,7), empoweredCrystalFactory('white',6,7),juggernautFactory('white',7,7),
+            )
     }
 
 
@@ -364,6 +382,49 @@ function drawPiece(x, y, img, size) {
         case 'blackSleepingDragon.png':
             ctx.drawImage(bSleepingDragon, 0, 0, 600, 600, x * size, y * size, size, size);
             break;
+
+        //
+        case 'whiteCyborg.png':
+            ctx.drawImage(wCyborg, 0, 0, 600, 600, x * size, y * size, size, size);
+        break;
+        case 'blackCyborg.png':
+            ctx.drawImage(bCyborg, 0, 0, 600, 600, x * size, y * size, size, size);
+        break;
+
+        case 'whiteBootvessel.png':
+            ctx.drawImage(wBootvessel, 0, 0, 600, 600, x * size, y * size, size, size);
+        break;
+        case 'blackBootvessel.png':
+            ctx.drawImage(bBootvessel, 0, 0, 600, 600, x * size, y * size, size, size);
+        break;
+
+        case 'blackCrystal.png':
+            ctx.drawImage(bCrystal, 0, 0, 600, 600, x * size, y * size, size, size);
+        break;
+        case 'whiteCrystal.png':
+            ctx.drawImage(wCrystal, 0, 0, 600, 600, x * size, y * size, size, size);
+        break;
+
+        case 'blackCrystalEmpowered.png':
+            ctx.drawImage(bCrystalEmpowered, 0, 0, 600, 600, x * size, y * size, size, size);
+        break;
+        case 'whiteCrystalEmpowered.png':
+            ctx.drawImage(wCrystalEmpowered, 0, 0, 600, 600, x * size, y * size, size, size);
+        break;
+
+        case 'blackJuggernaut.png':
+            ctx.drawImage(bJuggernaut, 0, 0, 600, 600, x * size, y * size, size, size);
+        break;
+        case 'whiteJuggernaut.png':
+            ctx.drawImage(wJuggernaut, 0, 0, 600, 600, x * size, y * size, size, size);
+        break;
+
+        case 'blackExecutor.png':
+            ctx.drawImage(bExecutor, 0, 0, 600, 600, x * size, y * size, size, size);
+        break;
+        case 'whiteExecutor.png':
+            ctx.drawImage(wExecutor, 0, 0, 600, 600, x * size, y * size, size, size);
+        break;
     }
 }
 

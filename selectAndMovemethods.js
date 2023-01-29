@@ -57,7 +57,7 @@ function lightBoard(piece, state, flag) {
                 const limit = move.limit || 100;
                 const offsetX = move.offsetX || 0;
                 const offsetY = move.offsetY || 0;
-                blockableFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag);
+                blockableFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag, move.missedSquareX, move.missedSquareY);
             }
         }
     })
@@ -65,7 +65,7 @@ function lightBoard(piece, state, flag) {
 
 
 
-function blockableFunction(state, powerX, powerY, x, y, move, limit, flag) {
+function blockableFunction(state, powerX, powerY, x, y, move, limit, flag, missedSquareX, missedSquareY) {
     if (!flag) {
         flag = 'light'
     }
@@ -100,10 +100,17 @@ function blockableFunction(state, powerX, powerY, x, y, move, limit, flag) {
         directionY = 0;
     }
 
+    if(!missedSquareX){
+        missedSquareX = 0;
+    }
+
+    if(!missedSquareY){
+        missedSquareY = 0;
+    }
 
     if (!piece) {
         square[flag] = true;
-        blockableFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1)
+        blockableFunction(state, powerX + directionX+missedSquareX, powerY + directionY + missedSquareY, x, y, move, limit - 1, flag, missedSquareX, missedSquareY)
     }
     else if (piece.color != state.turn && !move.impotent) {
         square[flag] = true;

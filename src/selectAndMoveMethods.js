@@ -20,7 +20,10 @@ function lightBoard(piece, state, flag) {
             if (square) {       
                 const innerPiece = pieceFromSquare(square, state.pieces)
                 if (innerPiece) {
-                    if (innerPiece.color != piece.color && !move.impotent) {
+                    let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
+                    let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
+
+                    if (checkForFriends || checkForEnemies) {
                         square[flag] = true;
                     }
                 }
@@ -48,7 +51,9 @@ function lightBoard(piece, state, flag) {
             if (square) {
                 const innerPiece = pieceFromSquare(square, state.pieces)
                 if (innerPiece) {
-                    if (innerPiece.color != piece.color && !move.impotent) {
+                    let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
+                    let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
+                    if (checkForEnemies || checkForFriends) {
                         square[flag] = true;
                     }
                 }
@@ -59,7 +64,7 @@ function lightBoard(piece, state, flag) {
                 const limit = move.limit || 100;
                 const offsetX = move.offsetX || 0;
                 const offsetY = move.offsetY || 0;
-                blockableFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag);
+                blockableFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag, move.missedSquareX, move.missedSquareY);
             }
         }
     })
@@ -67,7 +72,7 @@ function lightBoard(piece, state, flag) {
 
 
 
-function blockableFunction(state, powerX, powerY, x, y, move, limit, flag) {
+function blockableFunction(state, powerX, powerY, x, y, move, limit, flag, missedSquareX, missedSquareY) {
     if (!flag) {
         flag = 'light'
     }
@@ -102,12 +107,19 @@ function blockableFunction(state, powerX, powerY, x, y, move, limit, flag) {
         directionY = 0;
     }
 
+    if(!missedSquareX){
+        missedSquareX = 0;
+    }
+
+    if(!missedSquareY){
+        missedSquareY = 0;
+    }
 
     if (!piece) {
         square[flag] = true;
-        blockableFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1, flag)
+        blockableFunction(state, powerX + directionX+missedSquareX, powerY + directionY + missedSquareY, x, y, move, limit - 1, flag, missedSquareX, missedSquareY)
     }
-    else if (piece.color != state.turn && !move.impotent) {
+    else if ((state.turn != piece.color && !move.friendlyPieces) || (state.turn === piece.color && move.friendlyPieces)) { 
         square[flag] = true;
     }
 
