@@ -1513,14 +1513,9 @@ function crystalFactory(color,x,y){
 }
 
 
+
 function juggernautFactory(color,x,y){
     let moves = [
-        { type: 'blockable', repeat: true, x: 0, y: -1, limit:2 },
-        { type: 'blockable', repeat: true, x: 0, y: 1, limit:2 },
-        { type: 'blockable', repeat: true, x: 1, y: 0, limit:2 },
-        { type: 'blockable', repeat: true, x: -1, y: 0, limit:2 },
-
-
         { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
         { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
         { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
@@ -1551,45 +1546,124 @@ function juggernautFactory(color,x,y){
         ,
 
         conditionalMoves: function (state) {
-            const blockedUp = state.pieces.find((piece) => {
-                return piece.y === this.y + 1 && this.x === piece.x || piece.y === this.y + 2 && this.x === piece.x;
-            })
+            const toReturn = [];
+            const freeThere = (x,y) =>{
+                return state.pieces.find((piece) => {
+                    return piece.y === y  && x === piece.x;
+                })
 
-            const blockedDown = state.pieces.find((piece) => {
-                return piece.y === this.y - 1 && this.x === piece.x || piece.y === this.y - 2 && this.x === piece.x;
-            })
-
-            const blockedLeft = state.pieces.find((piece) => {
-                return piece.y === this.y && this.x === piece.x + 1 || piece.y === this.y && this.x === piece.x + 2;
-            })
-
-            const blockedRight = state.pieces.find((piece) => {
-                return piece.y === this.y  && this.x === piece.x -1 || piece.y === this.y && this.x === piece.x - 2;
-            })
-            let toReturn = [];
-
-            if(!blockedUp){
+            } 
+            toReturn.push({ type: 'absolute', y: -1, x: 0 })
+            if(!freeThere(this.x,this.y-1)){
                 toReturn.push(
-                    { type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 }
+                    
+                    { type: 'absolute', y: -2, x: 0 },
+                    { type: 'absolute', y: -1, x: 1 },
+                    { type: 'absolute', y: -1, x: -1 }
                 )
-            }
-            if(!blockedDown){
-                toReturn.push(
-                    { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 }
-                )
+                if(!freeThere(this.x,this.y-2)){
+                    toReturn.push(
+                        { type: 'absolute', y: -3, x: 0 },
+                        { type: 'absolute', y: -2, x: 1 },
+                        { type: 'absolute', y: -2, x: -1 }
+                    )
+                }
+                if(!freeThere(this.x-1,this.y-1)){
+                    toReturn.push(
+                        { type: 'absolute', y: -1, x: -2 },
+                    )
+                }
+                if(!freeThere(this.x+1,this.y-1)){
+                    toReturn.push(
+                        { type: 'absolute', y: -1, x: 2 },
+                    )
+                }       
             }
 
-            if(!blockedLeft){
+            toReturn.push({ type: 'absolute', y: 1, x: 0 })
+            if(!freeThere(this.x,this.y+1)){
                 toReturn.push(
-                    { type: 'absolute', y: -1, x: -2 }, { type: 'absolute', y: 1, x: -2 }
-                )       
+                    
+                    { type: 'absolute', y: 2, x: 0 },
+                    { type: 'absolute', y: 1, x: 1 },
+                    { type: 'absolute', y: 1, x: -1 }
+                )
+                if(!freeThere(this.x,this.y+2)){
+                    toReturn.push(
+                        { type: 'absolute', y: 3, x: 0 },
+                        { type: 'absolute', y: 2, x: 1 },
+                        { type: 'absolute', y: 2, x: -1 }
+                    )
+                }
+                if(!freeThere(this.x-1,this.y+1)){
+                    toReturn.push(
+                        { type: 'absolute', y: 1, x: -2 },
+                    )
+                }
+                if(!freeThere(this.x+1,this.y+1)){
+                    toReturn.push(
+                        { type: 'absolute', y: 1, x: 2 },
+                    )
+                }       
             }
 
-            if(!blockedRight){
+
+            toReturn.push({ type: 'absolute', x: -1, y: 0 })
+            if(!freeThere(this.x -1,this.y)){
                 toReturn.push(
-                    { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: -1, x: 2 }
+                    
+                    { type: 'absolute', x: -2, y: 0 },
+                    { type: 'absolute', x: -1, y: 1 },
+                    { type: 'absolute', x: -1, y: -1 }
                 )
+                if(!freeThere(this.x-2,this.y)){
+                    toReturn.push(
+                        { type: 'absolute', x: -3, y: 0 },
+                        { type: 'absolute', x: -2, y: 1 },
+                        { type: 'absolute', x: -2, y: -1 }
+                    )
+                }
+                if(!freeThere(this.x-1,this.y-1)){
+                    toReturn.push(
+                        { type: 'absolute', x: -1, y: -2 },
+                    )
+                }
+                if(!freeThere(this.x-1,this.y+1)){
+                    toReturn.push(
+                        { type: 'absolute', x: -1, y: 2 },
+                    )
+                }       
             }
+
+            toReturn.push({ type: 'absolute', x: 1, y: 0 })
+            if(!freeThere(this.x +1,this.y)){
+                toReturn.push(
+                    
+                    { type: 'absolute', x: 2, y: 0 },
+                    { type: 'absolute', x: 1, y: 1 },
+                    { type: 'absolute', x: 1, y: -1 }
+                )
+                if(!freeThere(this.x+2,this.y)){
+                    toReturn.push(
+                        { type: 'absolute', x: 3, y: 0 },
+                        { type: 'absolute', x: 2, y: 1 },
+                        { type: 'absolute', x: 2, y: -1 }
+                    )
+                }
+                console.log(freeThere(this.x+1,this.y-1), '  heere?')
+                if(!freeThere(this.x+1,this.y-1)){
+                    console.log('wtf?')
+                    toReturn.push(
+                        { type: 'absolute', x: 1, y: -2 },
+                    )
+                }
+                if(!freeThere(this.x+1,this.y+1)){
+                    toReturn.push(
+                        { type: 'absolute', x: 1, y: 2 },
+                    )
+                }       
+            }
+
             return toReturn;
         }
     }
