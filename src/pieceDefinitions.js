@@ -1522,8 +1522,8 @@ function juggernautFactory(color,x,y){
         x: x,
         y: y,
         color: color,
-        value:2.5,
-        posValue:0.3,
+        value:7,
+        posValue:0.7,
 
         
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
