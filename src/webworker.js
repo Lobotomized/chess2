@@ -44,14 +44,15 @@ JSONfn.parse = function(str) {
     });
 }
  
-function evaluateBoard(colorPerspective, pieces, board){
+function evaluateBoard(colorPerspective, pieces, state){
     let counter = 0;
     let valueTransformer = 1;
     let valueCounter = 0;
+    const board = state.board;
 
     while(pieces.length > counter){
         const piece = pieces[counter]
-        lightBoardFE(piece,{pieces:pieces, board:board},'allowedMove')
+        lightBoardFE(piece,{pieces:pieces, board:board, turn:state.turn},'allowedMove')
         const filtered = board.filter((square) => {
             return square['allowedMove']
         })
@@ -89,7 +90,7 @@ function evaluateBoard(colorPerspective, pieces, board){
      while(myPieces.length > piecesCounter){
          let movesCounter = 0;
          let piece = myPieces[piecesCounter]
-         lightBoardFE(piece,{pieces:state.pieces, board:state.board},'allowedMove')
+         lightBoardFE(piece,{pieces:state.pieces, board:state.board,turn:state.turn},'allowedMove')
        
          const allowedMoves = state.board.filter((square) => {
              return square.allowedMove;
@@ -142,7 +143,7 @@ function evaluateBoard(colorPerspective, pieces, board){
         let badMoveValue = -999999;
         badMoves.forEach((badMove) => {
 
-            let thisValue = evaluateBoard(enemy,badMove.pieces, state.board)
+            let thisValue = evaluateBoard(enemy,badMove.pieces, state)
             if(thisValue > badMoveValue){
                 badMoveValue = thisValue;
                 bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
