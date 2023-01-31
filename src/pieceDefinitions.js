@@ -1384,6 +1384,16 @@ function cyborgFactory(color,x,y){
         color: color,
         value:0.3,
         posValue:0.1,
+        friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
+            if(friendlyPiece)
+            {
+                if(friendlyPiece == state.pieceSelected){
+                    return true;
+                }
+                friendlyPiece.x = prevMove.x;
+                friendlyPiece.y = prevMove.y;
+            }
+        }
     }
 }
 
@@ -1408,6 +1418,16 @@ function bootVesselFactory(color,x,y){
         color: color,
         value:2,
         posValue:0.3,
+        friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
+            if(friendlyPiece)
+            {
+                if(friendlyPiece == state.pieceSelected){
+                    return true;
+                }
+                friendlyPiece.x = prevMove.x;
+                friendlyPiece.y = prevMove.y;
+            }
+        }
     }
 }
 
@@ -1434,6 +1454,16 @@ function empoweredCrystalFactory(color,x,y){
         color: color,
         value:1000,
         posValue:posValue[getRndInteger(1,3)-1],
+        friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
+            if(friendlyPiece)
+            {
+                if(friendlyPiece == state.pieceSelected){
+                    return true;
+                }
+                friendlyPiece.x = prevMove.x;
+                friendlyPiece.y = prevMove.y;
+            }
+        },
         afterThisPieceTaken:function(state){
             state.pieces.forEach((piece) => {
                 if(piece.color == this.color){
@@ -1467,6 +1497,16 @@ function executorFactory(color,x,y){
         color: color,
         value:5,
         posValue:posValue[getRndInteger(1,3)-1],
+        friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
+            if(friendlyPiece)
+            {
+                if(friendlyPiece == state.pieceSelected){
+                    return true;
+                }
+                friendlyPiece.x = prevMove.x;
+                friendlyPiece.y = prevMove.y;
+            }
+        }
     }
 }
 
@@ -1502,6 +1542,16 @@ function crystalFactory(color,x,y){
                     }
                 }
             })
+        },
+        friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
+            if(friendlyPiece)
+            {
+                if(friendlyPiece == state.pieceSelected){
+                    return true;
+                }
+                friendlyPiece.x = prevMove.x;
+                friendlyPiece.y = prevMove.y;
+            }
         }
     }
 }
