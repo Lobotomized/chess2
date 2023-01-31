@@ -72,7 +72,6 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
     selectPiece({x:myPieces[pieceIndex].x, y:myPieces[pieceIndex].y},state)
 
     const selectedPiece = state.pieceSelected;
-
     lightBoard(selectedPiece,{pieces:state.pieces, board:state.board})
     hotseatGame.move(state.turn,{ x: xClicked, y: yClicked });
 }

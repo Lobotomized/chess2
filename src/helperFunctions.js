@@ -527,7 +527,7 @@ function lightBoardFE(piece, state, flag,blockedFlag) {
                 const limit = move.limit || 100;
                 const offsetX = move.offsetX || 0;
                 const offsetY = move.offsetY || 0;
-                blockableSpecialFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag,blockedFlag);
+                blockableSpecialFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag,blockedFlag, move.missedSquareX, move.missedSquareY);
             }
         }
     })
@@ -538,7 +538,7 @@ function findCopyPieceByXY(pieces,x,y){
     })
 }
 
-function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag,secondFlag) {
+function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag,secondFlag, missedSquareX, missedSquareY) {
     if (!flag) {
         flag = 'light'
     }
@@ -573,10 +573,20 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
         directionY = 0;
     }
 
+    
+    if(!missedSquareX){
+        missedSquareX = 0;
+    }
+
+    if(!missedSquareY){
+        missedSquareY = 0;
+    }
 
     if (!piece) {
         square[flag] = true;
-        blockableSpecialFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1, flag,secondFlag)
+        const offsetX = move.offsetX || 0;
+        const offsetY = move.offsetY || 0;
+        blockableSpecialFunction(state, powerX + directionX, powerY + directionY, x+offsetX, y+offsetY, move, limit - 1, flag,secondFlag, missedSquareX, missedSquareY)
     }
     else if (!move.impotent) {
         // console.log(state, state.pieces)
@@ -591,7 +601,7 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
             }
         }
         
-        blockableSpecialFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1, secondFlag,secondFlag)
+        blockableSpecialFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1, secondFlag,secondFlag, missedSquareX, missedSquareY)
     }
 
     return;
