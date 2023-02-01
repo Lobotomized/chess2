@@ -1382,8 +1382,30 @@ function cyborgFactory(color,x,y){
         x: x,
         y: y,
         color: color,
-        value:0.3,
+        value:1.2,
         posValue:0.1,
+        afterPieceMove: function(state){
+            if(this.color == 'black' && (this.y === 5 || this.y ===3 || this.y === 1)){
+                this.value = 1.5 + this.y*0.5;
+            }
+            else if(this.color == 'white' && (this.y === 2 || this.y ===4 || this.y === 6)){
+                this.value = 1.5 + (7-this.y)*0.5;
+            }
+            return true;
+        },
+        afterPlayerMove: function (state){
+
+            if (this.color == 'black' && this.y == 7) {
+                state.pieces.push(juggernautFactory(this.color,this.x,this.y));
+                state.pieces.splice(state.pieces.indexOf(this),1);
+            }
+            else if (this.color == 'white' && this.y == 0) {
+                state.pieces.push(juggernautFactory(this.color,this.x,this.y));
+                state.pieces.splice(state.pieces.indexOf(this),1);
+            }
+            
+
+        },
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -1435,10 +1457,10 @@ function empoweredCrystalFactory(color,x,y){
     let moves = [
         { type: 'blockable', repeat: true, x: 0, y: -1, missedSquareY:-1, offsetY:-1 }, { type: 'blockable', repeat: true, x: 0, y: 1, missedSquareY:1, offsetY:1 },
         { type: 'blockable', repeat: true, x: -1, y: 0, missedSquareX:-1 , offsetX:-1 }, { type: 'blockable', repeat: true, x: 1, y: 0, missedSquareX:1, offsetX:1 },
-        { type: 'blockable', repeat: true, x: -1, y: -1, missedSquareX:-1, missedSquareY:-1, offsetX:-1, offsetY:-1 }, 
-        { type: 'blockable', repeat: true, x: 1, y: 1, missedSquareX:1, missedSquareY:1, offsetX:-1, offsetY:-1},
-        { type: 'blockable', repeat: true, x: -1, y: 1, missedSquareX:-1,missedSquareY:1, offsetX:-1, offsetY:1 }, 
-        { type: 'blockable', repeat: true, x: 1, y: -1, missedSquareX:1,missedSquareY:-1, offsetX:1, offsetY:-1 },
+        
+        { type: 'blockable', repeat: true, x: -1, y: -1, missedSquareX:-1 ,missedSquareY:-1 , offsetX:-1, offsetY:-1 }, { type: 'blockable', repeat: true, x: 1, y: 1 , missedSquareX:1 , missedSquareY:1 ,offsetX:1, offsetY:1},
+        { type: 'blockable', repeat: true, x: -1, y: 1, missedSquareX:-1 ,missedSquareY:1 , offsetX:-1, offsetY:1  }, { type: 'blockable', repeat: true, x: 1, y: -1, missedSquareX:1 ,missedSquareY:-1 , offsetX:1, offsetY:-1  },
+        
 
         { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
         { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
@@ -1452,7 +1474,7 @@ function empoweredCrystalFactory(color,x,y){
         x: x,
         y: y,
         color: color,
-        value:1000,
+        value:5,
         posValue:posValue[getRndInteger(1,3)-1],
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
@@ -1470,6 +1492,7 @@ function empoweredCrystalFactory(color,x,y){
                     if(piece.icon.includes('Crystal.png')){
                         piece.moves = this.moves;
                         piece.icon = this.icon;
+                        piece.value = 2000;
                     }
                 }
             })
@@ -1527,7 +1550,7 @@ function crystalFactory(color,x,y){
     ],
         x: x,
         y: y,
-        value:1000,
+        value:10,
         posValue:posValue[getRndInteger(1,3)-1],
         color: color,
 
@@ -1537,7 +1560,7 @@ function crystalFactory(color,x,y){
                     if(piece.icon.includes('CrystalEmpowered.png')){
                         piece.moves = this.moves;
                         piece.icon = this.icon;
-                        piece.value = this.value;
+                        piece.value = 2000;
                         piece.posValue = this.posValue;
                     }
                 }
@@ -1572,8 +1595,8 @@ function juggernautFactory(color,x,y){
         x: x,
         y: y,
         color: color,
-        value:9,
-        posValue:0.3,
+        value:10,
+        posValue:posValue[getRndInteger(1,3)-1],
 
         
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
@@ -1693,9 +1716,7 @@ function juggernautFactory(color,x,y){
                         { type: 'absolute', x: 2, y: -1 }
                     )
                 }
-                console.log(freeThere(this.x+1,this.y-1), '  heere?')
                 if(!freeThere(this.x+1,this.y-1)){
-                    console.log('wtf?')
                     toReturn.push(
                         { type: 'absolute', x: 1, y: -2 },
                     )

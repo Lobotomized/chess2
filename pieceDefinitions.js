@@ -1366,32 +1366,64 @@ const {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecke
 
 
     
-function cyborgFactory(color,x,y){
-    let moves = [{ type: 'absolute', y: -2, x: 0 },
-        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+    function cyborgFactory(color,x,y){
+        let moves = [{ type: 'absolute', y: -2, x: 0 },
+            { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+            { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+            { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+            { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+    
+        ]
+    
+        if (color == 'black') {
+            moves = [{ type: 'absolute',  y: 2, x: 0 }, 
+            { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+            { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+            { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+            { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }];
+        }
+        return {
+            icon: color + 'Cyborg.png',
+            moves: moves,
+            x: x,
+            y: y,
+            color: color,
+            value:1.2,
+            posValue:0.1,
+            afterPieceMove: function(state){
+                if(this.color == 'black' && (this.y === 5 || this.y ===3 || this.y === 1)){
+                    this.value = 1.5 + this.y*0.5;
+                }
+                else if(this.color == 'white' && (this.y === 2 || this.y ===4 || this.y === 6)){
+                    this.value = 1.5 + (7-this.y)*0.5;
+                }
+                return true;
 
-    ]
-
-    if (color == 'black') {
-        moves = [{ type: 'absolute',  y: 2, x: 0 }, 
-        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }];
+            },
+            afterPlayerMove: function (state){
+    
+                if (this.color == 'black' && this.y == 7) {
+                    state.pieces.push(juggernautFactory(this.color,this.x,this.y));
+                    state.pieces.splice(state.pieces.indexOf(this),1);
+                }
+                else if (this.color == 'white' && this.y == 0) {
+                    state.pieces.push(juggernautFactory(this.color,this.x,this.y));
+                    state.pieces.splice(state.pieces.indexOf(this),1);
+                }
+                
+            },
+            friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
+                if(friendlyPiece)
+                {
+                    if(friendlyPiece == state.pieceSelected){
+                        return true;
+                    }
+                    friendlyPiece.x = prevMove.x;
+                    friendlyPiece.y = prevMove.y;
+                }
+            }
+        }
     }
-    return {
-        icon: color + 'Cyborg.png',
-        moves: moves,
-        x: x,
-        y: y,
-        color: color,
-        value:0.3,
-        posValue:0.1,
-    }
-}
 
 function bootVesselFactory(color,x,y){
     let moves = [
@@ -1417,10 +1449,21 @@ function bootVesselFactory(color,x,y){
     }
 }
 
+/*
+            moves: [{ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
+            { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
+            { type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
+            { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 }],
+
+*/
+
 function empoweredCrystalFactory(color,x,y){
     let moves = [
         { type: 'blockable', repeat: true, x: 0, y: -1, missedSquareY:-1, offsetY:-1 }, { type: 'blockable', repeat: true, x: 0, y: 1, missedSquareY:1, offsetY:1 },
         { type: 'blockable', repeat: true, x: -1, y: 0, missedSquareX:-1 , offsetX:-1 }, { type: 'blockable', repeat: true, x: 1, y: 0, missedSquareX:1, offsetX:1 },
+        { type: 'blockable', repeat: true, x: -1, y: -1, missedSquareX:-1 ,missedSquareY:-1 , offsetX:-1, offsetY:-1 }, { type: 'blockable', repeat: true, x: 1, y: 1 , missedSquareX:1 , missedSquareY:1 ,offsetX:1, offsetY:1},
+        { type: 'blockable', repeat: true, x: -1, y: 1, missedSquareX:-1 ,missedSquareY:1 , offsetX:-1, offsetY:1  }, { type: 'blockable', repeat: true, x: 1, y: -1, missedSquareX:1 ,missedSquareY:-1 , offsetX:1, offsetY:-1  },
+        
         { type: 'blockable', repeat: true, x: -1, y: -1, missedSquareX:-1, missedSquareY:-1, offsetX:-1, offsetY:-1 }, 
         { type: 'blockable', repeat: true, x: 1, y: 1, missedSquareX:1, missedSquareY:1, offsetX:-1, offsetY:-1},
         { type: 'blockable', repeat: true, x: -1, y: 1, missedSquareX:-1,missedSquareY:1, offsetX:-1, offsetY:1 }, 
