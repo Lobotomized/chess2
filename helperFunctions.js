@@ -161,6 +161,8 @@ module.exports = {
     },
     blockableCheck(state, powerX, powerY, x, y, move, limit,myPiece, flag,counter) {
         let toReturn;
+        let missedSquareX = move.missedSquareX;
+        let missedSquareY = move.missedSquareY
         if (limit === 0) {
             return;
         }
@@ -189,11 +191,19 @@ module.exports = {
         else { 
             directionY = 0;
         }
+
+        if(!move.missedSquareX){
+            missedSquareX = 0;
+        }
+        if(!move.missedSquareY){
+            missedSquareY = 0;
+        }
+
         const secondPiece = state.pieces[module.exports.findPieceByXY(state.pieces,x+powerX, y + powerY)] // The piece on the attacked square
         //Find the direction in which we are going
         if (!secondPiece && !(x+powerX == myPiece.x && y+powerY == myPiece.y)) {
             //If there is  no such piece continue
-            return module.exports.blockableCheck(state, powerX+directionX, powerY+directionY, x, y, move, limit - 1, myPiece,flag,counter+1)
+            return module.exports.blockableCheck(state, powerX+directionX+missedSquareX, powerY+directionY+missedSquareY, x, y, move, limit - 1, myPiece,flag,counter+1)
         }
         else{
             if(secondPiece){

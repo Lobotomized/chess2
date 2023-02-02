@@ -85,7 +85,8 @@ function drawLightedSquare(x, y, size) {
 function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     pieces.length = 0;
     if(raceBlack == 'classic'){
-        pieces.push(rookFactory('black', 0,0), knightFactory('black', 1,0) ,
+        pieces.push(
+            rookFactory('black', 0,0), knightFactory('black', 1,0) ,
         bishopFactory('black', 2,0), queenFactory('black', 3,0),
         kingFactory('black', 4,0), bishopFactory('black', 5,0),
         knightFactory('black', 6,0), rookFactory('black', 7,0),
@@ -93,6 +94,7 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
         pawnFactory('black', 2,1), pawnFactory('black', 3,1),
         pawnFactory('black', 4,1), pawnFactory('black', 5,1),
         pawnFactory('black', 6,1), pawnFactory('black', 7,1)
+
         
         )
     }
@@ -643,6 +645,7 @@ function findPieceByXY(pieces,x,y){
                         const offsetX = move.offsetX || 0;
                         const offsetY = move.offsetY || 0;
                         if(blockableCheck(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, me) == 'block'){
+                            console.log(piece)
                             return true;
                         }
                     }
@@ -745,8 +748,10 @@ function findPieceByXY(pieces,x,y){
     return checker;
 }
 
-function blockableCheck(state, powerX, powerY, x, y, move, limit,myPiece, flag,counter) {
+function blockableCheck(state, powerX, powerY, x, y, move, limit,myPiece, flag) {
     let toReturn;
+    let missedSquareX = move.missedSquareX;
+    let missedSquareY = move.missedSquareY;
     if (limit === 0) {
         return;
     }
@@ -775,15 +780,23 @@ function blockableCheck(state, powerX, powerY, x, y, move, limit,myPiece, flag,c
     else { 
         directionY = 0;
     }
+
+    if(!move.missedSquareX){
+        missedSquareX = 0;
+    }
+    if(!move.missedSquareY){
+        missedSquareY = 0;
+    }
     const secondPiece = state.pieces[findPieceByXY(state.pieces,x+powerX, y + powerY)] // The piece on the attacked square
     //Find the direction in which we are going
     if (!secondPiece && !(x+powerX == myPiece.x && y+powerY == myPiece.y)) {
         //If there is  no such piece continue
-        return blockableCheck(state, powerX+directionX, powerY+directionY, x, y, move, limit - 1, myPiece,flag,counter+1)
+        return blockableCheck(state, powerX+directionX + missedSquareX, powerY+directionY + missedSquareY, x, y, move, limit - 1, myPiece,flag)
     }
     else{
         if(secondPiece){
             if(secondPiece.x == myPiece.x && secondPiece.y == myPiece.y){
+                console.log(secondPiece)
                 toReturn = 'block';
                 return 'block'
             }
