@@ -1077,20 +1077,20 @@ function northernKing(color, x, y){
         afterPieceMove:function(state, move, prevMove){
             if(this.color === 'black'){
                 if(this.y === 7){
-                    this.value = 1000;
+                    this.value = 2000;
                     state.won = 'black';
                 }
                 else{
-                    this.value = 800 + 0.5*this.y;
+                    this.value = 800 + 1*this.y;
                 }
             }
             else if(this.color === 'white' && this.y === 0){
                 if(this.y === 0){
-                    this.value = 1000;
+                    this.value = 2000;
                     state.won = 'white';
                 }
                 else{
-                    this.value = 800 + 0.5*this.y;
+                    this.value = 800 + 1*this.y;
                 }            
             }
 
@@ -1261,7 +1261,7 @@ function plagueDoctor(color, x, y){
         y: y,
         color: color,
         value:800,
-        posValue:0.5,
+        posValue:1,
         afterThisPieceTaken: function (state) {
             let find = state.pieces.find((el) => {
                 return el.icon === this.color + 'NorthernKing.png'
@@ -1278,7 +1278,7 @@ function plagueDoctor(color, x, y){
                     state.won = 'black';
                 }
                 else{
-                    this.value = 800 + 0.5*this.y;
+                    this.value = 800 + 1*this.y;
                 }
             }
             else if(this.color === 'white' && this.y === 0){
@@ -1287,10 +1287,10 @@ function plagueDoctor(color, x, y){
                     state.won = 'white';
                 }
                 else{
-                    this.value = 800 + 0.5*this.y;
+                    this.value = 800 + 1*this.y;
                 }            
             }
-
+            this.value += 2;
             let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
             let kolbaPower = this.color === 'black' ? this.y+1 : 8-this.y;
             if(promoteCondition){
@@ -1386,10 +1386,10 @@ function cyborgFactory(color,x,y){
         posValue:0.1,
         afterPieceMove: function(state){
             if(this.color == 'black' && (this.y === 5 || this.y ===3 || this.y === 1)){
-                this.value = 1.5 + this.y*0.5;
+                this.value = 2 + this.y*0.25;
             }
             else if(this.color == 'white' && (this.y === 2 || this.y ===4 || this.y === 6)){
-                this.value = 1.5 + (7-this.y)*0.5;
+                this.value = 2 + (7-this.y)*0.25;
             }
             return true;
         },
@@ -1439,7 +1439,7 @@ function bootVesselFactory(color,x,y){
         y: y,
         color: color,
         value:2,
-        posValue:0.3,
+        posValue:0.4,
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -1475,7 +1475,7 @@ function empoweredCrystalFactory(color,x,y){
         y: y,
         color: color,
         value:5,
-        posValue:posValue[getRndInteger(1,3)-1],
+        posValue:posValue[getRndInteger(1,5)-1],
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -1487,15 +1487,25 @@ function empoweredCrystalFactory(color,x,y){
             }
         },
         afterThisPieceTaken:function(state){
+            let hadIt=  false;
             state.pieces.forEach((piece) => {
-                if(piece.color == this.color){
-                    if(piece.icon.includes('Crystal.png')){
-                        piece.moves = this.moves;
-                        piece.icon = this.icon;
-                        piece.value = 2000;
-                    }
+                if(piece.color == this.color && piece.icon.includes('Crystal.png') && piece != this){
+                    piece.moves = this.moves;
+                    piece.icon = this.icon;
+                    piece.value = 2000;
+                    hadIt = true;
                 }
             })
+
+
+            if(!hadIt){
+                if (this.color == 'white') {
+                    state.won = 'black';
+                }
+                else if (this.color == 'black') {
+                    state.won = 'white';
+                }
+            }
         }
     }
 }
@@ -1519,7 +1529,7 @@ function executorFactory(color,x,y){
         y: y,
         color: color,
         value:5,
-        posValue:posValue[getRndInteger(1,3)-1],
+        posValue:posValue[getRndInteger(2,4)-1],
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -1555,16 +1565,25 @@ function crystalFactory(color,x,y){
         color: color,
 
         afterThisPieceTaken:function(state){
+            let hadIt = false;
+
             state.pieces.forEach((piece) => {
-                if(piece.color == this.color){
-                    if(piece.icon.includes('CrystalEmpowered.png')){
-                        piece.moves = this.moves;
-                        piece.icon = this.icon;
-                        piece.value = 2000;
-                        piece.posValue = this.posValue;
-                    }
+                if(piece.color == this.color && piece.icon.includes('CrystalEmpowered.png') && piece != this){
+                    piece.moves = this.moves;
+                    piece.icon = this.icon;
+                    piece.value = 2000;
+                    piece.posValue = this.posValue;
+                    hadIt = true;
                 }
             })
+            if(!hadIt){
+                if (this.color == 'white') {
+                    state.won = 'black';
+                }
+                else if (this.color == 'black') {
+                    state.won = 'white';
+                }
+            }
         },
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
