@@ -631,6 +631,7 @@ function findPieceByXY(pieces,x,y){
         if (piece.conditionalMoves) {
             tempMoves = piece.conditionalMoves(state);
         }
+
         for(let ii = [...piece.moves, ...tempMoves].length-1; ii>=0; ii--){
             const move = [...piece.moves, ...tempMoves][ii];
             if (piece.color == enemyColor) {

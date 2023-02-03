@@ -1697,7 +1697,6 @@ function juggernautFactory(color,x,y){
                 if(!freeThere(this.x+1,this.y+1)){
                     toReturn.push(
                         { type: 'absolute', y: 1, x: 2 },
-                        { type: 'absolute', y: 2, x: 2 },
                         { type: 'absolute', y: 2, x: 1 },
                     )
                 }       
@@ -1722,13 +1721,13 @@ function juggernautFactory(color,x,y){
                 if(!freeThere(this.x-1,this.y-1)){
                     toReturn.push(
                         { type: 'absolute', x: -1, y: -2 },
-                        { type: 'absolute', y: -2, x: 2 },
+                        
                     )
                 }
                 if(!freeThere(this.x-1,this.y+1)){
                     toReturn.push(
                         { type: 'absolute', x: -1, y: 2 },
-                        { type: 'absolute', y: 1, x: -2 },
+                        { type: 'absolute', x: -2, y: 1 },
                     )
                 }       
             }
@@ -1756,6 +1755,7 @@ function juggernautFactory(color,x,y){
                 if(!freeThere(this.x+1,this.y+1)){
                     toReturn.push(
                         { type: 'absolute', x: 1, y: 2 },
+                        { type: 'absolute', x: 2, y: 1 },
                     )
                 }       
             }
