@@ -114,7 +114,75 @@ function evaluateBoard(colorPerspective, pieces, state){
      }
      return movesAndPieces
  }
- 
+
+
+ function minimaxDve(state,maximizer, depth, removedTurns){
+    const moves = generateMovesFromPieces(state,maximizer)
+    let enemy = 'black';
+    if(maximizer === 'black'){
+        enemy = 'white';
+    }
+                
+    let selectedMove = undefined;
+    let badMoveResults= []
+    let goodMoveResults = [];
+    let slizedMoves = moves.slice(0,depth);
+    let lowestBadMoveResult = 99999999;
+    let lowestGooodMoveResult = -99999999;
+    slizedMoves.forEach((move, index) => {
+        let isItBanned;
+        if(removedTurns){
+            isItBanned = removedTurns.find((removedTurn) => {
+                return move.xClicked === removedTurn.xClicked && move.yClicked === removedTurn.yClicked && removedTurn.pieceCounter === move.pieceCounter
+            })
+        }
+
+        if(isItBanned){
+            return;
+        }
+        const badMoves = generateMovesFromPieces({board:state.board,pieces:move.pieces},enemy)
+        let bestBadMove = {};
+        let badMoveValue = -999999;
+        badMoves.forEach((badMove) => {
+
+            let thisValue = evaluateBoard(enemy,badMove.pieces, state)
+            if(thisValue > badMoveValue){
+                badMoveValue = thisValue;
+                bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
+            }
+        })
+        badMoveResults.push(bestBadMove)
+    })
+
+
+    badMoveResults.forEach((badMoveResult) => {
+        const badMoves = generateMovesFromPieces({board:state.board,pieces:badMoveResult.pieces},enemy)
+        let bestBadMove = {};
+        let badMoveValue = -999999;
+        badMoves.forEach((badMove) => {
+
+            let thisValue = evaluateBoard(enemy,badMove.pieces, state)
+            if(thisValue > badMoveValue){
+                badMoveValue = thisValue;
+                bestBadMove = {moveCounter:badMoveResult.moveCounter, value:badMoveValue,pieces:badMove.pieces}
+            }
+        })
+        goodMoveResults.push(bestBadMove)
+    })
+    
+    goodMoveResults.forEach((badMoveResult) => {
+        if(badMoveResult.value < lowestBadMoveResult ){
+            lowestBadMoveResult = badMoveResult.value;
+            selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
+        }
+    })
+    
+
+
+    return moves[selectedMove.moveCounter];
+
+}
+
  function minimax(state,maximizer, depth, removedTurns){
     const moves = generateMovesFromPieces(state,maximizer)
     let enemy = 'black';
@@ -171,6 +239,16 @@ function evaluateBoard(colorPerspective, pieces, state){
     // return move
 
     // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
+}
+
+
+function minimaxKing(state,maximizer, depth, removedTurns){
+    if(state.pieces > 15){
+        return minimax(state,maximizer, depth, removedTurns);
+    }
+    else{
+        return minimaxDve(state,maximizer, depth, removedTurns);
+    }
 }
 
 
@@ -503,7 +581,6 @@ function blockableCheck(state, powerX, powerY, x, y, move, limit,myPiece, flag) 
     else{
         if(secondPiece){
             if(secondPiece.x == myPiece.x && secondPiece.y == myPiece.y){
-                console.log(secondPiece)
                 toReturn = 'block';
                 return 'block'
             }

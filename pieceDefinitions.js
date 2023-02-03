@@ -306,7 +306,6 @@ const {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecke
     
         if (color == 'black') {
             moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'takeMove', y: 1, x: -1 }, { type: 'takeMove', y: 1, x: 1 }];
-    
         }
     
         return {
@@ -379,11 +378,14 @@ const {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecke
                         { type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
                         { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 })
                 }
-    
+                
     
                 if(this.color == 'black'){
     
                     const enemyPiece = state.pieces.find((piece) => {
+                        if(piece.x == move.x && piece.y == move.y-1 && piece.color != this.color){
+                            console.log('vliza  ', piece.enPassantMove)
+                        }
                         return piece.x == move.x && piece.y == move.y-1 && piece.color != this.color && piece.enPassantMove //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
                     })
                     if(enemyPiece){
@@ -423,7 +425,9 @@ const {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecke
                 else{
                     this.value = 1 + (7-this.y)*0.1
                 }
-                this.enPassantMove = false;
+                if(this.color === state.turn){
+                    this.enPassantMove = false;
+                }
                 if(this.color === 'black'){
                     if(this.y == prevMove.y + 2 && this.x === prevMove.x){
                         this.enPassantMove = true;
@@ -433,6 +437,7 @@ const {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecke
                 if(this.color === 'white'){
                     if(this.y == prevMove.y - 2 && this.x === prevMove.x){
                         this.enPassantMove = true;
+    
                     }
                 }
             }
@@ -1572,8 +1577,8 @@ function juggernautFactory(color,x,y){
         x: x,
         y: y,
         color: color,
-        value:7,
-        posValue:0.6,
+        value:10,
+        posValue:posValue[getRndInteger(1,3)-1],
 
         
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
@@ -1693,9 +1698,7 @@ function juggernautFactory(color,x,y){
                         { type: 'absolute', x: 2, y: -1 }
                     )
                 }
-                console.log(freeThere(this.x+1,this.y-1), '  heere?')
                 if(!freeThere(this.x+1,this.y-1)){
-                    console.log('wtf?')
                     toReturn.push(
                         { type: 'absolute', x: 1, y: -2 },
                     )

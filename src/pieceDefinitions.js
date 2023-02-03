@@ -373,11 +373,14 @@ function pawnFactory(color, x, y) {
                     { type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
                     { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 })
             }
-
+            
 
             if(this.color == 'black'){
 
                 const enemyPiece = state.pieces.find((piece) => {
+                    if(piece.x == move.x && piece.y == move.y-1 && piece.color != this.color){
+                        console.log('vliza  ', piece.enPassantMove)
+                    }
                     return piece.x == move.x && piece.y == move.y-1 && piece.color != this.color && piece.enPassantMove //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
                 })
                 if(enemyPiece){
@@ -417,7 +420,9 @@ function pawnFactory(color, x, y) {
             else{
                 this.value = 1 + (7-this.y)*0.1
             }
-            this.enPassantMove = false;
+            if(this.color === state.turn){
+                this.enPassantMove = false;
+            }
             if(this.color === 'black'){
                 if(this.y == prevMove.y + 2 && this.x === prevMove.x){
                     this.enPassantMove = true;
@@ -427,6 +432,7 @@ function pawnFactory(color, x, y) {
             if(this.color === 'white'){
                 if(this.y == prevMove.y - 2 && this.x === prevMove.x){
                     this.enPassantMove = true;
+
                 }
             }
         }
