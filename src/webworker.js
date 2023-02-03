@@ -194,7 +194,7 @@ function evaluateBoard(colorPerspective, pieces, state){
     let badMoveResults= []
     let slizedMoves = moves.slice(0,depth);
     let lowestBadMoveResult = 99999999;
-    
+
     slizedMoves.forEach((move, index) => {
         let isItBanned;
         if(removedTurns){
@@ -202,11 +202,13 @@ function evaluateBoard(colorPerspective, pieces, state){
                 return move.xClicked === removedTurn.xClicked && move.yClicked === removedTurn.yClicked && removedTurn.pieceCounter === move.pieceCounter
             })
         }
-
+        
         if(isItBanned){
             return;
         }
+
         const badMoves = generateMovesFromPieces({board:state.board,pieces:move.pieces},enemy)
+
         let bestBadMove = {};
         let badMoveValue = -999999;
         badMoves.forEach((badMove) => {
@@ -267,7 +269,8 @@ function minimaxKing(state,maximizer, depth, removedTurns){
            piece.conditionalMoves = JSONfn.parse(JSONfn.stringify(midObj)).conditionalMoves;
            tempMoves =  piece.conditionalMoves(state)
         }
-        //tempMoves = piece.conditionalMoves(state);
+
+        tempMoves = piece.conditionalMoves(state);
     }
     [...piece.moves, ...tempMoves].forEach((move) => {
         if (move.type == 'absolute') {
