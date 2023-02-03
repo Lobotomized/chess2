@@ -390,38 +390,38 @@ function drawPiece(x, y, img, size) {
         break;
 
         case 'whiteBootvessel.png':
-            ctx.drawImage(wBootvessel, 0, 0, 600, 600, x * size, y * size, size, size);
+            ctx.drawImage(wBootvessel, -40, -80, 600, 600, x * size, y * size, size, size);
         break;
         case 'blackBootvessel.png':
-            ctx.drawImage(bBootvessel, 0, 0, 600, 600, x * size, y * size, size, size);
+            ctx.drawImage(bBootvessel, -40, -80, 600, 600, x * size, y * size, size, size);
         break;
 
         case 'blackCrystal.png':
-            ctx.drawImage(bCrystal, 0, 0, 600, 600, x * size, y * size, size, size);
+            ctx.drawImage(bCrystal, -40, -40, 600, 600, x * size, y * size, size, size);
         break;
         case 'whiteCrystal.png':
-            ctx.drawImage(wCrystal, 0, 0, 600, 600, x * size, y * size, size, size);
+            ctx.drawImage(wCrystal, -40, -40, 600, 600, x * size, y * size, size, size);
         break;
 
         case 'blackCrystalEmpowered.png':
-            ctx.drawImage(bCrystalEmpowered, 0, 0, 600, 600, x * size, y * size, size, size);
+            ctx.drawImage(bCrystalEmpowered, -40, -40, 600, 600, x * size, y * size, size, size);
         break;
         case 'whiteCrystalEmpowered.png':
-            ctx.drawImage(wCrystalEmpowered, 0, 0, 600, 600, x * size, y * size, size, size);
+            ctx.drawImage(wCrystalEmpowered, -40, -40, 600, 600, x * size, y * size, size, size);
         break;
 
         case 'blackJuggernaut.png':
-            ctx.drawImage(bJuggernaut, 0, 0, 600, 600, x * size, y * size, size, size);
+            ctx.drawImage(bJuggernaut, -70, -50, 600, 600, x * size, y * size, size, size);
         break;
         case 'whiteJuggernaut.png':
-            ctx.drawImage(wJuggernaut, 0, 0, 600, 600, x * size, y * size, size, size);
+            ctx.drawImage(wJuggernaut, -70, -80, 600, 600, x * size, y * size, size, size);
         break;
 
         case 'blackExecutor.png':
-            ctx.drawImage(bExecutor, 0, 0, 600, 600, x * size, y * size, size, size);
+            ctx.drawImage(bExecutor,-100, -100, 600, 600, x * size, y * size, size, size);
         break;
         case 'whiteExecutor.png':
-            ctx.drawImage(wExecutor, 0, 0, 600, 600, x * size, y * size, size, size);
+            ctx.drawImage(wExecutor, -100, -100, 600, 600, x * size, y * size, size, size);
         break;
     }
 }
