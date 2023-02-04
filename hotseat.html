@@ -320,6 +320,17 @@ let ani = function(){
                 
                 // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
             }
+            else if(AIColor === 'allAI'){
+                w = new Worker("src/webworker.js");
+                console.log(state.turn,' wtf?   ')
+                w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:500}));
+                w.onmessage = function(event){
+                    let move = JSONfn.parse(event.data)
+                    AIMove(move.pieceCounter, move.xClicked, move.yClicked, state.turn)
+                    w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:500}));
+
+                }
+            }
         }
 
         function getRndInteger(min, max) {
