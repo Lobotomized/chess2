@@ -1480,7 +1480,7 @@ function empoweredCrystalFactory(color,x,y){
         x: x,
         y: y,
         color: color,
-        value:5,
+        value:993,
         posValue:posValue[getRndInteger(1,5)-1],
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
@@ -1498,7 +1498,7 @@ function empoweredCrystalFactory(color,x,y){
                 if(piece.color == this.color && piece.icon.includes('Crystal.png') && piece != this){
                     piece.moves = this.moves;
                     piece.icon = this.icon;
-                    piece.value = 2000;
+                    piece.value = 1000;
                     hadIt = true;
                 }
             })
@@ -1566,7 +1566,7 @@ function crystalFactory(color,x,y){
     ],
         x: x,
         y: y,
-        value:10,
+        value:1000,
         posValue:posValue[getRndInteger(1,3)-1],
         color: color,
 
@@ -1577,7 +1577,7 @@ function crystalFactory(color,x,y){
                 if(piece.color == this.color && piece.icon.includes('CrystalEmpowered.png') && piece != this){
                     piece.moves = this.moves;
                     piece.icon = this.icon;
-                    piece.value = 2000;
+                    piece.value = 1000;
                     piece.posValue = this.posValue;
                     hadIt = true;
                 }
