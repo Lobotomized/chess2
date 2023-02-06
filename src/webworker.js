@@ -69,6 +69,49 @@ function evaluateBoard(colorPerspective, pieces, state){
     return valueCounter;
 }
  
+function evaluateBoardDve(colorPerspective, pieces, state){
+    let counter = 0;
+    let valueTransformer = 1;
+    let valueCounter = 0;
+    const board = state.board;
+    let valuableEnemy= pieces.find((el)=> {
+        return el.color != state.color && el.value > 500;
+    })
+    while(pieces.length > counter){
+        const piece = pieces[counter]
+        lightBoardFE(piece,{pieces:pieces, board:board, turn:state.turn},'allowedMove')
+
+        let attackValue = 0;
+
+        const filtered = board.filter((square) => {
+            return square['allowedMove']
+        })
+        
+        let findSpecialSquare = filtered.find((square) => {
+            return square.x === valuableEnemy.x && square.y === valuableEnemy.y && square['allowedMove']
+        })
+        if(findSpecialSquare){
+            attackValue = 10000;
+        }
+         let magnifier = filtered.length * globalPosValue*piece.posValue;
+
+        if(colorPerspective === piece.color){
+            valueTransformer = piece.value ? piece.value + magnifier : 1 + magnifier +attackValue;
+        }
+        else{
+            valueTransformer = piece.value ? piece.value* -1 - magnifier : -1 - magnifier - attackValue;
+        }
+
+
+
+        
+        valueCounter += valueTransformer;
+
+
+        counter++;
+    }
+    return valueCounter;
+}
  
  
  function getColorPieces(pieces,color){
@@ -128,8 +171,7 @@ function evaluateBoard(colorPerspective, pieces, state){
     let goodMoveResults = [];
     let slizedMoves = moves.slice(0,depth);
     let lowestBadMoveResult = 99999999;
-    let lowestGooodMoveResult = -99999999;
-    slizedMoves.forEach((move, index) => {
+        slizedMoves.forEach((move, index) => {
         let isItBanned;
         if(removedTurns){
             isItBanned = removedTurns.find((removedTurn) => {
@@ -145,7 +187,7 @@ function evaluateBoard(colorPerspective, pieces, state){
         let badMoveValue = -999999;
         badMoves.forEach((badMove) => {
 
-            let thisValue = evaluateBoard(enemy,badMove.pieces, state)
+            let thisValue = evaluateBoardDve(enemy,badMove.pieces, state)
             if(thisValue > badMoveValue){
                 badMoveValue = thisValue;
                 bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
@@ -161,7 +203,7 @@ function evaluateBoard(colorPerspective, pieces, state){
         let badMoveValue = -999999;
         badMoves.forEach((badMove) => {
 
-            let thisValue = evaluateBoard(enemy,badMove.pieces, state)
+            let thisValue = evaluateBoardDve(enemy,badMove.pieces, state)
             if(thisValue > badMoveValue){
                 badMoveValue = thisValue;
                 bestBadMove = {moveCounter:badMoveResult.moveCounter, value:badMoveValue,pieces:badMove.pieces}
@@ -237,10 +279,7 @@ function evaluateBoard(colorPerspective, pieces, state){
         // })
    // }
     return moves[selectedMove.moveCounter];
-    // const move = moves[selectedMove.moveCounter]
-    // return move
 
-    // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
 }
 
 
