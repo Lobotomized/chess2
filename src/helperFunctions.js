@@ -86,15 +86,14 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     pieces.length = 0;
     if(raceBlack == 'classic'){
         pieces.push(
-            rookFactory('black', 0,0),rookFactory('black', 0,1),
-        //     rookFactory('black', 0,0), knightFactory('black', 1,0) ,
-        // bishopFactory('black', 2,0), queenFactory('black', 3,0),
-        // kingFactory('black', 4,0), bishopFactory('black', 5,0),
-        // knightFactory('black', 6,0), rookFactory('black', 7,0),
-        // pawnFactory('black', 0,1), pawnFactory('black', 1,1) ,
-        // pawnFactory('black', 2,1), pawnFactory('black', 3,1),
-        // pawnFactory('black', 4,1), pawnFactory('black', 5,1),
-        // pawnFactory('black', 6,1), pawnFactory('black', 7,1)
+            rookFactory('black', 0,0), knightFactory('black', 1,0) ,
+        bishopFactory('black', 2,0), queenFactory('black', 3,0),
+        kingFactory('black', 4,0), bishopFactory('black', 5,0),
+        knightFactory('black', 6,0), rookFactory('black', 7,0),
+        pawnFactory('black', 0,1), pawnFactory('black', 1,1) ,
+        pawnFactory('black', 2,1), pawnFactory('black', 3,1),
+        pawnFactory('black', 4,1), pawnFactory('black', 5,1),
+        pawnFactory('black', 6,1), pawnFactory('black', 7,1)
 
         
         )
@@ -129,17 +128,16 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
 
     if(raceWhite == 'classic'){
         pieces.push( 
-            crystalFactory('white', 4,7)
-        //     rookFactory('white', 0,7), 
-        // knightFactory('white', 1,7) ,
-        // bishopFactory('white', 2,7), 
-        // queenFactory('white', 3,7),
-        // kingFactory('white', 4,7), bishopFactory('white', 5,7),
-        // knightFactory('white', 6,7), rookFactory('white', 7,7),
-        // pawnFactory('white', 0,6), pawnFactory('white', 1,6) ,
-        // pawnFactory('white', 2,6), pawnFactory('white', 3,6),
-        // pawnFactory('white', 4,6), pawnFactory('white', 5,6),
-        // pawnFactory('white', 6,6), pawnFactory('white', 7,6),
+            rookFactory('white', 0,7), 
+        knightFactory('white', 1,7) ,
+        bishopFactory('white', 2,7), 
+        queenFactory('white', 3,7),
+        kingFactory('white', 4,7), bishopFactory('white', 5,7),
+        knightFactory('white', 6,7), rookFactory('white', 7,7),
+        pawnFactory('white', 0,6), pawnFactory('white', 1,6) ,
+        pawnFactory('white', 2,6), pawnFactory('white', 3,6),
+        pawnFactory('white', 4,6), pawnFactory('white', 5,6),
+        pawnFactory('white', 6,6), pawnFactory('white', 7,6),
         
         )
     }
