@@ -234,7 +234,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
                 
     let selectedMove = undefined;
     let badMoveResults= []
-    let slizedMoves = moves.slice(0,depth);
+    let slizedMoves = moves //.slice(0,depth);
     let lowestBadMoveResult = 99999999;
 
     slizedMoves.forEach((move, index) => {
@@ -246,11 +246,11 @@ function evaluateBoardDve(colorPerspective, pieces, state){
         }
         
         if(isItBanned){
+            console.log('tuka')
             return;
         }
 
         const badMoves = generateMovesFromPieces({board:state.board,pieces:move.pieces},enemy)
-
         let bestBadMove = {};
         let badMoveValue = -999999;
         badMoves.forEach((badMove) => {
@@ -261,6 +261,9 @@ function evaluateBoardDve(colorPerspective, pieces, state){
                 bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
             }
         })
+        if(!badMoves.length){
+            bestBadMove = {moveCounter:index, value:-2500,pieces:state.pieces};
+        }
         badMoveResults.push(bestBadMove)
     })
     badMoveResults.forEach((badMoveResult) => {
@@ -269,7 +272,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
             selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
         }
     })
-
+    // console.log(badMoveResults, selectedMove)
    // if(lowestBadMoveResult > 2000){
         // badMoveResults.forEach((badMoveResult) => {
         //     if(badMoveResult.value > lowestBadMoveResult ){
