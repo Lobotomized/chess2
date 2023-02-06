@@ -1,3 +1,4 @@
+
 function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -13,7 +14,7 @@ let posValue = [
 
 
 
-function knightFactory(color, x, y) {
+export function knightFactory(color, x, y) {
     return {
         icon: color + 'Knight.png',
         moves: [{ type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
@@ -30,7 +31,7 @@ function knightFactory(color, x, y) {
 
 
 
-function mongolianKnightFactory(color, x, y) {
+export function mongolianKnightFactory(color, x, y) {
     return {
         icon: color + 'Knight.png',
         moves: [{ type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
@@ -49,7 +50,7 @@ function mongolianKnightFactory(color, x, y) {
     }
 }
 
-function weakPawn(color,x,y){
+export function weakPawn(color,x,y){
     let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'takeMove', y: -1, x: -1 }, { type: 'takeMove', y: -1, x: 1 }]
 
     if (color == 'black') {
@@ -91,7 +92,7 @@ function weakPawn(color,x,y){
     }
 }
 
-function unpromotablePawn(color, x, y) {
+export function unpromotablePawn(color, x, y) {
     let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'takeMove', y: -1, x: -1 }, { type: 'takeMove', y: -1, x: 1 }]
 
     if (color == 'black') {
@@ -131,7 +132,7 @@ function unpromotablePawn(color, x, y) {
     }
 }
 
-function ghostFactory(color,x,y){
+export function ghostFactory(color,x,y){
     let moves = [{ type: 'absolute',y: -1, x: 0 }, { type: 'absolute', y: -2,x:0 }]
 
     if (color == 'black') {
@@ -148,7 +149,7 @@ function ghostFactory(color,x,y){
     }
 }
 
-function pigFactory(color,x,y){
+export function pigFactory(color,x,y){
     let moves = [{ type: 'blockable', repeat: true, x: 0, y: -1 }]
     if (color == 'black') {
         moves = [{ type: 'blockable', repeat: true, x: 0, y: 1 }];
@@ -165,7 +166,7 @@ function pigFactory(color,x,y){
     }
 }
 
-function horseFactory(color,x,y){
+export function horseFactory(color,x,y){
     const moves = [{ type: 'blockable', repeat: true, x: 0, y: -1, limit:3 }, { type: 'blockable', repeat: true, x: 0, y: 1,limit:3 },
     { type: 'blockable', repeat: true, x: -1, y: 0 ,limit:3}, { type: 'blockable', repeat: true, x: 1, y: 0 ,limit:3},
     { type: 'blockable', repeat: true, x: -1, y: -1 ,limit:3}, { type: 'blockable', repeat: true, x: 1, y: 1 ,limit:3},
@@ -182,7 +183,7 @@ function horseFactory(color,x,y){
     }
 }
 
-function ricarFactory(color,x,y){
+export function ricarFactory(color,x,y){
     let direction = 1;
     if(color == 'black'){
         direction = -1;
@@ -239,7 +240,7 @@ function ricarFactory(color,x,y){
 
 }
 
-function hatFactory(color,x,y){
+export function hatFactory(color,x,y){
     const moves = [{ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
         { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
     
@@ -265,7 +266,7 @@ function hatFactory(color,x,y){
     }
 }
 
-function clownFactory(color,x,y){
+export function clownFactory(color,x,y){
     const moves= [{ type: 'blockable', repeat: true, x: 0, y: -1, impotent:true }, { type: 'blockable', repeat: true, x: 0, y: 1, impotent:true },
     { type: 'blockable', repeat: true, x: -1, y: 0, impotent:true }, { type: 'blockable', repeat: true, x: 1, y: 0, impotent:true },
     { type: 'blockable', repeat: true, x: -1, y: -1, impotent:true }, { type: 'blockable', repeat: true, x: 1, y: 1, impotent:true },
@@ -296,7 +297,7 @@ function clownFactory(color,x,y){
 
 
 
-function pawnFactory(color, x, y) {
+export function pawnFactory(color, x, y) {
     let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'takeMove', y: -1, x: -1 }, { type: 'takeMove', y: -1, x: 1 }]
 
     if (color == 'black') {
@@ -439,7 +440,7 @@ function pawnFactory(color, x, y) {
     }
 }
 
-function dragonFactory(color,x,y){
+export function dragonFactory(color,x,y){
  return {
         color: color,
         x:x,
@@ -552,7 +553,7 @@ function dragonFactory(color,x,y){
 }
 }
 
-function bishopFactory(color, x, y) {
+export function bishopFactory(color, x, y) {
     return {
         icon: color + 'Bishop.png',
         moves: [{ type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
@@ -565,7 +566,7 @@ function bishopFactory(color, x, y) {
     }
 }
 
-function rookFactory(color, x, y) {
+export function rookFactory(color, x, y) {
     return {
         icon: color + 'Rook.png',
         moves: [{ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
@@ -583,7 +584,7 @@ function rookFactory(color, x, y) {
     }
 }
 
-function queenFactory(color, x, y) {
+export function queenFactory(color, x, y) {
     return {
         icon: color + 'Queen.png',
         moves: [{ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
@@ -601,7 +602,7 @@ function queenFactory(color, x, y) {
 
 
 
-function kingFactory(color, x, y) {
+export function kingFactory(color, x, y) {
     return {
         icon: color + 'King.png',
         vulnerable: true,
@@ -785,7 +786,7 @@ function kingFactory(color, x, y) {
     }
 }
 
-function antFactory(color,x,y, direction){
+export function antFactory(color,x,y, direction){
     if(!direction){
         direction =  color
     }
@@ -828,7 +829,7 @@ function antFactory(color,x,y, direction){
     }
 }
 
-function goliathBugFactory(color,x,y){
+export function goliathBugFactory(color,x,y){
     let moves = [{ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
         { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
         { type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
@@ -853,7 +854,7 @@ function goliathBugFactory(color,x,y){
     }
 }
 
-function ladyBugFactory(color,x,y){
+export function ladyBugFactory(color,x,y){
     let moves = [
         { type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
         { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
@@ -935,7 +936,7 @@ function ladyBugFactory(color,x,y){
     }
 }
 
-function spiderFactory(color,x,y){
+export function spiderFactory(color,x,y){
     let moves = [{ type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
     { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 },
     { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: 1, x: -2 },
@@ -962,7 +963,7 @@ function spiderFactory(color,x,y){
     }
 }
 
-function shroomFactory(color,x,y){
+export function shroomFactory(color,x,y){
     return {
         icon: color+'Shroom.png',
         moves:[],
@@ -1007,7 +1008,7 @@ function giveOppositeColor(color){
 }
 
 
-function queenBugFactory(color,x,y){
+export function queenBugFactory(color,x,y){
     return {
         icon: color+'QueenBug.png',
         moves: [{ type: 'absolute', x: 0, y: -1, impotent:true }, { type: 'absolute', x: 0, y: 1 , impotent:true},
@@ -1038,7 +1039,7 @@ function queenBugFactory(color,x,y){
 
 
 
-function swordsMen(color, x, y){
+export function swordsMen(color, x, y){
     let moves = [{ type: 'absolute',  y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
 
     if (color == 'black') {
@@ -1056,7 +1057,7 @@ function swordsMen(color, x, y){
 }
 
 
-function northernKing(color, x, y){
+export function northernKing(color, x, y){
     let moves = [{ type: 'absolute',  y: -1, x: 0 }]
 
     if (color == 'black') {
@@ -1141,7 +1142,7 @@ function northernKing(color, x, y){
     }
 }
 
-function pikeman(color, x, y){
+export function pikeman(color, x, y){
     let moves = [
         { type: 'absolute', impotent: true, y: -1, x: 0, impotent:true }, { type: 'absolute', impotent: true, y: 0, x: -1, impotent:true }, { type: 'absolute', impotent: true, y: 0, x: 1, impotent:true }, 
         {type:'takeMove', y:-2, x:0}, {type:'takeMove', y:-2, x:1}, {type:'takeMove', y:-2, x:-1}
@@ -1161,7 +1162,7 @@ function pikeman(color, x, y){
     }
 }
 
-function copier(color, x, y){
+export function copier(color, x, y){
     let moves = []
 
     return {
@@ -1185,7 +1186,7 @@ function copier(color, x, y){
 }
 
 
-function kolba(color, x, y){
+export function kolba(color, x, y){
     let moves = []
 
     return {
@@ -1208,7 +1209,7 @@ function kolba(color, x, y){
     }
 }
 
-function fencer(color, x, y){
+export function fencer(color, x, y){
     let moves = []
 
     return {
@@ -1222,7 +1223,7 @@ function fencer(color, x, y){
     }
 }
 
-function general(color, x, y){
+export function general(color, x, y){
     let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
 
     if (color == 'black') {
@@ -1239,7 +1240,7 @@ function general(color, x, y){
     }
 }
 
-function shield(color, x, y){
+export function shield(color, x, y){
     let moves = [{ type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },{ type: 'blockable', 
     repeat:true, limit:1, y: -1, x: 0}, { type: 'blockable', repeat:true, limit:1, y: 1, x: 0 }]
 
@@ -1254,7 +1255,7 @@ function shield(color, x, y){
     }
 }
 
-function plagueDoctor(color, x, y){
+export function plagueDoctor(color, x, y){
     let moves = [{ type: 'absolute',  y: -1, x: 0 }]
 
     if (color == 'black') {
@@ -1333,7 +1334,7 @@ function plagueDoctor(color, x, y){
     }
 }
 
-function starMan(color, x, y){
+export function starMan(color, x, y){
     let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
 
     if (color == 'black') {
@@ -1351,7 +1352,7 @@ function starMan(color, x, y){
 }
 
 
-function sleepingDragon(color,x,y){
+export function sleepingDragon(color,x,y){
     let moves = []
 
     return {
@@ -1366,7 +1367,7 @@ function sleepingDragon(color,x,y){
 }
 
 
-function cyborgFactory(color,x,y){
+export function cyborgFactory(color,x,y){
     let moves = [{ type: 'absolute', y: -2, x: 0 },
         { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
         { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
@@ -1425,7 +1426,7 @@ function cyborgFactory(color,x,y){
     }
 }
 
-function bootVesselFactory(color,x,y){
+export function bootVesselFactory(color,x,y){
     let moves = [
     { type: 'blockable', repeat: true, x: 1, y: 1, missedSquareX:1, missedSquareY:1, offsetX:1, offsetY:1 }, 
     { type: 'blockable', repeat: true, x: -1, y: -1, missedSquareX:-1, missedSquareY:-1, offsetX:-1, offsetY:-1 },
@@ -1459,7 +1460,7 @@ function bootVesselFactory(color,x,y){
     }
 }
 
-function empoweredCrystalFactory(color,x,y){
+export function empoweredCrystalFactory(color,x,y){
     let moves = [
         { type: 'blockable', repeat: true, x: 0, y: -1, missedSquareY:-1, offsetY:-1 }, { type: 'blockable', repeat: true, x: 0, y: 1, missedSquareY:1, offsetY:1 },
         { type: 'blockable', repeat: true, x: -1, y: 0, missedSquareX:-1 , offsetX:-1 }, { type: 'blockable', repeat: true, x: 1, y: 0, missedSquareX:1, offsetX:1 },
@@ -1517,7 +1518,7 @@ function empoweredCrystalFactory(color,x,y){
 }
 
 
-function executorFactory(color,x,y){
+export function executorFactory(color,x,y){
     let moves = [
         { type: 'blockable', repeat: true, x: 0, y: -1, offsetY:-1, missedSquareY:-1 }, { type: 'blockable', repeat: true, x: 0, y: 1,offsetY:1, missedSquareY:1 },
         { type: 'blockable', repeat: true, x: -1, y: 0, offsetX:-1, missedSquareX:-1 }, { type: 'blockable', repeat: true, x: 1, y: 0, missedSquareX:1 , offsetX:1, },
@@ -1549,7 +1550,7 @@ function executorFactory(color,x,y){
     }
 }
 
-function crystalFactory(color,x,y){
+export function crystalFactory(color,x,y){
     return {
         icon: color + 'Crystal.png',
         vulnerable: true,
@@ -1605,7 +1606,7 @@ function crystalFactory(color,x,y){
 }
 
 
-function juggernautFactory(color,x,y){
+export function juggernautFactory(color,x,y){
     let moves = [
         { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
         { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },

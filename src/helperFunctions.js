@@ -1,88 +1,67 @@
-function getMaxX(arr,x) {
+import { 
+    queenBugFactory,
+     kingFactory,
+     shroomFactory,
+     pawnFactory,
+     goliathBugFactory,
+     antFactory,
+     knightFactory,
+     rookFactory,
+    queenFactory,
+     bishopFactory,
+    weakPawn,
+     dragonFactory,
+    unpromotablePawn,
+     mongolianKnightFactory,
+    ricarFactory,
+     horseFactory,
+     ghostFactory,
+     hatFactory,
+     clownFactory,
+    pigFactory,
+    ladyBugFactory,
+    spiderFactory,
+    swordsMen,
+    northernKing,
+    pikeman,
+    kolba,
+    fencer,
+    general,
+    shield,
+    plagueDoctor,
+    starMan,
+    sleepingDragon,
+    cyborgFactory,
+    crystalFactory,
+    empoweredCrystalFactory,
+    executorFactory,
+    juggernautFactory,
+        bootVesselFactory
+
+
+} from "./pieceDefinitions.js";
+
+export function getMaxX(arr,x) {
     return arr.reduce((max, p) => p[x] > max ? p[x] : max, arr[0][x]);
 }
 
-function reverseNumber(number,size){
+export function reverseNumber(number,size){
     let sizePlusOne = size;
     return (number - sizePlusOne)*-1
 }
 
-function lightPieceMove(piece,color,board){
+export function lightPieceMove(piece,color,board){
 
 }
 
-function findSquareByXY(board,x,y){
+export function findSquareByXY(board,x,y){
     let index =  board.findIndex((square) => {
         return square.x == x && square.y == y;
     })
     return board[index]
 }
 
-function drawWhiteSquare(x, y, size) {
-    if(size == undefined){
-        size = 50;
-    }
-    ctx.fillStyle = whiteSquareColor;
-
-    ctx.beginPath();
-    ctx.fillRect(x, y, size, size);
-    ctx.stroke();
-
-    ctx.fillStyle = whiteSquareColor;
-
-    ctx.beginPath();
-    ctx.fillRect(x+1, y+1, size-2, size-2);
-    ctx.stroke();
-}
-
-function drawColoredSquare(x, y, color, size) {
-    ctx.fillStyle = color;
-
-    ctx.beginPath();
-    ctx.fillRect(x, y, size, size);
-    ctx.stroke();
-
-    ctx.fillStyle = color;
-
-    ctx.beginPath();
-    ctx.fillRect(x+1, y+1, size-2, size-2);
-    ctx.stroke();
-}
-
-function drawBlackSquare(x, y, size) {
-    if(size == undefined){
-        size = 50;
-    }
-    ctx.fillStyle = blackSquareColor;
-
-    ctx.beginPath();
-    ctx.fillRect(x, y, size, size);
-    ctx.stroke();
-
-    ctx.fillStyle = blackSquareColor;
-
-    ctx.beginPath();
-    ctx.fillRect(x+1, y+1, size-2, size-2);
-    ctx.stroke();
-}
-
-function drawLightedSquare(x, y, size) {
-    if(size == undefined){
-        size = 50;
-    }
-    ctx.fillStyle = lightedSquareColor;
-
-    ctx.beginPath();
-    ctx.fillRect(x, y, size, size);
-    ctx.stroke();
-    ctx.fillStyle = lightedSquareColor;
-
-    ctx.beginPath();
-    ctx.fillRect(x+1, y+1, size-2, size-2);
-    ctx.stroke();
-}
-
-function raceChoiceChess(pieces, board,raceWhite,raceBlack){
+export function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     pieces.length = 0;
     if(raceBlack == 'classic'){
         pieces.push(
@@ -172,261 +151,7 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
 
 }
 
-
-function drawPiece(x, y, img, size) {
-    if(size == undefined){
-        size = 50
-    }
-    switch (img) {
-        case 'blackBishop.png':
-            
-            ctx.drawImage(bBishop, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'dragonImage':
-            ctx.drawImage(dragonImage, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteBishop.png':
-            ctx.drawImage(wBishop, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackKnight.png':
-            ctx.drawImage(bKnight, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteKnight.png':
-            wKnight.width = size;
-            wKnight.height = size;
-            ctx.drawImage(wKnight, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackRook.png':
-            ctx.drawImage(bRook, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteRook.png':
-            ctx.drawImage(wRook, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackPawn.png':
-            ctx.drawImage(bPawn, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whitePawn.png':
-            ctx.drawImage(wPawn, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackQueen.png':
-            ctx.drawImage(bQueen, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteQueen.png':
-            ctx.drawImage(wQueen, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackKing.png':
-            ctx.drawImage(bKing, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteKing.png':
-            ctx.drawImage(wKing, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackPig.png':
-            ctx.drawImage(bPig, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whitePig.png':
-            ctx.drawImage(wPig, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackHorse.png':
-            ctx.drawImage(bHorse, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteHorse.png':
-            ctx.drawImage(wHorse, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackRicar.png':
-            ctx.drawImage(bRicar, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteRicar.png':
-            ctx.drawImage(wRicar, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackPlagueDoctor.png':
-            ctx.drawImage(bPlagueDoctor, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whitePlagueDoctor.png':
-            ctx.drawImage(wPlagueDoctor, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-
-        case 'blackStarMan.png':
-            ctx.drawImage(bStarMan, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteStarMan.png':
-            ctx.drawImage(wStarMan, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackClown.png':
-            ctx.drawImage(bClown, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteClown.png':
-            ctx.drawImage(wClown, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackGhost.png':
-            ctx.drawImage(bGhost, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteGhost.png':
-            ctx.drawImage(wGhost, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackHat.png':
-            ctx.drawImage(bHat, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteHat.png':
-            ctx.drawImage(wHat, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        // 
-        case 'blackAnt.png':
-            ctx.drawImage(bAnt, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackGoliathBug.png':
-            ctx.drawImage(bGoliathBug, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackLadyBug.png':
-            ctx.drawImage(bLadyBug, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackSpider.png':
-            ctx.drawImage(bSpider, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackQueenBug.png':
-            ctx.drawImage(bQueenBug, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackShroom.png':
-            ctx.drawImage(bShroom, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-
-        case 'whiteAnt.png':
-            ctx.drawImage(wAnt, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteGoliathBug.png':
-            ctx.drawImage(wGoliathBug, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteLadyBug.png':
-            ctx.drawImage(wLadyBug, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteSpider.png':
-            ctx.drawImage(wSpider, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteQueenBug.png':
-            ctx.drawImage(wQueenBug, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteShroom.png':
-            ctx.drawImage(wShroom, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-
-            //New
-        case 'whiteSwordsmen.png':
-            ctx.drawImage(wSwordsmen, 0, 0, 700, 700, x * size, y * size, size, size);
-            break;
-        case 'blackSwordsmen.png':
-            ctx.drawImage(bSwordsmen, 0, 0, 700, 700, x * size, y * size, size, size);
-            break;
-        case 'whitePlagueDoctor.png':
-            ctx.drawImage(wSwordsmen, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackPlagueDoctor.png':
-            ctx.drawImage(bSwordsmen, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'whiteStarMan.png':
-            ctx.drawImage(wStarMan, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-        case 'blackStarMan.png':
-            ctx.drawImage(bStarMan, 0, 0, 500, 500, x * size, y * size, size, size);
-            break;
-
-        case 'whiteKolba.png':
-            ctx.drawImage(wKolba, 0, 0,1050, 1050, x * size, y * size, size, size);
-            break;
-        case 'blackKolba.png':
-            ctx.drawImage(bKolba, 0, 0, 1050, 1050, x * size, y * size, size, size);
-            break;
-            
-        case 'whiteFencer.png':
-            ctx.drawImage(wFencer, 0, 0, 700, 700, x * size, y * size, size, size);
-            break;
-        case 'blackFencer.png':
-            ctx.drawImage(bFencer, 0, 0, 700, 700, x * size, y * size, size, size);
-            break;
-
-        case 'whiteNorthernKing.png':
-            ctx.drawImage(wNorthernKing, 0, 0, 700, 700, x * size, y * size, size, size);
-            break;
-        case 'blackNorthernKing.png':
-            ctx.drawImage(bNorthernKing, 0, 0, 700, 700, x * size, y * size, size, size);
-            break;
-        case 'whiteShield.png':
-            ctx.drawImage(wShield, 0, 0, 700, 700, x * size, y * size, size, size);
-            break;
-        case 'blackShield.png':
-            ctx.drawImage(bShield, 0, 0, 700, 700, x * size, y * size, size, size);
-            break;
-        case 'whitePikeman.png':
-            ctx.drawImage(wPikeman, 0, 0, 800, 800, x * size, y * size, size, size);
-            break;
-        case 'blackPikeman.png':
-            ctx.drawImage(bPikeman, 0, 0, 800, 800, x * size, y * size, size, size);
-            break;
-
-        case 'whiteGeneral.png':
-            ctx.drawImage(wGeneral, 0, 0, 600, 600, x * size, y * size, size, size);
-            break;
-        case 'blackGeneral.png':
-            ctx.drawImage(bGeneral, 0, 0, 600, 600, x * size, y * size, size, size);
-            break;
-
-        case 'whiteDragon.png':
-            ctx.drawImage(wDragon, 0, 0, 600, 600, x * size, y * size, size, size);
-            break;
-        case 'blackDragon.png':
-            ctx.drawImage(bDragon, 0, 0, 600, 600, x * size, y * size, size, size);
-            break;
-        case 'whiteSleepingDragon.png':
-            ctx.drawImage(wSleepingDragon, 0, 0, 600, 600, x * size, y * size, size, size);
-            break;
-        case 'blackSleepingDragon.png':
-            ctx.drawImage(bSleepingDragon, 0, 0, 600, 600, x * size, y * size, size, size);
-            break;
-
-        //
-        case 'whiteCyborg.png':
-            ctx.drawImage(wCyborg, 0, 0, 600, 600, x * size, y * size, size, size);
-        break;
-        case 'blackCyborg.png':
-            ctx.drawImage(bCyborg, 0, 0, 600, 600, x * size, y * size, size, size);
-        break;
-
-        case 'whiteBootvessel.png':
-            ctx.drawImage(wBootvessel, -40, -80, 600, 600, x * size, y * size, size, size);
-        break;
-        case 'blackBootvessel.png':
-            ctx.drawImage(bBootvessel, -40, -80, 600, 600, x * size, y * size, size, size);
-        break;
-
-        case 'blackCrystal.png':
-            ctx.drawImage(bCrystal, -40, -40, 600, 600, x * size, y * size, size, size);
-        break;
-        case 'whiteCrystal.png':
-            ctx.drawImage(wCrystal, -40, -40, 600, 600, x * size, y * size, size, size);
-        break;
-
-        case 'blackCrystalEmpowered.png':
-            ctx.drawImage(bCrystalEmpowered, -40, -40, 600, 600, x * size, y * size, size, size);
-        break;
-        case 'whiteCrystalEmpowered.png':
-            ctx.drawImage(wCrystalEmpowered, -40, -40, 600, 600, x * size, y * size, size, size);
-        break;
-
-        case 'blackJuggernaut.png':
-            ctx.drawImage(bJuggernaut, -70, -50, 600, 600, x * size, y * size, size, size);
-        break;
-        case 'whiteJuggernaut.png':
-            ctx.drawImage(wJuggernaut, -70, -80, 600, 600, x * size, y * size, size, size);
-        break;
-
-        case 'blackExecutor.png':
-            ctx.drawImage(bExecutor,-100, -100, 600, 600, x * size, y * size, size, size);
-        break;
-        case 'whiteExecutor.png':
-            ctx.drawImage(wExecutor, -100, -100, 600, 600, x * size, y * size, size, size);
-        break;
-    }
-}
-
-function getParams (url) {
+export function getParams (url) {
     var params = {};
     var parser = document.createElement('a');
     parser.href = url;
@@ -439,7 +164,7 @@ function getParams (url) {
     return params;
 };
 
-function pieceFromSquare(square, pieces) {
+export function pieceFromSquare(square, pieces) {
     const piece = pieces.find((p) => {
         return square.x === p.x && square.y === p.y;
     })
@@ -447,7 +172,7 @@ function pieceFromSquare(square, pieces) {
     return piece;
 }
 
-function pieceFromXY(x,y, pieces) {
+export function pieceFromXY(x,y, pieces) {
     const piece = pieces.find((p) => {
         return x === p.x && y === p.y;
     })
@@ -455,7 +180,7 @@ function pieceFromXY(x,y, pieces) {
     return piece;
 }
 
-function closeLights(board, flag) {
+export function closeLights(board, flag) {
     if (!flag) {
         flag = 'light'
     }
@@ -467,7 +192,7 @@ function closeLights(board, flag) {
 
 }
 
-function lightBoardFE(piece, state, flag,blockedFlag) {
+export function lightBoardFE(piece, state, flag,blockedFlag) {
     if (!flag) {
         flag = 'light'
     }
@@ -534,13 +259,13 @@ function lightBoardFE(piece, state, flag,blockedFlag) {
         }
     })
 }
-function findCopyPieceByXY(pieces,x,y){
+export function findCopyPieceByXY(pieces,x,y){
     return pieces.find((piece) => {
         return piece .x == x && piece.y == y;
     })
 }
 
-function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag,secondFlag, missedSquareX, missedSquareY) {
+export function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag,secondFlag, missedSquareX, missedSquareY) {
     if (!flag) {
         flag = 'light'
     }
@@ -609,7 +334,7 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
     return;
 }
 
-function getMousePos(canvas, evt) {
+export function getMousePos(canvas, evt) {
     var rect = canvas.getBoundingClientRect();
     return {
       x: evt.clientX - rect.left,
@@ -617,14 +342,14 @@ function getMousePos(canvas, evt) {
     };
 }
 
-function findPieceByXY(pieces,x,y){
+export function findPieceByXY(pieces,x,y){
     let index =  pieces.findIndex((piece) => {
          return piece .x == x && piece.y == y;
      })
      return index
  }
 
- function areYouChecked(state,enemyColor,me){
+ export function areYouChecked(state,enemyColor,me){
     for (let i = state.pieces.length - 1; i >= 0; i--) {
         const piece = state.pieces[i]
         let tempMoves = [];
@@ -659,7 +384,7 @@ function findPieceByXY(pieces,x,y){
 
 }
 
- function areYouCheckedWithoutTempMoves(state,enemyColor,me, flag){
+ export function areYouCheckedWithoutTempMoves(state,enemyColor,me, flag){
     let toReturn = false;
     for (let i = state.pieces.length - 1; i >= 0; i--) {
         const piece = state.pieces[i]
@@ -691,7 +416,7 @@ function findPieceByXY(pieces,x,y){
 
 }
 
- function isRoadAttacked(state,enemyColor,pointOne,pointTwo){
+ export function isRoadAttacked(state,enemyColor,pointOne,pointTwo){
     let direction = false;
     let checker = false;
     let actor = pointOne
@@ -721,7 +446,7 @@ function findPieceByXY(pieces,x,y){
     }
     return checker;
 }
- function checkEmptyHorizontalBetween(state,pieceOne, pieceTwo){
+ export function checkEmptyHorizontalBetween(state,pieceOne, pieceTwo){
 
     let direction = false;
     let checker = true;
@@ -749,7 +474,7 @@ function findPieceByXY(pieces,x,y){
     return checker;
 }
 
-function blockableCheck(state, powerX, powerY, x, y, move, limit,myPiece, flag) {
+export function blockableCheck(state, powerX, powerY, x, y, move, limit,myPiece, flag) {
     let toReturn;
     let missedSquareX = move.missedSquareX;
     let missedSquareY = move.missedSquareY;
@@ -814,7 +539,7 @@ function blockableCheck(state, powerX, powerY, x, y, move, limit,myPiece, flag) 
 }
 
 
-function getSinglePlayerGame() {
+export function getSinglePlayerGame() {
     const g = new newGame({
         baseState: {
             //Starting State
