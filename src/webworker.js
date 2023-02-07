@@ -278,7 +278,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
 
 
 function minimaxKing(state,maximizer, depth, removedTurns){
-    if(state.pieces > 5){
+    if(state.pieces.length > 5){
         return minimax(state,maximizer, depth, removedTurns);
     }
     else{
