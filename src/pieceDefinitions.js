@@ -714,7 +714,6 @@ function kingFactory(color, x, y) {
             this.moved = true;
             const caseOne = prevMove.x > move.x+1;
             const caseTwo = prevMove.x < move.x-1;
-
             let row = 0;
             if(this.color == 'white'){
                 row = 7
@@ -725,7 +724,9 @@ function kingFactory(color, x, y) {
                 if(state.pieces[findPieceByXY(state.pieces,0,row)]){
                     rook = state.pieces[findPieceByXY(state.pieces,0,row)];
                 }
-                rook.x = 3;
+                if(rook){
+                    rook.x = 3;
+                }
             }
             else if(caseTwo){
                 let rook 
@@ -733,7 +734,9 @@ function kingFactory(color, x, y) {
                 if(state.pieces[findPieceByXY(state.pieces,7,row)]){
                     rook = state.pieces[findPieceByXY(state.pieces,7,row)];
                 }
-                rook.x = 5;
+                if(rook){
+                    rook.x = 5;
+                }
             }
             return true
         },

@@ -235,7 +235,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
     let selectedMove = undefined;
     let badMoveResults= []
     let slizedMoves = moves //.slice(0,depth);
-    let lowestBadMoveResult = 99999999;
+    let lowestBadMoveResult = 999999;
 
     slizedMoves.forEach((move, index) => {
         let isItBanned;
@@ -246,7 +246,6 @@ function evaluateBoardDve(colorPerspective, pieces, state){
         }
         
         if(isItBanned){
-            console.log('tuka')
             return;
         }
 
@@ -262,7 +261,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
             }
         })
         if(!badMoves.length){
-            bestBadMove = {moveCounter:index, value:-2500,pieces:state.pieces};
+            bestBadMove = {moveCounter:index, value:-2000,pieces:state.pieces};
         }
         badMoveResults.push(bestBadMove)
     })
@@ -272,15 +271,6 @@ function evaluateBoardDve(colorPerspective, pieces, state){
             selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
         }
     })
-    // console.log(badMoveResults, selectedMove)
-   // if(lowestBadMoveResult > 2000){
-        // badMoveResults.forEach((badMoveResult) => {
-        //     if(badMoveResult.value > lowestBadMoveResult ){
-        //         lowestBadMoveResult = badMoveResult.value;
-        //         selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
-        //     }
-        // })
-   // }
     return moves[selectedMove.moveCounter];
 
 }
@@ -509,8 +499,9 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
         }
     }
     if (operatedPiece.afterPieceMove) {
-        const continueTurn = operatedPiece.afterPieceMove(state, playerMove, {x:oldX, y:oldY});
 
+        const continueTurn = operatedPiece.afterPieceMove(state, playerMove, {x:oldX, y:oldY});
+            
         if (!continueTurn) {
             operatedPiece.x = oldX;
             operatedPiece.y = oldY;
@@ -571,8 +562,10 @@ function closeLights(board, flag) {
 self.addEventListener("message", function(e) {
     let obj = JSON.parse(e.data)
     if(!obj.state.won){
-        let move = JSONfn.stringify(minimax(obj.state,obj.color,obj.depth, obj.removedTurns))
-        postMessage(move)
+        let move = minimax(obj.state,obj.color,obj.depth, obj.removedTurns)
+        move.removedTurns = obj.removedTurns;
+
+        postMessage(JSONfn.stringify(move))
     }
 })
 
