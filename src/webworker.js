@@ -168,64 +168,65 @@ function evaluateBoardDve(colorPerspective, pieces, state){
                 
     let selectedMove = undefined;
     let badMoveResults= []
-    let goodMoveResults = [];
-    let slizedMoves = moves.slice(0,depth);
-    let lowestBadMoveResult = 99999999;
-        slizedMoves.forEach((move, index) => {
+    let slizedMoves = moves //.slice(0,depth);
+    let lowestBadMoveResult = -999999;
+
+    slizedMoves.forEach((move, index) => {
         let isItBanned;
         if(removedTurns){
             isItBanned = removedTurns.find((removedTurn) => {
                 return move.xClicked === removedTurn.xClicked && move.yClicked === removedTurn.yClicked && removedTurn.pieceCounter === move.pieceCounter
             })
         }
-
+        
         if(isItBanned){
             return;
         }
+
         const badMoves = generateMovesFromPieces({board:state.board,pieces:move.pieces},enemy)
         let bestBadMove = {};
-        let badMoveValue = -999999;
+        let badMoveValue = 999999;
+        let goodMoveResults = [];
         badMoves.forEach((badMove) => {
-
-            let thisValue = evaluateBoardDve(enemy,badMove.pieces, state)
-            if(thisValue > badMoveValue){
-                badMoveValue = thisValue;
-                bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
+            let goodMoves = generateMovesFromPieces({board:state.board, pieces:badMove.pieces}, maximizer)
+            let bestGoodMove = {};
+            let goodMoveValue = 999999;
+            goodMoves.forEach((goodMove) => {
+                let thisValue = evaluateBoard(maximizer,goodMove.pieces, state)
+                if(thisValue < goodMoveValue){
+                    goodMoveValue = thisValue;
+                    bestGoodMove = {moveCounter:index, value:goodMoveValue,pieces:badMove.pieces}
+                }
+            })
+            goodMoveResults.push(bestGoodMove)
+        })
+        
+        if(!badMoves.length){
+            bestBadMove = {moveCounter:index, value:2000,pieces:state.pieces};
+        }
+        
+        goodMoveResults.forEach((goodMoveResult) => {
+            if(goodMoveResult.value < badMoveValue){
+                badMoveValue = goodMoveResult.value;
+                bestBadMove = {moveCounter:goodMoveResult.moveCounter, value:badMoveValue};
             }
         })
+
+        
         badMoveResults.push(bestBadMove)
     })
-
-
     badMoveResults.forEach((badMoveResult) => {
-        const badMoves = generateMovesFromPieces({board:state.board,pieces:badMoveResult.pieces},enemy)
-        let bestBadMove = {};
-        let badMoveValue = -999999;
-        badMoves.forEach((badMove) => {
-
-            let thisValue = evaluateBoardDve(enemy,badMove.pieces, state)
-            if(thisValue > badMoveValue){
-                badMoveValue = thisValue;
-                bestBadMove = {moveCounter:badMoveResult.moveCounter, value:badMoveValue,pieces:badMove.pieces}
-            }
-        })
-        goodMoveResults.push(bestBadMove)
-    })
-    
-    goodMoveResults.forEach((badMoveResult) => {
-        if(badMoveResult.value < lowestBadMoveResult ){
+        if(badMoveResult.value > lowestBadMoveResult ){
             lowestBadMoveResult = badMoveResult.value;
             selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
         }
     })
-    
-
 
     return moves[selectedMove.moveCounter];
 
 }
 
- function minimax(state,maximizer, depth, removedTurns){
+ function minimax(state,maximizer, depth, removedTurns){    
     const moves = generateMovesFromPieces(state,maximizer)
     let enemy = 'black';
     if(maximizer === 'black'){
@@ -277,7 +278,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
 
 
 function minimaxKing(state,maximizer, depth, removedTurns){
-    if(state.pieces > 15){
+    if(state.pieces > 5){
         return minimax(state,maximizer, depth, removedTurns);
     }
     else{
@@ -562,7 +563,7 @@ function closeLights(board, flag) {
 self.addEventListener("message", function(e) {
     let obj = JSON.parse(e.data)
     if(!obj.state.won){
-        let move = minimax(obj.state,obj.color,obj.depth, obj.removedTurns)
+        let move = minimaxKing(obj.state,obj.color,obj.depth, obj.removedTurns)
         move.removedTurns = obj.removedTurns;
 
         postMessage(JSONfn.stringify(move))

@@ -86,7 +86,7 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     pieces.length = 0;
     if(raceBlack == 'classic'){
         pieces.push(
-            kingFactory('black', 4,0)
+            kingFactory('black', 5,0)
         //     rookFactory('black', 0,0), knightFactory('black', 1,0) ,
         // bishopFactory('black', 2,0), queenFactory('black', 3,0),
         // kingFactory('black', 4,0), bishopFactory('black', 5,0),
