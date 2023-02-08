@@ -545,12 +545,14 @@ function findPieceByXY(pieces,x,y){
         for(let ii = [...piece.moves, ...tempMoves].length-1; ii>=0; ii--){
             const move = [...piece.moves, ...tempMoves][ii];
             if (piece.color == enemyColor) {
-                if ((move.type == 'absolute' || move.type == 'takeMove') && !move.impotent) {
+
+                if ((move.type == 'absolute' || move.type == 'takeMove') && !move.impotent && !move.friendlyPieces) {
+                    
                     if(piece.x + move.x == me.x && piece.y + move.y == me.y){
                         return true;
                     }
                 }
-                else if (move.type == 'blockable' && !move.impotent) {
+                else if (move.type == 'blockable' && !move.impotent &&  !move.friendlyPieces) {
                     if (move.repeat) {
                         const limit = move.limit || 100;
                         const offsetX = move.offsetX || 0;
@@ -565,7 +567,6 @@ function findPieceByXY(pieces,x,y){
     }
 
     return false
-
 }
 
  function areYouCheckedWithoutTempMoves(state,enemyColor,me, flag){
@@ -577,12 +578,12 @@ function findPieceByXY(pieces,x,y){
             const move = [...piece.moves][ii];
             if (piece.color == enemyColor) {
 
-                if ((move.type == 'absolute' || move.type == 'takeMove') && !move.impotent) {
+                if ((move.type == 'absolute' || move.type == 'takeMove') && !move.impotent && !move.friendlyPieces) {
                     if(piece.x + move.x == me.x && piece.y + move.y == me.y){
                         toReturn =  true;
                     }
                 }
-                else if (move.type == 'blockable' && !move.impotent) {
+                else if (move.type == 'blockable' && !move.impotent && !move.friendlyPieces) {
                     if (move.repeat) {
                         const limit = move.limit || 100;
                         const offsetX = move.offsetX || 0;

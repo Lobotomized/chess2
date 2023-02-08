@@ -110,7 +110,9 @@ let ani = function(){
     else if (hotseatGame.state.gameType === 'randomChess'){
         randomChess(hotseatGame.state.pieces,hotseatGame.state.board)
     }
-
+    else if (hotseatGame.state.gameType === 'miniChess'){
+        miniChess(hotseatGame.state.pieces,hotseatGame.state.board)
+    }
     function animate(secretState){
         //Draw the game
         const myTurnH1 = document.getElementById('turn');

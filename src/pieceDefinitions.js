@@ -680,7 +680,7 @@ function kingFactory(color, x, y) {
     
                         fakeState.pieceSelected = friendlyPiece;
     
-                        lightBoard(friendlyPiece,fakeState, 'light')
+                        lightBoardFE(friendlyPiece,fakeState, 'light')
     
                         const lightedSquares = fakeState.board.filter((sq) => {
                             return sq.light == true;
@@ -689,7 +689,7 @@ function kingFactory(color, x, y) {
                         lightedSquares.forEach((sq) => {
                             friendlyPiece = fakeState.pieces[i];
                             fakeState.pieceSelected = friendlyPiece;
-                            lightBoard(friendlyPiece,fakeState, 'light')
+                            lightBoardFE(friendlyPiece,fakeState, 'light')
     
                             fakeKing = fakeState.pieces.find((piece) => {
                                 return piece.x == this.x && piece.y == this.y
@@ -760,13 +760,13 @@ function kingFactory(color, x, y) {
                     const move = [...piece.moves, ...tempMoves][ii];
                     if (piece.color == enemyColor) {
 
-                        if ((move.type == 'absolute' || move.type == 'takeMove') && !move.impotent && !(attemptMove.x == piece.x && attemptMove.y == piece.y)) {
+                        if ((move.type == 'absolute' || move.type == 'takeMove') && !move.friendlyPieces && !move.impotent && !(attemptMove.x == piece.x && attemptMove.y == piece.y)) {
                             if(piece.x + move.x === this.x && piece.y + move.y === this.y){
                                 state.message = "Playing this move will leave you checked!"
                                 return true
                             }
                         }
-                        else if (move.type == 'blockable'  && !move.impotent && !(attemptMove.x == piece.x && attemptMove.y == piece.y)) {
+                        else if (move.type == 'blockable'&& !move.friendlyPieces  && !move.impotent && !(attemptMove.x == piece.x && attemptMove.y == piece.y)) {
                             if (move.repeat) {
 
                                 const limit = move.limit || 100;
@@ -1020,7 +1020,7 @@ function queenBugFactory(color,x,y){
         posValue:posValue[getRndInteger(1,3)-1],
         afterPieceMove:function(state, move, prevMove) {
             let color = this.color;
-            const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
+            const direction = this.y == 0  || this.y == 1 || this.y == 2 || this.y == 3|| this.y == 4? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;
             const ant = antFactory(color,move.x,move.y,direction)
