@@ -20,7 +20,7 @@
         <script src="/src/globby.js"></script>
         <script src="/src/helperFunctions.js"></script>
         <script src="/src/AI.js"></script>
-
+        <script src="/boardGeneration.js"></script>
         <link rel="stylesheet" href="/src/main.css">
 
 </head>
@@ -99,8 +99,18 @@ let ani = function(){
     hotseatGame.state.whiteRace = getParams(window.location.href).whiteRace || 'medieval'
     hotseatGame.state.blackRace = getParams(window.location.href).blackRace || 'bug'
     hotseatGame.state.turn = 'black'
+    let comingGameType = getParams(window.location.href).gameType;
+    if(comingGameType){
+        hotseatGame.state.gameType = comingGameType;
+    }
 
-    raceChoiceChess(hotseatGame.state.pieces,hotseatGame.state.board,hotseatGame.state.whiteRace,hotseatGame.state.blackRace)
+    if(hotseatGame.state.gameType === 'raceChoiceChess'){
+        raceChoiceChess(hotseatGame.state.pieces,hotseatGame.state.board,hotseatGame.state.whiteRace,hotseatGame.state.blackRace)
+    }
+    else if (hotseatGame.state.gameType === 'randomChess'){
+        randomChess(hotseatGame.state.pieces,hotseatGame.state.board)
+    }
+
     function animate(secretState){
         //Draw the game
         const myTurnH1 = document.getElementById('turn');

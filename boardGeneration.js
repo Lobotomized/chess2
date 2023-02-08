@@ -1,15 +1,18 @@
-const { kingFactory, knightFactory, mongolianKnightFactory, bishopFactory, rookFactory, queenFactory, pawnFactory, weakPawn, dragonFactory ,unpromotablePawn,
+try{
+    let { kingFactory, knightFactory, mongolianKnightFactory, bishopFactory, rookFactory, queenFactory, pawnFactory, weakPawn, dragonFactory ,unpromotablePawn,
 
         clownFactory, ricarFactory, horseFactory, hatFactory, ghostFactory, pigFactory, ladyBugFactory, queenBugFactory, goliathBugFactory, antFactory,
         shroomFactory, spiderFactory,
-
+    
         swordsMen, pikeman, sleepingDragon,kolba,fencer, shield, plagueDoctor, northernKing,
-
+    
         cyborgFactory, executorFactory,crystalFactory,empoweredCrystalFactory,juggernautFactory,bootVesselFactory
+    
+    } = require('./pieceDefinitions')
+}
 
-} = require('./pieceDefinitions')
-
-
+catch(err){
+}
 
 function raceChess(pieces, board){
     pieces.length = 0;
@@ -218,15 +221,15 @@ function randomChess(pieces,board){
     }
     pieces.push(kingFactory('black', 6, 1), kingFactory('white', 1, 6))
     pieces.push(
-        weakPawn('white', 1,5), weakPawn('white', 2,5) ,
-        weakPawn('white', 3,5), weakPawn('white', 4,5),
+        pawnFactory('white', 1,5), pawnFactory('white', 2,5) ,
+        pawnFactory('white', 3,5), pawnFactory('white', 4,5),
     
-        weakPawn('white', 5,5), weakPawn('white', 6,5),
+        pawnFactory('white', 5,5), pawnFactory('white', 6,5),
     
-        weakPawn('black', 1,2), weakPawn('black', 2,2) ,
-        weakPawn('black', 3,2), weakPawn('black', 4,2),
+        pawnFactory('black', 1,2), pawnFactory('black', 2,2) ,
+        pawnFactory('black', 3,2), pawnFactory('black', 4,2),
     
-        weakPawn('black', 5,2), weakPawn('black', 6,2)
+        pawnFactory('black', 5,2), pawnFactory('black', 6,2)
     )
     for (let i = 2; i <= 6; i++) {
         placeRandomPieces(pieces, i);
@@ -300,7 +303,7 @@ function makeBoard(pieces, board) {
 }
 
 function placeRandomPieces(pieces, next) {
-    const which = getRndInteger(1, 9)
+    const which = getRndInteger(1, 15)
 
     let blackNext = {
         x: next,
@@ -373,19 +376,59 @@ function placeRandomPieces(pieces, next) {
                 queenFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
+        case 10:
+            pieces.push(
+                juggernautFactory('black', 7-blackNext.x, blackNext.y),
+                juggernautFactory('white', whiteNext.x, whiteNext.y)
+            )
+            break;
+        case 11:
+            pieces.push(
+                executorFactory('black', 7-blackNext.x, blackNext.y),
+                executorFactory('white', whiteNext.x, whiteNext.y)
+            )
+            break;
+        case 12:
+            pieces.push(
+                bootVesselFactory('black', 7-blackNext.x, blackNext.y),
+                bootVesselFactory('white', whiteNext.x, whiteNext.y)
+            )
+            break;
+        case 13:
+            pieces.push(
+                ricarFactory('black', 7-blackNext.x, blackNext.y),
+                ricarFactory('white', whiteNext.x, whiteNext.y)
+            )
+            break;
+        case 14:
+            pieces.push(
+                horseFactory('black', 7-blackNext.x, blackNext.y),
+                horseFactory('white', whiteNext.x, whiteNext.y)
+            )
+            break;
+        case 15:
+            pieces.push(
+                queenBugFactory('black', 7-blackNext.x, blackNext.y),
+                queenBugFactory('white', whiteNext.x, whiteNext.y)
+            )
+            break;
     }
 }
 
 function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+try{
+    module.exports = {
+        miniChess:miniChess,
+        randomChess: randomChess,
+        catchTheDragon:catchTheDragon,
+        mongolianChess:mongolianChess,
+        classicChess : classicChess,
+        raceChess: raceChess,
+        raceChoiceChess: raceChoiceChess
+    };
+}
+catch(err){
 
-module.exports = {
-    miniChess:miniChess,
-    randomChess: randomChess,
-    catchTheDragon:catchTheDragon,
-    mongolianChess:mongolianChess,
-    classicChess : classicChess,
-    raceChess: raceChess,
-    raceChoiceChess: raceChoiceChess
-};
+}

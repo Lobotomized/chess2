@@ -983,8 +983,8 @@ function shroomFactory(color,x,y){
                             if(piece.icon.includes('Ant.png')){
                                 piece.value = 0.4
                             }
-                            else if(piece.icon.includes('Shroom.ong')){
-                                piece.value = 5000;
+                            else if(piece.icon.includes('Shroom.png')){
+                                piece.value = 2000;
                             }
                             else{
                                 piece.value = 2.5;
