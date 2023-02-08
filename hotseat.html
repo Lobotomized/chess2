@@ -291,7 +291,6 @@ let ani = function(){
                 }
             }
             else if(AIColor === 'allAI'){
-                console.log("here?")
                 w = new Worker("src/webworker.js");
                 w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:500}));
                 w.onmessage = function(event){

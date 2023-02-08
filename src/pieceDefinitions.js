@@ -378,9 +378,7 @@ function pawnFactory(color, x, y) {
             if(this.color == 'black'){
 
                 const enemyPiece = state.pieces.find((piece) => {
-                    if(piece.x == move.x && piece.y == move.y-1 && piece.color != this.color){
-                        console.log('vliza  ', piece.enPassantMove)
-                    }
+
                     return piece.x == move.x && piece.y == move.y-1 && piece.color != this.color && piece.enPassantMove //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
                 })
                 if(enemyPiece){

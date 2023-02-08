@@ -125,6 +125,12 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
             )
     }
 
+    else if(raceBlack =='test'){
+        pieces.push(
+                kingFactory('black',0,2)
+            ) 
+    }
+
 
     if(raceWhite == 'classic'){
         pieces.push( 
@@ -167,6 +173,13 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
             cyborgFactory('white',0,5),   cyborgFactory('white',1,5),cyborgFactory('white',2,5),        cyborgFactory('white',3,5),    cyborgFactory('white',4,5),      cyborgFactory('white',5,5), cyborgFactory('white',6,5),    cyborgFactory('white',7,5),
             juggernautFactory('white',0,7),crystalFactory('white',1,7),  executorFactory('white',2,7), bootVesselFactory('white',3,7),   bootVesselFactory('white',4,7),executorFactory('white', 5,7), empoweredCrystalFactory('white',6,7),juggernautFactory('white',7,7),
             )
+    }
+    else if(raceWhite === 'test'){
+        pieces.push(
+            rookFactory('white', 1,7) ,
+            rookFactory('white', 2,7), 
+            kingFactory('white', 3,7), 
+        )
     }
 
 

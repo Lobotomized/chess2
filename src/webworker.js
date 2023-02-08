@@ -52,21 +52,55 @@ function evaluateBoard(colorPerspective, pieces, state){
 
     while(pieces.length > counter){
         const piece = pieces[counter]
-        lightBoardFE(piece,{pieces:pieces, board:board, turn:state.turn},'allowedMove')
-        const filtered = board.filter((square) => {
-            return square['allowedMove']
-        })
-         let magnifier = filtered.length * globalPosValue*piece.posValue;
         if(colorPerspective === piece.color){
+            lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove')
+            const filtered = board.filter((square) => {
+                return square['allowedMove']
+            })
+            let magnifier = filtered.length * globalPosValue*piece.posValue;
             valueTransformer = piece.value ? piece.value + magnifier : 1 + magnifier;
+            // let safety = safetyValue(piece.color,pieces,board);
+            // valueTransformer += safety*100;
         }
         else{
+            lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove')
+            const filtered = board.filter((square) => {
+                return square['allowedMove']
+            })
+            let magnifier = filtered.length * globalPosValue*piece.posValue;
             valueTransformer = piece.value ? piece.value* -1 - magnifier : -1 - magnifier;
+            // let safety = safetyValue(piece.color,pieces,board);
+            // valueTransformer -= safety*100;
         }
         valueCounter += valueTransformer;
         counter++;
     }
     return valueCounter;
+}
+
+function safetyValue(colorPerspective, pieces,board){
+    let valueToReturn = 0;
+    let valuableEnemy= pieces.find((el)=> {
+        return el.color != colorPerspective && el.value > 500;
+    })
+    if(valuableEnemy)
+    {
+        pieces.forEach((piece) => {
+            if(piece.color != colorPerspective){
+                lightBoardFE(piece,{pieces:pieces, board:board, turn:colorPerspective},'attackingValuableFake', 'attackingValuable')
+            }
+        })
+        const filtered = board.filter((square) => {
+            return square.attackingValuable;
+        })
+        filtered.forEach((square) => {
+            if(square.x === valuableEnemy.x && square.y === valuableEnemy.y){
+                valueToReturn+=1;
+            }
+        })
+    }
+
+    return valueToReturn;
 }
  
 function evaluateBoardDve(colorPerspective, pieces, state){
@@ -202,7 +236,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
         })
         
         if(!badMoves.length){
-            bestBadMove = {moveCounter:index, value:2000,pieces:state.pieces};
+            bestBadMove = {moveCounter:index, value:20,pieces:state.pieces};
         }
         
         goodMoveResults.forEach((goodMoveResult) => {
@@ -262,7 +296,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
             }
         })
         if(!badMoves.length){
-            bestBadMove = {moveCounter:index, value:-2000,pieces:state.pieces};
+            bestBadMove = {moveCounter:index, value:-20,pieces:state.pieces};
         }
         badMoveResults.push(bestBadMove)
     })
