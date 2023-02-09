@@ -214,12 +214,12 @@ function randomChess(pieces,board){
     pieces.length = 0;
     board.length = 0;
 
-    for (let x = 1; x <= 6; x++) {
-        for (let y = 1; y <= 6; y++) {
+    for (let x = 0; x <= 5; x++) {
+        for (let y = 0; y <= 5; y++) {
             board.push({ light: false, x: x, y: y })
         }
     }
-    pieces.push(kingFactory('black', 6, 1), kingFactory('white', 1, 6))
+    pieces.push(kingFactory('black', 5, 0), kingFactory('white', 0, 5))
     // pieces.push(
     //     pawnFactory('white', 1,5), pawnFactory('white', 2,5) ,
     //     pawnFactory('white', 3,5), pawnFactory('white', 4,5),
@@ -231,11 +231,13 @@ function randomChess(pieces,board){
     
     //     pawnFactory('black', 5,2), pawnFactory('black', 6,2)
     // )
-    placeRandomFrontPiece(pieces,1)
+    // placeRandomFrontPiece(pieces,1)
 
-    for (let i = 2; i <= 6; i++) {
+    for (let i = 0; i < 6; i++) {
         placeRandomFrontPiece(pieces,i)
-        placeRandomPieces(pieces, i);
+        if(i>0){
+            placeRandomPieces(pieces, i);
+        }
     }
 
 }
@@ -311,54 +313,54 @@ function placeRandomFrontPiece(pieces,next) {
 
     let blackNext = {
         x: next,
-        y: 2
+        y: 1
     };
 
     let whiteNext = {
         x: next,
-        y: 5
+        y: 4
     }
-    if (next > 6) {
-        blackNext.x -= 6;
-        whiteNext.x -= 6;
-        blackNext.y = 2;
-        whiteNext.y = 5;
+    if (next > 5) {
+        blackNext.x -= 5;
+        whiteNext.x -= 5;
+        blackNext.y = 1;
+        whiteNext.y = 4;
     }
 
     switch (which) {
         case 1:
             pieces.push(
-                pawnFactory('black', 7-blackNext.x, blackNext.y),
+                pawnFactory('black', 5-blackNext.x, blackNext.y),
                 pawnFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 2:
             pieces.push(
-                ghostFactory('black', 7-blackNext.x, blackNext.y),
+                ghostFactory('black', 5-blackNext.x, blackNext.y),
                 ghostFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 3:
             pieces.push(
-                swordsMen('black', 7-blackNext.x, blackNext.y),
+                swordsMen('black', 5-blackNext.x, blackNext.y),
                 swordsMen('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 4:
             pieces.push(
-                pikeman('black', 7-blackNext.x, blackNext.y),
+                pikeman('black', 5-blackNext.x, blackNext.y),
                 pikeman('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 5:
             pieces.push(
-                queenBugFactory('black', 7-blackNext.x, blackNext.y),
+                queenBugFactory('black', 5-blackNext.x, blackNext.y),
                 queenBugFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 6:
             pieces.push(
-                antFactory('black', 7-blackNext.x, blackNext.y),
+                antFactory('black', 5-blackNext.x, blackNext.y),
                 antFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
@@ -372,108 +374,108 @@ function placeRandomPieces(pieces, next) {
 
     let blackNext = {
         x: next,
-        y: 1
+        y: 0
     };
 
     let whiteNext = {
         x: next,
-        y: 6
+        y: 5
     }
-    if (next > 6) {
-        blackNext.x -= 6;
-        whiteNext.x -= 6;
-        blackNext.y = 2;
-        whiteNext.y = 5;
+    if (next > 5) {
+        blackNext.x -= 5;
+        whiteNext.x -= 5;
+        blackNext.y = 1;
+        whiteNext.y = 6;
     }
 
     switch (which) {
         case 1:
             pieces.push(
-                bishopFactory('black', 7-blackNext.x, blackNext.y),
+                bishopFactory('black', 5-blackNext.x, blackNext.y),
                 bishopFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 2:
             pieces.push(
-                bishopFactory('black', 7-blackNext.x, blackNext.y),
+                bishopFactory('black', 5-blackNext.x, blackNext.y),
                 bishopFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 3:
             pieces.push(
-                rookFactory('black', 7-blackNext.x, blackNext.y),
+                rookFactory('black', 5-blackNext.x, blackNext.y),
                 rookFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 4:
             pieces.push(
-                rookFactory('black', 7-blackNext.x, blackNext.y),
+                rookFactory('black', 5-blackNext.x, blackNext.y),
                 rookFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 5:
             pieces.push(
-                knightFactory('black', 7-blackNext.x, blackNext.y),
+                knightFactory('black', 5-blackNext.x, blackNext.y),
                 knightFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 6:
             pieces.push(
-                knightFactory('black', 7-blackNext.x, blackNext.y),
+                knightFactory('black', 5-blackNext.x, blackNext.y),
                 knightFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 7:
             pieces.push(
-                knightFactory('black', 7-blackNext.x, blackNext.y),
+                knightFactory('black', 5-blackNext.x, blackNext.y),
                 knightFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 8:
             pieces.push(
-                bishopFactory('black', 7-blackNext.x, blackNext.y),
+                bishopFactory('black', 5-blackNext.x, blackNext.y),
                 bishopFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 9:
             pieces.push(
-                queenFactory('black', 7-blackNext.x, blackNext.y),
+                queenFactory('black', 5-blackNext.x, blackNext.y),
                 queenFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 10:
             pieces.push(
-                juggernautFactory('black', 7-blackNext.x, blackNext.y),
+                juggernautFactory('black', 5-blackNext.x, blackNext.y),
                 juggernautFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 11:
             pieces.push(
-                executorFactory('black', 7-blackNext.x, blackNext.y),
+                executorFactory('black', 5-blackNext.x, blackNext.y),
                 executorFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 12:
             pieces.push(
-                bootVesselFactory('black', 7-blackNext.x, blackNext.y),
+                bootVesselFactory('black', 5-blackNext.x, blackNext.y),
                 bootVesselFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 13:
             pieces.push(
-                ricarFactory('black', 7-blackNext.x, blackNext.y),
+                ricarFactory('black', 5-blackNext.x, blackNext.y),
                 ricarFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 14:
             pieces.push(
-                horseFactory('black', 7-blackNext.x, blackNext.y),
+                horseFactory('black', 5-blackNext.x, blackNext.y),
                 horseFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 15:
             pieces.push(
-                queenBugFactory('black', 7-blackNext.x, blackNext.y),
+                queenBugFactory('black', 5-blackNext.x, blackNext.y),
                 queenBugFactory('white', whiteNext.x, whiteNext.y)
             )
             break;

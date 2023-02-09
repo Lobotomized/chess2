@@ -357,7 +357,15 @@ function pawnFactory(color, x, y) {
             if (!this.moved) {
                 this.moved = true;
             }
-            if (this.color == 'black' && this.y == 7) {
+
+            let checkForLastRow = state.board.find((square) => {
+                return square.x === move.x && square.y > move.y;
+               })
+               let isItLast = false;
+               if(!checkForLastRow){
+                isItLast = true;
+               }
+            if (this.color == 'black' && isItLast) {
                 this.icon = color + 'Queen.png';
                 this.moves.length = 0;
                 this.moves.push({ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
@@ -815,7 +823,15 @@ function antFactory(color,x,y, direction){
             if(!this.direction){
                 this.direction =  color
             }
-            if(this.direction == 'white' && move.y == 0 || this.direction == 'black' && move.y == 7)
+           let checkForLastRow = state.board.find((square) => {
+            return square.x === move.x && square.y > move.y;
+           })
+           let isItLast = false;
+           if(!checkForLastRow){
+            isItLast = true;
+           }
+
+            if(this.direction == 'white' && move.y == 0 || this.direction == 'black' && isItLast)
             {
                 const me = state.pieces.find((piece) => {
                     return piece.x == move.x && piece.y == move.y
@@ -1020,7 +1036,7 @@ function queenBugFactory(color,x,y){
         posValue:posValue[getRndInteger(1,3)-1],
         afterPieceMove:function(state, move, prevMove) {
             let color = this.color;
-            const direction = this.y == 0  || this.y == 1 || this.y == 2 || this.y == 3|| this.y == 4? 'black' : 'white'
+            const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;
             const ant = antFactory(color,move.x,move.y,direction)
