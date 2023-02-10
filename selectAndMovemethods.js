@@ -210,6 +210,10 @@ function playerMove(playerMove, state,alwaysLight) {
 
         if(state.pieces[i].friendlyPieceInteraction){
             if(state.pieces[i].friendlyPieceInteraction(state, friendlyPiece, {x:oldX, y:oldY})){
+                if(friendlyPiece){
+                    friendlyPiece.x = friendlyPieceOldX;
+                    friendlyPiece.y = friendlyPieceOldY;
+                }
                 continueTurn = false;
             }    
         }
