@@ -16,11 +16,12 @@
         <script src="/src/jsonfn.js"></script>
 
         <script src="src/selectAndMoveMethods.js"></script>
-        <script src="src/pieceDefinitions.js"></script>
+        <script src="/pieceDefinitions.js"></script>
+        <script src="/boardGeneration.js"></script>
+
         <script src="/src/globby.js"></script>
         <script src="/src/helperFunctions.js"></script>
         <script src="/src/AI.js"></script>
-        <script src="/boardGeneration.js"></script>
         <link rel="stylesheet" href="/src/main.css">
 
 </head>
@@ -48,9 +49,6 @@
 
 const AIColor = getParams(window.location.href).AIColor
 
-// w.onmessage = function(){
-//     console.log('vliza tuka')
-// }
 
 
 let ani = function(){
@@ -86,12 +84,6 @@ let ani = function(){
 
     hotseatGame.state.pieces.length = 0;
     hotseatGame.state.board.length = 0;
-  //  evaluateBoard('white', hotseatGame.state.pieces)
-    for (let x = 0; x <= 7; x++) {
-        for (let y = 0; y <= 7; y++) {
-            hotseatGame.state.board.push({ light: false, x: x, y: y })
-        }
-    }
 
     hotseatGame.state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3))
     hotseatGame.state.gameType = 'raceChoiceChess'
@@ -104,14 +96,9 @@ let ani = function(){
         hotseatGame.state.gameType = comingGameType;
     }
 
-    if(hotseatGame.state.gameType === 'raceChoiceChess'){
-        raceChoiceChess(hotseatGame.state.pieces,hotseatGame.state.board,hotseatGame.state.whiteRace,hotseatGame.state.blackRace)
-    }
-    else if (hotseatGame.state.gameType === 'randomChess'){
-        randomChess(hotseatGame.state.pieces,hotseatGame.state.board)
-    }
-    else if (hotseatGame.state.gameType === 'miniChess'){
-        miniChess(hotseatGame.state.pieces,hotseatGame.state.board)
+
+    if(hotseatGame.state.gameType){
+        window[hotseatGame.state.gameType](hotseatGame.state.pieces,hotseatGame.state.board,hotseatGame.state.whiteRace,hotseatGame.state.blackRace)
     }
     function animate(secretState){
         //Draw the game
@@ -134,14 +121,14 @@ let ani = function(){
             const body = document.getElementsByTagName('body')[0];
             const forfeitTextButton = document.getElementById('forfeitText');
             if (state.turn == 'black') {
-                body.style.background = blackSquareColor
+                body.style.background = backgroundColor
                 me.style.color = whiteSquareColor;
                 enemy.style.color = whiteSquareColor;
             }
             else {
                 me.style.color = blackSquareColor;
                 enemy.style.color = blackSquareColor;
-                body.style.background = whiteSquareColor
+                body.style.background = backgroundColor
             }
             myTurnH1.innerText = state.message || '';
             const height = getMaxX(state.board,'y')
@@ -175,7 +162,7 @@ let ani = function(){
                 if(y%2 != 0){
                     orderFirst = false;
                 }
-                if (!sq.light && !sq.special && !sq.red) {
+                 if (!sq.light && !sq.special && !sq.red) {
                     if(orderFirst){
                         if(x % 2 != 0){
                             drawBlackSquare(x * squareLength, y * squareLength, squareLength)

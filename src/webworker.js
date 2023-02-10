@@ -1,4 +1,4 @@
-importScripts('/src/pieceDefinitions.js')
+importScripts('/pieceDefinitions.js')
 let globalPosValue = 0.1//Math.random();
 
 
