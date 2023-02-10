@@ -18,7 +18,7 @@ function prohodBoard(board){
     board.length = 0;
     for (let x = 0; x <= 7; x++) {
         for (let y = 0; y <= 7; y++) {
-            if(!(y===4 && !(x==4 || x==3))){
+            if(!((y===4 && !(x==4 || x==3)) || (y===3 && !(x==4 || x==3)))){
                 board.push({ light: false, x: x, y: y })
             }
 
