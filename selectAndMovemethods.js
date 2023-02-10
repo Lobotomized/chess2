@@ -193,7 +193,8 @@ function playerMove(playerMove, state,alwaysLight) {
     const friendlyPiece = state.pieces.find((ePiece) => {
         return ePiece.x === x && ePiece.y === y && ePiece.color == state.pieceSelected.color
     })
-
+    const friendlyPieceOldX = friendlyPiece && friendlyPiece.x;
+    const friendlyPieceOldY = friendlyPiece && friendlyPiece.y;
     const oldX = state.pieceSelected.x;
     const oldY = state.pieceSelected.y;
 

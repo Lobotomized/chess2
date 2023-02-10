@@ -195,8 +195,8 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
     const friendlyPiece = state.pieces.find((ePiece) => {
         return ePiece.x === x && ePiece.y === y && ePiece.color == operatedPiece.color
     })
-    const friendlyPieceOldX = friendlyPiece.x;
-    const friendlyPieceOldY = friendlyPiece.y;
+    const friendlyPieceOldX = friendlyPiece && friendlyPiece.x;
+    const friendlyPieceOldY = friendlyPiece && friendlyPiece.y;
 
     const oldX = operatedPiece.x;
     const oldY = operatedPiece.y;
@@ -213,10 +213,8 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
 
         if(state.pieces[i].friendlyPieceInteraction){
             if(state.pieces[i].friendlyPieceInteraction(state, friendlyPiece, {x:oldX, y:oldY})){
-                if(friendlyPiece){
-                    friendlyPiece.x = friendlyPieceOldX;
-                    friendlyPiece.y = friendlyPieceOldY;
-                }
+                friendlyPiece.x = friendlyPieceOldX;
+                friendlyPiece.y = friendlyPieceOldY;
                 continueTurn = false;
             }    
         }
