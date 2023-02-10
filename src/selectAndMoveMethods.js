@@ -195,6 +195,8 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
     const friendlyPiece = state.pieces.find((ePiece) => {
         return ePiece.x === x && ePiece.y === y && ePiece.color == operatedPiece.color
     })
+    const friendlyPieceOldX = friendlyPiece.x;
+    const friendlyPieceOldY = friendlyPiece.y;
 
     const oldX = operatedPiece.x;
     const oldY = operatedPiece.y;
@@ -202,7 +204,6 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
     operatedPiece.x = x;
     operatedPiece.y = y;
     let continueTurn = true;
-
     for (let i = state.pieces.length - 1; i >= 0; i--) {
         if (state.pieces[i].afterPlayerMove) {
             if(state.pieces[i].afterPlayerMove(state, playerMove, {x:oldX, y:oldY})){
@@ -212,12 +213,13 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
 
         if(state.pieces[i].friendlyPieceInteraction){
             if(state.pieces[i].friendlyPieceInteraction(state, friendlyPiece, {x:oldX, y:oldY})){
+                friendlyPiece.x = friendlyPieceOldX;
+                friendlyPiece.y = friendlyPieceOldY;
                 continueTurn = false;
             }    
         }
     }
     if(!continueTurn){
-
         operatedPiece.x = oldX;
         operatedPiece.y = oldY;
         return false;

@@ -1455,7 +1455,7 @@ function cyborgFactory(color,x,y){
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
-                if(friendlyPiece == state.pieceSelected){
+                if(friendlyPiece == state.pieceSelected || friendlyPiece.icon === state.pieceSelected.icon){
                     return true;
                 }
                 friendlyPiece.x = prevMove.x;
@@ -1489,7 +1489,7 @@ function bootVesselFactory(color,x,y){
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
-                if(friendlyPiece == state.pieceSelected){
+                if(friendlyPiece == state.pieceSelected || friendlyPiece.icon === state.pieceSelected.icon){
                     return true;
                 }
                 friendlyPiece.x = prevMove.x;
@@ -1525,7 +1525,7 @@ function empoweredCrystalFactory(color,x,y){
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
-                if(friendlyPiece == state.pieceSelected){
+                if(friendlyPiece == state.pieceSelected || friendlyPiece.icon === state.pieceSelected.icon){
                     return true;
                 }
                 friendlyPiece.x = prevMove.x;
@@ -1579,7 +1579,7 @@ function executorFactory(color,x,y){
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
-                if(friendlyPiece == state.pieceSelected){
+                if(friendlyPiece == state.pieceSelected || friendlyPiece.icon === state.pieceSelected.icon){
                     return true;
                 }
                 friendlyPiece.x = prevMove.x;
@@ -1634,7 +1634,7 @@ function crystalFactory(color,x,y){
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
-                if(friendlyPiece == state.pieceSelected){
+                if(friendlyPiece == state.pieceSelected || friendlyPiece.icon === state.pieceSelected.icon){
                     return true;
                 }
                 friendlyPiece.x = prevMove.x;
@@ -1667,7 +1667,7 @@ function juggernautFactory(color,x,y){
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
-                if(friendlyPiece == state.pieceSelected){
+                if(friendlyPiece == state.pieceSelected || friendlyPiece.icon === state.pieceSelected.icon){
                     return true;
                 }
                 friendlyPiece.x = prevMove.x;

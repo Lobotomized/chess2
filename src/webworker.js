@@ -498,6 +498,8 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
 
     operatedPiece.x = x;
     operatedPiece.y = y;
+
+    let oldState = JSON.parse(JSON.stringify(state));
     let continueTurn = true;
 
     for (let i = state.pieces.length - 1; i >= 0; i--) {
@@ -509,12 +511,15 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
 
         if(state.pieces[i].friendlyPieceInteraction){
             if(state.pieces[i].friendlyPieceInteraction(state, friendlyPiece, {x:oldX, y:oldY})){
+                friendlyPiece.x = friendlyPieceOldX;
+                friendlyPiece.y = friendlyPieceOldY;
                 continueTurn = false;
             }    
         }
+
     }
     if(!continueTurn){
-
+        state = oldState;
         operatedPiece.x = oldX;
         operatedPiece.y = oldY;
         return false;
