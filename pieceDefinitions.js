@@ -1,7 +1,31 @@
 
-const {playerMove, lightBoard} = require('./selectAndMovemethods')
-const {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecked, findPieceByXY, 
-    findCopyPieceByXY, areYouCheckedWithoutTempMoves, giveOppositeColor} = require('./helperFunctions')
+
+try{
+    var {playerMove, lightBoard} = require('./selectAndMovemethods')
+    var {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecked, findPieceByXY, 
+        findCopyPieceByXY, areYouCheckedWithoutTempMoves} = require('./helperFunctions')
+    
+}
+catch(err){
+
+}
+
+
+    function getRndInteger(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
+    
+    let posValue = [
+        0.1,
+        0.5,
+        1,
+        2,
+        3,
+        4
+    ]
+    
+    
+    
 function knightFactory(color, x, y) {
     return {
         icon: color + 'Knight.png',
@@ -11,9 +35,13 @@ function knightFactory(color, x, y) {
         { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }],
         x: x,
         y: y,
-        color: color
+        color: color,
+        value:2.5,
+        posValue:posValue[getRndInteger(1,6)-1]
     }
 }
+
+
 
 function mongolianKnightFactory(color, x, y) {
     return {
@@ -25,9 +53,17 @@ function mongolianKnightFactory(color, x, y) {
         x: x,
         y: y,
         color: color,
+        value:2.5,
+        posValue:0.1,
         afterPieceMove: function(state, move, prevMove){
             if(prevMove.x == 5  && prevMove.y == 5){
                 state.won = this.color
+            }
+            if(move.x === 5 && move.y === 5){
+                this.value = 2000;
+            }
+            else{
+                this.value = 2.5;
             }
             return true
         }
@@ -48,21 +84,23 @@ function weakPawn(color,x,y){
         y: y,
         moved: false,
         color: color,
+        value:1,
+        posValue:1,
         afterPieceMove: function (state, move) {
             //return false if you want to prevent next turn and true if you want to continue it
             if (!this.moved) {
                 this.moved = true;
             }
-            if (color == 'black' && state.pieceSelected.y == 1) {
-                this.icon = color + 'Queen.png';
+            if (this.color == 'black' && state.pieceSelected.y == 1) {
+                this.icon = this.color + 'Queen.png';
                 this.moves.length = 0;
                 this.moves.push({ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
                     { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
                     { type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
                     { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 })
             }
-            else if (color == 'white' && state.pieceSelected.y == 6) {
-                this.icon = color + 'Queen.png';
+            else if (this.color == 'white' && state.pieceSelected.y == 6) {
+                this.icon = this.color + 'Queen.png';
                 this.moves.length = 0;
                 this.moves.push({ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
                     { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
@@ -74,7 +112,6 @@ function weakPawn(color,x,y){
         }
     }
 }
-
 
 function unpromotablePawn(color, x, y) {
     let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'takeMove', y: -1, x: -1 }, { type: 'takeMove', y: -1, x: 1 }]
@@ -91,6 +128,8 @@ function unpromotablePawn(color, x, y) {
         y: y,
         moved: false,
         color: color,
+        value:1,
+        posValue:1,
         afterPieceMove: function(){
             if (!this.moved) {
                 this.moved = true;
@@ -126,7 +165,9 @@ function ghostFactory(color,x,y){
         moves:moves,
         color:color,
         x:x,
-        y:y
+        y:y,
+        value:0.6,
+        posValue:posValue[getRndInteger(1,4)-1]
     }
 }
 
@@ -141,7 +182,9 @@ function pigFactory(color,x,y){
         moves:moves,
         color:color,
         x:x,
-        y:y
+        y:y,
+        value:1.66,
+        posValue:posValue[getRndInteger(3,6)-1]
     }
 }
 
@@ -156,7 +199,9 @@ function horseFactory(color,x,y){
         moves:moves,
         color:color,
         x:x,
-        y:y
+        y:y,
+        value:5,
+        posValue:posValue[getRndInteger(1,6)-1]
     }
 }
 
@@ -175,13 +220,35 @@ function ricarFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        value:2.5,
+        posValue:posValue[getRndInteger(1,6)-1],
+        afterPlayerMove:function(state){
+            color = this.color;
+            if(color == 'black'){
+                direction = -1;
+            }
+            else{
+                direction = 1;
+            }
+            const copy = findCopyPieceByXY(state.pieces,this.x,this.y + direction);
+            const squareCheck = state.board.find((sq) => {
+                return sq.x == this.x && sq.y == this.y + direction;
+            })
+            if(copy || squareCheck != undefined){
+                this.value = 4;
+            }
+            else{
+                this.value = 2.5;
+            }
+        },
         
         afterThisPieceTaken:function(state){
-            if(direction === undefined){
-                let direction = 1;
-                if(color == 'black'){
-                    direction = -1;
-                }
+            color = this.color;
+            if(color == 'black'){
+                direction = -1;
+            }
+            else{
+                direction = 1;
             }
             const copy = findCopyPieceByXY(state.pieces,this.x,this.y + direction);
             const squareCheck = state.board.find((sq) => {
@@ -206,9 +273,10 @@ function hatFactory(color,x,y){
         icon: color + 'Hat.png',
         moves:moves,
         color:color,
+        value:2000,
+        posValue:posValue[getRndInteger(1,6)-1],
         x:x,
         y:y,
-        value:500,
         afterThisPieceTaken: function (state) {
             if (this.color == 'white') {
                 state.won = 'black';
@@ -235,6 +303,7 @@ function clownFactory(color,x,y){
         x:x,
         y:y,
         value:2,
+        posValue:posValue[getRndInteger(1,2)-1],
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -255,7 +324,6 @@ function pawnFactory(color, x, y) {
 
     if (color == 'black') {
         moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'takeMove', y: 1, x: -1 }, { type: 'takeMove', y: 1, x: 1 }];
-
     }
 
     return {
@@ -263,10 +331,11 @@ function pawnFactory(color, x, y) {
         moves: moves,
         x: x,
         y: y,
-        value:1,
         moved: false,
         enPassantMove:false,
         color: color,
+        value:100,
+        posValue:posValue[getRndInteger(1,3)-1],
         conditionalMoves: function (state) {
             let conditionalMoves = [];
             if(state){
@@ -301,7 +370,6 @@ function pawnFactory(color, x, y) {
                 }
                 else if (this.color == 'white') {
                     conditionalMoves.push(...[{ type: 'blockable', repeat: true, limit: 2, y: -1, x: 0, impotent: true }])
-                    // console.log(conditionalMoves)
 
                 }
             }
@@ -312,7 +380,15 @@ function pawnFactory(color, x, y) {
             if (!this.moved) {
                 this.moved = true;
             }
-            if (this.color == 'black' && this.y == 7) {
+
+            let checkForLastRow = state.board.find((square) => {
+                return square.x === move.x && square.y > move.y;
+               })
+               let isItLast = false;
+               if(!checkForLastRow){
+                isItLast = true;
+               }
+            if (this.color == 'black' && isItLast) {
                 this.icon = color + 'Queen.png';
                 this.moves.length = 0;
                 this.moves.push({ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
@@ -328,12 +404,13 @@ function pawnFactory(color, x, y) {
                     { type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
                     { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 })
             }
-
+            
 
             if(this.color == 'black'){
 
                 const enemyPiece = state.pieces.find((piece) => {
-                    return piece.x == move.x && piece.y == move.y-1 && piece.color != this.color //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
+
+                    return piece.x == move.x && piece.y == move.y-1 && piece.color != this.color && piece.enPassantMove //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
                 })
                 if(enemyPiece){
                     state.pieces.splice(state.pieces.indexOf(enemyPiece),1);    
@@ -346,7 +423,7 @@ function pawnFactory(color, x, y) {
 
 
                 const enemyPiece = state.pieces.find((piece) => {
-                    return piece.x == move.x && piece.y == move.y  + 1 && piece.color != this.color //&& !findCopyPieceByXY(state.pieces,move.x,move.y)
+                    return piece.x == move.x && piece.y == move.y  + 1 && piece.color != this.color  &&  piece.enPassantMove// && !findCopyPieceByXY(state.pieces,move.x,move.y)
                 })
                 if(enemyPiece){
                     state.pieces.splice(state.pieces.indexOf(enemyPiece),1);
@@ -359,7 +436,22 @@ function pawnFactory(color, x, y) {
             return true;
         },
         afterPlayerMove: function (state,move,prevMove){
-            this.enPassantMove = false;
+            color = this.color;
+            if(color == 'black'){
+                direction = -1;
+            }
+            else{
+                direction = 1;
+            }
+            if(!direction){
+                this.value = 1 + this.y*0.1
+            }
+            else{
+                this.value = 1 + (7-this.y)*0.1
+            }
+            if(this.color === state.turn){
+                this.enPassantMove = false;
+            }
             if(this.color === 'black'){
                 if(this.y == prevMove.y + 2 && this.x === prevMove.x){
                     this.enPassantMove = true;
@@ -369,6 +461,7 @@ function pawnFactory(color, x, y) {
             if(this.color === 'white'){
                 if(this.y == prevMove.y - 2 && this.x === prevMove.x){
                     this.enPassantMove = true;
+
                 }
             }
         }
@@ -421,7 +514,10 @@ function dragonFactory(color,x,y){
                         else if (move.type == 'blockable'  && !move.impotent) {
                             if (move.repeat) {
                                 const limit = move.limit || 100;
-                                if(blockableCheck(state, move.x, move.y, piece.x, piece.y, move, limit, this) == 'block'){
+                                const offsetX = move.offsetX || 0;
+                                const offsetY = move.offsetY || 0;
+                                
+                                if(blockableCheck(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, this) == 'block'){
                                     state.message = "Playing this move will leave you checked!"
                                     return true
                                 }
@@ -493,6 +589,7 @@ function bishopFactory(color, x, y) {
         x: x,
         y: y,
         value:3,
+        posValue:posValue[getRndInteger(1,6)-1],
         color: color
     }
 }
@@ -505,6 +602,7 @@ function rookFactory(color, x, y) {
         x: x,
         y: y,
         value:5,
+        posValue:posValue[getRndInteger(1,6)-1],
         moved:false,
         color: color,
         afterPieceMove:function(){
@@ -524,6 +622,7 @@ function queenFactory(color, x, y) {
         x: x,
         y: y,
         value:9,
+        posValue:posValue[getRndInteger(1,3)-1],
         color: color
     }
 }
@@ -542,7 +641,8 @@ function kingFactory(color, x, y) {
         { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }],
         x: x,
         y: y,
-        value:100000,
+        value:2000,
+        posValue:posValue[getRndInteger(1,3)-1],
         color: color,
 
         conditionalMoves: function(state){
@@ -611,7 +711,7 @@ function kingFactory(color, x, y) {
     
                         fakeState.pieceSelected = friendlyPiece;
     
-                        lightBoard(friendlyPiece,fakeState, 'light')
+                        lightBoardFE(friendlyPiece,fakeState, 'light')
     
                         const lightedSquares = fakeState.board.filter((sq) => {
                             return sq.light == true;
@@ -620,7 +720,7 @@ function kingFactory(color, x, y) {
                         lightedSquares.forEach((sq) => {
                             friendlyPiece = fakeState.pieces[i];
                             fakeState.pieceSelected = friendlyPiece;
-                            lightBoard(friendlyPiece,fakeState, 'light')
+                            lightBoardFE(friendlyPiece,fakeState, 'light')
     
                             fakeKing = fakeState.pieces.find((piece) => {
                                 return piece.x == this.x && piece.y == this.y
@@ -643,7 +743,6 @@ function kingFactory(color, x, y) {
             this.moved = true;
             const caseOne = prevMove.x > move.x+1;
             const caseTwo = prevMove.x < move.x-1;
-
             let row = 0;
             if(this.color == 'white'){
                 row = 7
@@ -654,7 +753,9 @@ function kingFactory(color, x, y) {
                 if(state.pieces[findPieceByXY(state.pieces,0,row)]){
                     rook = state.pieces[findPieceByXY(state.pieces,0,row)];
                 }
-                rook.x = 3;
+                if(rook){
+                    rook.x = 3;
+                }
             }
             else if(caseTwo){
                 let rook 
@@ -662,7 +763,9 @@ function kingFactory(color, x, y) {
                 if(state.pieces[findPieceByXY(state.pieces,7,row)]){
                     rook = state.pieces[findPieceByXY(state.pieces,7,row)];
                 }
-                rook.x = 5;
+                if(rook){
+                    rook.x = 5;
+                }
             }
             return true
         },
@@ -688,17 +791,19 @@ function kingFactory(color, x, y) {
                     const move = [...piece.moves, ...tempMoves][ii];
                     if (piece.color == enemyColor) {
 
-                        if ((move.type == 'absolute' || move.type == 'takeMove') && !move.impotent && !(attemptMove.x == piece.x && attemptMove.y == piece.y)) {
+                        if ((move.type == 'absolute' || move.type == 'takeMove') && !move.friendlyPieces && !move.impotent && !(attemptMove.x == piece.x && attemptMove.y == piece.y)) {
                             if(piece.x + move.x === this.x && piece.y + move.y === this.y){
                                 state.message = "Playing this move will leave you checked!"
                                 return true
                             }
                         }
-                        else if (move.type == 'blockable'  && !move.impotent && !(attemptMove.x == piece.x && attemptMove.y == piece.y)) {
+                        else if (move.type == 'blockable'&& !move.friendlyPieces  && !move.impotent && !(attemptMove.x == piece.x && attemptMove.y == piece.y)) {
                             if (move.repeat) {
 
                                 const limit = move.limit || 100;
-                                if(blockableCheck(state, move.x, move.y, piece.x, piece.y, move, limit, this) == 'block'){
+                                const offsetX = move.offsetX || 0;
+                                const offsetY = move.offsetY || 0;
+                                if(blockableCheck(state, move.x, move.y, piece.x+offsetX, piece.y+offsetY, move, limit, this) == 'block'){
                                     state.message = "Playing this move will leave you checked!"
                                     return true
                                 }
@@ -713,12 +818,6 @@ function kingFactory(color, x, y) {
 }
 
 function antFactory(color,x,y, direction){
-    if(direction === undefined){
-        let direction = 1;
-        if(color == 'black'){
-            direction = -1;
-        }
-    }
     if(!direction){
         direction =  color
     }
@@ -740,8 +839,22 @@ function antFactory(color,x,y, direction){
         x:x,
         y:y,
         value:0.6,
+        posValue:posValue[getRndInteger(1,3)-1],
+        direction:direction,
         afterPieceMove: function(state,move,prevMove) {
-            if(direction == 'white' && move.y == 0 || direction == 'black' && move.y == 7)
+            let color = this.color;
+            if(!this.direction){
+                this.direction =  color
+            }
+           let checkForLastRow = state.board.find((square) => {
+            return square.x === move.x && square.y > move.y;
+           })
+           let isItLast = false;
+           if(!checkForLastRow){
+            isItLast = true;
+           }
+
+            if(this.direction == 'white' && move.y == 0 || this.direction == 'black' && isItLast)
             {
                 const me = state.pieces.find((piece) => {
                     return piece.x == move.x && piece.y == move.y
@@ -775,17 +888,16 @@ function goliathBugFactory(color,x,y){
         weakMoves:weakMoves,
         x:x,
         y:y,
-        value:7
+        posValue:posValue[getRndInteger(1,6)-1],
+        value:7.5,
     }
 }
 
 function ladyBugFactory(color,x,y){
-    let moves = [{ type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
-    { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 }, 
-    { type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
-    { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
-    { type: 'absolute', x: -1, y: -1 }, { type: 'absolute', x: 1, y: 1 },
-    { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }]
+    let moves = [
+        { type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
+        { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
+    ]
 
     let weakMoves = [{ type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
     { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
@@ -793,13 +905,73 @@ function ladyBugFactory(color,x,y){
     { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }]
 
     return {
+        conditionalMoves: function (state) {
+            const arrToReturn =[]
+
+            const shrooms = state.pieces.filter((piece)=> {
+                return piece.color === this.color && piece.icon === this.color+'Shroom.png'
+            })
+
+            if(shrooms.length < 2){
+                return [];
+            }
+
+            const blockedUp = state.pieces.find((piece) => {
+                return piece.y === this.y + 1 && this.x === piece.x;
+            })
+
+            const blockedDown = state.pieces.find((piece) => {
+                return piece.y === this.y - 1 && this.x === piece.x;
+            })
+
+            const blockedLeft = state.pieces.find((piece) => {
+                return piece.y === this.y && this.x === piece.x + 1;
+            })
+
+            const blockedRight = state.pieces.find((piece) => {
+                return piece.y === this.y && this.x === piece.x - 1;
+            })
+
+            if(!blockedUp){
+                arrToReturn.push(
+                    { type: 'blockable', repeat: true, x: 1, y: 1, offsetY:1, limit:2, offsetCountsAsBlock:true },
+                    { type: 'blockable', repeat: true, x: -1, y: 1, offsetY:1, limit:2, offsetCountsAsBlock:true },
+                )
+            }
+
+            if(!blockedDown){
+                arrToReturn.push(
+                    { type: 'blockable', repeat: true, x: 1, y: -1, offsetY:-1, limit:2, offsetCountsAsBlock:true },
+                    { type: 'blockable', repeat: true, x: -1, y: -1, offsetY:-1, limit:2, offsetCountsAsBlock:true },
+                )
+            }
+
+            if(!blockedRight){
+                arrToReturn.push(
+                    { type: 'blockable', repeat: true, x: 1, y: 1, offsetX:1, limit:2, offsetCountsAsBlock:true },
+                    { type: 'blockable', repeat: true, x: 1, y: -1, offsetX:1, limit:2, offsetCountsAsBlock:true },
+
+                )
+            }
+
+            if(!blockedLeft){
+                arrToReturn.push(
+                    { type: 'blockable', repeat: true, x: -1, y: -1, offsetX:-1, limit:2, offsetCountsAsBlock:true },
+                    { type: 'blockable', repeat: true, x: -1, y: 1, offsetX:-1, limit:2, offsetCountsAsBlock:true },
+                )
+            }
+
+            return arrToReturn
+
+        },
         icon: color+'LadyBug.png',
         moves:moves,
         color:color,
         weakMoves:weakMoves,
         x:x,
         y:y,
-        value:5,
+        value:5.5,
+        posValue:posValue[getRndInteger(1,6)-1],
     }
 }
 
@@ -825,7 +997,8 @@ function spiderFactory(color,x,y){
         weakMoves:weakMoves,
         x:x,
         y:y,
-        value:5
+        value:5,
+        posValue:posValue[getRndInteger(1,6)-1],
     }
 }
 
@@ -836,7 +1009,8 @@ function shroomFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-        value:5000,
+        value:1000,
+        posValue:1,
         afterThisPieceTaken:function(state){
             state.pieces.forEach((piece) => {
                 if(piece.color == this.color){
@@ -845,21 +1019,30 @@ function shroomFactory(color,x,y){
                             state.won = giveOppositeColor(this.color)
                         }
                         else{
-                            piece.moves = piece.weakMoves;
-                            if(piece.icon.contains('Ant.png')){
+                            if(piece.icon.includes('Ant.png')){
                                 piece.value = 0.4
                             }
-                            else if(piece.icon.contains('Shroom.ong')){
-                                piece.value = 5000;
+                            else if(piece.icon.includes('Shroom.png')){
+                                piece.value = 2000;
                             }
                             else{
                                 piece.value = 2.5;
                             }
+                            piece.moves = piece.weakMoves;
                         }
                     }
                 }
             })
         }
+    }
+}
+
+function giveOppositeColor(color){
+    if(color == 'white'){
+        return 'black'
+    }
+    else if(color == 'black'){
+        return 'white'
     }
 }
 
@@ -872,15 +1055,10 @@ function queenBugFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-        value:2,
-        
+        value:2.5,
+        posValue:posValue[getRndInteger(1,3)-1],
         afterPieceMove:function(state, move, prevMove) {
-            if(direction === undefined){
-                let direction = 1;
-                if(color == 'black'){
-                    direction = -1;
-                }
-            }
+            let color = this.color;
             const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;
@@ -899,27 +1077,777 @@ function queenBugFactory(color,x,y){
 }
 
 
-module.exports = {
-    queenBugFactory:queenBugFactory,
-    kingFactory: kingFactory,
-    shroomFactory: shroomFactory,
-    pawnFactory: pawnFactory,
-    goliathBugFactory: goliathBugFactory,
-    antFactory: antFactory,
-    knightFactory: knightFactory,
-    rookFactory: rookFactory,
-    queenFactory: queenFactory,
-    bishopFactory: bishopFactory,
-    weakPawn: weakPawn,
-    dragonFactory: dragonFactory,
-    unpromotablePawn:unpromotablePawn,
-    mongolianKnightFactory: mongolianKnightFactory,
-    ricarFactory: ricarFactory,
-    horseFactory: horseFactory,
-    ghostFactory: ghostFactory,
-    hatFactory: hatFactory,
-    clownFactory: clownFactory,
-    pigFactory:pigFactory,
-    ladyBugFactory:ladyBugFactory,
-    spiderFactory: spiderFactory
+
+function swordsMen(color, x, y){
+    let moves = [{ type: 'absolute',  y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute',  y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
+    }
+    return {
+        icon: color + 'Swordsmen.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+
+function northernKing(color, x, y){
+    let moves = [{ type: 'absolute',  y: -1, x: 0 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute',  y: 1, x: 0 }];
+    }
+    return {
+        icon: color + 'NorthernKing.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:800,
+        posValue:1,
+        afterThisPieceTaken: function (state) {
+            
+            let find = state.pieces.find((el) => {
+                return el.icon === this.color + 'PlagueDoctor.png'
+            })
+            if(!find){
+                state.won = giveOppositeColor(this.color);
+            }
+
+        },
+        afterPieceMove:function(state, move, prevMove){
+            if(this.color === 'black'){
+                if(this.y === 7){
+                    this.value = 2000;
+                    state.won = 'black';
+                }
+                else{
+                    this.value = 800 + 1*this.y;
+                }
+            }
+            else if(this.color === 'white' && this.y === 0){
+                if(this.y === 0){
+                    this.value = 2000;
+                    state.won = 'white';
+                }
+                else{
+                    this.value = 800 + 1*this.y;
+                }            
+            }
+
+            this.value += 2;
+            let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
+            let fencerPower = this.color === 'black' ? this.y+1 : 8-this.y;
+
+
+            if(promoteCondition){
+                state.pieces.forEach((piece) => {
+                    if(piece.color === this.color && (piece.icon === piece.color + 'Pikeman.png' || piece.icon === piece.color + 'Swordsmen.png')){
+                        piece.icon =  piece.color+'Knight.png';
+                        piece.moves = [
+                        { type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
+                        { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 },
+                        { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: 1, x: -2 },
+                        { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }]
+                        piece.value = fencerPower;
+                        piece.posValue = posValue[getRndInteger(1,6)-1];
+                    }
+                })
+            }
+
+
+            state.pieces.forEach((piece) => {
+                if(piece.color === this.color && piece.icon === piece.color + 'Fencer.png'){
+                    piece.moves =  [];
+                    for(let i = fencerPower; i>=0; i--){
+                        piece.moves.push(
+                            {type: 'absolute', y: i, x: i },
+                            {type: 'absolute', y:-i, x:-i},
+                            {type: 'absolute', y:-i, x:i},
+                            {type: 'absolute', y:i, x:-i},
+                              )
+                    }
+                    piece.value = fencerPower*1.2
+                   
+                }
+            })
+            return true;
+        }
+    }
+}
+
+function pikeman(color, x, y){
+    let moves = [
+        { type: 'absolute', impotent: true, y: -1, x: 0, impotent:true }, { type: 'absolute', impotent: true, y: 0, x: -1, impotent:true }, { type: 'absolute', impotent: true, y: 0, x: 1, impotent:true }, 
+        {type:'takeMove', y:-2, x:0}, {type:'takeMove', y:-2, x:1}, {type:'takeMove', y:-2, x:-1}
+                ]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0, impotent:true },{ type: 'absolute', impotent: true, y: 0, x: -1, impotent:true }, { type: 'absolute', impotent: true, y: 0, x: 1, impotent:true }, 
+         {type:'takeMove', y:2, x:0}, {type:'takeMove', y:2, x:1}, {type:'takeMove', y:2, x:-1}]}
+    return {
+        icon: color + 'Pikeman.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+function copier(color, x, y){
+    let moves = []
+
+    return {
+        icon: color + 'Kolba.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:0.8,
+        posValue:0.1,
+        afterEnemyPieceTaken:function(enemyPiece,state){
+            this.moves = enemyPiece.moves;
+            let iconCode = enemyPiece.icon.replace('black', '');
+            iconCode = iconCode.replace('white', "");
+
+            this.icon = this.color + iconCode;
+            this.value = enemyPiece.value;
+            this.posValue = enemyPiece.posValue;
+        }
+    }
+}
+
+
+function kolba(color, x, y){
+    let moves = []
+
+    return {
+        icon: color + 'Kolba.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:2.5,
+        posValue:0.1,
+        // afterEnemyPieceTaken:function(enemyPiece,state){
+        //     this.moves = enemyPiece.moves;
+        //     let iconCode = enemyPiece.icon.replace('black', '');
+        //     iconCode = iconCode.replace('white', "");
+
+        //     this.icon = this.color + iconCode;
+        //     this.value = enemyPiece.value;
+        //     this.posValue = enemyPiece.posValue;
+        // }
+    }
+}
+
+function fencer(color, x, y){
+    let moves = []
+
+    return {
+        icon: color + 'Fencer.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+function general(color, x, y){
+    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
+    }
+    return {
+        icon: color + 'General.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+function shield(color, x, y){
+    let moves = [{ type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },{ type: 'blockable', 
+    repeat:true, limit:1, y: -1, x: 0}, { type: 'blockable', repeat:true, limit:1, y: 1, x: 0 }]
+
+    return {
+        icon: color + 'Shield.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+function plagueDoctor(color, x, y){
+    let moves = [{ type: 'absolute',  y: -1, x: 0 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute',  y: 1, x: 0 }];
+    }
+    return {
+        icon: color + 'PlagueDoctor.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:800,
+        posValue:1,
+        afterThisPieceTaken: function (state) {
+            let find = state.pieces.find((el) => {
+                return el.icon === this.color + 'NorthernKing.png'
+            })
+            if(!find){
+                state.won = giveOppositeColor(this.color);
+            }
+        },
+        afterPieceMove:function(state, move, prevMove){
+
+            if(this.color === 'black'){
+                if(this.y === 7){
+                    this.value = 1000;
+                    state.won = 'black';
+                }
+                else{
+                    this.value = 800 + 1*this.y;
+                }
+            }
+            else if(this.color === 'white' && this.y === 0){
+                if(this.y === 0){
+                    this.value = 1000;
+                    state.won = 'white';
+                }
+                else{
+                    this.value = 800 + 1*this.y;
+                }            
+            }
+            this.value += 2;
+            let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
+            let kolbaPower = this.color === 'black' ? this.y+1 : 8-this.y;
+            if(promoteCondition){
+                state.pieces.forEach((piece) => {
+                    if(piece.color === this.color && piece.icon === piece.color + 'SleepingDragon.png'){
+                        piece.icon =  piece.color+'Dragon.png';
+                        piece.moves =  [{ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
+                        { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
+                        { type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
+                        { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 },
+                        { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: 1, x: -2 },
+                        { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }
+                    ],
+                        piece.value = 8.5;
+                        piece.posValue = posValue[getRndInteger(1,6)-1];
+                    }
+                })
+            }
+            state.pieces.forEach((piece) => {
+                if(piece.color === this.color && piece.icon === piece.color + 'Kolba.png'){
+                    for(let i = kolbaPower; i>=0; i--){
+                        piece.moves.push(
+                            {type: 'absolute', y: i, x: 0 },
+                            {type: 'absolute', y:-i, x:0},
+                            {type: 'absolute', y:0, x:i},
+                            {type: 'absolute', y:0, x:-i},
+                              )
+                    }
+                    piece.value = kolbaPower 
+                }
+            })
+            return true;
+        }
+    }
+}
+
+function starMan(color, x, y){
+    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
+    }
+    return {
+        icon: color + 'StarMan.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+
+function sleepingDragon(color,x,y){
+    let moves = []
+
+    return {
+        icon: color + 'SleepingDragon.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+
+function cyborgFactory(color,x,y){
+    let moves = [{ type: 'absolute', y: -2, x: 0 },
+        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+
+    ]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute',  y: 2, x: 0 }, 
+        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }];
+    }
+    return {
+        icon: color + 'Cyborg.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1.2,
+        posValue:0.1,
+        afterPieceMove: function(state){
+            if(this.color == 'black' && (this.y === 5 || this.y ===3 || this.y === 1)){
+                this.value = 2 + this.y*0.25;
+            }
+            else if(this.color == 'white' && (this.y === 2 || this.y ===4 || this.y === 6)){
+                this.value = 2 + (7-this.y)*0.25;
+            }
+            return true;
+        },
+        afterPlayerMove: function (state){
+
+            if (this.color == 'black' && this.y == 7) {
+                state.pieces.push(juggernautFactory(this.color,this.x,this.y));
+                state.pieces.splice(state.pieces.indexOf(this),1);
+            }
+            else if (this.color == 'white' && this.y == 0) {
+                state.pieces.push(juggernautFactory(this.color,this.x,this.y));
+                state.pieces.splice(state.pieces.indexOf(this),1);
+            }
+            
+
+        },
+        friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
+            if(friendlyPiece)
+            {
+                if(friendlyPiece == state.pieceSelected || friendlyPiece.icon === state.pieceSelected.icon){
+                    return true;
+                }
+                friendlyPiece.x = prevMove.x;
+                friendlyPiece.y = prevMove.y;
+            }
+        }
+    }
+}
+
+function bootVesselFactory(color,x,y){
+    let moves = [
+    { type: 'blockable', repeat: true, x: 1, y: 1, missedSquareX:1, missedSquareY:1, offsetX:1, offsetY:1 }, 
+    { type: 'blockable', repeat: true, x: -1, y: -1, missedSquareX:-1, missedSquareY:-1, offsetX:-1, offsetY:-1 },
+    { type: 'blockable', repeat: true, x: 1, y: -1, missedSquareX:1, missedSquareY:-1, offsetX:1, offsetY:-1 },
+    { type: 'blockable', repeat: true, x: -1, y: 1, missedSquareX:-1, missedSquareY:1, offsetX:-1, offsetY:1 },
+
+    { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+    { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+    { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+    { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+    ]
+
+    return{
+        icon: color + 'Bootvessel.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:2,
+        posValue:0.4,
+        friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
+            if(friendlyPiece)
+            {
+                if(friendlyPiece == state.pieceSelected || friendlyPiece.icon === state.pieceSelected.icon){
+                    return true;
+                }
+                friendlyPiece.x = prevMove.x;
+                friendlyPiece.y = prevMove.y;
+            }
+        }
+    }
+}
+
+function empoweredCrystalFactory(color,x,y){
+    let moves = [
+        { type: 'blockable', repeat: true, x: 0, y: -1, missedSquareY:-1, offsetY:-1 }, { type: 'blockable', repeat: true, x: 0, y: 1, missedSquareY:1, offsetY:1 },
+        { type: 'blockable', repeat: true, x: -1, y: 0, missedSquareX:-1 , offsetX:-1 }, { type: 'blockable', repeat: true, x: 1, y: 0, missedSquareX:1, offsetX:1 },
+        
+        { type: 'blockable', repeat: true, x: -1, y: -1, missedSquareX:-1 ,missedSquareY:-1 , offsetX:-1, offsetY:-1 }, { type: 'blockable', repeat: true, x: 1, y: 1 , missedSquareX:1 , missedSquareY:1 ,offsetX:1, offsetY:1},
+        { type: 'blockable', repeat: true, x: -1, y: 1, missedSquareX:-1 ,missedSquareY:1 , offsetX:-1, offsetY:1  }, { type: 'blockable', repeat: true, x: 1, y: -1, missedSquareX:1 ,missedSquareY:-1 , offsetX:1, offsetY:-1  },
+        
+
+        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+    ]
+
+    return{
+        icon: color + 'CrystalEmpowered.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:993,
+        posValue:posValue[getRndInteger(1,5)-1],
+        friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
+            if(friendlyPiece)
+            {
+                if(friendlyPiece == state.pieceSelected || friendlyPiece.icon === state.pieceSelected.icon){
+                    return true;
+                }
+                friendlyPiece.x = prevMove.x;
+                friendlyPiece.y = prevMove.y;
+            }
+        },
+        afterThisPieceTaken:function(state){
+            let hadIt=  false;
+            state.pieces.forEach((piece) => {
+                if(piece.color == this.color && piece.icon.includes('Crystal.png') && piece != this){
+                    piece.moves = this.moves;
+                    piece.icon = this.icon;
+                    piece.value = 1000;
+                    hadIt = true;
+                }
+            })
+
+
+            if(!hadIt){
+                if (this.color == 'white') {
+                    state.won = 'black';
+                }
+                else if (this.color == 'black') {
+                    state.won = 'white';
+                }
+            }
+        }
+    }
+}
+
+
+function executorFactory(color,x,y){
+    let moves = [
+        { type: 'blockable', repeat: true, x: 0, y: -1, offsetY:-1, missedSquareY:-1 }, { type: 'blockable', repeat: true, x: 0, y: 1,offsetY:1, missedSquareY:1 },
+        { type: 'blockable', repeat: true, x: -1, y: 0, offsetX:-1, missedSquareX:-1 }, { type: 'blockable', repeat: true, x: 1, y: 0, missedSquareX:1 , offsetX:1, },
+
+        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+    ]
+
+    return{
+        icon: color + 'Executor.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:5,
+        posValue:posValue[getRndInteger(2,4)-1],
+        friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
+            if(friendlyPiece)
+            {
+                if(friendlyPiece == state.pieceSelected || friendlyPiece.icon === state.pieceSelected.icon){
+                    return true;
+                }
+                friendlyPiece.x = prevMove.x;
+                friendlyPiece.y = prevMove.y;
+            }
+        }
+    }
+}
+
+function crystalFactory(color,x,y){
+    return {
+        icon: color + 'Crystal.png',
+        vulnerable: true,
+        moved: false,
+        moves: [{ type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
+        { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
+        { type: 'absolute', x: -1, y: -1 }, { type: 'absolute', x: 1, y: 1 },
+        { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 },
+    
+        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+    ],
+        x: x,
+        y: y,
+        value:1000,
+        posValue:posValue[getRndInteger(1,3)-1],
+        color: color,
+
+        afterThisPieceTaken:function(state){
+            let hadIt = false;
+
+            state.pieces.forEach((piece) => {
+                if(piece.color == this.color && piece.icon.includes('CrystalEmpowered.png') && piece != this){
+                    piece.moves = this.moves;
+                    piece.icon = this.icon;
+                    piece.value = 1000;
+                    piece.posValue = this.posValue;
+                    hadIt = true;
+                }
+            })
+            if(!hadIt){
+                if (this.color == 'white') {
+                    state.won = 'black';
+                }
+                else if (this.color == 'black') {
+                    state.won = 'white';
+                }
+            }
+        },
+        friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
+            if(friendlyPiece)
+            {
+                if(friendlyPiece == state.pieceSelected || friendlyPiece.icon === state.pieceSelected.icon){
+                    return true;
+                }
+                friendlyPiece.x = prevMove.x;
+                friendlyPiece.y = prevMove.y;
+            }
+        }
+    }
+}
+
+
+function juggernautFactory(color,x,y){
+    let moves = [
+        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
+        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+    ]
+    
+
+    return {
+        icon: color + 'Juggernaut.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:10,
+        posValue:posValue[getRndInteger(1,3)-1],
+
+        
+        friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
+            if(friendlyPiece)
+            {
+                if(friendlyPiece == state.pieceSelected || friendlyPiece.icon === state.pieceSelected.icon){
+                    return true;
+                }
+                friendlyPiece.x = prevMove.x;
+                friendlyPiece.y = prevMove.y;
+            }
+        }
+        ,
+
+        conditionalMoves: function (state) {
+            let toReturn = [];
+            const freeThere = (x,y) =>{
+                return state.pieces.find((piece) => {
+                    return piece.y === y  && x === piece.x;
+                })
+
+            } 
+            toReturn.push({ type: 'absolute', y: -1, x: 0 })
+            if(!freeThere(this.x,this.y-1)){
+                toReturn.push(
+                    
+                    { type: 'absolute', y: -2, x: 0 },
+                    { type: 'absolute', y: -1, x: 1 },
+                    { type: 'absolute', y: -1, x: -1 }
+                )
+                if(!freeThere(this.x,this.y-2)){
+                    toReturn.push(
+                        { type: 'absolute', y: -3, x: 0 },
+                        { type: 'absolute', y: -2, x: 1 },
+                        { type: 'absolute', y: -2, x: -1 }
+                    )
+                }
+                if(!freeThere(this.x-1,this.y-1)){
+                    toReturn.push(
+                        { type: 'absolute', y: -1, x: -2 },
+                        { type: 'absolute', y: -2, x: -1 }
+                    )
+                }
+                if(!freeThere(this.x+1,this.y-1)){
+                    toReturn.push(
+                        { type: 'absolute', y: -1, x: 2 },
+                        { type: 'absolute', y: -2, x: 1 }
+                    )
+                }       
+            }
+
+            toReturn.push({ type: 'absolute', y: 1, x: 0 })
+            if(!freeThere(this.x,this.y+1)){
+                toReturn.push(
+                    
+                    { type: 'absolute', y: 2, x: 0 },
+                    { type: 'absolute', y: 1, x: 1 },
+                    { type: 'absolute', y: 1, x: -1 }
+                )
+                if(!freeThere(this.x,this.y+2)){
+                    toReturn.push(
+                        { type: 'absolute', y: 3, x: 0 },
+                        { type: 'absolute', y: 2, x: 1 },
+                        { type: 'absolute', y: 2, x: -1 }
+                    )
+                }
+                if(!freeThere(this.x-1,this.y+1)){
+                    toReturn.push(
+                        { type: 'absolute', y: 1, x: -2 },
+                        { type: 'absolute', y: 2, x: -1 },
+                    )
+                }
+                if(!freeThere(this.x+1,this.y+1)){
+                    toReturn.push(
+                        { type: 'absolute', y: 1, x: 2 },
+                        { type: 'absolute', y: 2, x: 1 },
+                    )
+                }       
+            }
+
+
+            toReturn.push({ type: 'absolute', x: -1, y: 0 })
+            if(!freeThere(this.x -1,this.y)){
+                toReturn.push(
+                    
+                    { type: 'absolute', x: -2, y: 0 },
+                    { type: 'absolute', x: -1, y: 1 },
+                    { type: 'absolute', x: -1, y: -1 }
+                )
+                if(!freeThere(this.x-2,this.y)){
+                    toReturn.push(
+                        { type: 'absolute', x: -3, y: 0 },
+                        { type: 'absolute', x: -2, y: 1 },
+                        { type: 'absolute', x: -2, y: -1 }
+                    )
+                }
+                if(!freeThere(this.x-1,this.y-1)){
+                    toReturn.push(
+                        { type: 'absolute', x: -1, y: -2 },
+                        
+                    )
+                }
+                if(!freeThere(this.x-1,this.y+1)){
+                    toReturn.push(
+                        { type: 'absolute', x: -1, y: 2 },
+                        { type: 'absolute', x: -2, y: 1 },
+                    )
+                }       
+            }
+
+            toReturn.push({ type: 'absolute', x: 1, y: 0 })
+            if(!freeThere(this.x +1,this.y)){
+                toReturn.push(
+                    
+                    { type: 'absolute', x: 2, y: 0 },
+                    { type: 'absolute', x: 1, y: 1 },
+                    { type: 'absolute', x: 1, y: -1 }
+                )
+                if(!freeThere(this.x+2,this.y)){
+                    toReturn.push(
+                        { type: 'absolute', x: 3, y: 0 },
+                        { type: 'absolute', x: 2, y: 1 },
+                        { type: 'absolute', x: 2, y: -1 }
+                    )
+                }
+                if(!freeThere(this.x+1,this.y-1)){
+                    toReturn.push(
+                        { type: 'absolute', x: 1, y: -2 },
+                    )
+                }
+                if(!freeThere(this.x+1,this.y+1)){
+                    toReturn.push(
+                        { type: 'absolute', x: 1, y: 2 },
+                        { type: 'absolute', x: 2, y: 1 },
+                    )
+                }       
+            }
+
+            toReturn = [...new Set(toReturn)];
+            return toReturn;
+        }
+    }
+}
+
+try{
+    module.exports = {
+        queenBugFactory:queenBugFactory,
+        kingFactory: kingFactory,
+        shroomFactory: shroomFactory,
+        pawnFactory: pawnFactory,
+        goliathBugFactory: goliathBugFactory,
+        antFactory: antFactory,
+        knightFactory: knightFactory,
+        rookFactory: rookFactory,
+        queenFactory: queenFactory,
+        bishopFactory: bishopFactory,
+        weakPawn: weakPawn,
+        dragonFactory: dragonFactory,
+        unpromotablePawn:unpromotablePawn,
+        mongolianKnightFactory: mongolianKnightFactory,
+        ricarFactory: ricarFactory,
+        horseFactory: horseFactory,
+        ghostFactory: ghostFactory,
+        hatFactory: hatFactory,
+        clownFactory: clownFactory,
+        pigFactory:pigFactory,
+        ladyBugFactory:ladyBugFactory,
+        spiderFactory: spiderFactory,
+        swordsMen:swordsMen,
+        northernKing:northernKing,
+        pikeman:pikeman,
+        kolba:kolba,
+        fencer:fencer,
+        general:general,
+        shield:shield,
+        plagueDoctor:plagueDoctor,
+        starMan:starMan,
+        sleepingDragon:sleepingDragon,
+        cyborgFactory:cyborgFactory,
+        crystalFactory:crystalFactory,
+        empoweredCrystalFactory:empoweredCrystalFactory,
+        executorFactory:executorFactory,
+        juggernautFactory:juggernautFactory,
+        bootVesselFactory:bootVesselFactory
+    }
+}
+catch(err){
+
 }

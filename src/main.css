@@ -322,7 +322,8 @@ html{
   }
 
   .racePickImage{
-      max-width:20vw;
+      max-width:5vw;
+      min-width:50px;
   }
 
   .racePickImage:hover{

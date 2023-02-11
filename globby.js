@@ -100,7 +100,6 @@ const newGame = function (properties) {
                 const nonBots = game.players.filter((pl) => {
                     return !(pl.socketId.substring(0, 10) == 'thisisabot')
                 })
-                console.log(nonBots)
                 if (!nonBots.length) {
                     this.games.splice(this.games.indexOf(game), 1)
                 }
@@ -227,8 +226,20 @@ const newGame = function (properties) {
     }
 
     function g() {
-
-        let state = JSON.parse(JSON.stringify(baseState));
+        const JSONfn = {};
+        JSONfn.stringify = function(obj) {
+            return JSON.stringify(obj,function(key, value){
+                    return (typeof value === 'function' ) ? value.toString() : value;
+                });
+        }
+    
+        JSONfn.parse = function(str) {
+            return JSON.parse(str,function(key, value){
+                if(typeof value != 'string') return value;
+                return ( value.substring(0,8) == 'function') ? eval('('+value+')') : value;
+            });
+        }
+        let state = JSONfn.parse(JSONfn.stringify(baseState));
         state.playersConfigArray = this.players;
         this.players = [];
         this.disconnected = [];
@@ -247,7 +258,6 @@ const newGame = function (properties) {
 
             moveFunction(player, move, state)
         }
-
         this.timeFunction = () => {
 
             const blocker = startBlockerFunction(minPlayers, maxPlayers, state.playersConfigArray, state)
@@ -267,7 +277,7 @@ const newGame = function (properties) {
                 return blocker;
             }
 
-            let copyState = JSON.parse(JSON.stringify(state));
+            let copyState = JSONfn.parse(JSONfn.stringify(state));
             const player = state.playersConfigArray.find((pl) => {
                 return pl.socketId == socketId
             })

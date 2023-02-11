@@ -1,6 +1,6 @@
 function newGame(properties) {
 
-    this.state = JSON.parse(JSON.stringify(properties.baseState));
+    this.state = JSONfn.parse(JSONfn.stringify(properties.baseState));
     this.state.playersConfigArray = this.players;
     this.players = [];
     this.disconnected = [];
@@ -23,7 +23,7 @@ function newGame(properties) {
 
     this.returnState = (socketId) => {
 
-        let copyState = JSON.parse(JSON.stringify(this.state));
+        let copyState = JSONfn.parse(JSONfn.stringify(this.state));
         const player = this.state.playersConfigArray.find((pl) => {
             return pl.socketId == socketId
         })

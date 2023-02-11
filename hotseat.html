@@ -15,12 +15,13 @@
 
         <script src="/src/jsonfn.js"></script>
 
-        <script src="src/selectAndMoveMethods.js"></script>
-        <script src="src/pieceDefinitions.js"></script>
-        <script src="/src/globby.js"></script>
-        <script src="/src/helperFunctions.js"></script>
-        <script src="/src/AI.js"></script>
+        <script src="/selectAndMoveMethods.js"></script>
+        <script src="/pieceDefinitions.js"></script>
+        <script src="/boardGeneration.js"></script>
 
+        <script src="/src/globby.js"></script>
+        <script src="/helperFunctions.js"></script>
+        <!-- <script src="/src/AI.js"></script> -->
         <link rel="stylesheet" href="/src/main.css">
 
 </head>
@@ -46,10 +47,8 @@
 
 <script>
 
+const AIColor = getParams(window.location.href).AIColor
 
-// w.onmessage = function(){
-//     console.log('vliza tuka')
-// }
 
 
 let ani = function(){
@@ -78,18 +77,15 @@ let ani = function(){
     let state;
     let hoveredPiece;
     let playerRef;
+    let w;
+
+
 
     hotseatGame.join('white', 'white');
     hotseatGame.join('black','black');
 
     hotseatGame.state.pieces.length = 0;
     hotseatGame.state.board.length = 0;
-  //  evaluateBoard('white', hotseatGame.state.pieces)
-    for (let x = 0; x <= 7; x++) {
-        for (let y = 0; y <= 7; y++) {
-            hotseatGame.state.board.push({ light: false, x: x, y: y })
-        }
-    }
 
     hotseatGame.state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3))
     hotseatGame.state.gameType = 'raceChoiceChess'
@@ -97,15 +93,44 @@ let ani = function(){
     hotseatGame.state.whiteRace = getParams(window.location.href).whiteRace || 'medieval'
     hotseatGame.state.blackRace = getParams(window.location.href).blackRace || 'bug'
     hotseatGame.state.turn = 'black'
+    let comingGameType = getParams(window.location.href).gameType;
+    if(comingGameType){
+        hotseatGame.state.gameType = comingGameType;
+    }
 
-    raceChoiceChess(hotseatGame.state.pieces,hotseatGame.state.board,hotseatGame.state.whiteRace,hotseatGame.state.blackRace)
+
+    if(hotseatGame.state.gameType){
+        window[hotseatGame.state.gameType](hotseatGame.state.pieces,hotseatGame.state.board,hotseatGame.state.whiteRace,hotseatGame.state.blackRace)
+    }
+
+
+const AIProps = {
+    state:undefined,
+    color:'white'
+}
+
+
+AIProps.hotseatGame = hotseatGame;
+AIProps.color = AIColor;
+
+
+function AIMove(pieceIndex, xClicked, yClicked, color){
+    const hotseatGame = AIProps.hotseatGame;
+    const theColor = color? color : AIProps.color;
+    const state = hotseatGame.state;
+    const myPieces = getColorPieces(AIProps.hotseatGame.state.pieces,theColor);
+    selectPiece({x:myPieces[pieceIndex].x, y:myPieces[pieceIndex].y},state)
+
+    const selectedPiece = state.pieceSelected;
+    lightBoard(selectedPiece,{pieces:state.pieces, board:state.board})
+    hotseatGame.move(state.turn,{ x: xClicked, y: yClicked });
+}
     function animate(secretState){
         //Draw the game
         const myTurnH1 = document.getElementById('turn');
         canvas.width = squareLength * boardWidth + squareLength;
         canvas.height = squareLength * boardWidth + squareLength;
         state = secretState;
-
         if(hoveredPiece){
             if(hoveredPiece.color != hotseatGame.state.turn && hotseatGame.state.turn != undefined){
                 lightBoardFE(hoveredPiece,state,'red','grey')
@@ -121,14 +146,14 @@ let ani = function(){
             const body = document.getElementsByTagName('body')[0];
             const forfeitTextButton = document.getElementById('forfeitText');
             if (state.turn == 'black') {
-                body.style.background = blackSquareColor
+                body.style.background = backgroundColor
                 me.style.color = whiteSquareColor;
                 enemy.style.color = whiteSquareColor;
             }
             else {
                 me.style.color = blackSquareColor;
                 enemy.style.color = blackSquareColor;
-                body.style.background = whiteSquareColor
+                body.style.background = backgroundColor
             }
             myTurnH1.innerText = state.message || '';
             const height = getMaxX(state.board,'y')
@@ -162,7 +187,7 @@ let ani = function(){
                 if(y%2 != 0){
                     orderFirst = false;
                 }
-                if (!sq.light && !sq.special && !sq.red) {
+                 if (!sq.light && !sq.special && !sq.red) {
                     if(orderFirst){
                         if(x % 2 != 0){
                             drawBlackSquare(x * squareLength, y * squareLength, squareLength)
@@ -185,18 +210,19 @@ let ani = function(){
                         }
                     }
                 }
+                else if(sq.red){
+                    drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength)
+                }
+                else if(sq.grey){
+                    drawColoredSquare(x*squareLength, y * squareLength, blockedSquareColor, squareLength)
+                }
                 else if(sq.special){
                     drawColoredSquare(x*squareLength, y * squareLength, '#855bb3', squareLength)
                 }
                 else {
                     drawLightedSquare(x * squareLength, y * squareLength, squareLength);
                 }
-                if(sq.red){
-                    drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength)
-                }
-                else if(sq.grey){
-                    drawColoredSquare(x*squareLength, y * squareLength, blockedSquareColor, squareLength)
-                }
+
 
                 
                 
@@ -204,6 +230,7 @@ let ani = function(){
             if(state.oldMove){
                 const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);
                 const newSquare = findSquareByXY(state.board,state.oldMove.currentX, state.oldMove.currentY);
+
                 if(hotseatGame.state.turn === 'black'){
                     if(!oldSquare.light){
                         drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
@@ -213,6 +240,7 @@ let ani = function(){
                     }
                 }
                 else if(hotseatGame.state.turn === 'white'){
+
                     if(!oldSquare.light){
                         drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
                     }
@@ -246,49 +274,17 @@ let ani = function(){
         }
 
     } 
-    AISetup(hotseatGame,'white');
+
 
     canvas.addEventListener('click', (e) => {
-        const AIColor = 'white';
-        const hotseat = false;
+        const hotseat = true;
         const state = hotseatGame.state;
         const AIvsAI = false;
-        
-        if(AIvsAI)
-        {
-            state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
-            if(state.turn === 'black'){
-                w = new Worker("src/webworker.js");
-
-                w.postMessage(JSONfn.stringify({state:state, color:'black', depth:500}));
-                w.onmessage = function(event){
-                    let move = JSONfn.parse(event.data)
-                    AIMove(move.pieceCounter, move.xClicked, move.yClicked, 'black')
-                    if(state.turn === 'black'){
-                        w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500, removedTurns:[...event.data.removedTurns, {...move}]}));
-                    }
-                }
-            }
-            if(state.turn === 'white'){
-                w = new Worker("src/webworker.js");
-
-                w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500}));
-                w.onmessage = function(event){
-                    let move = JSONfn.parse(event.data)
-                    AIMove(move.pieceCounter, move.xClicked, move.yClicked, 'white')
-                    if(state.turn === 'white'){
-                        w.postMessage(JSONfn.stringify({state:state, color:'white', depth:500, removedTurns:[...event.data.removedTurns, {...move}]}));
-                    }
-                }
-                // let move = minimax(state,'white',200)
-
-                
-                // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
-            }
+        if(w){
+            w.terminate();
         }
-        else if(hotseat || state.turn !=  AIColor){
+        if(hotseat || state.turn !=  AIColor){
             var element = canvas, offsetX = 0, offsetY = 0, mx, my;
-
             // Compute the total offset. It's possible to cache this if you want
             if (element.offsetParent !== undefined) {
                 do {
@@ -299,22 +295,37 @@ let ani = function(){
 
             mx = e.pageX - offsetX;
             my = e.pageY - offsetY;
-            
 
             hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
             state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
+
             if(state.turn === AIColor){
                 w = new Worker("src/webworker.js");
-
                 w.postMessage(JSONfn.stringify({state:state, color:AIColor, depth:500}));
+
                 w.onmessage = function(event){
                     let move = JSONfn.parse(event.data)
-                    AIMove(move.pieceCounter, move.xClicked, move.yClicked, AIColor)
-                }
-                // let move = minimax(state,'white',200)
 
-                
-                // AIMove(move.pieceCounter, move.xClicked, move.yClicked)
+                    AIMove(move.pieceCounter, move.xClicked, move.yClicked, AIColor)
+                    if(state.turn === AIColor){
+                        let removedTurns = [{...move}]
+                        
+                        if(move.removedTurns){
+                            removedTurns = [...removedTurns, ...move.removedTurns]
+                        }
+                        w.postMessage(JSONfn.stringify({state:state, color:AIColor, depth:500, removedTurns:removedTurns}));
+                    }
+                }
+            }
+            else if(AIColor === 'allAI'){
+                w = new Worker("src/webworker.js");
+                w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:500}));
+                w.onmessage = function(event){
+                    let move = JSONfn.parse(event.data)
+                    AIMove(move.pieceCounter, move.xClicked, move.yClicked, state.turn)
+                    w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:500}));
+
+                }
             }
         }
 

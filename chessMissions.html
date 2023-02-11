@@ -3,7 +3,7 @@
 <script src="/src/variables.js"></script>
 
 <script src="/src/loadImages.js"></script>
-<script src="/src/helperFunctions.js"></script>
+<script src="/helperFunctions.js"></script>
 <script src="/src/globby.js"></script>
 
 <link rel="stylesheet" href="/src/main.css">
@@ -76,7 +76,7 @@
                 lightBoardFE(hoveredPiece,state,'red','grey')
             }
         }
-        if (state.pieces) {
+        if (state.pieces && state.board) {
             if(exitButton.hasAttribute('style')){
                 exitButton.removeAttribute('style')
             }
@@ -314,6 +314,7 @@
         mx = e.pageX - offsetX;
         my = e.pageY - offsetY;
         if(IAM == 'black' && boardHeight){
+
             socket.emit('move', { x: parseInt(mx / squareLength), y: reverseNumber(parseInt(my / squareLength),boardHeight) })
         }
         else{

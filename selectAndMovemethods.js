@@ -1,4 +1,3 @@
-const e = require("express");
 
 function lightBoard(piece, state, flag) {
     if (!flag) {
@@ -12,15 +11,19 @@ function lightBoard(piece, state, flag) {
     if (piece.conditionalMoves) {
         tempMoves = piece.conditionalMoves(state);
     }
+
     [...piece.moves, ...tempMoves].forEach((move) => {
         if (move.type == 'absolute') {
             const square = state.board.find((el) => {
                 return el.x === piece.x + move.x && el.y === piece.y + move.y
             })
-            if (square) {
+            if (square) {       
                 const innerPiece = pieceFromSquare(square, state.pieces)
                 if (innerPiece) {
-                    if (innerPiece.color != piece.color && !move.impotent) {
+                    let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces && !move.impotent;
+                    let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces && !move.impotent;
+
+                    if ((checkForFriends || checkForEnemies) && !move.impotent) {
                         square[flag] = true;
                     }
                 }
@@ -28,6 +31,8 @@ function lightBoard(piece, state, flag) {
                     square[flag] = true;
                 }
             }
+
+
         }
         else if (move.type == 'allMine') {
             state.board.forEach((square) => {
@@ -46,7 +51,9 @@ function lightBoard(piece, state, flag) {
             if (square) {
                 const innerPiece = pieceFromSquare(square, state.pieces)
                 if (innerPiece) {
-                    if (innerPiece.color != piece.color && !move.impotent) {
+                    let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
+                    let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
+                    if ((checkForFriends || checkForEnemies) && !move.impotent) {
                         square[flag] = true;
                     }
                 }
@@ -55,7 +62,9 @@ function lightBoard(piece, state, flag) {
         else if (move.type == 'blockable') {
             if (move.repeat) {
                 const limit = move.limit || 100;
-                blockableFunction(state, move.x, move.y, piece.x, piece.y, move, limit, flag);
+                const offsetX = move.offsetX || 0;
+                const offsetY = move.offsetY || 0;
+                blockableFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag, move.missedSquareX, move.missedSquareY);
             }
         }
     })
@@ -63,7 +72,8 @@ function lightBoard(piece, state, flag) {
 
 
 
-function blockableFunction(state, powerX, powerY, x, y, move, limit, flag) {
+
+function blockableFunction(state, powerX, powerY, x, y, move, limit, flag, missedSquareX, missedSquareY) {
     if (!flag) {
         flag = 'light'
     }
@@ -98,10 +108,17 @@ function blockableFunction(state, powerX, powerY, x, y, move, limit, flag) {
         directionY = 0;
     }
 
+    if(!missedSquareX){
+        missedSquareX = 0;
+    }
+
+    if(!missedSquareY){
+        missedSquareY = 0;
+    }
 
     if (!piece) {
         square[flag] = true;
-        blockableFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1)
+        blockableFunction(state, powerX + directionX+missedSquareX, powerY + directionY + missedSquareY, x, y, move, limit - 1, flag, missedSquareX, missedSquareY)
     }
     else if (piece.color != state.turn && !move.impotent) {
         square[flag] = true;
@@ -175,7 +192,8 @@ function playerMove(playerMove, state,alwaysLight) {
     const friendlyPiece = state.pieces.find((ePiece) => {
         return ePiece.x === x && ePiece.y === y && ePiece.color == state.pieceSelected.color
     })
-
+    const friendlyPieceOldX = friendlyPiece && friendlyPiece.x;
+    const friendlyPieceOldY = friendlyPiece && friendlyPiece.y;
     const oldX = state.pieceSelected.x;
     const oldY = state.pieceSelected.y;
 
@@ -192,6 +210,10 @@ function playerMove(playerMove, state,alwaysLight) {
 
         if(state.pieces[i].friendlyPieceInteraction){
             if(state.pieces[i].friendlyPieceInteraction(state, friendlyPiece, {x:oldX, y:oldY})){
+                if(friendlyPiece){
+                    friendlyPiece.x = friendlyPieceOldX;
+                    friendlyPiece.y = friendlyPieceOldY;
+                }
                 continueTurn = false;
             }    
         }
@@ -250,15 +272,22 @@ function selectPiece(playerMove, state) {
         return;
     }
     state.pieceSelected = piece;
+
     lightBoard(piece, state)
 }
 
-module.exports = {
-    selectPiece: selectPiece,
-    playerMove: playerMove,
-    checkTurn: checkTurn,
-    changeTurn: changeTurn,
-    lightBoard: lightBoard,
-    closeLights: closeLights,
-    pickARace: pickARace
+try{
+    module.exports = {
+        selectPiece: selectPiece,
+        playerMove: playerMove,
+        checkTurn: checkTurn,
+        changeTurn: changeTurn,
+        lightBoard: lightBoard,
+        closeLights: closeLights,
+        pickARace: pickARace
+    }
 }
+catch(err){
+
+}
+
