@@ -1,7 +1,7 @@
 
 
 try{
-    var {playerMove, lightBoard} = require('./selectAndMovemethods')
+    var {playerMove, lightBoard} = require('./selectAndMoveMethods')
     var {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecked, findPieceByXY, 
         findCopyPieceByXY, areYouCheckedWithoutTempMoves} = require('./helperFunctions')
     
