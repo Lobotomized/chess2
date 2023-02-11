@@ -72,6 +72,7 @@ function lightBoard(piece, state, flag) {
 
 
 
+
 function blockableFunction(state, powerX, powerY, x, y, move, limit, flag, missedSquareX, missedSquareY) {
     if (!flag) {
         flag = 'light'
