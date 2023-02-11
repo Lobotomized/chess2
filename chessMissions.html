@@ -76,7 +76,7 @@
                 lightBoardFE(hoveredPiece,state,'red','grey')
             }
         }
-        if (state.pieces) {
+        if (state.pieces && state.board) {
             if(exitButton.hasAttribute('style')){
                 exitButton.removeAttribute('style')
             }
@@ -314,12 +314,10 @@
         mx = e.pageX - offsetX;
         my = e.pageY - offsetY;
         if(IAM == 'black' && boardHeight){
-            console.log(parseInt(mx / squareLength),reverseNumber(parseInt(my / squareLength),boardHeight))
 
             socket.emit('move', { x: parseInt(mx / squareLength), y: reverseNumber(parseInt(my / squareLength),boardHeight) })
         }
         else{
-            console.log(parseInt(mx / squareLength), parseInt(my / squareLength) )
             socket.emit('move', { x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
         }
     })
