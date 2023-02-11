@@ -360,16 +360,6 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
     return true;
 }
 
-
- 
-function closeLights(board, flag) {
-    if (!flag) {
-        flag = 'light'
-    }
-    board.forEach((square) => {
-        square[flag] = false;
-    })
-}
  
 
 self.addEventListener("message", function(e) {
