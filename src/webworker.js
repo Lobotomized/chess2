@@ -4,11 +4,6 @@ importScripts('/src/jsonfn.js')
 
 let globalPosValue = 0.1//Math.random();
 
-const AIProps = {
-    state:undefined,
-    color:'white'
- }
-
 function evaluateBoard(colorPerspective, pieces, state){
     let counter = 0;
     let valueTransformer = 1;
@@ -112,21 +107,9 @@ function evaluateBoardDve(colorPerspective, pieces, state){
     return valueCounter;
 }
  
- 
- function getColorPieces(pieces,color){
-     const myPieces = pieces.filter((piece) => {
-         if(color === piece.color){
-             return true;
-         }
-     })
- 
-     return myPieces
- }
- 
- 
  function generateMovesFromPieces(state,color){
      const movesAndPieces = []
-     color = color ? color : AIProps.color;
+     color = color ? color : getColorPieces.color;
      let piecesCounter = 0;
      const myPieces = !color ?state.pieces : getColorPieces(state.pieces,color) //getColorPieces(state.pieces,   color);
      while(myPieces.length > piecesCounter){

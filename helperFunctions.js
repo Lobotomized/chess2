@@ -18,10 +18,10 @@ function findPieceByXY(pieces,x,y){
  }
 
  function findSquareByXY(pieces,x,y){
-    let index =  pieces.findIndex((piece) => {
-         return piece .x == x && piece.y == y;
+    let square =  pieces.find((square) => {
+         return square.x == x && square.y == y;
      })
-     return index
+     return square
  }
 
 
@@ -718,6 +718,16 @@ function closeLights(board, flag) {
 function reverseNumber(number,size){
     let sizePlusOne = size;
     return (number - sizePlusOne)*-1
+}
+
+function getColorPieces(pieces,color){
+    const myPieces = pieces.filter((piece) => {
+        if(color === piece.color){
+            return true;
+        }
+    })
+
+    return myPieces
 }
 
 try{

@@ -15,13 +15,13 @@
 
         <script src="/src/jsonfn.js"></script>
 
-        <script src="src/selectAndMoveMethods.js"></script>
+        <script src="/selectAndMoveMethods.js"></script>
         <script src="/pieceDefinitions.js"></script>
         <script src="/boardGeneration.js"></script>
 
         <script src="/src/globby.js"></script>
         <script src="/helperFunctions.js"></script>
-        <script src="/src/AI.js"></script>
+        <!-- <script src="/src/AI.js"></script> -->
         <link rel="stylesheet" href="/src/main.css">
 
 </head>
@@ -79,6 +79,8 @@ let ani = function(){
     let playerRef;
     let w;
 
+
+
     hotseatGame.join('white', 'white');
     hotseatGame.join('black','black');
 
@@ -100,6 +102,29 @@ let ani = function(){
     if(hotseatGame.state.gameType){
         window[hotseatGame.state.gameType](hotseatGame.state.pieces,hotseatGame.state.board,hotseatGame.state.whiteRace,hotseatGame.state.blackRace)
     }
+
+
+const AIProps = {
+    state:undefined,
+    color:'white'
+}
+
+
+AIProps.hotseatGame = hotseatGame;
+AIProps.color = AIColor;
+
+
+function AIMove(pieceIndex, xClicked, yClicked, color){
+    const hotseatGame = AIProps.hotseatGame;
+    const theColor = color? color : AIProps.color;
+    const state = hotseatGame.state;
+    const myPieces = getColorPieces(AIProps.hotseatGame.state.pieces,theColor);
+    selectPiece({x:myPieces[pieceIndex].x, y:myPieces[pieceIndex].y},state)
+
+    const selectedPiece = state.pieceSelected;
+    lightBoard(selectedPiece,{pieces:state.pieces, board:state.board})
+    hotseatGame.move(state.turn,{ x: xClicked, y: yClicked });
+}
     function animate(secretState){
         //Draw the game
         const myTurnH1 = document.getElementById('turn');
@@ -185,18 +210,19 @@ let ani = function(){
                         }
                     }
                 }
+                else if(sq.red){
+                    drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength)
+                }
+                else if(sq.grey){
+                    drawColoredSquare(x*squareLength, y * squareLength, blockedSquareColor, squareLength)
+                }
                 else if(sq.special){
                     drawColoredSquare(x*squareLength, y * squareLength, '#855bb3', squareLength)
                 }
                 else {
                     drawLightedSquare(x * squareLength, y * squareLength, squareLength);
                 }
-                if(sq.red){
-                    drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength)
-                }
-                else if(sq.grey){
-                    drawColoredSquare(x*squareLength, y * squareLength, blockedSquareColor, squareLength)
-                }
+
 
                 
                 
@@ -204,6 +230,7 @@ let ani = function(){
             if(state.oldMove){
                 const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);
                 const newSquare = findSquareByXY(state.board,state.oldMove.currentX, state.oldMove.currentY);
+
                 if(hotseatGame.state.turn === 'black'){
                     if(!oldSquare.light){
                         drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
@@ -213,6 +240,7 @@ let ani = function(){
                     }
                 }
                 else if(hotseatGame.state.turn === 'white'){
+
                     if(!oldSquare.light){
                         drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
                     }
@@ -246,7 +274,7 @@ let ani = function(){
         }
 
     } 
-    AISetup(hotseatGame,'white');
+
 
     canvas.addEventListener('click', (e) => {
         const hotseat = true;

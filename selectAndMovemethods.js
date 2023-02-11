@@ -1,4 +1,3 @@
-const e = require("express");
 
 function lightBoard(piece, state, flag) {
     if (!flag) {
@@ -70,7 +69,6 @@ function lightBoard(piece, state, flag) {
         }
     })
 }
-
 
 
 
@@ -277,12 +275,18 @@ function selectPiece(playerMove, state) {
     lightBoard(piece, state)
 }
 
-module.exports = {
-    selectPiece: selectPiece,
-    playerMove: playerMove,
-    checkTurn: checkTurn,
-    changeTurn: changeTurn,
-    lightBoard: lightBoard,
-    closeLights: closeLights,
-    pickARace: pickARace
+try{
+    module.exports = {
+        selectPiece: selectPiece,
+        playerMove: playerMove,
+        checkTurn: checkTurn,
+        changeTurn: changeTurn,
+        lightBoard: lightBoard,
+        closeLights: closeLights,
+        pickARace: pickARace
+    }
 }
+catch(err){
+
+}
+
