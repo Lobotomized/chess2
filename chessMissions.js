@@ -14,6 +14,7 @@ app.use('/helperFunctions.js', express.static('helperFunctions.js'))
 app.use('/selectAndMoveMethods.js', express.static('selectAndMoveMethods.js'))
 
 
+
 // app.use('/pieceDefinitions.js, express.static('pieces'))
 // app.use('/boardGeneration.js', express.static('boardGeneration.js'))
 
