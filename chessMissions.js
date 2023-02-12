@@ -7,9 +7,9 @@ app.use('/selectAndMoveMethods.js', express.static('selectAndMoveMethodi.js'))
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const newG = require('./globby').newIOServerV2;
-const {miniChess, randomChess,  catchTheDragon, mongolianChess, classicChess, raceChess, raceChoiceChess} = require('./boardGeneration')
-const { selectPiece, playerMove, checkTurn, changeTurn, lightBoard, closeLights } = require('./selectAndMoveMethodi')
-const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFactory} = require('./pieceDefinitions')
+const {miniChess, randomChess,  catchTheDragon, mongolianChess, classicChess, raceChess, raceChoiceChess} = require('./boardGeneration.js')
+const { selectPiece, playerMove, checkTurn, changeTurn, lightBoard, closeLights } = require('./selectAndMoveMethodi.js')
+const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFactory} = require('./pieceDefinitions.js')
 app.use('/static', express.static('public'))
 app.use('/src', express.static('src'))
 
