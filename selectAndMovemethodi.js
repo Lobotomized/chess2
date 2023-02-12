@@ -276,6 +276,16 @@ function selectPiece(playerMove, state) {
     lightBoard(piece, state)
 }
 
+module.exports = {
+    selectPiece: selectPiece,
+    playerMove: playerMove,
+    checkTurn: checkTurn,
+    changeTurn: changeTurn,
+    lightBoard: lightBoard,
+    closeLights: closeLights,
+    pickARace: pickARace
+}
+
 try{
     module.exports = {
         selectPiece: selectPiece,
