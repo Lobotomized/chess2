@@ -13,7 +13,7 @@ console.log(selectPiece, ' tuka!?')
 app.use('/boardGeneration.js', express.static('boardGeneration.js'))
 app.use('/pieceDefinitions.js', express.static('pieceDefinitions.js'))
 app.use('/helperFunctions.js', express.static('helperFunctions.js'))
-// app.use('/selectAndMoveMethods.js', express.static('selectAndMoveMethods.js'))
+app.use('/selectAndMoveMethods.js', express.static('selectAndMoveMethods.js'))
 
 
 
