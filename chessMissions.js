@@ -1,5 +1,9 @@
 const express = require('express');
 const app = express();
+app.use('/boardGeneration.js', express.static('boardGeneration.js'))
+app.use('/pieceDefinitions.js', express.static('pieceDefinitions.js'))
+app.use('/helperFunctions.js', express.static('helperFunctions.js'))
+app.use('/selectAndMoveMethods.js', express.static('selectAndMoveMethods.js'))
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const newG = require('./globby').newIOServerV2;
@@ -9,11 +13,7 @@ const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFac
 app.use('/static', express.static('public'))
 app.use('/src', express.static('src'))
 
-console.log(selectPiece, ' tuka!?')
-app.use('/boardGeneration.js', express.static('./boardGeneration.js'))
-app.use('/pieceDefinitions.js', express.static('./pieceDefinitions.js'))
-app.use('/helperFunctions.js', express.static('./helperFunctions.js'))
-app.use('/selectAndMoveMethods.js', express.static('./selectAndMoveMethods.js'))
+
 
 
 
