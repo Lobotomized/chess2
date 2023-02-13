@@ -8,7 +8,7 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const newG = require('./globby').newIOServerV2;
 const {miniChess, randomChess,  catchTheDragon, mongolianChess, classicChess, raceChess, raceChoiceChess} = require('./boardGeneration.js')
-const { selectPiece, playerMove, checkTurn, changeTurn, lightBoard, closeLights } = require('./selectAndMoveMethods.js')
+const { selectPiece, playerMove, checkTurn, changeTurn, lightBoard, closeLights } = require('./moveMethods.js')
 const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFactory} = require('./pieceDefinitions.js')
 app.use('/static', express.static('public'))
 app.use('/src', express.static('src'))
