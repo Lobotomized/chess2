@@ -13,7 +13,7 @@ const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFac
 app.use('/static', express.static('public'))
 app.use('/src', express.static('src'))
 
-
+console.log(selectPiece)
 
 
 

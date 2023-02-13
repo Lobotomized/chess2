@@ -287,7 +287,7 @@ try{
         closeLights: closeLights,
         pickARace: pickARace
     }
-    console.log('vliza tuka?')
+    console.log('vliza tuka? !!?!?!?')
 }
 catch(err){
 
