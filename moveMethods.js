@@ -276,13 +276,18 @@ function selectPiece(playerMove, state) {
     lightBoard(piece, state)
 }
 
+try{
+    module.exports = {
+        selectPiece: selectPiece,
+        playerMove: playerMove,
+        checkTurn: checkTurn,
+        changeTurn: changeTurn,
+        lightBoard: lightBoard,
+        closeLights: closeLights,
+        pickARace: pickARace
+    }
+}
 
-module.exports = {
-    selectPiece: selectPiece,
-    playerMove: playerMove,
-    checkTurn: checkTurn,
-    changeTurn: changeTurn,
-    lightBoard: lightBoard,
-    closeLights: closeLights,
-    pickARace: pickARace
+catch(err){
+    
 }

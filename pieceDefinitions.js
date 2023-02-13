@@ -704,9 +704,9 @@ function kingFactory(color, x, y) {
                 for(let i = fakeState.pieces.length - 1; i>=0; i--){
                     let friendlyPiece = fakeState.pieces[i];    
                     if(friendlyPiece.color == this.color){
-                        if (friendlyPiece.conditionalMoves) {
-                            tempMoves = friendlyPiece.conditionalMoves(state); //  If the piece is from your team we gonna need it's conditional moves.
-                        }
+                        // if (friendlyPiece.conditionalMoves) {
+                        //     tempMoves = friendlyPiece.conditionalMoves(state); //  If the piece is from your team we gonna need it's conditional moves.
+                        // }
                         fakeState.turn = this.color;
     
                         fakeState.pieceSelected = friendlyPiece;
