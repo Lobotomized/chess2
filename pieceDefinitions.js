@@ -699,7 +699,7 @@ function kingFactory(color, x, y) {
                 enemyColor = 'white'
             }
             if(areYouChecked(state,enemyColor,this)){
-                let fakeState = JSON.parse(JSON.stringify(state));
+                let fakeState = JSONfn.parse(JSONfn.stringify(state));
                 let possibleEscape = false;
                 for(let i = fakeState.pieces.length - 1; i>=0; i--){
                     let friendlyPiece = fakeState.pieces[i];    
@@ -729,7 +729,7 @@ function kingFactory(color, x, y) {
                             if(!areYouChecked(fakeState,enemyColor,fakeKing)){
                                 possibleEscape = true;
                             }
-                            fakeState = JSON.parse(JSON.stringify(state));
+                            fakeState = JSONfn.parse(JSONfn.stringify(state));
                         })
     
                     }

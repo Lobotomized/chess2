@@ -69,7 +69,6 @@ function areYouChecked (state,enemyColor,me){
         let tempMoves = [];
         if (piece.conditionalMoves) {
             tempMoves = piece.conditionalMoves(state);
-            console.log(tempMoves)
         }
         for(let ii = [...piece.moves, ...tempMoves].length-1; ii>=0; ii--){
             const move = [...piece.moves, ...tempMoves][ii];

@@ -172,6 +172,9 @@ function pickARace(race,state,playerRef){
 }
 
 function playerMove(playerMove, state,alwaysLight) {
+    if(state.won){
+        return;
+    }
     // if legal move return true else return false
     const x = playerMove.x;
     const y = playerMove.y;
