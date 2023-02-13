@@ -684,7 +684,7 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
         const offsetY = move.offsetY || 0;
         blockableSpecialFunction(state, powerX + directionX, powerY + directionY, x+offsetX, y+offsetY, move, limit - 1, flag,secondFlag, missedSquareX, missedSquareY)
     }
-    else if (!move.impotent) {
+    else if (piece.color != state.turn && !move.impotent) {
         // console.log(state, state.pieces)
         let selectedPiece = pieceFromXY(x,y,state.pieces)
         square[flag] = true;

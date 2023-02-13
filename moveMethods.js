@@ -22,7 +22,6 @@ function lightBoard(piece, state, flag) {
                 if (innerPiece) {
                     let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces && !move.impotent;
                     let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces && !move.impotent;
-
                     if ((checkForFriends || checkForEnemies) && !move.impotent) {
                         square[flag] = true;
                     }
@@ -64,6 +63,9 @@ function lightBoard(piece, state, flag) {
                 const limit = move.limit || 100;
                 const offsetX = move.offsetX || 0;
                 const offsetY = move.offsetY || 0;
+                // if(!state.turn){
+                //     state.turn =  piece.color;
+                // }
                 blockableFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag, move.missedSquareX, move.missedSquareY);
             }
         }
@@ -115,7 +117,6 @@ function blockableFunction(state, powerX, powerY, x, y, move, limit, flag, misse
     if(!missedSquareY){
         missedSquareY = 0;
     }
-
     if (!piece) {
         square[flag] = true;
         blockableFunction(state, powerX + directionX+missedSquareX, powerY + directionY + missedSquareY, x, y, move, limit - 1, flag, missedSquareX, missedSquareY)
