@@ -1,7 +1,6 @@
 importScripts('/pieceDefinitions.js')
 importScripts('/helperFunctions.js')
 importScripts('/src/jsonfn.js')
-importScripts('/moveMethods.js')
 
 let globalPosValue = 0.1//Math.random();
 
@@ -40,24 +39,24 @@ function evaluateBoard(colorPerspective, pieces, state){
 }
 
 
-function evaluateBoardSimple(colorPerspective, pieces, state){
-    let counter = 0;
-    let valueTransformer = 1;
-    let valueCounter = 0;
+// function evaluateBoardSimple(colorPerspective, pieces, state){
+//     let counter = 0;
+//     let valueTransformer = 1;
+//     let valueCounter = 0;
 
-    while(pieces.length > counter){
-        const piece = pieces[counter]
-        if(colorPerspective === piece.color){
-            valueTransformer = piece.value
-        }
-        else{
-            valueTransformer = piece.value
-        }
-        valueCounter += valueTransformer;
-        counter++;
-    }
-    return valueCounter;
-}
+//     while(pieces.length > counter){
+//         const piece = pieces[counter]
+//         if(colorPerspective === piece.color){
+//             valueTransformer = piece.value
+//         }
+//         else{
+//             valueTransformer = piece.value
+//         }
+//         valueCounter += valueTransformer;
+//         counter++;
+//     }
+//     return valueCounter;
+// }
 
 function safetyValue(colorPerspective, pieces,board){
     let valueToReturn = 0;
@@ -128,38 +127,38 @@ function evaluateBoardDve(colorPerspective, pieces, state){
     return valueCounter;
 }
 
-function generateMovesFromPiecesFast(state,color){
-    const movesAndPieces = []
-    color = color ? color : getColorPieces.color;
-    let piecesCounter = 0;
-    const myPieces = !color ?state.pieces : getColorPieces(state.pieces,color) //getColorPieces(state.pieces,   color);
-    while(myPieces.length > piecesCounter){
-        let movesCounter = 0;
-        let piece = myPieces[piecesCounter]
-        lightBoardFEFast(piece,{pieces:state.pieces, board:state.board,turn:state.turn},'allowedMove')
+// function generateMovesFromPiecesFast(state,color){
+//     const movesAndPieces = []
+//     color = color ? color : getColorPieces.color;
+//     let piecesCounter = 0;
+//     const myPieces = !color ?state.pieces : getColorPieces(state.pieces,color) //getColorPieces(state.pieces,   color);
+//     while(myPieces.length > piecesCounter){
+//         let movesCounter = 0;
+//         let piece = myPieces[piecesCounter]
+//         lightBoardFEFast(piece,{pieces:state.pieces, board:state.board,turn:state.turn},'allowedMove')
       
-        const allowedMoves = state.board.filter((square) => {
-            return square.allowedMove;
-        })
-        while(allowedMoves.length > movesCounter){
-            const newPieces = JSONfn.parse(JSONfn.stringify(state.pieces))
-            let newMyPieces = getColorPieces(newPieces, color)
-            piece = newMyPieces[piecesCounter];
+//         const allowedMoves = state.board.filter((square) => {
+//             return square.allowedMove;
+//         })
+//         while(allowedMoves.length > movesCounter){
+//             const newPieces = JSONfn.parse(JSONfn.stringify(state.pieces))
+//             let newMyPieces = getColorPieces(newPieces, color)
+//             piece = newMyPieces[piecesCounter];
 
 
-            const square = allowedMoves[movesCounter]
-            playerMove({x:square.x, y:square.y},{board:state.board, pieces:newPieces, pieceSelected:piece , turn:color},true, undefined, 'allowedMove')
+//             const square = allowedMoves[movesCounter]
+//             playerMove({x:square.x, y:square.y},{board:state.board, pieces:newPieces, pieceSelected:piece , turn:color},true, undefined, 'allowedMove')
 
 
-            if( square && square.allowedMove){
-                movesAndPieces.push({pieceCounter:piecesCounter,pieces:newPieces, xClicked:square.x, yClicked:square.y})
-            }
-            movesCounter++
-        }
-        piecesCounter++
-    }
-    return movesAndPieces
-}
+//             if( square && square.allowedMove){
+//                 movesAndPieces.push({pieceCounter:piecesCounter,pieces:newPieces, xClicked:square.x, yClicked:square.y})
+//             }
+//             movesCounter++
+//         }
+//         piecesCounter++
+//     }
+//     return movesAndPieces
+// }
  
  function generateMovesFromPieces(state,color){
      const movesAndPieces = []
@@ -312,55 +311,55 @@ function generateMovesFromPiecesFast(state,color){
 
 }
 
-function minimaxFast(state,maximizer, depth, removedTurns){    
-    const moves = generateMovesFromPiecesFast(state,maximizer)
-    let enemy = 'black';
-    if(maximizer === 'black'){
-        enemy = 'white';
-    }
+// function minimaxFast(state,maximizer, depth, removedTurns){    
+//     const moves = generateMovesFromPiecesFast(state,maximizer)
+//     let enemy = 'black';
+//     if(maximizer === 'black'){
+//         enemy = 'white';
+//     }
 
-    let selectedMove = undefined;
-    let badMoveResults= []
-    let slizedMoves = moves.slice(0,depth);
-    let lowestBadMoveResult = 999999;
+//     let selectedMove = undefined;
+//     let badMoveResults= []
+//     let slizedMoves = moves.slice(0,depth);
+//     let lowestBadMoveResult = 999999;
 
-    slizedMoves.forEach((move, index) => {
-        let isItBanned;
-        if(removedTurns){
-            isItBanned = removedTurns.find((removedTurn) => {
-                return move.xClicked === removedTurn.xClicked && move.yClicked === removedTurn.yClicked && removedTurn.pieceCounter === move.pieceCounter
-            })
-        }
+//     slizedMoves.forEach((move, index) => {
+//         let isItBanned;
+//         if(removedTurns){
+//             isItBanned = removedTurns.find((removedTurn) => {
+//                 return move.xClicked === removedTurn.xClicked && move.yClicked === removedTurn.yClicked && removedTurn.pieceCounter === move.pieceCounter
+//             })
+//         }
         
-        if(isItBanned){
-            return;
-        }
+//         if(isItBanned){
+//             return;
+//         }
 
-        const badMoves = generateMovesFromPiecesFast({board:state.board,pieces:move.pieces},enemy)
-        let bestBadMove = {};
-        let badMoveValue = -999999;
-        badMoves.forEach((badMove) => {
+//         const badMoves = generateMovesFromPiecesFast({board:state.board,pieces:move.pieces},enemy)
+//         let bestBadMove = {};
+//         let badMoveValue = -999999;
+//         badMoves.forEach((badMove) => {
 
-            let thisValue = evaluateBoardSimple(enemy,badMove.pieces, state)
-            if(thisValue > badMoveValue){
-                badMoveValue = thisValue;
-                bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
-            }
-        })
-        if(!badMoves.length){
-            bestBadMove = {moveCounter:index, value:-20,pieces:state.pieces};
-        }
-        badMoveResults.push(bestBadMove)
-    })
-    badMoveResults.forEach((badMoveResult) => {
-        if(badMoveResult.value < lowestBadMoveResult ){
-            lowestBadMoveResult = badMoveResult.value;
-            selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
-        }
-    })
-    return moves[selectedMove.moveCounter];
+//             let thisValue = evaluateBoardSimple(enemy,badMove.pieces, state)
+//             if(thisValue > badMoveValue){
+//                 badMoveValue = thisValue;
+//                 bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
+//             }
+//         })
+//         if(!badMoves.length){
+//             bestBadMove = {moveCounter:index, value:-20,pieces:state.pieces};
+//         }
+//         badMoveResults.push(bestBadMove)
+//     })
+//     badMoveResults.forEach((badMoveResult) => {
+//         if(badMoveResult.value < lowestBadMoveResult ){
+//             lowestBadMoveResult = badMoveResult.value;
+//             selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
+//         }
+//     })
+//     return moves[selectedMove.moveCounter];
 
-}
+// }
 
 
 function minimaxKing(state,maximizer, depth, removedTurns){
@@ -475,7 +474,7 @@ self.addEventListener("message", function(e) {
         generateMovesFromPieces(obj.state,obj.color);
         let move = minimaxKing(obj.state,obj.color,obj.depth, obj.removedTurns)
         move.removedTurns = obj.removedTurns;
-
+        
         postMessage(JSONfn.stringify(move))
     }
 })
