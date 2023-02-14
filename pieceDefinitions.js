@@ -10,7 +10,40 @@ catch(err){
 
 }
 
+    function returnPieceWithColor(x,y,color,state){
+       return state.pieces.find((el) => {
+           return el.x === x && el.y === y && el.color === color;
+       })
+    }
 
+    function cyborgTeleport(state,me,toReturn){
+        if(returnPieceWithColor(me.x+0,me.y-1,me.color,state)?.icon != me.icon){
+            toReturn.push({ type: 'takeMove', x: 0, y: 1, friendlyPieces:true })
+         }
+         if(returnPieceWithColor(me.x+0,me.y+1,me.color,state)?.icon != me.icon){
+              toReturn.push({ type: 'takeMove', x: 0, y: 1, friendlyPieces:true })
+          }
+          if(returnPieceWithColor(me.x+1,me.y-1,me.color,state)?.icon != me.icon){
+              toReturn.push({ type: 'takeMove', x: 1, y: -1, friendlyPieces:true })
+           }
+          if(returnPieceWithColor(me.x+1,me.y+1,me.color,state)?.icon != me.icon){
+              toReturn.push({ type: 'takeMove', x: 1, y: 1, friendlyPieces:true })
+          }
+
+          if(returnPieceWithColor(me.x+1,me.y+0,me.color,state)?.icon != me.icon){
+              toReturn.push({ type: 'takeMove', x: 1, y: 0, friendlyPieces:true })
+          }
+          if(returnPieceWithColor(me.x-1,me.y+0,me.color,state)?.icon != me.icon){
+              toReturn.push({ type: 'takeMove', x: -1, y: 0, friendlyPieces:true })
+          }
+
+          if(returnPieceWithColor(me.x-1,me.y-1,me.color,state)?.icon != me.icon){
+              toReturn.push({ type: 'takeMove', x: -1, y:-1, friendlyPieces:true })
+          }
+          if(returnPieceWithColor(me.x-1,me.y+1,me.color,state)?.icon != me.icon){
+              toReturn.push({ type: 'takeMove', x: -1, y: 1, friendlyPieces:true })
+          }
+    }
     function getRndInteger(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
     }
@@ -1408,19 +1441,12 @@ function sleepingDragon(color,x,y){
 
 function cyborgFactory(color,x,y){
     let moves = [{ type: 'absolute', y: -2, x: 0 },
-        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
 
     ]
 
     if (color == 'black') {
         moves = [{ type: 'absolute',  y: 2, x: 0 }, 
-        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }];
+    ];
     }
     return {
         icon: color + 'Cyborg.png',
@@ -1430,6 +1456,13 @@ function cyborgFactory(color,x,y){
         color: color,
         value:1.2,
         posValue:0.1,
+        conditionalMoves:function(state){
+           let toReturn = [];
+
+            cyborgTeleport(state,this,toReturn)
+
+            return toReturn;
+        },
         afterPieceMove: function(state){
             if(this.color == 'black' && (this.y === 5 || this.y ===3 || this.y === 1)){
                 this.value = 2 + this.y*0.25;
@@ -1471,11 +1504,6 @@ function bootVesselFactory(color,x,y){
     { type: 'blockable', repeat: true, x: -1, y: -1, missedSquareX:-1, missedSquareY:-1, offsetX:-1, offsetY:-1 },
     { type: 'blockable', repeat: true, x: 1, y: -1, missedSquareX:1, missedSquareY:-1, offsetX:1, offsetY:-1 },
     { type: 'blockable', repeat: true, x: -1, y: 1, missedSquareX:-1, missedSquareY:1, offsetX:-1, offsetY:1 },
-
-    { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
-    { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
-    { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
-    { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
     ]
 
     return{
@@ -1486,6 +1514,11 @@ function bootVesselFactory(color,x,y){
         color: color,
         value:2,
         posValue:0.4,
+        conditionalMoves: function(state){
+            let toReturn = [];
+            cyborgTeleport(state,this,toReturn)
+            return toReturn;
+        },
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -1508,10 +1541,6 @@ function empoweredCrystalFactory(color,x,y){
         { type: 'blockable', repeat: true, x: -1, y: 1, missedSquareX:-1 ,missedSquareY:1 , offsetX:-1, offsetY:1  }, { type: 'blockable', repeat: true, x: 1, y: -1, missedSquareX:1 ,missedSquareY:-1 , offsetX:1, offsetY:-1  },
         
 
-        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
     ]
 
     return{
@@ -1531,6 +1560,11 @@ function empoweredCrystalFactory(color,x,y){
                 friendlyPiece.x = prevMove.x;
                 friendlyPiece.y = prevMove.y;
             }
+        },
+        conditionalMoves: function(state){
+            let toReturn = [];
+            cyborgTeleport(state,this,toReturn)
+            return toReturn;
         },
         afterThisPieceTaken:function(state){
             let hadIt=  false;
@@ -1561,11 +1595,6 @@ function executorFactory(color,x,y){
     let moves = [
         { type: 'blockable', repeat: true, x: 0, y: -1, offsetY:-1, missedSquareY:-1 }, { type: 'blockable', repeat: true, x: 0, y: 1,offsetY:1, missedSquareY:1 },
         { type: 'blockable', repeat: true, x: -1, y: 0, offsetX:-1, missedSquareX:-1 }, { type: 'blockable', repeat: true, x: 1, y: 0, missedSquareX:1 , offsetX:1, },
-
-        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
     ]
 
     return{
@@ -1576,6 +1605,11 @@ function executorFactory(color,x,y){
         color: color,
         value:5,
         posValue:posValue[getRndInteger(2,4)-1],
+        conditionalMoves: function(state){
+            let toReturn = [];
+            cyborgTeleport(state,this,toReturn)
+            return toReturn;
+        },
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -1598,17 +1632,18 @@ function crystalFactory(color,x,y){
         { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
         { type: 'absolute', x: -1, y: -1 }, { type: 'absolute', x: 1, y: 1 },
         { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 },
-    
-        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
+
     ],
         x: x,
         y: y,
         value:1000,
         posValue:posValue[getRndInteger(1,3)-1],
         color: color,
+        conditionalMoves: function(state){
+            let toReturn = [];
+            cyborgTeleport(state,this,toReturn)
+            return toReturn;
+        },
 
         afterThisPieceTaken:function(state){
             let hadIt = false;
@@ -1646,17 +1681,11 @@ function crystalFactory(color,x,y){
 
 
 function juggernautFactory(color,x,y){
-    let moves = [
-        { type: 'takeMove', x: 0, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 0, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 0, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 0, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: -1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: 1, friendlyPieces:true },
-        { type: 'takeMove', x: -1, y: 1, friendlyPieces:true }, { type: 'takeMove', x: 1, y: -1, friendlyPieces:true }
-    ]
     
 
     return {
         icon: color + 'Juggernaut.png',
-        moves: moves,
+        moves: [],
         x: x,
         y: y,
         color: color,
@@ -1678,6 +1707,7 @@ function juggernautFactory(color,x,y){
 
         conditionalMoves: function (state) {
             let toReturn = [];
+            cyborgTeleport(state,this,toReturn);
             const freeThere = (x,y) =>{
                 return state.pieces.find((piece) => {
                     return piece.y === y  && x === piece.x;

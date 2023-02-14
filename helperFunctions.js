@@ -574,7 +574,6 @@ function lightBoardFE(piece, state, flag,blockedFlag) {
         if(typeof piece.conditionalMoves === 'string'){
             let midObj = {conditionalMoves:piece.conditionalMoves}
            piece.conditionalMoves = JSONfn.parse(JSONfn.stringify(midObj)).conditionalMoves;
-           tempMoves =  piece.conditionalMoves(state)
         }
 
         tempMoves = piece.conditionalMoves(state);
@@ -588,7 +587,11 @@ function lightBoardFE(piece, state, flag,blockedFlag) {
                 const innerPiece = pieceFromSquare(square, state.pieces)
                 if (innerPiece) {
                     if (innerPiece.color != piece.color && !move.impotent) {
-                        square[flag] = true;
+                        let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces && !move.impotent;
+                        let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces && !move.impotent;
+                        if ((checkForFriends || checkForEnemies) && !move.impotent) {
+                            square[flag] = true;
+                        }    
                     }
                     else{
 
@@ -617,7 +620,9 @@ function lightBoardFE(piece, state, flag,blockedFlag) {
             if (square) {
                 const innerPiece = pieceFromSquare(square, state.pieces)
                 if (innerPiece) {
-                    if (innerPiece.color != piece.color && !move.impotent) {
+                    let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
+                    let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
+                    if ((checkForFriends || checkForEnemies) && !move.impotent) {
                         square[flag] = true;
                     }
                 }

@@ -214,11 +214,12 @@ function evaluateBoardDve(colorPerspective, pieces, state){
     if(maximizer === 'black'){
         enemy = 'white';
     }
-                
+
     let selectedMove = undefined;
     let badMoveResults= []
     let slizedMoves = moves //.slice(0,depth);
     let lowestBadMoveResult = 999999;
+    console.log(removedTurns, slizedMoves.length)
 
     slizedMoves.forEach((move, index) => {
         let isItBanned;

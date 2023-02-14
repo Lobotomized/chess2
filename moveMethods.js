@@ -9,6 +9,10 @@ function lightBoard(piece, state, flag) {
     }
     let tempMoves = [];
     if (piece.conditionalMoves) {
+        if(typeof piece.conditionalMoves === 'string'){
+            let midObj = {conditionalMoves:piece.conditionalMoves}
+           piece.conditionalMoves = JSONfn.parse(JSONfn.stringify(midObj)).conditionalMoves;
+        }
         tempMoves = piece.conditionalMoves(state);
     }
 
