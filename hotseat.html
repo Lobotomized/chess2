@@ -48,6 +48,12 @@
 <script>
 
 const AIColor = getParams(window.location.href).AIColor
+let AIPower = getParams(window.location.href).AIPower;
+AIPower = parseInt(AIPower);
+
+if(!AIPower){
+    AIPower = 500;
+}
 
 
 
@@ -300,7 +306,7 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
             console.time('start')
             if(state.turn === AIColor){
                 w = new Worker("src/webworker.js");
-                w.postMessage(JSONfn.stringify({state:state, color:AIColor, depth:500}));
+                w.postMessage(JSONfn.stringify({state:state, color:AIColor, depth:AIPower}));
 
                 w.onmessage = function(event){
                     let move = JSONfn.parse(event.data)
@@ -313,17 +319,17 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
                         if(move.removedTurns){
                             removedTurns = [...removedTurns, ...move.removedTurns]
                         }
-                        w.postMessage(JSONfn.stringify({state:state, color:AIColor, depth:500, removedTurns:removedTurns}));
+                        w.postMessage(JSONfn.stringify({state:state, color:AIColor, depth:AIPower, removedTurns:removedTurns}));
                     }
                 }
             }
             else if(AIColor === 'allAI'){
                 w = new Worker("src/webworker.js");
-                w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:500}));
+                w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:AIPower}));
                 w.onmessage = function(event){
                     let move = JSONfn.parse(event.data)
                     AIMove(move.pieceCounter, move.xClicked, move.yClicked, state.turn)
-                    w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:500}));
+                    w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:AIPower}));
 
                 }
             }

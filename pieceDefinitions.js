@@ -18,7 +18,7 @@ catch(err){
 
     function cyborgTeleport(state,me,toReturn){
         if(returnPieceWithColor(me.x+0,me.y-1,me.color,state)?.icon != me.icon){
-            toReturn.push({ type: 'takeMove', x: 0, y: 1, friendlyPieces:true })
+            toReturn.push({ type: 'takeMove', x: 0, y: -1, friendlyPieces:true })
          }
          if(returnPieceWithColor(me.x+0,me.y+1,me.color,state)?.icon != me.icon){
               toReturn.push({ type: 'takeMove', x: 0, y: 1, friendlyPieces:true })
@@ -1830,7 +1830,11 @@ function juggernautFactory(color,x,y){
                 }       
             }
 
-            toReturn = [...new Set(toReturn)];
+            toReturn = toReturn.filter((move, index, self) =>
+                index === self.findIndex((t) => (
+                    t.type === move.type && t.x === move.x && t.y === move.y
+                ))
+            )
             return toReturn;
         }
     }
