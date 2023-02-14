@@ -728,7 +728,7 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
     if (limit === 0) {
         return;
     }
-    const square = memoizedSquares[`X:${x + powerX}Y:${ y + powerY}`] ||state.board.find((el) => {
+    const square = state.board.find((el) => {
         return el.x === x + powerX && el.y === y + powerY;
     })
     if (!square) {

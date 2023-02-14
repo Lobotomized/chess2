@@ -365,7 +365,7 @@ function minimaxFast(state,maximizer, depth, removedTurns){
 
 function minimaxKing(state,maximizer, depth, removedTurns){
     if(state.pieces.length > 5){
-        return minimaxFast(state,maximizer, depth, removedTurns);
+        return minimax(state,maximizer, depth, removedTurns);
     }
     else{
         return minimaxDve(state,maximizer, depth, removedTurns);
@@ -469,20 +469,14 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
 self.addEventListener("message", function(e) {
     let obj = JSON.parse(e.data)
     if(!obj.state.won){
-        console.time('fast')
-        generateMovesFromPiecesFast(obj.state, 'black');
-
-        console.timeLog('fast')
-        console.time('slow')
-        generateMovesFromPieces(obj.state, 'black');
-        console.timeLog('slow')
 
 
-        //generateMovesFromPieces(obj.state,obj.color);
-        // let move = minimaxKing(obj.state,obj.color,obj.depth, obj.removedTurns)
-        // move.removedTurns = obj.removedTurns;
 
-        // postMessage(JSONfn.stringify(move))
+        generateMovesFromPieces(obj.state,obj.color);
+        let move = minimaxKing(obj.state,obj.color,obj.depth, obj.removedTurns)
+        move.removedTurns = obj.removedTurns;
+
+        postMessage(JSONfn.stringify(move))
     }
 })
 

@@ -303,7 +303,6 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
 
             hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
             state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
-            console.time('start')
             if(state.turn === AIColor){
                 w = new Worker("src/webworker.js");
                 w.postMessage(JSONfn.stringify({state:state, color:AIColor, depth:AIPower}));
@@ -312,7 +311,6 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
                     let move = JSONfn.parse(event.data)
 
                     AIMove(move.pieceCounter, move.xClicked, move.yClicked, AIColor)
-                    console.timeEnd('start')
                     if(state.turn === AIColor){
                         let removedTurns = [{...move}]
                         
