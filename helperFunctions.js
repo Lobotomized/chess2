@@ -1,6 +1,10 @@
+let memoizedSquares = {};
+let memoizedPieces = {};
+
+
 function findCopyPieceByXY(pieces,x,y){
     return pieces.find((piece) => {
-        return piece .x == x && piece.y == y;
+        return piece.x == x && piece.y == y;
     })
 }
 
@@ -168,7 +172,7 @@ function pieceFromSquare(square, pieces) {
     return piece;
 }
 
-function     blockableCheck(state, powerX, powerY, x, y, move, limit,myPiece, flag,counter) {
+function blockableCheck(state, powerX, powerY, x, y, move, limit,myPiece, flag,counter) {
     let toReturn;
     let missedSquareX = move.missedSquareX;
     let missedSquareY = move.missedSquareY
@@ -559,6 +563,84 @@ function pieceFromXY(x,y, pieces) {
 
     return piece;
 }
+function lightBoardFEFast(piece, state, flag,blockedFlag) {
+    if (!flag) {
+        flag = 'light'
+    }
+    closeLights(state.board, flag);
+    if (!piece) {
+        return;
+    }
+    let tempMoves = [];
+    
+    if (piece.conditionalMoves) {
+        if(typeof piece.conditionalMoves === 'string'){
+            let midObj = {conditionalMoves:piece.conditionalMoves}
+           piece.conditionalMoves = JSONfn.parse(JSONfn.stringify(midObj)).conditionalMoves;
+        }
+
+        tempMoves = piece.conditionalMoves(state);
+    }
+    [...piece.moves, ...tempMoves].forEach((move) => {
+        if (move.type == 'absolute') {
+            const square = memoizedSquares[`X:${piece.x + move.x}Y:${piece.y+move.y}`] || state.board.find((el) => {
+                return el.x === piece.x + move.x && el.y === piece.y + move.y
+            })
+            if (square) {
+                const innerPiece = pieceFromSquare(square, state.pieces)
+                if (innerPiece) {
+                    if (innerPiece.color != piece.color && !move.impotent) {
+                        let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces && !move.impotent;
+                        let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces && !move.impotent;
+                        if ((checkForFriends || checkForEnemies) && !move.impotent) {
+                            square[flag] = true;
+                        }    
+                    }
+                    else{
+
+                        square[blockedFlag] = true;
+                    }
+                }
+                else if (!innerPiece) {
+                    square[flag] = true;
+                }
+            }
+        }
+        else if (move.type == 'allMine') {
+            state.board.forEach((square) => {
+                const innerPiece = pieceFromSquare(square, state.pieces);
+                if (innerPiece) {
+                    if (innerPiece.color == piece.color) {
+                        square[flag] = true;
+                    }
+                }
+            })
+        }
+        else if (move.type == 'takeMove') {
+            const square = memoizedSquares[`X:${piece.x + move.x}Y:${piece.y+move.y}`] || state.board.find((el) => {
+                return el.x === piece.x + move.x && el.y === piece.y + move.y
+            })
+            if (square) {
+                const innerPiece = pieceFromSquare(square, state.pieces)
+                if (innerPiece) {
+                    let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
+                    let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
+                    if ((checkForFriends || checkForEnemies) && !move.impotent) {
+                        square[flag] = true;
+                    }
+                }
+            }
+        }
+        else if (move.type == 'blockable') {
+            if (move.repeat) {
+                const limit = move.limit || 100;
+                const offsetX = move.offsetX || 0;
+                const offsetY = move.offsetY || 0;
+                blockableSpecialFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag,blockedFlag, move.missedSquareX, move.missedSquareY);
+            }
+        }
+    })
+}
 
 function lightBoardFE(piece, state, flag,blockedFlag) {
     if (!flag) {
@@ -646,7 +728,7 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
     if (limit === 0) {
         return;
     }
-    const square = state.board.find((el) => {
+    const square = memoizedSquares[`X:${x + powerX}Y:${ y + powerY}`] ||state.board.find((el) => {
         return el.x === x + powerX && el.y === y + powerY;
     })
     if (!square) {
