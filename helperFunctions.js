@@ -722,6 +722,7 @@ function lightBoardFE(piece, state, flag,blockedFlag) {
 }
 
 function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag,secondFlag, missedSquareX, missedSquareY) {
+
     if (!flag) {
         flag = 'light'
     }
@@ -772,7 +773,6 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
         blockableSpecialFunction(state, powerX + directionX, powerY + directionY, x+offsetX, y+offsetY, move, limit - 1, flag,secondFlag, missedSquareX, missedSquareY)
     }
     else if (piece.color != state.turn && !move.impotent) {
-        // console.log(state, state.pieces)
         let selectedPiece = pieceFromXY(x,y,state.pieces)
         square[flag] = true;
 
