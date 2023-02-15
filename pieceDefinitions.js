@@ -1454,7 +1454,7 @@ function cyborgFactory(color,x,y){
         x: x,
         y: y,
         color: color,
-        value:50,
+        value:1.2,
         posValue:0.1,
         conditionalMoves:function(state){
            let toReturn = [];
