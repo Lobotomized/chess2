@@ -225,7 +225,7 @@
                 const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);
                 const newSquare = findSquareByXY(state.board,state.oldMove.currentX, state.oldMove.currentY);
                 if(IAM === 'black'){
-                    if(!oldSquare.light){
+                    if(!oldSquare.light && !oldSquare.red){
                         drawColoredSquare(state.oldMove.oldX*squareLength, reverseNumber(state.oldMove.oldY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
                     }
                     if(!newSquare.light){
@@ -233,7 +233,7 @@
                     }
                 }
                 else if(IAM === 'white'){
-                    if(!oldSquare.light){
+                    if(!oldSquare.light && !oldSquare.red){
                         drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
                     }
                     if(!newSquare.light){

@@ -676,7 +676,6 @@ function lightBoardFE(piece, state, flag,blockedFlag) {
                         }    
                     }
                     else{
-
                         square[blockedFlag] = true;
                     }
                 }
