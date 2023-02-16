@@ -2,17 +2,40 @@ let memoizedSquares = {};
 let memoizedPieces = {};
 
 
+function findSquareByXY(board,x,y){
+    //If in browser memo
+    Object.keys(memoizedSquares).length;
+    if(typeof window === 'undefined'){
+        if(memoizedSquares["X:"+x+"Y:"+y]){
+            return memoizedSquares["X:"+x+"Y:"+y]
+        }
+        else{
+            let square =  board.find((square) => {
+                return square.x == x && square.y == y;
+            })
+            memoizedSquares["X:"+x+"Y:"+y] = square;
+            return square
+        }
+
+    }
+    else{
+        let square =  board.find((square) => {
+            return square.x == x && square.y == y;
+        })
+        return square
+    }
+
+    
+
+ }
+
+
 function findCopyPieceByXY(pieces,x,y){
     return pieces.find((piece) => {
         return piece.x == x && piece.y == y;
     })
 }
 
-function findCopySquareByXY(board,x,y){
-    return board.find((square) => {
-        return square .x == x && square.y == y;
-    })
-}
 
 function findPieceByXY(pieces,x,y){
     let index =  pieces.findIndex((piece) => {
@@ -21,12 +44,7 @@ function findPieceByXY(pieces,x,y){
      return index
  }
 
- function findSquareByXY(pieces,x,y){
-    let square =  pieces.find((square) => {
-         return square.x == x && square.y == y;
-     })
-     return square
- }
+
 
 
  function checkEmptyHorizontalBetween(state,pieceOne, pieceTwo){
@@ -179,9 +197,8 @@ function blockableCheck(state, powerX, powerY, x, y, move, limit,myPiece, flag,c
     if (limit === 0) {
         return;
     }
-    const square = state.board.find((el) => {
-        return el.x === x + powerX && el.y === y + powerY;
-    }) // Find a square for x/y
+    const square = findSquareByXY(state.board,powerX+x,powerY+y)
+
     if (!square) {
         return;
     }// If such a square does not exist return undefined
@@ -327,7 +344,7 @@ function getSinglePlayerGame() {
                 else {
                     selectPiece(move, state)
                     if (state.pieceSelected) {
-                        lightBoard(state.pieceSelected, state)
+                        lightBoardFE(state.pieceSelected, state)
                     }
                 }
             }
@@ -563,84 +580,7 @@ function pieceFromXY(x,y, pieces) {
 
     return piece;
 }
-// function lightBoardFEFast(piece, state, flag,blockedFlag) {
-//     if (!flag) {
-//         flag = 'light'
-//     }
-//     closeLights(state.board, flag);
-//     if (!piece) {
-//         return;
-//     }
-//     let tempMoves = [];
-    
-//     if (piece.conditionalMoves) {
-//         if(typeof piece.conditionalMoves === 'string'){
-//             let midObj = {conditionalMoves:piece.conditionalMoves}
-//            piece.conditionalMoves = JSONfn.parse(JSONfn.stringify(midObj)).conditionalMoves;
-//         }
 
-//         tempMoves = piece.conditionalMoves(state);
-//     }
-//     [...piece.moves, ...tempMoves].forEach((move) => {
-//         if (move.type == 'absolute') {
-//             const square = memoizedSquares[`X:${piece.x + move.x}Y:${piece.y+move.y}`] || state.board.find((el) => {
-//                 return el.x === piece.x + move.x && el.y === piece.y + move.y
-//             })
-//             if (square) {
-//                 const innerPiece = pieceFromSquare(square, state.pieces)
-//                 if (innerPiece) {
-//                     if (innerPiece.color != piece.color && !move.impotent) {
-//                         let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces && !move.impotent;
-//                         let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces && !move.impotent;
-//                         if ((checkForFriends || checkForEnemies) && !move.impotent) {
-//                             square[flag] = true;
-//                         }    
-//                     }
-//                     else{
-
-//                         square[blockedFlag] = true;
-//                     }
-//                 }
-//                 else if (!innerPiece) {
-//                     square[flag] = true;
-//                 }
-//             }
-//         }
-//         else if (move.type == 'allMine') {
-//             state.board.forEach((square) => {
-//                 const innerPiece = pieceFromSquare(square, state.pieces);
-//                 if (innerPiece) {
-//                     if (innerPiece.color == piece.color) {
-//                         square[flag] = true;
-//                     }
-//                 }
-//             })
-//         }
-//         else if (move.type == 'takeMove') {
-//             const square = memoizedSquares[`X:${piece.x + move.x}Y:${piece.y+move.y}`] || state.board.find((el) => {
-//                 return el.x === piece.x + move.x && el.y === piece.y + move.y
-//             })
-//             if (square) {
-//                 const innerPiece = pieceFromSquare(square, state.pieces)
-//                 if (innerPiece) {
-//                     let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
-//                     let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
-//                     if ((checkForFriends || checkForEnemies) && !move.impotent) {
-//                         square[flag] = true;
-//                     }
-//                 }
-//             }
-//         }
-//         else if (move.type == 'blockable') {
-//             if (move.repeat) {
-//                 const limit = move.limit || 100;
-//                 const offsetX = move.offsetX || 0;
-//                 const offsetY = move.offsetY || 0;
-//                 blockableSpecialFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag,blockedFlag, move.missedSquareX, move.missedSquareY);
-//             }
-//         }
-//     })
-// }
 
 function lightBoardFE(piece, state, flag,blockedFlag) {
     if (!flag) {
@@ -721,16 +661,14 @@ function lightBoardFE(piece, state, flag,blockedFlag) {
 }
 
 function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag,secondFlag, missedSquareX, missedSquareY) {
-
     if (!flag) {
         flag = 'light'
     }
     if (limit === 0) {
         return;
     }
-    const square = state.board.find((el) => {
-        return el.x === x + powerX && el.y === y + powerY;
-    })
+    const square = findSquareByXY(state.board,powerX+x,powerY+y)
+
     if (!square) {
         return;
     }
@@ -782,8 +720,9 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
 
             }
         }
-        
-        blockableSpecialFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1, secondFlag,secondFlag, missedSquareX, missedSquareY)
+        if(secondFlag){
+            blockableSpecialFunction(state, powerX + directionX, powerY + directionY, x, y, move, limit - 1, secondFlag,secondFlag, missedSquareX, missedSquareY)
+        }
     }
 
     return;
@@ -819,7 +758,6 @@ function getColorPieces(pieces,color){
 try{
     module.exports = {
         findCopyPieceByXY,
-        findCopySquareByXY,
         findPieceByXY,
         findSquareByXY,
         checkEmptyHorizontalBetween,
@@ -828,7 +766,8 @@ try{
         areYouCheckedWithoutTempMoves,
         isRoadAttacked,
         pieceFromSquare,
-        blockableCheck
+        blockableCheck,
+        lightBoardFE
     }
 }
 catch(err){

@@ -1,136 +1,14 @@
 
-function lightBoard(piece, state, flag) {
-    if (!flag) {
-        flag = 'light'
-    }
-    closeLights(state.board, flag);
-    if (!piece) {
-        return;
-    }
-    let tempMoves = [];
-    if (piece.conditionalMoves) {
-        if(typeof piece.conditionalMoves === 'string'){
-            let midObj = {conditionalMoves:piece.conditionalMoves}
-           piece.conditionalMoves = JSONfn.parse(JSONfn.stringify(midObj)).conditionalMoves;
-        }
-        tempMoves = piece.conditionalMoves(state);
-    }
-
-    [...piece.moves, ...tempMoves].forEach((move) => {
-        if (move.type == 'absolute') {
-            const square = state.board.find((el) => {
-                return el.x === piece.x + move.x && el.y === piece.y + move.y
-            })
-            if (square) {       
-                const innerPiece = pieceFromSquare(square, state.pieces)
-                if (innerPiece) {
-                    let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces && !move.impotent;
-                    let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces && !move.impotent;
-                    if ((checkForFriends || checkForEnemies) && !move.impotent) {
-                        square[flag] = true;
-                    }
-                }
-                else if (!innerPiece) {
-                    square[flag] = true;
-                }
-            }
 
 
-        }
-        else if (move.type == 'allMine') {
-            state.board.forEach((square) => {
-                const innerPiece = pieceFromSquare(square, state.pieces);
-                if (innerPiece) {
-                    if (innerPiece.color == piece.color) {
-                        square[flag] = true;
-                    }
-                }
-            })
-        }
-        else if (move.type == 'takeMove') {
-            const square = state.board.find((el) => {
-                return el.x === piece.x + move.x && el.y === piece.y + move.y
-            })
-            if (square) {
-                const innerPiece = pieceFromSquare(square, state.pieces)
-                if (innerPiece) {
-                    let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
-                    let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
-                    if ((checkForFriends || checkForEnemies) && !move.impotent) {
-                        square[flag] = true;
-                    }
-                }
-            }
-        }
-        else if (move.type == 'blockable') {
-            if (move.repeat) {
-                const limit = move.limit || 100;
-                const offsetX = move.offsetX || 0;
-                const offsetY = move.offsetY || 0;
-                // if(!state.turn){
-                //     state.turn =  piece.color;
-                // }
-                blockableFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag, move.missedSquareX, move.missedSquareY);
-            }
-        }
-    })
+try{
+    var {lightBoardFE} = require('./helperFunctions')
+    
+}
+catch(err){
+
 }
 
-
-
-
-function blockableFunction(state, powerX, powerY, x, y, move, limit, flag, missedSquareX, missedSquareY) {
-    if (!flag) {
-        flag = 'light'
-    }
-    if (limit === 0) {
-        return;
-    }
-    const square = state.board.find((el) => {
-        return el.x === x + powerX && el.y === y + powerY;
-    })
-    if (!square) {
-        return;
-    }
-    const piece = pieceFromSquare(square, state.pieces)
-
-    let directionX = 0;
-    if (powerX < 0) {
-        directionX = -1;
-    }
-    else if (powerX > 0) {
-        directionX = 1;
-    }
-
-    let directionY = 0;
-
-    if (powerY < 0) {
-        directionY = -1;
-    }
-    else if (powerY > 0) {
-        directionY = 1;
-    }
-    else {
-        directionY = 0;
-    }
-
-    if(!missedSquareX){
-        missedSquareX = 0;
-    }
-
-    if(!missedSquareY){
-        missedSquareY = 0;
-    }
-    if (!piece) {
-        square[flag] = true;
-        blockableFunction(state, powerX + directionX+missedSquareX, powerY + directionY + missedSquareY, x, y, move, limit - 1, flag, missedSquareX, missedSquareY)
-    }
-    else if (piece.color != state.turn && !move.impotent) {
-        square[flag] = true;
-    }
-
-    return;
-}
 
 function pieceFromSquare(square, pieces) {
     const piece = pieces.find((p) => {
@@ -281,7 +159,7 @@ function selectPiece(playerMove, state) {
     }
     state.pieceSelected = piece;
 
-    lightBoard(piece, state)
+    lightBoardFE(piece, state)
 }
 
 try{
@@ -290,7 +168,6 @@ try{
         playerMove: playerMove,
         checkTurn: checkTurn,
         changeTurn: changeTurn,
-        lightBoard: lightBoard,
         closeLights: closeLights,
         pickARace: pickARace
     }
