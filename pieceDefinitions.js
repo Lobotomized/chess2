@@ -584,7 +584,7 @@ function dragonFactory(color,x,y){
 
                     fakeState.pieceSelected = friendlyPiece;
 
-                    lightBoardFE(friendlyPiece,fakeState, 'light')
+                    lightBoardFE(friendlyPiece,fakeState, 'light',undefined,true)
 
                     const lightedSquares = fakeState.board.filter((sq) => {
                         return sq.light == true;
@@ -593,7 +593,7 @@ function dragonFactory(color,x,y){
                     lightedSquares.forEach((sq) => {
                         friendlyPiece = fakeState.pieces[i];
                         fakeState.pieceSelected = friendlyPiece;
-                        lightBoardFE(friendlyPiece,fakeState, 'light')
+                        lightBoardFE(friendlyPiece,fakeState, 'light',undefined,true)
 
                         fakeKing = fakeState.pieces.find((piece) => {
                             return piece.x == this.x && piece.y == this.y
@@ -748,7 +748,7 @@ function kingFactory(color, x, y) {
     
                         fakeState.pieceSelected = friendlyPiece;
     
-                        lightBoardFE(friendlyPiece,fakeState, 'light')
+                        lightBoardFE(friendlyPiece,fakeState, 'light',undefined,true)
     
                         const lightedSquares = fakeState.board.filter((sq) => {
                             return sq.light == true;
@@ -757,7 +757,7 @@ function kingFactory(color, x, y) {
                         lightedSquares.forEach((sq) => {
                             friendlyPiece = fakeState.pieces[i];
                             fakeState.pieceSelected = friendlyPiece;
-                            lightBoardFE(friendlyPiece,fakeState, 'light')
+                            lightBoardFE(friendlyPiece,fakeState, 'light',undefined,true)
     
                             fakeKing = fakeState.pieces.find((piece) => {
                                 return piece.x == this.x && piece.y == this.y

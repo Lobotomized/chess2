@@ -159,7 +159,7 @@ function selectPiece(playerMove, state) {
     }
     state.pieceSelected = piece;
 
-    lightBoardFE(piece, state)
+    lightBoardFE(piece, state,undefined,undefined,true)
 }
 
 try{

@@ -15,7 +15,7 @@ function evaluateBoard(colorPerspective, pieces, state,simple){
         if(colorPerspective === piece.color){
             let magnifier = 0;
             if(!simple){
-                lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove')
+                lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true)
                 const filtered = board.filter((square) => {
                     return square['allowedMove']
                 })
@@ -29,7 +29,7 @@ function evaluateBoard(colorPerspective, pieces, state,simple){
         else{
             let magnifier = 0;
             if(!simple){
-                lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove')
+                lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true)
                 const filtered = board.filter((square) => {
                     return square['allowedMove']
                 })
@@ -55,7 +55,7 @@ function safetyValue(colorPerspective, pieces,board){
     {
         pieces.forEach((piece) => {
             if(piece.color != colorPerspective){
-                lightBoardFE(piece,{pieces:pieces, board:board, turn:colorPerspective},'attackingValuableFake', 'attackingValuable')
+                lightBoardFE(piece,{pieces:pieces, board:board, turn:colorPerspective},'attackingValuableFake', 'attackingValuable',undefined,true)
             }
         })
         const filtered = board.filter((square) => {
@@ -81,7 +81,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
     })
     while(pieces.length > counter){
         const piece = pieces[counter]
-        lightBoardFE(piece,{pieces:pieces, board:board, turn:state.turn},'allowedMove')
+        lightBoardFE(piece,{pieces:pieces, board:board, turn:state.turn},'allowedMove',undefined,true)
 
         let attackValue = 0;
 
@@ -124,7 +124,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
      while(myPieces.length > piecesCounter){
          let movesCounter = 0;
          let piece = myPieces[piecesCounter]
-         lightBoardFE(piece,{pieces:state.pieces, board:state.board,turn:state.turn},'allowedMove')
+         lightBoardFE(piece,{pieces:state.pieces, board:state.board,turn:state.turn},'allowedMove',undefined,true)
          const allowedMoves = state.board.filter((square) => {
              return square.allowedMove;
          })

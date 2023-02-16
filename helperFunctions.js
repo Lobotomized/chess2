@@ -582,7 +582,7 @@ function pieceFromXY(x,y, pieces) {
 }
 
 
-function lightBoardFE(piece, state, flag,blockedFlag) {
+function lightBoardFE(piece, state, flag,blockedFlag, minimal) {
     if (!flag) {
         flag = 'light'
     }
@@ -665,7 +665,8 @@ function lightBoardFE(piece, state, flag,blockedFlag) {
                     flag:flag,
                     blockedFlag:blockedFlag,
                     missedSquareX:move.missedSquareX,
-                    missedSquareY:move.missedSquareY
+                    missedSquareY:move.missedSquareY,
+                    minimal:true
                 }
                 blockableSpecialFunction(properties);
             }
@@ -677,7 +678,6 @@ function blockableSpecialFunction(properties) {
     let {state, powerX, powerY, x, y, move, limit, flag,secondFlag} = properties;
     let missedSquareX = properties.missedSquareX;
     let missedSquareY = properties.missedSquareY;
-    console.log(properties.state, state);
     /*
     properties
 
@@ -740,7 +740,7 @@ function blockableSpecialFunction(properties) {
 
     if (!piece) {
         square[flag] = true;
-        const properties = {
+        const props = {
             state:state,
             powerX:powerX+ directionX+missedSquareX,
             powerY:powerY+ directionY+missedSquareY,
@@ -749,10 +749,15 @@ function blockableSpecialFunction(properties) {
             move:move,
             limit:limit-1,
             flag:flag,
+            secondFlag:secondFlag,
             missedSquareX:missedSquareX,
-            missedSquareY:missedSquareY
+            missedSquareY:missedSquareY,
+            minimal:properties.minimal
         }
-        blockableSpecialFunction(properties)
+        blockableSpecialFunction(props)
+    }
+    else if(properties.minimal){
+        square[flag] = true;
     }
     else if (piece.color != state.turn && !move.impotent) {
         let selectedPiece = pieceFromXY(x,y,state.pieces)
@@ -765,22 +770,23 @@ function blockableSpecialFunction(properties) {
 
             }
         }
-        // if(secondFlag){
-        //     square[flag] = true;
-        //     const properties = {
-        //         state:state,
-        //         powerX:move.x+ directionX+missedSquareX,
-        //         powerY:move.y+ directionY+missedSquareY,
-        //         x:x,
-        //         y:y,
-        //         move:move,
-        //         limit:limit-1,
-        //         flag:secondFlag,
-        //         missedSquareX:missedSquareX,
-        //         missedSquareY:missedSquareY
-        //     }
-        //     blockableSpecialFunction(properties)
-        // }
+        if(secondFlag){
+            square[flag] = true;
+            const props = {
+                state:state,
+                powerX:move.x+ directionX+missedSquareX,
+                powerY:move.y+ directionY+missedSquareY,
+                x:x,
+                y:y,
+                move:move,
+                limit:limit-1,
+                flag:secondFlag,
+                missedSquareX:missedSquareX,
+                missedSquareY:missedSquareY,
+                minimal:properties.minimal
+            }
+            blockableSpecialFunction(props)
+        }
     }
 
     return;
