@@ -701,6 +701,15 @@ function blockableSpecialFunction(properties) {
     if (limit === 0) {
         return;
     }
+    
+    
+    if(!missedSquareX){
+        missedSquareX = 0;
+    }
+
+    if(!missedSquareY){
+        missedSquareY = 0;
+    }
     const square = findSquareByXY(state.board,powerX+x,powerY+y)
 
     if (!square) {
@@ -728,25 +737,17 @@ function blockableSpecialFunction(properties) {
         directionY = 0;
     }
 
-    
-    if(!missedSquareX){
-        missedSquareX = 0;
-    }
-
-    if(!missedSquareY){
-        missedSquareY = 0;
-    }
 
     if (!piece) {
         square[flag] = true;
         const properties = {
             state:state,
-            powerX:move.x,
-            powerY:move.y,
-            x:x + powerX,
-            y:y + powerY,
+            powerX:powerX+ directionX+missedSquareX,
+            powerY:powerY+ directionY+missedSquareY,
+            x:x,
+            y:y,
             move:move,
-            limit:limit,
+            limit:limit-1,
             flag:flag,
             missedSquareX:missedSquareX,
             missedSquareY:missedSquareY
@@ -764,23 +765,22 @@ function blockableSpecialFunction(properties) {
 
             }
         }
-        if(secondFlag){
-            square[flag] = true;
-            const properties = {
-                state:state,
-                powerX:move.x,
-                powerY:move.y,
-                x:x + powerX,
-                y:y + powerY,
-                move:move,
-                limit:limit,
-                flag:flag,
-                blockedFlag:blockedFlag,
-                missedSquareX:missedSquareX,
-                missedSquareY:missedSquareY
-            }
-            blockableSpecialFunction(properties)
-        }
+        // if(secondFlag){
+        //     square[flag] = true;
+        //     const properties = {
+        //         state:state,
+        //         powerX:move.x+ directionX+missedSquareX,
+        //         powerY:move.y+ directionY+missedSquareY,
+        //         x:x,
+        //         y:y,
+        //         move:move,
+        //         limit:limit-1,
+        //         flag:secondFlag,
+        //         missedSquareX:missedSquareX,
+        //         missedSquareY:missedSquareY
+        //     }
+        //     blockableSpecialFunction(properties)
+        // }
     }
 
     return;
