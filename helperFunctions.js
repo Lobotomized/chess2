@@ -654,13 +654,47 @@ function lightBoardFE(piece, state, flag,blockedFlag) {
                 const limit = move.limit || 100;
                 const offsetX = move.offsetX || 0;
                 const offsetY = move.offsetY || 0;
-                blockableSpecialFunction(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, flag,blockedFlag, move.missedSquareX, move.missedSquareY);
+                const properties = {
+                    state:state,
+                    powerX:move.x,
+                    powerY:move.y,
+                    x:piece.x+offsetX,
+                    y:piece.y+offsetY,
+                    move:move,
+                    limit:limit,
+                    flag:flag,
+                    blockedFlag:blockedFlag,
+                    missedSquareX:move.missedSquareX,
+                    missedSquareY:move.missedSquareY
+                }
+                blockableSpecialFunction(properties);
             }
         }
     })
 }
 
-function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag,secondFlag, missedSquareX, missedSquareY) {
+function blockableSpecialFunction(properties) {
+    let {state, powerX, powerY, x, y, move, limit, flag,secondFlag} = properties;
+    let missedSquareX = properties.missedSquareX;
+    let missedSquareY = properties.missedSquareY;
+    console.log(properties.state, state);
+    /*
+    properties
+
+        state:state,
+        powerX:move.x,
+        powerY:move.y,
+        x:piece.x+offsetX,
+        y:piece.y+offsetY,
+        move:move,
+        limit:limit,
+        flag:flag,
+        blockedFlag:blockedFlag,
+        missedSquareX:missedSquareX,
+        missedSquareY:missedSquareY
+
+    */
+
     if (!flag) {
         flag = 'light'
     }
@@ -705,8 +739,19 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
 
     if (!piece) {
         square[flag] = true;
-
-        blockableSpecialFunction(state, powerX + directionX+missedSquareX, powerY + directionY+missedSquareY, x, y, move, limit - 1, flag,secondFlag, missedSquareX, missedSquareY)
+        const properties = {
+            state:state,
+            powerX:move.x,
+            powerY:move.y,
+            x:x + powerX,
+            y:y + powerY,
+            move:move,
+            limit:limit,
+            flag:flag,
+            missedSquareX:missedSquareX,
+            missedSquareY:missedSquareY
+        }
+        blockableSpecialFunction(properties)
     }
     else if (piece.color != state.turn && !move.impotent) {
         let selectedPiece = pieceFromXY(x,y,state.pieces)
@@ -720,8 +765,21 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
             }
         }
         if(secondFlag){
-
-            blockableSpecialFunction(state, powerX + directionX+missedSquareX, powerY + directionY+missedSquareY, x, y, move, limit - 1, secondFlag,secondFlag, missedSquareX, missedSquareY)
+            square[flag] = true;
+            const properties = {
+                state:state,
+                powerX:move.x,
+                powerY:move.y,
+                x:x + powerX,
+                y:y + powerY,
+                move:move,
+                limit:limit,
+                flag:flag,
+                blockedFlag:blockedFlag,
+                missedSquareX:missedSquareX,
+                missedSquareY:missedSquareY
+            }
+            blockableSpecialFunction(properties)
         }
     }
 
