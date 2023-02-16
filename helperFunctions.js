@@ -705,9 +705,8 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
 
     if (!piece) {
         square[flag] = true;
-        const offsetX = move.offsetX || 0;
-        const offsetY = move.offsetY || 0;
-        blockableSpecialFunction(state, powerX + directionX+missedSquareX, powerY + directionY+missedSquareY, x+offsetX, y+offsetY, move, limit - 1, flag,secondFlag, missedSquareX, missedSquareY)
+
+        blockableSpecialFunction(state, powerX + directionX+missedSquareX, powerY + directionY+missedSquareY, x, y, move, limit - 1, flag,secondFlag, missedSquareX, missedSquareY)
     }
     else if (piece.color != state.turn && !move.impotent) {
         let selectedPiece = pieceFromXY(x,y,state.pieces)
@@ -721,9 +720,8 @@ function blockableSpecialFunction(state, powerX, powerY, x, y, move, limit, flag
             }
         }
         if(secondFlag){
-            const offsetX = move.offsetX || 0;
-            const offsetY = move.offsetY || 0;
-            blockableSpecialFunction(state, powerX + directionX+missedSquareX, powerY + directionY+missedSquareY, x+offsetX, y+offsetY, move, limit - 1, secondFlag,secondFlag, missedSquareX, missedSquareY)
+
+            blockableSpecialFunction(state, powerX + directionX+missedSquareX, powerY + directionY+missedSquareY, x, y, move, limit - 1, secondFlag,secondFlag, missedSquareX, missedSquareY)
         }
     }
 
