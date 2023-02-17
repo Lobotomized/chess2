@@ -128,7 +128,7 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
     selectPiece({x:myPieces[pieceIndex].x, y:myPieces[pieceIndex].y},state)
 
     const selectedPiece = state.pieceSelected;
-    lightBoard(selectedPiece,{pieces:state.pieces, board:state.board, turn:state.turn})
+    lightBoardFE(selectedPiece,{pieces:state.pieces, board:state.board, turn:state.turn})
     hotseatGame.move(state.turn,{ x: xClicked, y: yClicked });
 }
     function animate(secretState){
@@ -139,7 +139,7 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
         state = secretState;
         if(hoveredPiece){
             if(hoveredPiece.color != hotseatGame.state.turn && hotseatGame.state.turn != undefined){
-                lightBoardFE(hoveredPiece,state,'red','grey')
+                lightBoardFE(hoveredPiece,state,'red','red')
             }
         }
         if (state.pieces) {

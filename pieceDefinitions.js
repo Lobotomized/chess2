@@ -1,7 +1,7 @@
 
 
 try{
-    var {playerMove, lightBoard} = require('./moveMethods.js')
+    var {playerMove} = require('./moveMethods.js')
     var {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecked, findPieceByXY, 
         findCopyPieceByXY, areYouCheckedWithoutTempMoves} = require('./helperFunctions')
     
@@ -15,6 +15,8 @@ catch(err){
            return el.x === x && el.y === y && el.color === color;
        })
     }
+
+    
 
     function cyborgTeleport(state,me,toReturn){
         if(returnPieceWithColor(me.x+0,me.y-1,me.color,state)?.icon != me.icon){
@@ -582,7 +584,7 @@ function dragonFactory(color,x,y){
 
                     fakeState.pieceSelected = friendlyPiece;
 
-                    lightBoard(friendlyPiece,fakeState, 'light')
+                    lightBoardFE(friendlyPiece,fakeState, 'light',undefined,true)
 
                     const lightedSquares = fakeState.board.filter((sq) => {
                         return sq.light == true;
@@ -591,7 +593,7 @@ function dragonFactory(color,x,y){
                     lightedSquares.forEach((sq) => {
                         friendlyPiece = fakeState.pieces[i];
                         fakeState.pieceSelected = friendlyPiece;
-                        lightBoard(friendlyPiece,fakeState, 'light')
+                        lightBoardFE(friendlyPiece,fakeState, 'light',undefined,true)
 
                         fakeKing = fakeState.pieces.find((piece) => {
                             return piece.x == this.x && piece.y == this.y
@@ -630,8 +632,10 @@ function bishopFactory(color, x, y) {
 function rookFactory(color, x, y) {
     return {
         icon: color + 'Rook.png',
-        moves: [{ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
-        { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 }],
+        moves: [
+            { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
+        { type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
+        ],
         x: x,
         y: y,
         value:5,
@@ -744,7 +748,7 @@ function kingFactory(color, x, y) {
     
                         fakeState.pieceSelected = friendlyPiece;
     
-                        lightBoardFE(friendlyPiece,fakeState, 'light')
+                        lightBoardFE(friendlyPiece,fakeState, 'light',undefined,true)
     
                         const lightedSquares = fakeState.board.filter((sq) => {
                             return sq.light == true;
@@ -753,7 +757,7 @@ function kingFactory(color, x, y) {
                         lightedSquares.forEach((sq) => {
                             friendlyPiece = fakeState.pieces[i];
                             fakeState.pieceSelected = friendlyPiece;
-                            lightBoardFE(friendlyPiece,fakeState, 'light')
+                            lightBoardFE(friendlyPiece,fakeState, 'light',undefined,true)
     
                             fakeKing = fakeState.pieces.find((piece) => {
                                 return piece.x == this.x && piece.y == this.y
