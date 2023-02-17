@@ -246,7 +246,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
         badMoves.forEach((badMove) => {
             // console.log(badMoves,enemy, '  wtf?!')
 
-            let thisValue = evaluateBoard(enemy,badMove.pieces, state,true)
+            let thisValue = evaluateBoard(enemy,badMove.pieces, state,false)
             if(thisValue > badMoveValue){
                 badMoveValue = thisValue;
                 bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
@@ -379,7 +379,7 @@ self.addEventListener("message", function(e) {
         //generateMovesFromPieces(obj.state,'black')
             console.time('minimax')
             //generateMovesFromPieces(obj.state,'black')
-            let move = minimax(obj.state,obj.color,obj.depth, obj.removedTurns)
+            let move = minimaxKing(obj.state,obj.color,obj.depth, obj.removedTurns)
             console.timeEnd('minimax');
 
             move.removedTurns = obj.removedTurns;

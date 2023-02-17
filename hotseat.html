@@ -139,7 +139,7 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
         state = secretState;
         if(hoveredPiece){
             if(hoveredPiece.color != hotseatGame.state.turn && hotseatGame.state.turn != undefined){
-                lightBoardFE(hoveredPiece,state,'red','grey')
+                lightBoardFE(hoveredPiece,state,'red','red')
             }
         }
         if (state.pieces) {

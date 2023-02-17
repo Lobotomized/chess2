@@ -663,10 +663,10 @@ function lightBoardFE(piece, state, flag,blockedFlag, minimal) {
                     move:move,
                     limit:limit,
                     flag:flag,
-                    blockedFlag:blockedFlag,
+                    secondFlag:blockedFlag,
                     missedSquareX:move.missedSquareX,
                     missedSquareY:move.missedSquareY,
-                    minimal:true
+                    minimal:minimal
                 }
                 blockableSpecialFunction(properties);
             }
@@ -737,7 +737,6 @@ function blockableSpecialFunction(properties) {
         directionY = 0;
     }
 
-
     if (!piece) {
         square[flag] = true;
         const props = {
@@ -756,16 +755,18 @@ function blockableSpecialFunction(properties) {
         }
         blockableSpecialFunction(props)
     }
-    else if(properties.minimal){
+    else if(piece.color != state.turn && properties.minimal  && !move.impotent){
         square[flag] = true;
     }
-    else if (piece.color != state.turn && !move.impotent) {
+    else if (!move.impotent && !properties.minimal) {
         let selectedPiece = pieceFromXY(x,y,state.pieces)
         square[flag] = true;
 
         if(selectedPiece){
             if(selectedPiece.color == piece.color){
-                square[secondFlag] = true;
+                if(secondFlag){
+                    square[secondFlag] = true;
+                }
                 square[flag] = false;
 
             }
