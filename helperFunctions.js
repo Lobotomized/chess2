@@ -758,7 +758,7 @@ function blockableSpecialFunction(properties) {
     else if(piece.color != state.turn && properties.minimal  && !move.impotent){
         square[flag] = true;
     }
-    else if (piece.color != state.turn &&!move.impotent && !properties.minimal) {
+    else if ((piece.color != state.turn && !move.friendlyPieces || piece.color === state.turn && move.friendlyPieces) && !move.impotent && !properties.minimal) {
         let selectedPiece = pieceFromXY(x,y,state.pieces)
         square[flag] = true;
 
