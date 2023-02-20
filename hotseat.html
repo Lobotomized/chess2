@@ -285,8 +285,8 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
     canvas.addEventListener('click', (e) => {
         const hotseat = true;
         const state = hotseatGame.state;
-        if(w){
-            w.terminate();
+        if(!w){
+            w = new Worker("src/webworker.js");
         }
         if(hotseat || state.turn !=  AIColor){
             var element = canvas, offsetX = 0, offsetY = 0, mx, my;
@@ -304,7 +304,6 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
             hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
             state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
             if(state.turn === AIColor){
-                w = new Worker("src/webworker.js");
                 w.postMessage(JSONfn.stringify({state:state, color:AIColor, depth:AIPower}));
 
                 w.onmessage = function(event){
@@ -322,7 +321,6 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
                 }
             }
             else if(AIColor === 'allAI'){
-                w = new Worker("src/webworker.js");
                 w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:AIPower}));
                 w.onmessage = function(event){
                     let move = JSONfn.parse(event.data)

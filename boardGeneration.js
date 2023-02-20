@@ -107,8 +107,8 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     }
     else if(raceBlack == 'test'){
         pieces.push(
-            shield('black',0,1),shroomFactory('black',0,0),spiderFactory('black',1,0)
-             )
+                spiderFactory('black',3,4)
+        )
     }
 
     if(raceWhite == 'classic'){
@@ -153,7 +153,7 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     else if(raceBlack == 'test'){
         pieces.push(
                 executorFactory('white', 0, 6),
-                antFactory('white', 6, 5)
+                kingFactory('white', 1, 6)
              )
     }
 

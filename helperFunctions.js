@@ -4,26 +4,30 @@ let memoizedPieces = {};
 
 function findSquareByXY(board,x,y){
     //If in browser memo
-    Object.keys(memoizedSquares).length;
-    if(typeof window === 'undefined'){
-        if(memoizedSquares["X:"+x+"Y:"+y]){
-            return memoizedSquares["X:"+x+"Y:"+y]
-        }
-        else{
-            let square =  board.find((square) => {
-                return square.x == x && square.y == y;
-            })
-            memoizedSquares["X:"+x+"Y:"+y] = square;
-            return square
-        }
+    let square =  board.find((square) => {
+        return square.x == x && square.y == y;
+    })
+    return square
+    // Object.keys(memoizedSquares).length;
+    // if(typeof window === 'undefined'){
+    //     if(memoizedSquares["X:"+x+"Y:"+y]){
+    //         return memoizedSquares["X:"+x+"Y:"+y]
+    //     }
+    //     else{
+    //         let square =  board.find((square) => {
+    //             return square.x == x && square.y == y;
+    //         })
+    //         memoizedSquares["X:"+x+"Y:"+y] = square;
+    //         return square
+    //     }
 
-    }
-    else{
-        let square =  board.find((square) => {
-            return square.x == x && square.y == y;
-        })
-        return square
-    }
+    // }
+    // else{
+    //     let square =  board.find((square) => {
+    //         return square.x == x && square.y == y;
+    //     })
+    //     return square
+    // }
 
     
 
@@ -666,7 +670,8 @@ function lightBoardFE(piece, state, flag,blockedFlag, minimal) {
                     secondFlag:blockedFlag,
                     missedSquareX:move.missedSquareX,
                     missedSquareY:move.missedSquareY,
-                    minimal:minimal
+                    minimal:minimal,
+                    operatedPiece:piece
                 }
                 blockableSpecialFunction(properties);
             }
@@ -675,7 +680,7 @@ function lightBoardFE(piece, state, flag,blockedFlag, minimal) {
 }
 
 function blockableSpecialFunction(properties) {
-    let {state, powerX, powerY, x, y, move, limit, flag,secondFlag} = properties;
+    let {state, powerX, powerY, x, y, move, limit, flag,secondFlag,operatedPiece} = properties;
     let missedSquareX = properties.missedSquareX;
     let missedSquareY = properties.missedSquareY;
     /*
@@ -736,7 +741,6 @@ function blockableSpecialFunction(properties) {
     else {
         directionY = 0;
     }
-
     if (!piece) {
         square[flag] = true;
         const props = {
@@ -751,14 +755,17 @@ function blockableSpecialFunction(properties) {
             secondFlag:secondFlag,
             missedSquareX:missedSquareX,
             missedSquareY:missedSquareY,
-            minimal:properties.minimal
+            minimal:properties.minimal,
+            operatedPiece:operatedPiece
         }
+
         blockableSpecialFunction(props)
     }
-    else if(piece.color != state.turn && properties.minimal  && !move.impotent){
+    else if((piece.color != state.turn && !move.friendlyPieces || piece.color === state.turn && move.friendlyPieces) && properties.minimal  && !move.impotent){
         square[flag] = true;
     }
-    else if ((piece.color != state.turn && !move.friendlyPieces || piece.color === state.turn && move.friendlyPieces) && !move.impotent && !properties.minimal) {
+    else if ((piece.color != operatedPiece.color && !move.friendlyPieces || piece.color === state.turn && move.friendlyPieces) && !move.impotent && !properties.minimal) {
+
         let selectedPiece = pieceFromXY(x,y,state.pieces)
         square[flag] = true;
 
@@ -784,7 +791,8 @@ function blockableSpecialFunction(properties) {
                 flag:secondFlag,
                 missedSquareX:missedSquareX,
                 missedSquareY:missedSquareY,
-                minimal:properties.minimal
+                minimal:properties.minimal,
+                operatedPiece:operatedPiece
             }
             blockableSpecialFunction(props)
         }

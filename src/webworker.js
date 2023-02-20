@@ -128,6 +128,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
          const allowedMoves = state.board.filter((square) => {
              return square.allowedMove;
          })
+
          while(allowedMoves.length > movesCounter){
              const newPieces = JSONfn.parse(JSONfn.stringify(state.pieces))
              let newMyPieces = getColorPieces(newPieces, color)

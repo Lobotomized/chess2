@@ -82,6 +82,7 @@ function playerMove(playerMove, state,alwaysLight) {
     const friendlyPieceOldY = friendlyPiece && friendlyPiece.y;
     const oldX = state.pieceSelected.x;
     const oldY = state.pieceSelected.y;
+    let oldPieces = JSONfn.parse(JSONfn.stringify(state.pieces))
 
     state.pieceSelected.x = x;
     state.pieceSelected.y = y;
@@ -105,8 +106,9 @@ function playerMove(playerMove, state,alwaysLight) {
         }
     }
     if(!continueTurn){
-        state.pieceSelected.x = oldX;
-        state.pieceSelected.y = oldY;
+        state.pieces = oldPieces
+        // state.pieceSelected.x = oldX;
+        // state.pieceSelected.y = oldY;
         return false;
     }
     else{

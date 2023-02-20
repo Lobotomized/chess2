@@ -19,32 +19,40 @@ catch(err){
     
 
     function cyborgTeleport(state,me,toReturn){
-        if(returnPieceWithColor(me.x+0,me.y-1,me.color,state)?.icon != me.icon){
+        let piece = returnPieceWithColor(me.x+0,me.y-1,me.color,state);
+        if(piece && piece?.icon != me.icon){
             toReturn.push({ type: 'takeMove', x: 0, y: -1, friendlyPieces:true })
-         }
-         if(returnPieceWithColor(me.x+0,me.y+1,me.color,state)?.icon != me.icon){
-              toReturn.push({ type: 'takeMove', x: 0, y: 1, friendlyPieces:true })
-          }
-          if(returnPieceWithColor(me.x+1,me.y-1,me.color,state)?.icon != me.icon){
-              toReturn.push({ type: 'takeMove', x: 1, y: -1, friendlyPieces:true })
-           }
-          if(returnPieceWithColor(me.x+1,me.y+1,me.color,state)?.icon != me.icon){
-              toReturn.push({ type: 'takeMove', x: 1, y: 1, friendlyPieces:true })
-          }
+        }
+        piece = returnPieceWithColor(me.x+0,me.y+1,me.color,state)
+        if(piece && piece?.icon != me.icon){
+            toReturn.push({ type: 'takeMove', x: 0, y: 1, friendlyPieces:true })
+        }
+        piece = returnPieceWithColor(me.x+1,me.y-1,me.color,state)
+        if(piece && piece?.icon != me.icon){
+            toReturn.push({ type: 'takeMove', x: 1, y: -1, friendlyPieces:true })
+        }
+        piece = returnPieceWithColor(me.x+1,me.y+1,me.color,state)
+        if(piece && piece?.icon != me.icon){
+            toReturn.push({ type: 'takeMove', x: 1, y: 1, friendlyPieces:true })
+        }
+        piece = returnPieceWithColor(me.x+1,me.y+0,me.color,state)
+        if(piece && piece?.icon != me.icon){
+            toReturn.push({ type: 'takeMove', x: 1, y: 0, friendlyPieces:true })
+        }
+        piece = returnPieceWithColor(me.x-1,me.y+0,me.color,state)
+        if(piece && piece?.icon != me.icon){
+            toReturn.push({ type: 'takeMove', x: -1, y: 0, friendlyPieces:true })
+        }
+        piece = returnPieceWithColor(me.x-1,me.y-1,me.color,state)
 
-          if(returnPieceWithColor(me.x+1,me.y+0,me.color,state)?.icon != me.icon){
-              toReturn.push({ type: 'takeMove', x: 1, y: 0, friendlyPieces:true })
-          }
-          if(returnPieceWithColor(me.x-1,me.y+0,me.color,state)?.icon != me.icon){
-              toReturn.push({ type: 'takeMove', x: -1, y: 0, friendlyPieces:true })
-          }
+        if(piece && piece?.icon != me.icon){
+            toReturn.push({ type: 'takeMove', x: -1, y:-1, friendlyPieces:true })
+        }
+        piece = returnPieceWithColor(me.x-1,me.y+1,me.color,state)
 
-          if(returnPieceWithColor(me.x-1,me.y-1,me.color,state)?.icon != me.icon){
-              toReturn.push({ type: 'takeMove', x: -1, y:-1, friendlyPieces:true })
-          }
-          if(returnPieceWithColor(me.x-1,me.y+1,me.color,state)?.icon != me.icon){
-              toReturn.push({ type: 'takeMove', x: -1, y: 1, friendlyPieces:true })
-          }
+        if(piece && piece?.icon != me.icon){
+            toReturn.push({ type: 'takeMove', x: -1, y: 1, friendlyPieces:true })
+        }
     }
     function getRndInteger(min, max) {
         return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -1326,7 +1334,7 @@ function shield(color, x, y){
         x: x,
         y: y,
         color: color,
-        value:1,
+        value:2.5,
         posValue:0.1,
     }
 }
