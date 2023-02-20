@@ -1584,7 +1584,7 @@ function empoweredCrystalFactory(color,x,y){
                 if(piece.color == this.color && piece.icon.includes('Crystal.png') && piece != this){
                     piece.moves = this.moves;
                     piece.icon = this.icon;
-                    piece.value = 1000;
+                    piece.value = 993;
                     hadIt = true;
                 }
             })
