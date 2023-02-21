@@ -67,6 +67,8 @@
     })
     socket.on('returnState', (secretState) => {
         //Draw the game
+        console.log(squareLength, ' wtf!?')
+
         const myTurnH1 = document.getElementById('turn');
         canvas.width = squareLength * boardWidth + squareLength;
         canvas.height = squareLength * boardWidth + squareLength;

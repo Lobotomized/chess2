@@ -1,10 +1,22 @@
 importScripts('/pieceDefinitions.js')
 importScripts('/helperFunctions.js')
+importScripts('/moveMethods.js')
+
 importScripts('/src/jsonfn.js')
 
 let globalPosValue = 0.1//Math.random();
 
-function evaluateBoard(colorPerspective, pieces, state,simple){
+
+function evaluationMagnifierMaxOptions(piece,state,colorPerspective){
+    lightBoardFE(piece,{pieces:state.pieces, board:state.board, turn:piece.color},'allowedMove',undefined,true)
+    const filtered = state.board.filter((square) => {
+        return square['allowedMove']
+    })
+    return filtered.length * globalPosValue*piece.posValue;
+}
+
+
+function evaluateBoard(colorPerspective, pieces, state,magnifierMethods){
     let counter = 0;
     let valueTransformer = 1;
     let valueCounter = 0;
@@ -14,28 +26,19 @@ function evaluateBoard(colorPerspective, pieces, state,simple){
         const piece = pieces[counter]
         if(colorPerspective === piece.color){
             let magnifier = 0;
-            if(!simple){
-                lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true)
-                const filtered = board.filter((square) => {
-                    return square['allowedMove']
-                })
-                magnifier = filtered.length * globalPosValue*piece.posValue;
-            }
 
+            magnifierMethods.forEach((method) => {
+                magnifier += method(piece,state,colorPerspective)
+            })
             valueTransformer = piece.value ? piece.value + magnifier : 1 + magnifier;
             // let safety = safetyValue(piece.color,pieces,board);
             // valueTransformer += safety*100;
         }
         else{
             let magnifier = 0;
-            if(!simple){
-                lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true)
-                const filtered = board.filter((square) => {
-                    return square['allowedMove']
-                })
-                magnifier = filtered.length * globalPosValue*piece.posValue;
-            }
-
+            magnifierMethods.forEach((method) => {
+                magnifier += method(piece,state,colorPerspective)
+            })
             valueTransformer = piece.value? piece.value* -1 - magnifier : -1 - magnifier;
             // let safety = safetyValue(piece.color,pieces,board);
             // valueTransformer -= safety*100;
@@ -183,7 +186,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
             let bestGoodMove = {};
             let goodMoveValue = 999999;
             goodMoves.forEach((goodMove) => {
-                let thisValue = evaluateBoard(maximizer,goodMove.pieces, state)
+                let thisValue = evaluateBoard(colorPerspective,maximizer,goodMove.pieces, state,[evaluationMagnifierMaxOptions])
                 if(thisValue < goodMoveValue){
                     goodMoveValue = thisValue;
                     bestGoodMove = {moveCounter:index, value:goodMoveValue,pieces:badMove.pieces}
@@ -247,7 +250,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
         badMoves.forEach((badMove) => {
             // console.log(badMoves,enemy, '  wtf?!')
 
-            let thisValue = evaluateBoard(enemy,badMove.pieces, state,false)
+            let thisValue =  evaluateBoard(maximizer,badMove.pieces, state,[evaluationMagnifierMaxOptions])
             if(thisValue > badMoveValue){
                 badMoveValue = thisValue;
                 bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
@@ -272,7 +275,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
 
 
 function minimaxKing(state,maximizer, depth, removedTurns){
-    if(state.pieces.length > 5){
+    if(state.pieces.length > 8){
         return minimax(state,maximizer, depth, removedTurns);
     }
     else{
@@ -280,99 +283,6 @@ function minimaxKing(state,maximizer, depth, removedTurns){
     }
 }
 
-
-function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
-    // if legal move return true else return false
-    let light = specialFlag || 'light';
-    const x = playerMove.x;
-    const y = playerMove.y;
-    const operatedPiece = selectedForced ? selectedForced : state.pieceSelected
-    const square = state.board.find((sq) => {
-        return sq.x === x && sq.y === y;
-    })
-
-    if (!square) {
-        return false;
-    }
-    if (!square[light] && !alwaysLight) {
-        return false; // Square wasn't lighted in the lightBoard stage so the move is not legal
-    }
-
-    const enemyPiece = state.pieces.find((ePiece) => {
-        return ePiece.x === x && ePiece.y === y && ePiece.color != operatedPiece.color
-    })
-
-
-    const friendlyPiece = state.pieces.find((ePiece) => {
-        return ePiece.x === x && ePiece.y === y && ePiece.color == operatedPiece.color
-    })
-    const friendlyPieceOldX = friendlyPiece && friendlyPiece.x;
-    const friendlyPieceOldY = friendlyPiece && friendlyPiece.y;
-    const oldX = operatedPiece.x;
-    const oldY = operatedPiece.y;
-
-    operatedPiece.x = x;
-    operatedPiece.y = y;
-
-    let oldState = JSON.parse(JSON.stringify(state));
-    let continueTurn = true;
-
-    for (let i = state.pieces.length - 1; i >= 0; i--) {
-        if (state.pieces[i].afterPlayerMove) {
-            if(state.pieces[i].afterPlayerMove(state, playerMove, {x:oldX, y:oldY})){
-                continueTurn = false;
-            }
-        }
-
-        if(state.pieces[i].friendlyPieceInteraction){
-            if(state.pieces[i].friendlyPieceInteraction(state, friendlyPiece, {x:oldX, y:oldY})){
-                if(friendlyPiece){
-                    friendlyPiece.x = friendlyPieceOldX;
-                    friendlyPiece.y = friendlyPieceOldY;
-                }
-                continueTurn = false;
-            }    
-        }
-
-    }
-    if(!continueTurn){
-        state = oldState;
-        operatedPiece.x = oldX;
-        operatedPiece.y = oldY;
-        return false;
-    }
-    else{
-        if (enemyPiece) {
-            if (enemyPiece.afterThisPieceTaken) {
-                enemyPiece.afterThisPieceTaken(state)
-            }
-            if (operatedPiece.afterEnemyPieceTaken) {
-                operatedPiece.afterEnemyPieceTaken(enemyPiece, state);
-            }
-            enemyPiece.x = undefined;
-            enemyPiece.y = undefined;
-            
-            state.pieces.splice(state.pieces.indexOf(enemyPiece), 1)
-        }
-    }
-    if (operatedPiece.afterPieceMove) {
-
-        const continueTurn = operatedPiece.afterPieceMove(state, playerMove, {x:oldX, y:oldY});
-            
-        if (!continueTurn) {
-            operatedPiece.x = oldX;
-            operatedPiece.y = oldY;
-            return false;
-        }
-    }
-    state.oldMove = {oldX:oldX,oldY:oldY,currentY:operatedPiece.y,currentX:operatedPiece.x}
-    state.pieceSelected = undefined;
-    closeLights(state.board)
-
-    return true;
-}
-
- 
 
 self.addEventListener("message", function(e) {
     let obj = JSON.parse(e.data)

@@ -326,7 +326,6 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
                     let move = JSONfn.parse(event.data)
                     AIMove(move.pieceCounter, move.xClicked, move.yClicked, state.turn)
                     w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:AIPower}));
-
                 }
             }
         }
