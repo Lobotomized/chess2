@@ -8,15 +8,15 @@ let globalPosValue = 0.1//Math.random();
 
 
 function evaluationMagnifierMaxOptions(piece,state,colorPerspective){
-    lightBoardFE(piece,{pieces:state.pieces, board:state.board, turn:piece.color},'allowedMove',undefined,true)
-    const filtered = state.board.filter((square) => {
+    lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true)
+    const filtered = board.filter((square) => {
         return square['allowedMove']
     })
     return filtered.length * globalPosValue*piece.posValue;
 }
 
 
-function evaluateBoard(colorPerspective, pieces, state,magnifierMethods){
+function evaluateBoard(colorPerspective, pieces, state,simple){
     let counter = 0;
     let valueTransformer = 1;
     let valueCounter = 0;
@@ -26,19 +26,28 @@ function evaluateBoard(colorPerspective, pieces, state,magnifierMethods){
         const piece = pieces[counter]
         if(colorPerspective === piece.color){
             let magnifier = 0;
+            if(!simple){
+                lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true)
+                const filtered = board.filter((square) => {
+                    return square['allowedMove']
+                })
+                magnifier = filtered.length * globalPosValue*piece.posValue;
+            }
 
-            magnifierMethods.forEach((method) => {
-                magnifier += method(piece,state,colorPerspective)
-            })
             valueTransformer = piece.value ? piece.value + magnifier : 1 + magnifier;
             // let safety = safetyValue(piece.color,pieces,board);
             // valueTransformer += safety*100;
         }
         else{
             let magnifier = 0;
-            magnifierMethods.forEach((method) => {
-                magnifier += method(piece,state,colorPerspective)
-            })
+            if(!simple){
+                lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true)
+                const filtered = board.filter((square) => {
+                    return square['allowedMove']
+                })
+                magnifier = filtered.length * globalPosValue*piece.posValue;
+            }
+
             valueTransformer = piece.value? piece.value* -1 - magnifier : -1 - magnifier;
             // let safety = safetyValue(piece.color,pieces,board);
             // valueTransformer -= safety*100;
@@ -186,7 +195,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
             let bestGoodMove = {};
             let goodMoveValue = 999999;
             goodMoves.forEach((goodMove) => {
-                let thisValue = evaluateBoard(colorPerspective,maximizer,goodMove.pieces, state,[evaluationMagnifierMaxOptions])
+                let thisValue = evaluateBoard(maximizer,goodMove.pieces, state)
                 if(thisValue < goodMoveValue){
                     goodMoveValue = thisValue;
                     bestGoodMove = {moveCounter:index, value:goodMoveValue,pieces:badMove.pieces}
@@ -250,7 +259,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
         badMoves.forEach((badMove) => {
             // console.log(badMoves,enemy, '  wtf?!')
 
-            let thisValue =  evaluateBoard(maximizer,badMove.pieces, state,[evaluationMagnifierMaxOptions])
+            let thisValue = evaluateBoard(enemy,badMove.pieces, state,false)
             if(thisValue > badMoveValue){
                 badMoveValue = thisValue;
                 bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
