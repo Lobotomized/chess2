@@ -27,9 +27,9 @@ function evaluateBoard(colorPerspective, pieces, state,simple){
         if(colorPerspective === piece.color){
             let magnifier = 0;
 
-            magnifierMethods.forEach((method) => {
-                magnifier += method(piece,state,colorPerspective)
-            })
+            // magnifierMethods.forEach((method) => {
+            //     magnifier += method(piece,state,colorPerspective)
+            // })
             if(!simple){
                 lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true)
                 const filtered = board.filter((square) => {

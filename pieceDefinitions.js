@@ -377,7 +377,7 @@ function pawnFactory(color, x, y) {
         moved: false,
         enPassantMove:false,
         color: color,
-        value:100,
+        value:1,
         posValue:posValue[getRndInteger(1,3)-1],
         conditionalMoves: function (state) {
             let conditionalMoves = [];
