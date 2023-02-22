@@ -740,7 +740,9 @@ function blockableSpecialFunction(properties) {
     }
     else {
         directionY = 0;
-    }
+    } 
+
+
     if (!piece) {
         square[flag] = true;
         const props = {
@@ -761,11 +763,10 @@ function blockableSpecialFunction(properties) {
 
         blockableSpecialFunction(props)
     }
-    else if((piece.color != state.turn && !move.friendlyPieces || piece.color === state.turn && move.friendlyPieces) && properties.minimal  && !move.impotent){
+    else if((piece.color != operatedPiece.color  && !move.friendlyPieces || piece.color === operatedPiece.color  && move.friendlyPieces) && properties.minimal  && !move.impotent){
         square[flag] = true;
     }
-    else if ((piece.color != operatedPiece.color && !move.friendlyPieces || piece.color === state.turn && move.friendlyPieces) && !move.impotent && !properties.minimal) {
-
+    else if (piece && !move.impotent && !properties.minimal) {
         let selectedPiece = pieceFromXY(x,y,state.pieces)
         square[flag] = true;
 

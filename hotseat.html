@@ -139,7 +139,7 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
         state = secretState;
         if(hoveredPiece){
             if(hoveredPiece.color != hotseatGame.state.turn && hotseatGame.state.turn != undefined){
-                lightBoardFE(hoveredPiece,state,'red','red')
+                lightBoardFE(hoveredPiece,state,'red','grey')
             }
         }
         if (state.pieces) {
@@ -193,7 +193,7 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
                 if(y%2 != 0){
                     orderFirst = false;
                 }
-                 if (!sq.light && !sq.special && !sq.red) {
+                 if (!sq.light && !sq.special && !sq.red && !sq.grey) {
                     if(orderFirst){
                         if(x % 2 != 0){
                             drawBlackSquare(x * squareLength, y * squareLength, squareLength)
