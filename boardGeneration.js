@@ -107,7 +107,7 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     }
     else if(raceBlack == 'test'){
         pieces.push(
-                juggernautFactory('black',3,4)
+                juggernautFactory('black',6,7),
         )
     }
 
@@ -152,7 +152,7 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     }
     else if(raceBlack == 'test'){
         pieces.push(
-                executorFactory('white', 0, 6),
+                kingFactory('white', 0, 6)
              )
     }
 
@@ -365,7 +365,7 @@ function makeBoard(pieces, board) {
 
 
 function placeRandomFrontPiece(pieces,next,maxX, maxY) {
-    const which = getRndInteger(1, 6)
+    const which = getRndInteger(1, 7)
 
     let blackNext = {
         x: next,
@@ -420,13 +420,19 @@ function placeRandomFrontPiece(pieces,next,maxX, maxY) {
                 antFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
+        case 7:
+            pieces.push(
+                shield('black', maxX-blackNext.x, blackNext.y),
+                shield('white', whiteNext.x, whiteNext.y)
+            )
+            break;
     
 
     }
 }
 
 function placeRandomPieces(pieces, next,maxX, maxY) {
-    const which = getRndInteger(1, 16)
+    const which = getRndInteger(1, 18)
 
     let blackNext = {
         x: next,
@@ -540,6 +546,20 @@ function placeRandomPieces(pieces, next,maxX, maxY) {
                 pigFactory('black',maxX-blackNext.x,blackNext.y),
                 pigFactory('white',whiteNext.x,whiteNext.y)
             )
+            break;
+        case 17:
+            pieces.push(
+                shield('black',maxX-blackNext.x,blackNext.y),
+                shield('white',whiteNext.x,whiteNext.y)            
+            )
+            break;
+        case 18:
+            pieces.push(
+                clownFactory('black',maxX-blackNext.x,blackNext.y),
+                clownFactory('white',whiteNext.x,whiteNext.y)            
+            )
+            break;
+        
     }
 }
 

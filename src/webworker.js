@@ -1,60 +1,78 @@
 importScripts('/pieceDefinitions.js')
 importScripts('/helperFunctions.js')
 importScripts('/moveMethods.js')
+importScripts('/src/AI/magnifiers.js')
 
 importScripts('/src/jsonfn.js')
 
-let globalPosValue = 0.1//Math.random();
+//let globalPosValue = 0.1//Math.random();
 
 
-function evaluationMagnifierMaxOptions(piece,state,colorPerspective){
-    lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true)
-    const filtered = board.filter((square) => {
-        return square['allowedMove']
-    })
-    return filtered.length * globalPosValue*piece.posValue;
-}
+// function evaluationMagnifierMaxOptions(piece,pieces,state,colorPerspective){
+//     lightBoardFE(piece,{pieces:pieces, board:state.board, turn:piece.color},'allowedMove',undefined,true)
+//     const filtered = state.board.filter((square) => {
+//         return square['allowedMove']
+//     })
+//     return filtered.length * globalPosValue*piece.posValue;
+// }
+// let kingTropism = 0.5;
 
 
-function evaluateBoard(colorPerspective, pieces, state,simple){
+//Code related variables
+// let valuableEnemy = false;
+
+// function evaluationMagnifierKingTropism(piece,pieces,state,colorPerspective){
+//     if(piece.value > 500){
+//         return 0;
+//     }
+//     if(!valuableEnemy || valuableEnemy.color === colorPerspective){
+//         valuableEnemy= pieces.find((el)=> {
+//             return el.color != colorPerspective && el.value > 500;
+//         })
+//     }
+
+//     if(!valuableEnemy){
+//         return 0;
+//     }
+//     let distanceX = Math.abs(piece.x - valuableEnemy.x);
+//     let distanceY = Math.abs(piece.y - valuableEnemy.y);
+
+//     if(distanceX > distanceY){
+//         return 7*kingTropism - distanceX * kingTropism;
+//     }
+//     else{
+//         return 7*kingTropism -distanceY * kingTropism
+//     }
+// }
+
+function evaluateBoard(colorPerspective, pieces, state,magnifierMethods){
     let counter = 0;
     let valueTransformer = 1;
     let valueCounter = 0;
-    const board = state.board;
 
     while(pieces.length > counter){
         const piece = pieces[counter]
         if(colorPerspective === piece.color){
             let magnifier = 0;
 
-            // magnifierMethods.forEach((method) => {
-            //     magnifier += method(piece,state,colorPerspective)
-            // })
-            if(!simple){
-                lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true)
-                const filtered = board.filter((square) => {
-                    return square['allowedMove']
-                })
-                magnifier = filtered.length * globalPosValue*piece.posValue;
-            }
+            magnifierMethods.forEach((magnifierObject) => {
+                if(!magnifierObject.onlyForMe){
+                    magnifier += magnifierObject.method(piece,pieces,state,piece.color,magnifierObject.options);
+                }
+            })
 
-            valueTransformer = piece.value ? piece.value + magnifier : 1 + magnifier;
-            // let safety = safetyValue(piece.color,pieces,board);
-            // valueTransformer += safety*100;
+            valueTransformer = magnifier;
         }
         else{
             let magnifier = 0;
-            if(!simple){
-                lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true)
-                const filtered = board.filter((square) => {
-                    return square['allowedMove']
-                })
-                magnifier = filtered.length * globalPosValue*piece.posValue;
-            }
 
-            valueTransformer = piece.value? piece.value* -1 - magnifier : -1 - magnifier;
-            // let safety = safetyValue(piece.color,pieces,board);
-            // valueTransformer -= safety*100;
+            magnifierMethods.forEach((magnifierObject) => {
+                if(!magnifierObject.onlyForEnemy){
+                    magnifier += magnifierObject.method(piece,pieces,state,piece.color,magnifierObject.options);
+                }
+            })
+
+            valueTransformer = magnifier*-1;
         }
         valueCounter += valueTransformer;
         counter++;
@@ -199,7 +217,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
             let bestGoodMove = {};
             let goodMoveValue = 999999;
             goodMoves.forEach((goodMove) => {
-                let thisValue = evaluateBoard(maximizer,goodMove.pieces, state)
+                let thisValue = evaluateBoard(maximizer,goodMove.pieces, state, [])
                 if(thisValue < goodMoveValue){
                     goodMoveValue = thisValue;
                     bestGoodMove = {moveCounter:index, value:goodMoveValue,pieces:badMove.pieces}
@@ -239,7 +257,6 @@ function evaluateBoardDve(colorPerspective, pieces, state){
     if(maximizer === 'black'){
         enemy = 'white';
     }
-
     let selectedMove = undefined;
     let badMoveResults= []
     let slizedMoves = moves.slice(0,depth);
@@ -262,8 +279,19 @@ function evaluateBoardDve(colorPerspective, pieces, state){
         let badMoveValue = -999999;
         badMoves.forEach((badMove) => {
             // console.log(badMoves,enemy, '  wtf?!')
-
-            let thisValue = evaluateBoard(enemy,badMove.pieces, state,false)
+            let thisValue = undefined;
+            if(maximizer === 'white'){
+                thisValue = evaluateBoard(enemy,badMove.pieces, state,
+                    [{method:evaluationMagnifierMaxOptions,options:{posValue:0.1}}, 
+                        {method:evaluationMagnifierPiece, options:{pieceValue:1}},
+                        {method:evaluationMagnifierKingTropism, options:{relativeValue:0.2,defendersSearch:true}}
+                    ])
+            }
+            else{
+                thisValue = evaluateBoard(enemy,badMove.pieces, state,[
+                    {method:evaluationMagnifierMaxOptions,options:{posValue:0.1}},
+                    {method:evaluationMagnifierPiece, options:{pieceValue:1 }}]) 
+            }
             if(thisValue > badMoveValue){
                 badMoveValue = thisValue;
                 bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
@@ -303,7 +331,7 @@ self.addEventListener("message", function(e) {
         //generateMovesFromPieces(obj.state,'black')
             console.time('minimax')
             //generateMovesFromPieces(obj.state,'black')
-            let move = minimaxKing(obj.state,obj.color,obj.depth, obj.removedTurns)
+            let move = minimax(obj.state,obj.color,obj.depth, obj.removedTurns)
             console.timeEnd('minimax');
 
             move.removedTurns = obj.removedTurns;

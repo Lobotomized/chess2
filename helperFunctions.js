@@ -154,6 +154,16 @@ function areYouCheckedWithoutTempMoves(state,enemyColor,me, flag){
 
 }
 
+function isPositionAttacked(state,myColor,x,y){
+    let enemyColor = 'white';
+    if(myColor == 'white'){
+        enemyColor = 'black'
+    }
+    if(areYouCheckedWithoutTempMoves(state,enemyColor,{x:x,y:y,color:myColor}, 'rokado')){
+        return true;
+    }
+    return false;
+}
 
 function isRoadAttacked(state,enemyColor,pointOne,pointTwo){
     let direction = false;
@@ -841,7 +851,8 @@ try{
         isRoadAttacked,
         pieceFromSquare,
         blockableCheck,
-        lightBoardFE
+        lightBoardFE,
+        isPositionAttacked
     }
 }
 catch(err){

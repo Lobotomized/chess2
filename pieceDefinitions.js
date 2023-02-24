@@ -680,17 +680,40 @@ function kingFactory(color, x, y) {
         icon: color + 'King.png',
         vulnerable: true,
         moved: false,
-        moves: [{ type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
-        { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
-        { type: 'absolute', x: -1, y: -1 }, { type: 'absolute', x: 1, y: 1 },
-        { type: 'absolute', x: -1, y: 1 }, { type: 'absolute', x: 1, y: -1 }],
+        moves: [ ],
         x: x,
         y: y,
         value:2000,
-        posValue:posValue[getRndInteger(1,3)-1],
+        posValue:posValue[getRndInteger(1,6)-1],
         color: color,
 
         conditionalMoves: function(state){
+            let toReturn = []
+            if(!isPositionAttacked(state,this.color,this.x,this.y+1)){
+                toReturn.push({ type: 'absolute', x: 0, y: 1 });
+            }
+            if(!isPositionAttacked(state,this.color,this.x+1,this.y)){
+                toReturn.push({ type: 'absolute', x: 1, y: 0 });
+            }
+            if(!isPositionAttacked(state,this.color,this.x+1,this.y+1)){
+                toReturn.push({ type: 'absolute', x: 1, y: 1 });
+            }
+            if(!isPositionAttacked(state,this.color,this.x-1,this.y-1)){
+                toReturn.push({ type: 'absolute', x: -1, y: -1 });
+            }
+            //
+            if(!isPositionAttacked(state,this.color,this.x,this.y-1)){
+                toReturn.push({ type: 'absolute', x: 0, y: -1 });
+            }
+            if(!isPositionAttacked(state,this.color,this.x-1,this.y)){
+                toReturn.push({ type: 'absolute', x: -1, y: 0 });
+            }
+            if(!isPositionAttacked(state,this.color,this.x-1,this.y+1)){
+                toReturn.push({ type: 'absolute', x: -1, y: 1 });
+            }
+            if(!isPositionAttacked(state,this.color,this.x+1,this.y-1)){
+                toReturn.push({ type: 'absolute', x: 1, y: -1 });
+            }
             if(!this.moved){
                 const availableRooks = state.pieces.filter((piece) => {
                     let enemyColor = 'black'
@@ -713,7 +736,6 @@ function kingFactory(color, x, y) {
                     }
                 })
 
-                let toReturn = []
                 availableRooks.forEach((rook) => {
                     if(rook.x > this.x){
                         toReturn.push({type:'blockable',x:1,y:0, repeat:true, limit:2})
@@ -723,12 +745,11 @@ function kingFactory(color, x, y) {
                     }
                 })
 
-                return toReturn
                  
             }
-            else{
-                return [];
-            }
+            
+
+            return toReturn;
         },
         afterThisPieceTaken: function (state) {
             if (this.color == 'white') {
