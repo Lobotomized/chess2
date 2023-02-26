@@ -80,7 +80,7 @@ function knightFactory(color, x, y) {
         y: y,
         color: color,
         value:2.5,
-        posValue:posValue[getRndInteger(1,6)-1]
+        posValue:posValue[3]
     }
 }
 
@@ -210,7 +210,7 @@ function ghostFactory(color,x,y){
         x:x,
         y:y,
         value:0.6,
-        posValue:posValue[getRndInteger(1,4)-1]
+        posValue:posValue[2]
     }
 }
 
@@ -227,7 +227,7 @@ function pigFactory(color,x,y){
         x:x,
         y:y,
         value:1.66,
-        posValue:posValue[getRndInteger(3,6)-1]
+        posValue:posValue[2]
     }
 }
 
@@ -244,7 +244,7 @@ function horseFactory(color,x,y){
         x:x,
         y:y,
         value:5,
-        posValue:posValue[getRndInteger(1,6)-1]
+        posValue:posValue[3]
     }
 }
 
@@ -264,7 +264,7 @@ function ricarFactory(color,x,y){
         x:x,
         y:y,
         value:2.5,
-        posValue:posValue[getRndInteger(1,6)-1],
+        posValue:posValue[3],
         afterPlayerMove:function(state){
             color = this.color;
             if(color == 'black'){
@@ -317,7 +317,7 @@ function hatFactory(color,x,y){
         moves:moves,
         color:color,
         value:2000,
-        posValue:posValue[getRndInteger(1,6)-1],
+        posValue:posValue[4],
         x:x,
         y:y,
         afterThisPieceTaken: function (state) {
@@ -346,7 +346,7 @@ function clownFactory(color,x,y){
         x:x,
         y:y,
         value:2,
-        posValue:posValue[getRndInteger(1,2)-1],
+        posValue:posValue[2],
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -378,7 +378,7 @@ function pawnFactory(color, x, y) {
         enPassantMove:false,
         color: color,
         value:1,
-        posValue:posValue[getRndInteger(1,3)-1],
+        posValue:posValue[2],
         conditionalMoves: function (state) {
             let conditionalMoves = [];
             if(state){
@@ -632,7 +632,7 @@ function bishopFactory(color, x, y) {
         x: x,
         y: y,
         value:3,
-        posValue:posValue[getRndInteger(1,6)-1],
+        posValue:posValue[3],
         color: color
     }
 }
@@ -647,7 +647,7 @@ function rookFactory(color, x, y) {
         x: x,
         y: y,
         value:5,
-        posValue:posValue[getRndInteger(1,6)-1],
+        posValue:posValue[2],
         moved:false,
         color: color,
         afterPieceMove:function(){
@@ -667,7 +667,7 @@ function queenFactory(color, x, y) {
         x: x,
         y: y,
         value:9,
-        posValue:posValue[getRndInteger(1,3)-1],
+        posValue:0.05,
         color: color
     }
 }
@@ -684,7 +684,7 @@ function kingFactory(color, x, y) {
         x: x,
         y: y,
         value:2000,
-        posValue:posValue[getRndInteger(1,6)-1],
+        posValue:posValue[3],
         color: color,
 
         conditionalMoves: function(state){
@@ -905,7 +905,7 @@ function antFactory(color,x,y, direction){
         x:x,
         y:y,
         value:0.6,
-        posValue:posValue[getRndInteger(1,3)-1],
+        posValue:posValue[2],
         direction:direction,
         afterPieceMove: function(state,move,prevMove) {
             let color = this.color;
@@ -954,7 +954,7 @@ function goliathBugFactory(color,x,y){
         weakMoves:weakMoves,
         x:x,
         y:y,
-        posValue:posValue[getRndInteger(1,6)-1],
+        posValue:posValue[3],
         value:7.5,
     }
 }
@@ -1037,7 +1037,7 @@ function ladyBugFactory(color,x,y){
         x:x,
         y:y,
         value:5.5,
-        posValue:posValue[getRndInteger(1,6)-1],
+        posValue:posValue[3],
     }
 }
 
@@ -1064,7 +1064,7 @@ function spiderFactory(color,x,y){
         x:x,
         y:y,
         value:5,
-        posValue:posValue[getRndInteger(1,6)-1],
+        posValue:posValue[3],
     }
 }
 
@@ -1122,7 +1122,7 @@ function queenBugFactory(color,x,y){
         x:x,
         y:y,
         value:2.5,
-        posValue:posValue[getRndInteger(1,3)-1],
+        posValue:posValue[2],
         afterPieceMove:function(state, move, prevMove) {
             let color = this.color;
             const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
@@ -1221,7 +1221,7 @@ function northernKing(color, x, y){
                         { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: 1, x: -2 },
                         { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }]
                         piece.value = fencerPower;
-                        piece.posValue = posValue[getRndInteger(1,6)-1];
+                        piece.posValue = posValue[3];
                     }
                 })
             }
@@ -1417,7 +1417,7 @@ function plagueDoctor(color, x, y){
                         { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }
                     ],
                         piece.value = 8.5;
-                        piece.posValue = posValue[getRndInteger(1,6)-1];
+                        piece.posValue = posValue[3];
                     }
                 })
             }
@@ -1583,7 +1583,7 @@ function empoweredCrystalFactory(color,x,y){
         y: y,
         color: color,
         value:993,
-        posValue:posValue[getRndInteger(1,5)-1],
+        posValue:posValue[2],
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
@@ -1637,7 +1637,7 @@ function executorFactory(color,x,y){
         y: y,
         color: color,
         value:5,
-        posValue:posValue[getRndInteger(2,4)-1],
+        posValue:posValue[3],
         conditionalMoves: function(state){
             let toReturn = [];
             cyborgTeleport(state,this,toReturn)
@@ -1670,7 +1670,7 @@ function crystalFactory(color,x,y){
         x: x,
         y: y,
         value:1000,
-        posValue:posValue[getRndInteger(1,3)-1],
+        posValue:posValue[3],
         color: color,
         conditionalMoves: function(state){
             let toReturn = [];
@@ -1723,7 +1723,7 @@ function juggernautFactory(color,x,y){
         y: y,
         color: color,
         value:10,
-        posValue:posValue[getRndInteger(1,3)-1],
+        posValue:posValue[3],
 
         
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {

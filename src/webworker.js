@@ -49,7 +49,6 @@ function evaluateBoard(colorPerspective, pieces, state,magnifierMethods){
     let counter = 0;
     let valueTransformer = 1;
     let valueCounter = 0;
-
     while(pieces.length > counter){
         const piece = pieces[counter]
         if(colorPerspective === piece.color){
@@ -282,15 +281,22 @@ function evaluateBoardDve(colorPerspective, pieces, state){
             let thisValue = undefined;
             if(maximizer === 'white'){
                 thisValue = evaluateBoard(enemy,badMove.pieces, state,
-                    [{method:evaluationMagnifierMaxOptions,options:{posValue:0.1}}, 
+                    [
+                        {method:evaluationMagnifierMaxOptions,options:{posValue:0.1}}, 
                         {method:evaluationMagnifierPiece, options:{pieceValue:1}},
-                        {method:evaluationMagnifierKingTropism, options:{relativeValue:0.2,defendersSearch:true}}
+                        // {method:evaluationMagnifierPieceDefended, options:{relativeValue:0.3}},
+
+                        // {method:evaluationMagnifierKingTropism, options:{relativeValue:0.1,defendersSearch:true, onlyForMe:true, discriminates:true,pieceValue:0.5}},
                     ])
             }
             else{
                 thisValue = evaluateBoard(enemy,badMove.pieces, state,[
-                    {method:evaluationMagnifierMaxOptions,options:{posValue:0.1}},
-                    {method:evaluationMagnifierPiece, options:{pieceValue:1 }}]) 
+                    {method:evaluationMagnifierMaxOptions,options:{posValue:0.1, mask:positionMaskDefault}}, 
+                    {method:evaluationMagnifierPiece, options:{pieceValue:1}},
+
+                    // {method:evaluationMagnifierKingTropism, options:{relativeValue:0.2,defendersSearch:true, onlyForMe:true}},
+                    // {method:evaluationMagnifierKingTropism, options:{relativeValue:0.2,defendersSearch:true, onlyForMe:true}}
+                ]) 
             }
             if(thisValue > badMoveValue){
                 badMoveValue = thisValue;

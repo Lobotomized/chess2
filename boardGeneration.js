@@ -107,7 +107,10 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     }
     else if(raceBlack == 'test'){
         pieces.push(
-                juggernautFactory('black',6,7),
+                knightFactory('white',6,7),
+                knightFactory('white',4,3),
+                knightFactory('white',4,7),
+                knightFactory('white',5,3),
         )
     }
 
@@ -152,7 +155,7 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     }
     else if(raceBlack == 'test'){
         pieces.push(
-                kingFactory('white', 0, 6)
+                kingFactory('black', 0, 6)
              )
     }
 
