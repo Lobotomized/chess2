@@ -1,3 +1,4 @@
+
 //Options to change AI behavior
 let positionMaskDefault = {
     'whitePawn.png':1,
@@ -33,8 +34,8 @@ let positionMaskDefault = {
     'blackRicar.png':1,
     'whiteHorse.png':0.7,
     'blackHorse.png':0.7,
-    'whiteHat.png':0.7,
-    'blackHat.png':0.7,
+    'whiteHat.png':0.4,
+    'blackHat.png':0.4,
     'whiteClown.png':0.7,
     'blackClown.png':0.7,
 
@@ -124,11 +125,11 @@ function evaluationMagnifierMaxOptions(piece,pieces,state,colorPerspective,optio
 
 function evaluationMagnifierPiece(piece,pieces,state,colorPerspective,options){
 
-    if(options.adaptive){
+    if(options.threshold){
         let myPieces = pieces.filter((piece) => {
             return piece.color === colorPerspective;
         })
-        let quantifier = defaultPieceValueThreshold(myPieces.length);
+        let quantifier = options.threshold(myPieces.length);
 
         return piece.value * quantifier;
     }
@@ -145,7 +146,16 @@ function evaluationMagnifierPieceDefended(piece,pieces,state,colorPerspective,op
     if(piece.color === 'black'){
         enemyColor = 'white';
     }
-    if(isPositionAttacked(state,enemyColor,piece.x,piece.y)){
+
+    let colorToUse = enemyColor;
+    if(options.pieceAttacked){
+        colorToUse  = piece.color
+    }
+    if(isPositionAttacked(state,colorToUse,piece.x,piece.y)){
+        if(options.pieceValue){
+            return options.relativeValue * options.pieceValue*piece.value
+        }
+
         return options.relativeValue
     }
 
@@ -156,7 +166,6 @@ function evaluationMagnifierKingTropism(piece,pieces,state,colorPerspective,opti
 
     /*
         options - 
-        discriminating - дали се интересува от стойността на фигурата или не.  true ако се интересува.
         pieceValue - Колко релативна стойност отделя на стойността на фигурите
         relativeValue - Колко релативна стойност се отделя на близостта до царя
         defendersSearch - Колко защитника има около приятелския цар, а не нападателя около противниковия
@@ -201,16 +210,20 @@ function evaluationMagnifierKingTropism(piece,pieces,state,colorPerspective,opti
     }
     let distanceX = Math.abs(piece.x - target.x);
     let distanceY = Math.abs(piece.y - target.y);
-
+    let tempPieceValue = piece.value;
+    if(tempPieceValue>500){
+        tempPieceValue = 0.0001;
+    }
     if(distanceX > distanceY){
-        if(options.discriminating){
-            return (boardWidth*options.relativeValue - distanceX * options.relativeValue)*piece.value * options.pieceValue;
+        if(options.pieceValue){
+
+            return (boardWidth*options.relativeValue - distanceX * options.relativeValue)* options.pieceValue * tempPieceValue;
         }
         return boardWidth*options.relativeValue - distanceX * options.relativeValue;
     }
     else{
-        if(options.discriminating){
-            return (boardHeight*options.relativeValue -distanceY * options.relativeValue)*piece.value * options.pieceValue
+        if(options.pieceValue){
+            return (boardHeight*options.relativeValue -distanceY * options.relativeValue)*options.pieceValue * tempPieceValue
         }
         return boardHeight*options.relativeValue -distanceY * options.relativeValue
     }
@@ -223,26 +236,139 @@ function defensiveCharacter(weight){
         weight = 0;
     }
     switch(weight){
+        default:
         case 0:
             return [
-                {method:evaluationMagnifierMaxOptions,options:{posValue:0.1}}, 
+                {method:evaluationMagnifierMaxOptions,options:{posValue:0.1, mask:positionMaskDefault}}, 
                 {method:evaluationMagnifierPiece, options:{pieceValue:1}},
                 {method:evaluationMagnifierKingTropism, options:{relativeValue:0.2,defendersSearch:true, onlyForMe:true}}
             ]
         case 1:
             return [
-                {method:evaluationMagnifierMaxOptions,options:{posValue:0.1}}, 
+                {method:evaluationMagnifierMaxOptions,options:{posValue:0.1, mask:positionMaskDefault}}, 
                 {method:evaluationMagnifierPiece, options:{pieceValue:1}},
                 {method:evaluationMagnifierKingTropism, options:{relativeValue:0.2,defendersSearch:true, onlyForMe:true}},
-                {method:evaluationMagnifierKingTropism, options:{relativeValue:0.4, onlyForMe:true}}
+                {method:evaluationMagnifierKingTropism, options:{relativeValue:0.1, onlyForMe:true}}
+            ]
+
+        case 2:
+            return [
+                {method:evaluationMagnifierMaxOptions,options:{posValue:0.1, mask:positionMaskDefault}}, 
+                {method:evaluationMagnifierPiece, options:{pieceValue:4 }},
+                {method:evaluationMagnifierKingTropism, options:{relativeValue:0.2,defendersSearch:true, onlyForMe:true}},
+                {method:evaluationMagnifierKingTropism, options:{relativeValue:0.1, onlyForMe:true}},
+                {method:evaluationMagnifierPieceDefended, options:{relativeValue:0.1, onlyForMe:true}}
+            ]
+    }
+}
+
+
+function offensiveCharacter(weight){
+    if(!weight){
+        weight = 0;
+    }
+    switch(weight){
+        default:
+        case 0:
+            return [
+                {method:evaluationMagnifierMaxOptions,options:{mask:positionMaskDefault,posValue:0.1}}, 
+                {method:evaluationMagnifierPiece, options:{pieceValue:1 }},
+                {method:evaluationMagnifierKingTropism, options:{relativeValue:0.3, onlyForEnemy:true, pieceValue:1}}
+            ]
+        case 1:
+            return [
+                {method:evaluationMagnifierMaxOptions,options:{mask:positionMaskDefault,posValue:0.1}}, 
+                {method:evaluationMagnifierPiece, options:{pieceValue:1 }},
+                {method:evaluationMagnifierKingTropism, options:{relativeValue:0.1, onlyForEnemy:true, pieceValue:1}},
+                {method:evaluationMagnifierKingTropism, options:{relativeValue:0.1,defendersSearch:true, onlyForEnemy:true, pieceValue:1}},
+            ]
+        case 2:
+            return [
+                {method:evaluationMagnifierMaxOptions,options:{mask:positionMaskDefault,posValue:0.1}}, 
+                {method:evaluationMagnifierPiece, options:{pieceValue:2 }},
+                {method:evaluationMagnifierKingTropism, options:{relativeValue:0.1, onlyForEnemy:true, pieceValue:1}},
+                {method:evaluationMagnifierKingTropism, options:{relativeValue:0.1,defendersSearch:true, onlyForEnemy:true, pieceValue:1}},
+                {method:evaluationMagnifierPieceDefended, options:{relativeValue:0.1, onlyForEnemy:true,pieceAttacked:true}}
+            ]
+    }
+}
+
+function positionalOffeniveCharacter(weight){
+    if(!weight){
+        weight = 0;
+    }
+    switch(weight){
+        default:
+        case 0:
+            return [
+                {method:evaluationMagnifierMaxOptions,options:{mask:positionMaskDefault,posValue:0.2}}, 
+                {method:evaluationMagnifierPiece, options:{pieceValue:1, }},
+                {method:evaluationMagnifierKingTropism, options:{relativeValue:0.1, onlyForEnemy:true, pieceValue:2}}
+            ]
+
+        case 1:
+            return [
+                {method:evaluationMagnifierMaxOptions,options:{mask:positionMaskDefault,posValue:0.2,onlyForMe:true}}, 
+                {method:evaluationMagnifierMaxOptions,options:{mask:positionMaskDefault,posValue:0.1,onlyForEnemy:true}}, 
+                {method:evaluationMagnifierKingTropism, options:{relativeValue:0.1, onlyForEnemy:true, pieceValue:2}},
+                {method:evaluationMagnifierPiece, options:{pieceValue:1 }},
+                {method:evaluationMagnifierPieceDefended, options:{relativeValue:0.1, onlyForMe:true}}
+            ]
+    }
+}
+
+function positionalCharacter(weight){
+    if(!weight){
+        weight = 0;
+    }
+    switch(weight){
+        default:
+        case 0:
+            return [
+                {method:evaluationMagnifierMaxOptions,options:{mask:positionMaskDefault,posValue:0.2}}, 
+                {method:evaluationMagnifierPiece, options:{pieceValue:1}}
+            ]
+        case 1:
+            return [
+                {method:evaluationMagnifierMaxOptions,options:{mask:positionMaskDefault,posValue:0.3,onlyForMe:true}}, 
+                {method:evaluationMagnifierMaxOptions,options:{mask:positionMaskDefault,posValue:0.1,onlyForEnemy:true}}, 
+                {method:evaluationMagnifierPiece, options:{pieceValue:1.5}},
+                {method:evaluationMagnifierPieceDefended, options:{relativeValue:0.1}}
+            ]
+        case 2:
+            return [
+                {method:evaluationMagnifierMaxOptions,options:{mask:positionMaskDefault,posValue:0.3,onlyForMe:true}}, 
+                {method:evaluationMagnifierMaxOptions,options:{mask:positionMaskDefault,posValue:0.1,onlyForEnemy:true}}, 
+                {method:evaluationMagnifierPiece, options:{pieceValue:1.5}},
+                {method:evaluationMagnifierPieceDefended, options:{relativeValue:0.1}},
+                {method:evaluationMagnifierPieceDefended, options:{relativeValue:0.1, pieceAttacked:true,pieceValue:1}}
+
+            ]
+    }
+}
+
+function defaultCharacter(weight){
+
+    switch(weight){
+        default:
+        case 0:
+            return [
+                {method:evaluationMagnifierMaxOptions,options:{posValue:0.1}},
+                {method:evaluationMagnifierPiece, options:{pieceValue:1 }}
+            ]
+        case 1:
+            return [
+                {method:evaluationMagnifierMaxOptions,options:{posValue:0.1}},
+                {method:evaluationMagnifierPiece, options:{pieceValue:1.1 }},
+                {method:evaluationMagnifierPieceDefended, options:{relativeValue:0.1}}
+            ]
+        case 2:
+            return [
+                {method:evaluationMagnifierMaxOptions,options:{posValue:0.1}},
+                {method:evaluationMagnifierPiece, options:{pieceValue:2 }},
+                {method:evaluationMagnifierPieceDefended, options:{relativeValue:0.1}},
+                {method:evaluationMagnifierPieceDefended, options:{relativeValue:0.1, pieceAttacked:true,pieceValue:1, onlyForMe:true}}
             ]
     }
 
-}
-
-function defaultCharacter(){
-    return [
-        {method:evaluationMagnifierMaxOptions,options:{posValue:0.1}},
-        {method:evaluationMagnifierPiece, options:{pieceValue:1 }}
-    ]
 }

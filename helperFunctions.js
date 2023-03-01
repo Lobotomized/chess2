@@ -94,6 +94,11 @@ function areYouChecked (state,enemyColor,me){
         const piece = state.pieces[i]
         let tempMoves = [];
         if (piece.conditionalMoves) {
+            if(typeof piece.conditionalMoves === 'string'){
+                let midObj = {conditionalMoves:piece.conditionalMoves}
+               piece.conditionalMoves = JSONfn.parse(JSONfn.stringify(midObj)).conditionalMoves;
+            }
+    
             tempMoves = piece.conditionalMoves(state);
         }
         for(let ii = [...piece.moves, ...tempMoves].length-1; ii>=0; ii--){
@@ -160,6 +165,17 @@ function isPositionAttacked(state,myColor,x,y){
         enemyColor = 'black'
     }
     if(areYouCheckedWithoutTempMoves(state,enemyColor,{x:x,y:y,color:myColor}, 'rokado')){
+        return true;
+    }
+    return false;
+}
+
+function isPositionAttackedWithTempMoves(state,myColor,x,y){
+    let enemyColor = 'white';
+    if(myColor == 'white'){
+        enemyColor = 'black'
+    }
+    if(areYouChecked(state,enemyColor,{x:x,y:y,color:myColor}, 'rokado')){
         return true;
     }
     return false;
@@ -654,9 +670,11 @@ function lightBoardFE(piece, state, flag,blockedFlag, minimal) {
             })
             if (square) {
                 const innerPiece = pieceFromSquare(square, state.pieces)
+
                 if (innerPiece) {
                     let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
                     let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
+
                     if ((checkForFriends || checkForEnemies) && !move.impotent) {
                         square[flag] = true;
                     }
@@ -681,7 +699,9 @@ function lightBoardFE(piece, state, flag,blockedFlag, minimal) {
                     missedSquareX:move.missedSquareX,
                     missedSquareY:move.missedSquareY,
                     minimal:minimal,
-                    operatedPiece:piece
+                    operatedPiece:piece,
+                    offsetX:offsetX,
+                    offsetY:offsetY
                 }
                 blockableSpecialFunction(properties);
             }
@@ -690,7 +710,7 @@ function lightBoardFE(piece, state, flag,blockedFlag, minimal) {
 }
 
 function blockableSpecialFunction(properties) {
-    let {state, powerX, powerY, x, y, move, limit, flag,secondFlag,operatedPiece} = properties;
+    let {state, powerX, powerY, x, y, move, limit, flag,secondFlag,operatedPiece,offsetX,offsetY} = properties;
     let missedSquareX = properties.missedSquareX;
     let missedSquareY = properties.missedSquareY;
     /*
@@ -768,7 +788,9 @@ function blockableSpecialFunction(properties) {
             missedSquareX:missedSquareX,
             missedSquareY:missedSquareY,
             minimal:properties.minimal,
-            operatedPiece:operatedPiece
+            operatedPiece:operatedPiece,
+            offsetX:offsetX,
+            offsetY:offsetY
         }
 
         blockableSpecialFunction(props)
@@ -777,12 +799,16 @@ function blockableSpecialFunction(properties) {
         square[flag] = true;
     }
     else if (piece && !move.impotent && !properties.minimal) {
-        let selectedPiece = pieceFromXY(x,y,state.pieces)
+        let selectedPiece = pieceFromXY(x-offsetX,y-offsetY,state.pieces)
+        // let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
+        // let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
         square[flag] = true;
 
+        
         if(selectedPiece){
             if(selectedPiece.color == piece.color){
                 if(secondFlag){
+
                     square[secondFlag] = true;
                 }
                 square[flag] = false;

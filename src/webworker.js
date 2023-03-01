@@ -53,9 +53,10 @@ function evaluateBoard(colorPerspective, pieces, state,magnifierMethods){
         const piece = pieces[counter]
         if(colorPerspective === piece.color){
             let magnifier = 0;
-
             magnifierMethods.forEach((magnifierObject) => {
-                if(!magnifierObject.onlyForMe){
+
+                if(!magnifierObject.onlyForEnemy){
+
                     magnifier += magnifierObject.method(piece,pieces,state,piece.color,magnifierObject.options);
                 }
             })
@@ -66,7 +67,7 @@ function evaluateBoard(colorPerspective, pieces, state,magnifierMethods){
             let magnifier = 0;
 
             magnifierMethods.forEach((magnifierObject) => {
-                if(!magnifierObject.onlyForEnemy){
+                if(!magnifierObject.onlyForMe){
                     magnifier += magnifierObject.method(piece,pieces,state,piece.color,magnifierObject.options);
                 }
             })
@@ -281,22 +282,16 @@ function evaluateBoardDve(colorPerspective, pieces, state){
             let thisValue = undefined;
             if(maximizer === 'white'){
                 thisValue = evaluateBoard(enemy,badMove.pieces, state,
-                    [
-                        {method:evaluationMagnifierMaxOptions,options:{posValue:0.1}}, 
-                        {method:evaluationMagnifierPiece, options:{pieceValue:1}},
-                        // {method:evaluationMagnifierPieceDefended, options:{relativeValue:0.3}},
-
-                        // {method:evaluationMagnifierKingTropism, options:{relativeValue:0.1,defendersSearch:true, onlyForMe:true, discriminates:true,pieceValue:0.5}},
-                    ])
+                    defensiveCharacter(2)
+                    )
             }
             else{
-                thisValue = evaluateBoard(enemy,badMove.pieces, state,[
-                    {method:evaluationMagnifierMaxOptions,options:{posValue:0.1, mask:positionMaskDefault}}, 
-                    {method:evaluationMagnifierPiece, options:{pieceValue:1}},
+                thisValue = evaluateBoard(enemy,badMove.pieces, state,
+                    defaultCharacter(2)
 
                     // {method:evaluationMagnifierKingTropism, options:{relativeValue:0.2,defendersSearch:true, onlyForMe:true}},
                     // {method:evaluationMagnifierKingTropism, options:{relativeValue:0.2,defendersSearch:true, onlyForMe:true}}
-                ]) 
+                ) 
             }
             if(thisValue > badMoveValue){
                 badMoveValue = thisValue;
@@ -333,6 +328,7 @@ function minimaxKing(state,maximizer, depth, removedTurns){
 
 self.addEventListener("message", function(e) {
     let obj = JSON.parse(e.data)
+    console.log('mesedj?')
     if(!obj.state.won){
         //generateMovesFromPieces(obj.state,'black')
             console.time('minimax')
