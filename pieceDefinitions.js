@@ -680,7 +680,9 @@ function kingFactory(color, x, y) {
         icon: color + 'King.png',
         vulnerable: true,
         moved: false,
-        moves: [ ],
+        moves: [ { type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
+                 { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },
+                 { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }],
         x: x,
         y: y,
         value:2000,
@@ -689,31 +691,31 @@ function kingFactory(color, x, y) {
 
         conditionalMoves: function(state){
             let toReturn = []
-            if(!isPositionAttacked(state,this.color,this.x,this.y+1)){
-                toReturn.push({ type: 'absolute', x: 0, y: 1 });
-            }
-            if(!isPositionAttacked(state,this.color,this.x+1,this.y)){
-                toReturn.push({ type: 'absolute', x: 1, y: 0 });
-            }
-            if(!isPositionAttacked(state,this.color,this.x+1,this.y+1)){
-                toReturn.push({ type: 'absolute', x: 1, y: 1 });
-            }
-            if(!isPositionAttacked(state,this.color,this.x-1,this.y-1)){
-                toReturn.push({ type: 'absolute', x: -1, y: -1 });
-            }
-            //
-            if(!isPositionAttacked(state,this.color,this.x,this.y-1)){
-                toReturn.push({ type: 'absolute', x: 0, y: -1 });
-            }
-            if(!isPositionAttacked(state,this.color,this.x-1,this.y)){
-                toReturn.push({ type: 'absolute', x: -1, y: 0 });
-            }
-            if(!isPositionAttacked(state,this.color,this.x-1,this.y+1)){
-                toReturn.push({ type: 'absolute', x: -1, y: 1 });
-            }
-            if(!isPositionAttacked(state,this.color,this.x+1,this.y-1)){
-                toReturn.push({ type: 'absolute', x: 1, y: -1 });
-            }
+            // if(!isPositionAttacked(state,this.color,this.x,this.y+1)){
+            //     toReturn.push({ type: 'absolute', x: 0, y: 1 });
+            // }
+            // if(!isPositionAttacked(state,this.color,this.x+1,this.y)){
+            //     toReturn.push({ type: 'absolute', x: 1, y: 0 });
+            // }
+            // if(!isPositionAttacked(state,this.color,this.x+1,this.y+1)){
+            //     toReturn.push({ type: 'absolute', x: 1, y: 1 });
+            // }
+            // if(!isPositionAttacked(state,this.color,this.x-1,this.y-1)){
+            //     toReturn.push({ type: 'absolute', x: -1, y: -1 });
+            // }
+            // //
+            // if(!isPositionAttacked(state,this.color,this.x,this.y-1)){
+            //     toReturn.push({ type: 'absolute', x: 0, y: -1 });
+            // }
+            // if(!isPositionAttacked(state,this.color,this.x-1,this.y)){
+            //     toReturn.push({ type: 'absolute', x: -1, y: 0 });
+            // }
+            // if(!isPositionAttacked(state,this.color,this.x-1,this.y+1)){
+            //     toReturn.push({ type: 'absolute', x: -1, y: 1 });
+            // }
+            // if(!isPositionAttacked(state,this.color,this.x+1,this.y-1)){
+            //     toReturn.push({ type: 'absolute', x: 1, y: -1 });
+            // }
             if(!this.moved){
                 const availableRooks = state.pieces.filter((piece) => {
                     let enemyColor = 'black'

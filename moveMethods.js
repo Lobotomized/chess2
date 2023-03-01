@@ -79,6 +79,7 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
     const friendlyPiece = state.pieces.find((ePiece) => {
         return ePiece.x === x && ePiece.y === y && ePiece.color == operatedPiece.color
     })
+
     const friendlyPieceOldX = friendlyPiece && friendlyPiece.x;
     const friendlyPieceOldY = friendlyPiece && friendlyPiece.y;
     const oldX = operatedPiece.x;
@@ -110,6 +111,10 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
     }
     if(!continueTurn){
         state = oldState;
+        if(friendlyPiece){
+            friendlyPiece.x = friendlyPieceOldX;
+            friendlyPiece.y = friendlyPieceOldY;
+        }
         operatedPiece.x = oldX;
         operatedPiece.y = oldY;
         return false;
