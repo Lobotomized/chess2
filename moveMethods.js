@@ -60,6 +60,7 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
     const x = playerMove.x;
     const y = playerMove.y;
     const operatedPiece = selectedForced ? selectedForced : state.pieceSelected
+    
     const square = state.board.find((sq) => {
         return sq.x === x && sq.y === y;
     })

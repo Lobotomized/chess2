@@ -121,10 +121,8 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     }
     else if(raceBlack == 'test'){
         pieces.push(
-                electricCatFactory('white', 0, 2),
-                fatCatFactory('white',6,7),
-                blindCatFactory('white',5,7),
-                cuteCatFactory('white',4,4)
+                pawnFactory('white',6,7),
+
         )
     }
 
@@ -178,7 +176,8 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     }
     else if(raceWhite == 'test'){
         pieces.push(
-            electricCatFactory('black', 0, 4),scaryCatFactory('black', 0, 6),longCatFactory('black', 2, 6),
+            electricCatFactory('black', 0, 4),
+            scaryCatFactory('black', 0, 6),longCatFactory('black', 2, 6),
              )
     }
 

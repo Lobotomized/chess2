@@ -125,6 +125,7 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
     const theColor = color? color : AIProps.color;
     const state = hotseatGame.state;
     const myPieces = getColorPieces(AIProps.hotseatGame.state.pieces,theColor);
+    // console.log(myPieces, color, pieceIndex)
     selectPiece({x:myPieces[pieceIndex].x, y:myPieces[pieceIndex].y},state)
 
     const selectedPiece = state.pieceSelected;
@@ -307,7 +308,6 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
 
                 w.onmessage = function(event){
                     let move = JSONfn.parse(event.data)
-
                     AIMove(move.pieceCounter, move.xClicked, move.yClicked, AIColor)
                     if(state.turn === AIColor){
                         let removedTurns = [{...move}]
@@ -323,6 +323,8 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
                 w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:AIPower}));
                 w.onmessage = function(event){
                     let move = JSONfn.parse(event.data)
+                    console.log(move, 'det idva?!')
+
                     AIMove(move.pieceCounter, move.xClicked, move.yClicked, state.turn)
                     w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:AIPower}));
                 }
