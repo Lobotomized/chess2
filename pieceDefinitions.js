@@ -2113,10 +2113,10 @@ function cuteCatFactory(color, x, y) {
 
         afterEnemyPieceTaken:function(enemyPiece,state){
             this.moves = enemyPiece.moves;
-            // let iconCode = enemyPiece.icon.replace('black', '');
-            // iconCode = iconCode.replace('white', "");
+            let iconCode = enemyPiece.icon.replace('black', '');
+            iconCode = iconCode.replace('white', "");
 
-            // this.icon = this.color + iconCode;
+            this.icon = this.color + iconCode;
             this.value = enemyPiece.value;
             this.posValue = enemyPiece.posValue;
         }
