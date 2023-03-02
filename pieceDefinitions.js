@@ -22,13 +22,15 @@ catch(err){
         }
     }
 
-    function conditionalSpliceWithBonus(state,index){
+    function conditionalSpliceWithBonus(state,index,color){
 
         if(index> -1){
             if(state.pieces[index].afterThisPieceTaken){
                 state.pieces[index].afterThisPieceTaken(state);
             }
-            state.pieces.splice(index,1)
+            if(state.pieces[index].color != color || !color){
+                state.pieces.splice(index,1)
+            }
         }
     }
 
@@ -1932,8 +1934,18 @@ function electricCatFactory(color, x, y) {
                     toReturn.push({ type: 'blockable',limit:5, repeat:true, y: -1, x: 0 })
                 }
             }
-            
 
+            if(pieceAroundMe(state,this,'FatCat.png')){
+                if (this.color == 'black') {
+                    toReturn.push({ type: 'blockable',limit:3, repeat:true, y: 1, x: -1 })
+                    toReturn.push({ type: 'blockable',limit:3, repeat:true, y: 1, x: 1 })
+                }
+                else{
+                    toReturn.push({ type: 'blockable',limit:3, repeat:true, y: -1, x: -1 })
+                    toReturn.push({ type: 'blockable',limit:3, repeat:true, y: -1, x: 1 })
+                }
+            }  
+            
             return toReturn
         },
 
@@ -1944,11 +1956,11 @@ function electricCatFactory(color, x, y) {
             return true;
         }
         ,
-        afterThisPieceTaken:function(state){
-            if(pieceAroundMe(state,this,'FatCat.png')){
-                return true;
-            }                
-        }
+        // afterThisPieceTaken:function(state){
+        //     if(pieceAroundMe(state,this,'FatCat.png')){
+        //         return true;
+        //     }                
+        // }
     }
 }
 
@@ -1981,19 +1993,40 @@ function longCatFactory(color, x, y) {
             { type: 'blockable', repeat: true, x: -1, y: 0, limit:3 ,friendlyPieces:true }, { type: 'blockable', repeat: true, x: 1, y: 0, limit:3 ,friendlyPieces:true },
             { type: 'blockable', repeat: true, x: 0, y: -1 , limit:3 ,friendlyPieces:true}, { type: 'blockable', repeat: true, x: 0, y: 1 , limit:3 ,friendlyPieces:true},
         ],
+        conditionalMoves:function(state){
+            let toReturn = [];
+
+            if(pieceAroundMe(state,this,'ScaryCat.png')){
+                toReturn.push(
+                    { type: 'blockable', repeat: true, x: -1, y: 0, limit:5 }, { type: 'blockable', repeat: true, x: 1, y: 0, limit:5 },
+                    { type: 'blockable', repeat: true, x: 0, y: -1 , limit:5}, { type: 'blockable', repeat: true, x: 0, y: 1 , limit:5},
+                    { type: 'blockable', repeat: true, x: -1, y: 0, limit:5 ,friendlyPieces:true }, { type: 'blockable', repeat: true, x: 1, y: 0, limit:5 ,friendlyPieces:true },
+                    { type: 'blockable', repeat: true, x: 0, y: -1 , limit:5 ,friendlyPieces:true}, { type: 'blockable', repeat: true, x: 0, y: 1 , limit:5 ,friendlyPieces:true},
+                )
+            }
+
+            
+            if(pieceAroundMe(state,this,'FatCat.png')){
+                toReturn.push({ type: 'blockable', repeat: true, x: -1, y: -1 , limit:3}, { type: 'blockable', repeat: true, x: 1, y: 1 , limit:3},
+                { type: 'blockable', repeat: true, x: -1, y: 1, limit:3 }, { type: 'blockable', repeat: true, x: 1, y: -1 , limit:3})
+            }  
+            
+
+            return toReturn
+        },
         friendlyPieceInteraction:function(state,friendlyPiece,prevMove){
             if(friendlyPiece && friendlyPiece.icon.includes("ElectricCat.png"))
             { 
                 conditionalSpliceWithBonus(state,state.pieces.indexOf(friendlyPiece))
-                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x,this.y+1))  
-                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x,this.y-1))  
-                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x+1,this.y))  
-                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x-1,this.y))  
-                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x,this.y+1))  
-                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x+1,this.y+1))  
-                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x-1,this.y+1))  
-                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x+1,this.y-1))  
-                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x-1,this.y-1))
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x,this.y+1),this.color)  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x,this.y-1),this.color)  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x+1,this.y),this.color)  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x-1,this.y),this.color)  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x,this.y+1),this.color)  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x+1,this.y+1),this.color)  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x-1,this.y+1),this.color)  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x+1,this.y-1),this.color)  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x-1,this.y-1),this.color)
 
             }
             else if(friendlyPiece){
