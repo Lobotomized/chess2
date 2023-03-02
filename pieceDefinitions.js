@@ -1909,10 +1909,10 @@ function juggernautFactory(color,x,y){
 
 function electricCatFactory(color, x, y) {
 
-    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }]
+    let moves = [{ type: 'absolute',  y: -1, x: 0 }]
 
     if (color == 'black') {
-        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }];
+        moves = [{ type: 'absolute', y: 1, x: 0 }];
     }
     return {
         icon: color + 'ElectricCat.png',

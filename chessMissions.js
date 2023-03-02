@@ -9,7 +9,7 @@ const io = require('socket.io')(http);
 const newG = require('./globby').newIOServerV2;
 const {miniChess, randomChess,  catchTheDragon, mongolianChess, classicChess, raceChess, raceChoiceChess} = require('./boardGeneration.js')
 const { selectPiece, playerMove, checkTurn, changeTurn, closeLights } = require('./moveMethods.js')
-const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFactory} = require('./pieceDefinitions.js')
+const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFactory,blindCatFactory} = require('./pieceDefinitions.js')
 const {lightBoardFE} = require('./helperFunctions.js');
 app.use('/static', express.static('public'))
 app.use('/src', express.static('src'))
@@ -59,6 +59,9 @@ let lobby = newG({properties:{
                     else if(move.x === 1 && move.y ==5){
                         state.whiteRace = 'cyborgs'
                     }
+                    else if(move.x === 1 && move.y ==6){
+                        state.whiteRace = 'cat'
+                    }
                 }
                 else if(player.ref == state.black){
                     if(move.x  == 1 && move.y == 1){
@@ -75,6 +78,9 @@ let lobby = newG({properties:{
                     }
                     else if(move.x === 1 && move.y ==5){
                         state.blackRace = 'cyborgs'
+                    }
+                    else if(move.x === 1 && move.y ==6){
+                        state.blackRace = 'cat'
                     }
                 }
 
@@ -282,7 +288,7 @@ let lobby = newG({properties:{
                             state.board.push({ light: false, x: x, y: y })
                     }
                 }
-                state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4), empoweredCrystalFactory('white',1,5))
+                state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4), empoweredCrystalFactory('white',1,5),blindCatFactory('white',1,6))
                 state.gameType = 'raceChoiceChess'
                 state.turn = 'menu'
             }
