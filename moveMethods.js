@@ -97,17 +97,15 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
                 continueTurn = false;
             }
         }
-
-        if(state.pieces[i].friendlyPieceInteraction){
-            if(state.pieces[i].friendlyPieceInteraction(state, friendlyPiece, {x:oldX, y:oldY})){
-                if(friendlyPiece){
-                    friendlyPiece.x = friendlyPieceOldX;
-                    friendlyPiece.y = friendlyPieceOldY;
-                }
-                continueTurn = false;
-            }    
-        }
-
+    }
+    if(operatedPiece.friendlyPieceInteraction){
+        if(operatedPiece.friendlyPieceInteraction(state, friendlyPiece, {x:oldX, y:oldY})){
+            if(friendlyPiece){
+                friendlyPiece.x = friendlyPieceOldX;
+                friendlyPiece.y = friendlyPieceOldY;
+            }
+            continueTurn = false;
+        }    
     }
     if(!continueTurn){
         state = oldState;
@@ -122,7 +120,11 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
     else{
         if (enemyPiece) {
             if (enemyPiece.afterThisPieceTaken) {
-                enemyPiece.afterThisPieceTaken(state)
+                if(enemyPiece.afterThisPieceTaken(state)){
+                    operatedPiece.x = oldX;
+                    operatedPiece.y = oldY;
+                    return false;
+                }
             }
             if (operatedPiece.afterEnemyPieceTaken) {
                 operatedPiece.afterEnemyPieceTaken(enemyPiece, state);

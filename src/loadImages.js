@@ -235,6 +235,45 @@ const wJuggernaut = new Image();
 wJuggernaut.src = '/static/whiteJuggernaut.png'
 
 
+
+
+const bBlindCat = new Image();
+bBlindCat.src = '/static/blackBlindCat.png'
+
+const wBlindCat = new Image();
+wBlindCat.src = '/static/whiteBlindCat.png'
+
+const bCuteCat = new Image();
+bCuteCat.src = '/static/blackCuteCat.png'
+
+const wCuteCat = new Image();
+wCuteCat.src = '/static/whiteCuteCat.png'
+
+const bElectricCat = new Image();
+bElectricCat.src = '/static/blackElectricCat.png'
+
+const wElectricCat = new Image();
+wElectricCat.src = '/static/whiteElectricCat.png'
+
+
+const bFatCat = new Image();
+bFatCat.src = '/static/blackFatCat.png'
+
+const wFatCat = new Image();
+wFatCat.src = '/static/whiteFatCat.png'
+
+const bLongCat = new Image();
+bLongCat.src = '/static/blackLongCat.png'
+
+const wLongCat = new Image();
+wLongCat.src = '/static/whiteLongCat.png'
+
+const bScaryCat = new Image();
+bScaryCat.src = '/static/blackScaryCat.png'
+
+const wScaryCat = new Image();
+wScaryCat.src = '/static/whiteScaryCat.png'
+
 function drawPiece(x, y, img, size) {
     if(size == undefined){
         size = 50
@@ -485,5 +524,49 @@ function drawPiece(x, y, img, size) {
         case 'whiteExecutor.png':
             ctx.drawImage(wExecutor, -100, -100, 600, 600, x * size, y * size, size, size);
         break;
+
+
+    
+    case 'blackBlindCat.png':
+        ctx.drawImage(bBlindCat, -40, -40, 1200, 1200, x * size, y * size, size, size);
+    break;
+    case 'whiteBlindCat.png':
+        ctx.drawImage(wBlindCat, -40, -40, 1200, 1200, x * size, y * size, size, size);
+    break;
+
+    case 'blackCuteCat.png':
+        ctx.drawImage(bCuteCat, 0, 80, 1400, 1400, x * size, y * size, size, size);
+    break;
+    case 'whiteCuteCat.png':
+        ctx.drawImage(wCuteCat, 0, 80, 1400, 1400, x * size, y * size, size, size);
+    break;
+
+    case 'blackElectricCat.png':
+        ctx.drawImage(bElectricCat,-100, -100, 1350, 1350, x * size, y * size, size, size);
+    break;
+    case 'whiteElectricCat.png':
+        ctx.drawImage(wElectricCat, -100, -100, 1350, 1350, x * size, y * size, size, size);
+    break;
+
+    case 'blackFatCat.png':
+        ctx.drawImage(bFatCat,0, 0, 1600, 1600, x * size, y * size, size, size);
+    break;
+    case 'whiteFatCat.png':
+        ctx.drawImage(wFatCat, 0, 0, 1600, 1600, x * size, y * size, size, size);
+    break;
+
+    case 'blackLongCat.png':
+        ctx.drawImage(bLongCat,-300, 0, 1250, 1250, x * size, y * size, size, size);
+    break;
+    case 'whiteLongCat.png':
+        ctx.drawImage(wLongCat, -300, 0, 1250, 1250, x * size, y * size, size, size);
+    break;
+
+    case 'blackScaryCat.png':
+        ctx.drawImage(bScaryCat,-100, -100, 1500, 1500, x * size, y * size, size, size);
+    break;
+    case 'whiteScaryCat.png':
+        ctx.drawImage(wScaryCat, -100, -100, 1500, 1500, x * size, y * size, size, size);
+    break;
     }
 }

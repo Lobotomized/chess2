@@ -16,6 +16,35 @@ catch(err){
        })
     }
 
+    function conditionalSplice(array,index){
+        if(index> -1){
+            array.splice(index,1)
+        }
+    }
+
+    function conditionalSpliceWithBonus(state,index){
+
+        if(index> -1){
+            if(state.pieces[index].afterThisPieceTaken){
+                state.pieces[index].afterThisPieceTaken(state);
+            }
+            state.pieces.splice(index,1)
+        }
+    }
+
+    function pieceAroundMe(state,aroundWhat,pieceTypeIcon){
+        let gore =  state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y+1)]?.icon?.includes(pieceTypeIcon) && aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y+1)]?.color;
+        let dolu = state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y-1)]?.icon?.includes(pieceTypeIcon) && aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y-1)]?.color;
+        let lqvo = state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y)]?.color;
+        let dqsno = state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y)]?.icon?.includes(pieceTypeIcon) && aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y)]?.color;;
+        let lqvoGore = state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y+1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y+1)]?.color;;
+        let dqsnoGore = state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y+1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y+1)]?.color;
+        let lqvoDolu = state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y-1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y-1)]?.color;;
+        let dqsnoDolu = state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y-1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y-1)]?.color;;
+        
+        return gore || dolu || lqvo || dqsno || lqvoGore || dqsnoGore || lqvoDolu || dqsnoDolu;
+    }
+
     
 
     function cyborgTeleport(state,me,toReturn){
@@ -1875,6 +1904,196 @@ function juggernautFactory(color,x,y){
     }
 }
 
+
+function electricCatFactory(color, x, y) {
+
+    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }]
+
+    if (color == 'black') {
+        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }];
+    }
+    return {
+        icon: color + 'ElectricCat.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:0.5,
+        posValue:1,
+        conditionalMoves:function(state){
+            let toReturn = [];
+
+            if(pieceAroundMe(state,this,'ScaryCat.png')){
+                
+                if (this.color == 'black') {
+                    toReturn.push({ type: 'blockable',limit:5, repeat:true, y: 1, x: 0 })
+                }
+                else{
+                    toReturn.push({ type: 'blockable',limit:5, repeat:true, y: -1, x: 0 })
+                }
+            }
+            
+
+            return toReturn
+        },
+
+        afterPieceMove:function(state, move, prevMove){
+            if(prevMove.y - move.y > 1 || move.y-prevMove.y > 1){
+                state.pieces.splice(state.pieces.indexOf(this),1);
+            }
+            return true;
+        }
+        ,
+        afterThisPieceTaken:function(state){
+            if(pieceAroundMe(state,this,'FatCat.png')){
+                return true;
+            }                
+        }
+    }
+}
+
+function scaryCatFactory(color, x, y) {
+
+    return {
+        icon: color + 'ScaryCat.png',
+        moves: [{ type: 'blockable', repeat: true, x: 0, y: -1, limit:2 }, { type: 'blockable', repeat: true, x: 0, y: 1, limit:2 },
+        { type: 'blockable', repeat: true, x: -1, y: 0, limit:2 }, { type: 'blockable', repeat: true, x: 1, y: 0, limit:2 },
+        { type: 'blockable', repeat: true, x: -1, y: -1 , limit:2}, { type: 'blockable', repeat: true, x: 1, y: 1, limit:2 },
+        { type: 'blockable', repeat: true, x: -1, y: 1 , limit:2}, { type: 'blockable', repeat: true, x: 1, y: -1, limit:2 }],
+        x: x,
+        y: y,
+        color: color,
+        value:6,
+        posValue:1
+    }
+}
+
+
+
+
+function longCatFactory(color, x, y) {
+
+    return {
+        icon: color + 'LongCat.png',
+        moves: [
+            { type: 'blockable', repeat: true, x: -1, y: 0, limit:3 }, { type: 'blockable', repeat: true, x: 1, y: 0, limit:3 },
+            { type: 'blockable', repeat: true, x: 0, y: -1 , limit:3}, { type: 'blockable', repeat: true, x: 0, y: 1 , limit:3},
+            { type: 'blockable', repeat: true, x: -1, y: 0, limit:3 ,friendlyPieces:true }, { type: 'blockable', repeat: true, x: 1, y: 0, limit:3 ,friendlyPieces:true },
+            { type: 'blockable', repeat: true, x: 0, y: -1 , limit:3 ,friendlyPieces:true}, { type: 'blockable', repeat: true, x: 0, y: 1 , limit:3 ,friendlyPieces:true},
+        ],
+        friendlyPieceInteraction:function(state,friendlyPiece,prevMove){
+            if(friendlyPiece && friendlyPiece.icon.includes("ElectricCat.png"))
+            { 
+                conditionalSpliceWithBonus(state,state.pieces.indexOf(friendlyPiece))
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x,this.y+1))  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x,this.y-1))  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x+1,this.y))  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x-1,this.y))  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x,this.y+1))  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x+1,this.y+1))  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x-1,this.y+1))  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x+1,this.y-1))  
+                conditionalSpliceWithBonus(state,findPieceByXY(state.pieces,this.x-1,this.y-1))
+
+            }
+            else if(friendlyPiece){
+                return true;
+            }
+
+        },
+        
+        afterThisPieceTaken:function(state){
+            if(pieceAroundMe(state,this,'FatCat.png')){
+                return true;
+            }                
+        },
+        x: x,
+        y: y,
+        color: color,
+        value:4,
+        posValue:1
+    }
+}
+
+
+function fatCatFactory(color, x, y) {
+    return {
+        icon: color + 'FatCat.png',
+        moves: [{ type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
+        { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 }],
+        x: x,
+        y: y,
+
+        color: color,
+        value:6,
+        posValue:1
+    }
+}
+
+
+function blindCatFactory(color, x, y) {
+
+
+    return {
+        icon: color + 'BlindCat.png',
+        moves: [{
+            type:'allMine'
+        }],
+        x: x,
+        y: y,
+        color: color,
+        value:2000,
+        posValue:0.0001,
+        friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
+            if(friendlyPiece)
+            {
+                if(friendlyPiece == state.pieceSelected){
+                    return true;
+                }
+                conditionalSplice(state.pieces,state.pieces.indexOf(friendlyPiece))
+            }
+        },
+        afterThisPieceTaken: function (state) {
+            if (this.color == 'white') {
+                state.won = 'black';
+            }
+            else if (this.color == 'black') {
+                state.won = 'white';
+            }
+        }
+    }
+}
+
+
+
+
+function cuteCatFactory(color, x, y) {
+
+    return {
+        icon: color + 'CuteCat.png',
+        moves: [
+            { type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
+            { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
+            { type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
+            { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 }
+        ],
+        x: x,
+        y: y,
+        color: color,
+        value:6,
+        posValue:1,
+
+        afterEnemyPieceTaken:function(enemyPiece,state){
+            this.moves = enemyPiece.moves;
+            let iconCode = enemyPiece.icon.replace('black', '');
+            iconCode = iconCode.replace('white', "");
+
+            this.icon = this.color + iconCode;
+            this.value = enemyPiece.value;
+            this.posValue = enemyPiece.posValue;
+        }
+    }
+}
 try{
     module.exports = {
         queenBugFactory:queenBugFactory,
@@ -1914,7 +2133,15 @@ try{
         empoweredCrystalFactory:empoweredCrystalFactory,
         executorFactory:executorFactory,
         juggernautFactory:juggernautFactory,
-        bootVesselFactory:bootVesselFactory
+        bootVesselFactory:bootVesselFactory,
+
+        electricCatFactory:electricCatFactory,
+        longCatFactory:longCatFactory,
+        scaryCatFactory:scaryCatFactory,
+        blindCatFactory:blindCatFactory,
+        fatCatFactory:fatCatFactory,
+        cuteCatFactory:cuteCatFactory
+        
     }
 }
 catch(err){

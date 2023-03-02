@@ -6,7 +6,12 @@ try{
     
         swordsMen, pikeman, sleepingDragon,kolba,fencer, shield, plagueDoctor, northernKing,
     
-        cyborgFactory, executorFactory,crystalFactory,empoweredCrystalFactory,juggernautFactory,bootVesselFactory
+        cyborgFactory, executorFactory,crystalFactory,empoweredCrystalFactory,juggernautFactory,bootVesselFactory, electricCatFactory, scaryCatFactory, longCatFactory,
+        fatCatFactory,
+        blindCatFactory,
+        cuteCatFactory
+
+        
     
     } = require('./pieceDefinitions')
 }
@@ -105,10 +110,21 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
             juggernautFactory('black',0,0),crystalFactory('black',1,0),  executorFactory('black',2,0), bootVesselFactory('black',3,0),   bootVesselFactory('black',4,0),executorFactory('black', 5,0), empoweredCrystalFactory('black',6,0),juggernautFactory('black',7,0),
             )
     }
+    else if(raceBlack==='cat'){
+        pieces.push(
+            electricCatFactory('black', 0, 1),electricCatFactory('black', 1, 1),electricCatFactory('black', 2, 1),electricCatFactory('black', 3, 1),
+            electricCatFactory('black', 4, 1),electricCatFactory('black', 5, 1),electricCatFactory('black', 6, 1),electricCatFactory('black', 7, 1),
+
+            scaryCatFactory('black', 0, 0),fatCatFactory('black', 1, 0),longCatFactory('black', 2, 0),cuteCatFactory('black', 3, 0),
+            blindCatFactory('black', 4, 0),longCatFactory('black', 5, 0),fatCatFactory('black', 6, 0),scaryCatFactory('black', 7, 0),
+             )
+    }
     else if(raceBlack == 'test'){
         pieces.push(
-                kingFactory('white', 0, 2),
-                rookFactory('white',6,7),
+                electricCatFactory('white', 0, 2),
+                fatCatFactory('white',6,7),
+                blindCatFactory('white',5,7),
+                cuteCatFactory('white',4,4)
         )
     }
 
@@ -151,9 +167,18 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
             juggernautFactory('white',0,7),crystalFactory('white',1,7),  executorFactory('white',2,7), bootVesselFactory('white',3,7),   bootVesselFactory('white',4,7),executorFactory('white', 5,7), empoweredCrystalFactory('white',6,7),juggernautFactory('white',7,7),
             )
     }
+    else if(raceBlack == 'cat'){
+        pieces.push(
+            electricCatFactory('white', 0, 6),electricCatFactory('white', 1, 6),electricCatFactory('white', 2, 6),electricCatFactory('white', 3, 6),
+            electricCatFactory('white', 4, 6),electricCatFactory('white', 5, 6),electricCatFactory('white', 6, 6),electricCatFactory('white', 7, 6),
+
+            scaryCatFactory('white', 0, 7),fatCatFactory('white', 1, 7),longCatFactory('white', 2, 7),cuteCatFactory('white', 3, 7),
+            blindCatFactory('white', 4, 7),longCatFactory('white', 5, 7),fatCatFactory('white', 6, 7),scaryCatFactory('white', 7, 7),
+             )
+    }
     else if(raceBlack == 'test'){
         pieces.push(
-                kingFactory('black', 0, 6)
+            electricCatFactory('black', 0, 4),scaryCatFactory('black', 0, 6),longCatFactory('black', 2, 6),
              )
     }
 

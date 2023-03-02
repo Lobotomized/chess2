@@ -806,7 +806,7 @@ function blockableSpecialFunction(properties) {
 
         
         if(selectedPiece){
-            if(selectedPiece.color == piece.color){
+            if(selectedPiece.color == piece.color && !move.friendlyPieces || selectedPiece.color != piece.color && move.friendlyPieces){
                 if(secondFlag){
 
                     square[secondFlag] = true;
