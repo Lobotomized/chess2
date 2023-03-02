@@ -167,7 +167,7 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
             juggernautFactory('white',0,7),crystalFactory('white',1,7),  executorFactory('white',2,7), bootVesselFactory('white',3,7),   bootVesselFactory('white',4,7),executorFactory('white', 5,7), empoweredCrystalFactory('white',6,7),juggernautFactory('white',7,7),
             )
     }
-    else if(raceBlack == 'cat'){
+    else if(raceWhite == 'cat'){
         pieces.push(
             electricCatFactory('white', 0, 5),electricCatFactory('white', 1, 6),electricCatFactory('white', 2, 5),electricCatFactory('white', 3, 6),
             electricCatFactory('white', 4, 6),electricCatFactory('white', 5, 5),electricCatFactory('white', 6, 6),electricCatFactory('white', 7, 5),
@@ -176,7 +176,7 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
             blindCatFactory('white', 4, 7),longCatFactory('white', 5, 7),scaryCatFactory('white', 6, 7),fatCatFactory('white', 7, 7),
              )
     }
-    else if(raceBlack == 'test'){
+    else if(raceWhite == 'test'){
         pieces.push(
             electricCatFactory('black', 0, 4),scaryCatFactory('black', 0, 6),longCatFactory('black', 2, 6),
              )

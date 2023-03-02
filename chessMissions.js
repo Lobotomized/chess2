@@ -159,6 +159,10 @@ let lobby = newG({properties:{
                     search.x = 1;
                     search.y = 5;
                 }
+                else if(copyState.blackRace == 'cat'){
+                    search.x = 1;
+                    search.y = 6;
+                }
             }
             else{
                 if(copyState.whiteRace == 'medieval'){
@@ -180,6 +184,10 @@ let lobby = newG({properties:{
                 else if(copyState.whiteRace == 'cyborgs'){
                     search.x = 1;
                     search.y = 5;
+                }
+                else if(copyState.whiteRace == 'cat'){
+                    search.x = 1;
+                    search.y = 6;
                 }
             }
 

@@ -802,17 +802,16 @@ function blockableSpecialFunction(properties) {
         let selectedPiece = pieceFromXY(x-offsetX,y-offsetY,state.pieces)
         // let checkForEnemies = innerPiece.color != piece.color && !move.friendlyPieces;
         // let checkForFriends = innerPiece.color === piece.color && move.friendlyPieces;
-        square[flag] = true;
+        // square[flag] = true;
 
         
         if(selectedPiece){
-            if(selectedPiece.color == piece.color && !move.friendlyPieces || selectedPiece.color != piece.color && move.friendlyPieces){
+            if(!(selectedPiece.color == piece.color && !move.friendlyPieces || selectedPiece.color != piece.color && move.friendlyPieces) ){
                 if(secondFlag){
 
                     square[secondFlag] = true;
                 }
-                //square[flag] = false;
-
+                square[flag] = true;
             }
         }
         if(secondFlag){
