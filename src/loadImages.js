@@ -528,10 +528,10 @@ function drawPiece(x, y, img, size) {
 
     
     case 'blackBlindCat.png':
-        ctx.drawImage(bBlindCat, -40, -40, 1200, 1200, x * size, y * size, size, size);
+        ctx.drawImage(bBlindCat, 0, 0, 1500, 1500, x * size, y * size, size, size);
     break;
     case 'whiteBlindCat.png':
-        ctx.drawImage(wBlindCat, -40, -40, 1200, 1200, x * size, y * size, size, size);
+        ctx.drawImage(wBlindCat, 0, 0, 1500, 1500, x * size, y * size, size, size);
     break;
 
     case 'blackCuteCat.png':
