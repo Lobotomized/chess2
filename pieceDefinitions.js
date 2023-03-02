@@ -1928,10 +1928,10 @@ function electricCatFactory(color, x, y) {
             if(pieceAroundMe(state,this,'ScaryCat.png')){
                 
                 if (this.color == 'black') {
-                    toReturn.push({ type: 'blockable',limit:5, repeat:true, y: 1, x: 0 })
+                    toReturn.push({ type: 'blockable',limit:4, repeat:true, y: 1, x: 0 })
                 }
                 else{
-                    toReturn.push({ type: 'blockable',limit:5, repeat:true, y: -1, x: 0 })
+                    toReturn.push({ type: 'blockable',limit:4, repeat:true, y: -1, x: 0 })
                 }
             }
 
@@ -1983,10 +1983,10 @@ function scaryCatFactory(color, x, y) {
 
 
 
-function longCatFactory(color, x, y) {
+function fatCatFactory(color, x, y) {
 
     return {
-        icon: color + 'LongCat.png',
+        icon: color + 'FatCat.png',
         moves: [
             { type: 'blockable', repeat: true, x: -1, y: 0, limit:3 }, { type: 'blockable', repeat: true, x: 1, y: 0, limit:3 },
             { type: 'blockable', repeat: true, x: 0, y: -1 , limit:3}, { type: 'blockable', repeat: true, x: 0, y: 1 , limit:3},
@@ -1998,10 +1998,10 @@ function longCatFactory(color, x, y) {
 
             if(pieceAroundMe(state,this,'ScaryCat.png')){
                 toReturn.push(
-                    { type: 'blockable', repeat: true, x: -1, y: 0, limit:5 }, { type: 'blockable', repeat: true, x: 1, y: 0, limit:5 },
-                    { type: 'blockable', repeat: true, x: 0, y: -1 , limit:5}, { type: 'blockable', repeat: true, x: 0, y: 1 , limit:5},
-                    { type: 'blockable', repeat: true, x: -1, y: 0, limit:5 ,friendlyPieces:true }, { type: 'blockable', repeat: true, x: 1, y: 0, limit:5 ,friendlyPieces:true },
-                    { type: 'blockable', repeat: true, x: 0, y: -1 , limit:5 ,friendlyPieces:true}, { type: 'blockable', repeat: true, x: 0, y: 1 , limit:5 ,friendlyPieces:true},
+                    { type: 'blockable', repeat: true, x: -1, y: 0, limit:4 }, { type: 'blockable', repeat: true, x: 1, y: 0, limit:4 },
+                    { type: 'blockable', repeat: true, x: 0, y: -1 , limit:4}, { type: 'blockable', repeat: true, x: 0, y: 1 , limit:4},
+                    { type: 'blockable', repeat: true, x: -1, y: 0, limit:4 ,friendlyPieces:true }, { type: 'blockable', repeat: true, x: 1, y: 0, limit:4 ,friendlyPieces:true },
+                    { type: 'blockable', repeat: true, x: 0, y: -1 , limit:4 ,friendlyPieces:true}, { type: 'blockable', repeat: true, x: 0, y: 1 , limit:4 ,friendlyPieces:true},
                 )
             }
 
@@ -2049,9 +2049,9 @@ function longCatFactory(color, x, y) {
 }
 
 
-function fatCatFactory(color, x, y) {
+function longCatFactory(color, x, y) {
     return {
-        icon: color + 'FatCat.png',
+        icon: color + 'LongCat.png',
         moves: [{ type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
         { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 }],
         x: x,
@@ -2118,10 +2118,10 @@ function cuteCatFactory(color, x, y) {
 
         afterEnemyPieceTaken:function(enemyPiece,state){
             this.moves = enemyPiece.moves;
-            let iconCode = enemyPiece.icon.replace('black', '');
-            iconCode = iconCode.replace('white', "");
+            // let iconCode = enemyPiece.icon.replace('black', '');
+            // iconCode = iconCode.replace('white', "");
 
-            this.icon = this.color + iconCode;
+            // this.icon = this.color + iconCode;
             this.value = enemyPiece.value;
             this.posValue = enemyPiece.posValue;
         }
