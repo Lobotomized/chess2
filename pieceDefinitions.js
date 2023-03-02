@@ -1935,7 +1935,7 @@ function electricCatFactory(color, x, y) {
                 }
             }
 
-            if(pieceAroundMe(state,this,'FatCat.png')){
+            if(pieceAroundMe(state,this,'LongCat.png')){
                 if (this.color == 'black') {
                     toReturn.push({ type: 'blockable',limit:3, repeat:true, y: 1, x: -1 })
                     toReturn.push({ type: 'blockable',limit:3, repeat:true, y: 1, x: 1 })
@@ -2006,7 +2006,7 @@ function fatCatFactory(color, x, y) {
             }
 
             
-            if(pieceAroundMe(state,this,'FatCat.png')){
+            if(pieceAroundMe(state,this,'LongCat.png')){
                 toReturn.push({ type: 'blockable', repeat: true, x: -1, y: -1 , limit:3}, { type: 'blockable', repeat: true, x: 1, y: 1 , limit:3},
                 { type: 'blockable', repeat: true, x: -1, y: 1, limit:3 }, { type: 'blockable', repeat: true, x: 1, y: -1 , limit:3})
             }  
@@ -2035,11 +2035,6 @@ function fatCatFactory(color, x, y) {
 
         },
         
-        afterThisPieceTaken:function(state){
-            if(pieceAroundMe(state,this,'FatCat.png')){
-                return true;
-            }                
-        },
         x: x,
         y: y,
         color: color,
