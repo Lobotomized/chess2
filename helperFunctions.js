@@ -811,7 +811,7 @@ function blockableSpecialFunction(properties) {
 
                     square[secondFlag] = true;
                 }
-                square[flag] = false;
+                //square[flag] = false;
 
             }
         }
