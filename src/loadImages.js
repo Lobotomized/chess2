@@ -103,8 +103,9 @@ bAnt.src = '/static/blackAnt.png';
 const bQueenBug = new Image();
 bQueenBug.src = '/static/blackQueenBug.png';
 
+const bBrainBug = new Image();
+bBrainBug.src = '/static/blackBrainBug.png';
 
-//
 const wLadyBug = new Image();
 wLadyBug.src = '/static/whiteLadyBug.png';
 
@@ -119,6 +120,9 @@ wShroom.src = '/static/whiteShroom.png';
 
 const wAnt = new Image();
 wAnt.src = '/static/whiteAnt.png';
+
+const wBrainBug = new Image();
+wBrainBug.src = '/static/whiteBrainBug.png'
 
 
 const wQueenBug = new Image();
@@ -162,6 +166,12 @@ wKolba.src = '/static/whiteKolba.png'
 
 const bKolba = new Image();
 bKolba.src = '/static/blackKolba.png'
+
+const wGargoyle = new Image();
+wGargoyle.src = '/static/whiteGargoyle.png'
+
+const bGargoyle = new Image();
+bGargoyle.src = '/static/blackGargoyle.png'
 
 const wNorthernKing = new Image();
 wNorthernKing.src = '/static/whiteNorthernKing.png'
@@ -389,6 +399,9 @@ function drawPiece(x, y, img, size) {
         case 'blackShroom.png':
             ctx.drawImage(bShroom, 0, 0, 500, 500, x * size, y * size, size, size);
             break;
+        case 'blackBrainBug.png':
+            ctx.drawImage(bBrainBug, 0, 0, 1500, 1500, x * size, y * size, size, size);
+            break;
 
         case 'whiteAnt.png':
             ctx.drawImage(wAnt, 0, 0, 500, 500, x * size, y * size, size, size);
@@ -408,6 +421,10 @@ function drawPiece(x, y, img, size) {
         case 'whiteShroom.png':
             ctx.drawImage(wShroom, 0, 0, 500, 500, x * size, y * size, size, size);
             break;
+        case 'whiteBrainBug.png':
+            ctx.drawImage(wBrainBug, 0, 0, 1500, 1500, x * size, y * size, size, size);
+            break;
+    
 
             //New
         case 'whiteSwordsmen.png':
@@ -434,6 +451,13 @@ function drawPiece(x, y, img, size) {
             break;
         case 'blackKolba.png':
             ctx.drawImage(bKolba, 0, 0, 1050, 1050, x * size, y * size, size, size);
+            break;
+
+        case 'whiteGargoyle.png':
+            ctx.drawImage(wGargoyle, 0, 0, 1400, 1400, x * size, y * size, size, size);
+            break;
+        case 'blackGargoyle.png':
+            ctx.drawImage(bGargoyle, 0, 0, 1400, 1400, x * size, y * size, size, size);
             break;
             
         case 'whiteFencer.png':

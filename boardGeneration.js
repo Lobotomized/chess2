@@ -2,9 +2,9 @@ try{
     var { kingFactory, knightFactory, mongolianKnightFactory, bishopFactory, rookFactory, queenFactory, pawnFactory, weakPawn, dragonFactory ,unpromotablePawn,
 
         clownFactory, ricarFactory, horseFactory, hatFactory, ghostFactory, pigFactory, ladyBugFactory, queenBugFactory, goliathBugFactory, antFactory,
-        shroomFactory, spiderFactory,
+        brainBugFactory, spiderFactory,
     
-        swordsMen, pikeman, sleepingDragon,kolba,fencer, shield, plagueDoctor, northernKing,
+        swordsMen, pikeman, sleepingDragon,gargoyleFactory,fencer, shield, plagueDoctor, northernKing,
     
         cyborgFactory, executorFactory,crystalFactory,empoweredCrystalFactory,juggernautFactory,bootVesselFactory, electricCatFactory, scaryCatFactory, longCatFactory,
         fatCatFactory,
@@ -94,14 +94,14 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     else if(raceBlack == 'bug'){
         pieces.push(
         antFactory('black',0,1),   queenBugFactory('black',1,1), antFactory('black',2,1),        antFactory('black',3,1),         antFactory('black',4,1),    antFactory('black',5,1),       queenBugFactory('black',6,1), antFactory('black',7,1),
-        shroomFactory('black',0,0),spiderFactory('black',1,0),   ladyBugFactory('black',2,0),    goliathBugFactory('black',3,0),   goliathBugFactory('black',4,0),ladyBugFactory('black', 5,0), spiderFactory('black',6,0), shroomFactory('black',7,0)
+        brainBugFactory('black',0,0),spiderFactory('black',1,0),   ladyBugFactory('black',2,0),    goliathBugFactory('black',3,0),   goliathBugFactory('black',4,0),ladyBugFactory('black', 5,0), spiderFactory('black',6,0), brainBugFactory('black',7,0)
         )
     }
     else if(raceBlack === 'promoters'){
         pieces.push(
             pikeman('black', 0,2), swordsMen('black',1,2),pikeman('black', 2,2), swordsMen('black',3,2),swordsMen('black', 4,2), pikeman('black',5,2),swordsMen('black', 6,2), pikeman('black',7,2),
                 shield('black',1,1),                                                                                              shield('black',6,1),
-        sleepingDragon('black',0,0),kolba('black',1,0),kolba('black',2,0), plagueDoctor('black',3,0),northernKing('black',4,0), fencer('black',5,0),fencer('black',6,0), sleepingDragon('black',7,0)
+        sleepingDragon('black',0,0),gargoyleFactory('black',1,0),gargoyleFactory('black',2,0), plagueDoctor('black',3,0),northernKing('black',4,0), fencer('black',5,0),fencer('black',6,0), sleepingDragon('black',7,0)
         )
     }
     else if(raceBlack == 'cyborgs'){
@@ -121,10 +121,8 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     }
     else if(raceBlack == 'test'){
         pieces.push(
-                electricCatFactory('white', 0, 2),
-                fatCatFactory('white',6,7),
-                blindCatFactory('white',5,7),
-                cuteCatFactory('white',4,4)
+                juggernautFactory('white', 0, 2),
+
         )
     }
 
@@ -150,14 +148,14 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     else if(raceWhite == 'bug'){
         pieces.push(
         antFactory('white',0,6),   queenBugFactory('white',1,6),antFactory('white',2,6),        antFactory('white',3,6),    antFactory('white',4,6),      antFactory('white',5,6), queenBugFactory('white',6,6),    antFactory('white',7,6),
-        shroomFactory('white',0,7),spiderFactory('white',1,7),  ladyBugFactory('white',2,7), goliathBugFactory('white',3,7),   goliathBugFactory('white',4,7),ladyBugFactory('white', 5,7), spiderFactory('white',6,7),shroomFactory('white',7,7)
+        brainBugFactory('white',0,7),spiderFactory('white',1,7),  ladyBugFactory('white',2,7), goliathBugFactory('white',3,7),   goliathBugFactory('white',4,7),ladyBugFactory('white', 5,7), spiderFactory('white',6,7),brainBugFactory('white',7,7)
         )
     }
     else if(raceWhite === 'promoters'){
         pieces.push(
             pikeman('white', 0,5), swordsMen('white',1,5),pikeman('white', 2,5), swordsMen('white',3,5),swordsMen('white', 4,5), pikeman('white',5,5),swordsMen('white', 6,5), pikeman('white',7,5),
                     shield('white',1,6),                                                                                              shield('white',6,6),
-        sleepingDragon('white',0,7),kolba('white',1,7),kolba('white',2,7), plagueDoctor('white',3,7),northernKing('white',4,7), fencer('white',5,7),fencer('white',6,7), sleepingDragon('white',7,7),
+        sleepingDragon('white',0,7),gargoyleFactory('white',1,7),gargoyleFactory('white',2,7), plagueDoctor('white',3,7),northernKing('white',4,7), fencer('white',5,7),fencer('white',6,7), sleepingDragon('white',7,7),
         )
    
     }
@@ -178,7 +176,7 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     }
     else if(raceWhite == 'test'){
         pieces.push(
-            electricCatFactory('black', 0, 4),scaryCatFactory('black', 0, 6),longCatFactory('black', 2, 6),
+            kingFactory('black', 0, 4)
              )
     }
 

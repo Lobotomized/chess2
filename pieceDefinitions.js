@@ -1008,7 +1008,7 @@ function ladyBugFactory(color,x,y){
             const arrToReturn =[]
 
             const shrooms = state.pieces.filter((piece)=> {
-                return piece.color === this.color && piece.icon === this.color+'Shroom.png'
+                return piece.color === this.color && piece.icon === this.color+'BrainBug.png'
             })
 
             if(shrooms.length < 2){
@@ -1101,9 +1101,9 @@ function spiderFactory(color,x,y){
     }
 }
 
-function shroomFactory(color,x,y){
+function brainBugFactory(color,x,y){
     return {
-        icon: color+'Shroom.png',
+        icon: color+'BrainBug.png',
         moves:[],
         color:color,
         x:x,
@@ -1121,7 +1121,7 @@ function shroomFactory(color,x,y){
                             if(piece.icon.includes('Ant.png')){
                                 piece.value = 0.4
                             }
-                            else if(piece.icon.includes('Shroom.png')){
+                            else if(piece.icon.includes('BrainBug.png')){
                                 piece.value = 2000;
                             }
                             else{
@@ -1164,7 +1164,7 @@ function queenBugFactory(color,x,y){
             const ant = antFactory(color,move.x,move.y,direction)
             state.pieces.push(ant);
             const currentShrooms = state.pieces.filter((shroom) => {
-                return shroom.icon == this.color + 'Shroom.png';
+                return shroom.icon == this.color + 'BrainBug.png';
             })
             if(currentShrooms.length == 1){
                 ant.moves = ant.weakMoves;
@@ -1324,11 +1324,11 @@ function copier(color, x, y){
 }
 
 
-function kolba(color, x, y){
+function gargoyleFactory(color, x, y){
     let moves = []
 
     return {
-        icon: color + 'Kolba.png',
+        icon: color + 'Gargoyle.png',
         moves: moves,
         x: x,
         y: y,
@@ -1455,7 +1455,7 @@ function plagueDoctor(color, x, y){
                 })
             }
             state.pieces.forEach((piece) => {
-                if(piece.color === this.color && piece.icon === piece.color + 'Kolba.png'){
+                if(piece.color === this.color && piece.icon === piece.color + 'Gargoyle.png'){
                     for(let i = kolbaPower; i>=0; i--){
                         piece.moves.push(
                             {type: 'absolute', y: i, x: 0 },
@@ -2126,7 +2126,7 @@ try{
     module.exports = {
         queenBugFactory:queenBugFactory,
         kingFactory: kingFactory,
-        shroomFactory: shroomFactory,
+        brainBugFactory: brainBugFactory,
         pawnFactory: pawnFactory,
         goliathBugFactory: goliathBugFactory,
         antFactory: antFactory,
@@ -2149,7 +2149,7 @@ try{
         swordsMen:swordsMen,
         northernKing:northernKing,
         pikeman:pikeman,
-        kolba:kolba,
+        gargoyleFactory:gargoyleFactory,
         fencer:fencer,
         general:general,
         shield:shield,

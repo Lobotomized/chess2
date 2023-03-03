@@ -282,12 +282,12 @@ function evaluateBoardDve(colorPerspective, pieces, state){
             let thisValue = undefined;
             if(maximizer === 'white'){
                 thisValue = evaluateBoard(enemy,badMove.pieces, state,
-                    offensiveCharacter(2)
+                    positionalCharacter(2)
                     )
             }
             else{
                 thisValue = evaluateBoard(enemy,badMove.pieces, state,
-                    positionalCharacter(0)
+                    defensiveCharacter(2)
 
                     // {method:evaluationMagnifierKingTropism, options:{relativeValue:0.2,defendersSearch:true, onlyForMe:true}},
                     // {method:evaluationMagnifierKingTropism, options:{relativeValue:0.2,defendersSearch:true, onlyForMe:true}}
