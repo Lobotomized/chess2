@@ -1008,7 +1008,7 @@ function ladyBugFactory(color,x,y){
             const arrToReturn =[]
 
             const shrooms = state.pieces.filter((piece)=> {
-                return piece.color === this.color && piece.icon === this.color+'BrainBug.png'
+                return piece.color === this.color && piece.icon === this.color+'Shroom.png'
             })
 
             if(shrooms.length < 2){
@@ -1101,9 +1101,9 @@ function spiderFactory(color,x,y){
     }
 }
 
-function brainBugFactory(color,x,y){
+function shroomFactory(color,x,y){
     return {
-        icon: color+'BrainBug.png',
+        icon: color+'Shroom.png',
         moves:[],
         color:color,
         x:x,
@@ -1121,7 +1121,7 @@ function brainBugFactory(color,x,y){
                             if(piece.icon.includes('Ant.png')){
                                 piece.value = 0.4
                             }
-                            else if(piece.icon.includes('BrainBug.png')){
+                            else if(piece.icon.includes('Shroom.png')){
                                 piece.value = 2000;
                             }
                             else{
@@ -1164,7 +1164,7 @@ function queenBugFactory(color,x,y){
             const ant = antFactory(color,move.x,move.y,direction)
             state.pieces.push(ant);
             const currentShrooms = state.pieces.filter((shroom) => {
-                return shroom.icon == this.color + 'BrainBug.png';
+                return shroom.icon == this.color + 'Shroom.png';
             })
             if(currentShrooms.length == 1){
                 ant.moves = ant.weakMoves;
@@ -2126,7 +2126,8 @@ try{
     module.exports = {
         queenBugFactory:queenBugFactory,
         kingFactory: kingFactory,
-        brainBugFactory: brainBugFactory,
+        //brainBugFactory: brainBugFactory,
+        shroomFactory:shroomFactory,
         pawnFactory: pawnFactory,
         goliathBugFactory: goliathBugFactory,
         antFactory: antFactory,

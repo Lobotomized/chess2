@@ -514,7 +514,7 @@ function getSinglePlayerGame() {
                         }
                     }
 
-                    state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), brainBugFactory('white', 1, 3))
+                    state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3))
                     state.gameType = 'raceChoiceChess'
                     state.turn = 'menu'
                 }

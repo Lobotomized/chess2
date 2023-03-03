@@ -93,7 +93,7 @@ let ani = function(){
     hotseatGame.state.pieces.length = 0;
     hotseatGame.state.board.length = 0;
 
-    hotseatGame.state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), brainBugFactory('white', 1, 3))
+    hotseatGame.state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3))
     hotseatGame.state.gameType = 'raceChoiceChess'
     hotseatGame.state.turn = 'menu'
     hotseatGame.state.whiteRace = getParams(window.location.href).whiteRace || 'medieval'
