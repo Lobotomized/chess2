@@ -13,6 +13,21 @@ function randomlyRemove1NthFilter(options) {
     return allowedMoves
   }
 
+function removeAttackedMovesFilter(options){
+  let {allowedMoves} = options;
+  if(exceptionsChecker(options)){
+    return allowedMoves;
+  }
+  let res = allowedMoves.filter((am) => {
+    if(isPositionAttacked(options.state,options.color,am.x, am.y)){
+      return false;
+    }
+    return false;
+  })
+
+  return res;
+}
+
   
 
 function maxNumberOfMovesPerPieceFilter(options){

@@ -75,6 +75,22 @@ self.addEventListener("message", function(e) {
                 defensiveCharacter:defensiveCharacter,
                 positionalCharacter:positionalCharacter
             }
+            if(obj.AIPower === -1){
+                if(obj.state.pieces.length > 20){
+                    obj.AIPower = 1;
+                }
+                else if(obj.state.pieces.length > 13){
+                    obj.AIPower = 3;
+                }
+                else if(obj.state.pieces.length > 8){
+                    obj.AIPower = 4;
+                }
+                else{
+                    obj.AIPower = 5;
+                }
+            }
+
+
             if(obj.AIPower === 0){
                 move = minimaxDeep(obj.state,obj.color,1, obj.removedTurns,methods[obj.AICharacter](0))
             }
@@ -112,7 +128,16 @@ self.addEventListener("message", function(e) {
                     []
                 )
             }
-
+            else if(obj.AIPower === 5){
+                move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns,
+                    methods[obj.AICharacter](0),
+                    [
+                        {method:removeAttackedMovesFilter, options:{randomException:0.6,exceptions:[randomException]}},
+                        {method:removeNonAttackingMovesFilter, options:{randomException:0.5, 
+                            exceptions:[pieceAttackedException,randomException]}},
+                    ]
+                )
+            }
             move.removedTurns = obj.removedTurns;
             postMessage(JSONfn.stringify(move))
 
