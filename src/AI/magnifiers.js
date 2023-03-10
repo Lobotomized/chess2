@@ -79,8 +79,8 @@ let positionMaskDefault = {
     'blackBlindCat.png':0,
     'whiteScaryCat.png':1,
     'blackScaryCat.png':1,
-    'whiteCuteCat.png':1,
-    'blackCuteCat.png':1,
+    'whiteCuteCat.png':0.1,
+    'blackCuteCat.png':0.1,
 
 
 
@@ -139,14 +139,24 @@ function evaluationMagnifierMaxOptions(piece,pieces,board,colorPerspective,optio
 }
 
 function evaluationMagnifierPiece(piece,pieces,board,colorPerspective,options){
+    let myPieces;
 
-    if(options.threshold){
-        let myPieces = pieces.filter((piece) => {
+    if(options.whoHasMorePieces || options.threshold){
+        myPieces = pieces.filter((piece) => {
             return piece.color === colorPerspective;
         })
-        let quantifier = options.threshold(myPieces.length);
+    }
 
-        return piece.value * quantifier;
+    let pieceDifferenceChange = 1;
+    if(options.whoHasMorePieces){
+        pieceDifferenceChange = myPieces.length/(pieces.length-myPieces.length);
+    }
+    if(options.threshold){
+
+        let quantifier = options.threshold(myPieces.length);
+        
+
+        return piece.value * quantifier*pieceDifferenceChange;
     }
 
     return piece.value*options.pieceValue;

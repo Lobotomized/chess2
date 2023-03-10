@@ -11,73 +11,10 @@ importScripts('/src/jsonfn.js')
 
 
 
- function minimax(state,maximizer, depth, removedTurns){
-    const moves = generateMovesFromPieces(state,maximizer)
-    let enemy = 'black';
-    if(maximizer === 'black'){
-        enemy = 'white';
-    }
-    let selectedMove = undefined;
-    let badMoveResults= []
-    let slizedMoves = moves.slice(0,depth);
-    let lowestBadMoveResult = 999999;
-
-    slizedMoves.forEach((move, index) => {
-        let isItBanned;
-        if(removedTurns && removedTurns.length){
-            isItBanned = removedTurns.find((removedTurn) => {
-                return move.xClicked === removedTurn.xClicked && move.yClicked === removedTurn.yClicked && removedTurn.pieceCounter === move.pieceCounter
-            })
-        }
-        
-        if(isItBanned){
-            return;
-        }
-
-        const badMoves = generateMovesFromPieces({board:state.board,pieces:move.pieces},enemy)
-        let bestBadMove = {};
-        let badMoveValue = -999999;
-        badMoves.forEach((badMove) => {
-            let thisValue = undefined;
-            if(maximizer === 'white'){
-                thisValue = evaluateBoard(enemy,badMove.pieces, state.board,
-                    positionalCharacter(0)
-                    )
-            }
-            else{
-                thisValue = evaluateBoard(enemy,badMove.pieces, state.board,
-                    defensiveCharacter(0)
-                ) 
-            }
-            if(thisValue > badMoveValue){
-                badMoveValue = thisValue;
-                bestBadMove = {moveCounter:index, value:badMoveValue,pieces:badMove.pieces}
-            }
-        })
-        if(!badMoves.length){
-            bestBadMove = {moveCounter:index, value:-20,pieces:state.pieces};
-        }
-        badMoveResults.push(bestBadMove)
-    })
-    badMoveResults.forEach((badMoveResult) => {
-        if(badMoveResult.value < lowestBadMoveResult ){
-            lowestBadMoveResult = badMoveResult.value;
-            selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
-        }
-    })
-    // console.log(moves[selectedMove.moveCounter], )
-    return moves[selectedMove.moveCounter];
-
-}
-
-
-function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters, filtersDepth,filtersEnemy){
+function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters){
     state.id = crypto.randomUUID()
     let enemy = getEnemy(maximizer);
     let firstGen = generateMovesFromPieces(state,maximizer,filters);
-    if(!filtersDepth){
-        filtersDepth === 4;
-    }
     
 
     if(removedTurns && removedTurns.length){
@@ -90,15 +27,15 @@ function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters, fi
     }
     if(depth === 2){
 
-        const secondGen = filtersDepth >= 2 && filtersEnemy ? generateMovesFromMoves(firstGen, enemy,state.board,filters) : generateMovesFromMoves(firstGen, enemy,state.board);
+        const secondGen = generateMovesFromMoves(firstGen, enemy,state.board,filters, true);
     
         evalMoves(secondGen,maximizer,state.board,magnifiers);
         evalParents(firstGen,secondGen,true);
         return getMoveByValue(firstGen)
     }
     else if(depth === 3){
-        const secondGen = filtersDepth >= 2 && filtersEnemy ? generateMovesFromMoves(firstGen, enemy,state.board,filters) : generateMovesFromMoves(firstGen, enemy,state.board);
-        const thirdGen =filtersDepth >= 3? generateMovesFromMoves(secondGen, maximizer,state.board,filters) : generateMovesFromMoves(secondGen, maximizer,state.board);
+        const secondGen = generateMovesFromMoves(firstGen, enemy,state.board,filters, true);
+        const thirdGen = generateMovesFromMoves(secondGen, maximizer,state.board,filters);
     
         evalMoves(thirdGen,maximizer,state.board,magnifiers);
         evalParents(secondGen,thirdGen);
@@ -109,9 +46,9 @@ function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters, fi
     }
 
     else if(depth >= 4){
-        const secondGen = filtersDepth >= 2 && filtersEnemy ? generateMovesFromMoves(firstGen, enemy,state.board,filters) : generateMovesFromMoves(firstGen, enemy,state.board);
-        const thirdGen =filtersDepth >= 3? generateMovesFromMoves(secondGen, maximizer,state.board,filters) : generateMovesFromMoves(secondGen, maximizer,state.board);
-        const fourthGen = filtersDepth >= 4 && filtersEnemy ?generateMovesFromMoves(thirdGen, enemy,state.board, filters) : generateMovesFromMoves(thirdGen, enemy,state.board, filters);
+        const secondGen =generateMovesFromMoves(firstGen, enemy,state.board,filters, true);
+        const thirdGen =generateMovesFromMoves(secondGen, maximizer,state.board,filters)
+        const fourthGen = generateMovesFromMoves(thirdGen, enemy,state.board, filters, true);
         
         evalMoves(fourthGen,maximizer,state.board,defaultCharacter(0));
         evalParents(thirdGen, fourthGen,true);
@@ -135,7 +72,8 @@ self.addEventListener("message", function(e) {
                 undefined:defaultCharacter,
                 defaultCharacter:defaultCharacter,
                 offensiveCharacter:offensiveCharacter,
-                defensiveCharacter:defensiveCharacter
+                defensiveCharacter:defensiveCharacter,
+                positionalCharacter:positionalCharacter
             }
             if(obj.AIPower === 0){
                 move = minimaxDeep(obj.state,obj.color,1, obj.removedTurns,methods[obj.AICharacter](0))

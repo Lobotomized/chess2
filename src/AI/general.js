@@ -38,7 +38,7 @@ function evaluateBoard(colorPerspective, pieces, board,magnifierMethods){
 
 
  
- function generateMovesFromPieces(state,color, filters){
+ function generateMovesFromPieces(state,color, filters,enemy){
     if(!filters){
         filters = [];
     }
@@ -55,9 +55,11 @@ function evaluateBoard(colorPerspective, pieces, board,magnifierMethods){
              return square.allowedMove;
          })
          filters.forEach((filter) => {
-            allowedMoves = filter.method({
-                state,allowedMoves,myPieces,piecesCounter,piece,color,...filter.options
-            })
+            if(!enemy || filter.allowEnemy){
+                allowedMoves = filter.method({
+                    state,allowedMoves,myPieces,piecesCounter,piece,color,...filter.options
+                })
+            }
          })
          while(allowedMoves.length > movesCounter){
              const newPieces = JSONfn.parse(JSONfn.stringify(state.pieces))
@@ -80,10 +82,10 @@ function evaluateBoard(colorPerspective, pieces, board,magnifierMethods){
  }
 
 
- function generateMovesFromMoves(moves, color,board){
+ function generateMovesFromMoves(moves, color,board,filters,enemy){
     let childMoves = [];
     moves.forEach((move) => {
-        childMoves.push(...generateMovesFromPieces({pieces:move.pieces,board,turn:color, id:move.id},color))
+        childMoves.push(...generateMovesFromPieces({pieces:move.pieces,board,turn:color, id:move.id},color,filters,enemy))
     })
     return childMoves
  }
