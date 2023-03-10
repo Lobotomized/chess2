@@ -131,12 +131,18 @@ self.addEventListener("message", function(e) {
     if(!obj.state.won){
 
             let move;
+            let methods = {
+                undefined:defaultCharacter,
+                defaultCharacter:defaultCharacter,
+                offensiveCharacter:offensiveCharacter,
+                defensiveCharacter:defensiveCharacter
+            }
             if(obj.AIPower === 0){
-                move = minimaxDeep(obj.state,obj.color,1, obj.removedTurns,)
+                move = minimaxDeep(obj.state,obj.color,1, obj.removedTurns,methods[obj.AICharacter](0))
             }
             else if(obj.AIPower === 1){
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
-                    defaultCharacter(0),
+                    methods[obj.AICharacter](0),
                     [
                     {method:removeNonAttackingMovesFilter, options:{maximum:2,minPieceValue:2,randomException:0.3, filterDepth:1,
                     exceptions:[pieceValueMustBeSmallerThanException,randomException]}},
@@ -147,7 +153,7 @@ self.addEventListener("message", function(e) {
             else if(obj.AIPower === 2){
 
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
-                    defaultCharacter(3),
+                    methods[obj.AICharacter](2),
                     [
                     {method:removeNonAttackingMovesFilter, options:{maximum:2,minPieceValue:2,randomException:0.3, 
                     exceptions:[pieceValueMustBeSmallerThanException,randomException]}},
@@ -158,13 +164,13 @@ self.addEventListener("message", function(e) {
             }
             else if(obj.AIPower === 3){
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
-                    defaultCharacter(0),
+                    methods[obj.AICharacter](0),
                     []
                 )
             }
             else if(obj.AIPower === 4){
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
-                    defaultCharacter(3),
+                    methods[obj.AICharacter](2),
                     []
                 )
             }

@@ -49,11 +49,11 @@
 
 const AIColor = getParams(window.location.href).AIColor
 let AIPower = getParams(window.location.href).AIPower;
-AIPower = parseInt(AIPower);
-
-if(AIPower === undefined){
+if(AIPower === undefined || typeof AIPower === 'NaN'){
     AIPower = 1;
 }
+AIPower = parseInt(AIPower);
+
 
 
 
