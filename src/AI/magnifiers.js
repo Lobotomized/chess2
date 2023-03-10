@@ -67,6 +67,23 @@ let positionMaskDefault = {
     'blackJuggernaut.png':0.3,
     'whiteCyborg.png':1,
     'blackCyborg.png':1,
+
+
+    'whiteElectricCat.png':1,
+    'blackElectricCat.png':1,
+    'whiteFatCat.png':3,
+    'blackFatCat.png':3,
+    'whiteLongCat':3,
+    'blackLongCat.png':3,
+    'whiteBlindCat.png':0,
+    'blackBlindCat.png':0,
+    'whiteScaryCat.png':1,
+    'blackScaryCat.png':1,
+    'whiteCuteCat.png':1,
+    'blackCuteCat.png':1,
+
+
+
 }
 
 
@@ -96,9 +113,7 @@ let defaultPieceValueThreshold = function(myPiecesLength){
 let boardHeight = undefined;
 let boardWidth = undefined;
 
-const testFunk = function(){
-    console.log('test fuk')
-}
+
 
 function setBoardDimensions(board){
     if(!boardHeight){
@@ -111,9 +126,9 @@ function setBoardDimensions(board){
 
 }
 
-function evaluationMagnifierMaxOptions(piece,pieces,state,colorPerspective,options){
-    lightBoardFE(piece,{pieces:pieces, board:state.board, turn:piece.color},'allowedMove',undefined,true)
-    const filtered = state.board.filter((square) => {
+function evaluationMagnifierMaxOptions(piece,pieces,board,colorPerspective,options){
+    lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true)
+    const filtered = board.filter((square) => {
         return square['allowedMove']
     })
     let piecePosValue = piece.posValue;
@@ -123,7 +138,7 @@ function evaluationMagnifierMaxOptions(piece,pieces,state,colorPerspective,optio
     return filtered.length * options.posValue*piecePosValue;
 }
 
-function evaluationMagnifierPiece(piece,pieces,state,colorPerspective,options){
+function evaluationMagnifierPiece(piece,pieces,board,colorPerspective,options){
 
     if(options.threshold){
         let myPieces = pieces.filter((piece) => {
@@ -141,7 +156,7 @@ function evaluationMagnifierPiece(piece,pieces,state,colorPerspective,options){
 //isPositionAttacked
 
 
-function evaluationMagnifierPieceDefended(piece,pieces,state,colorPerspective,options){
+function evaluationMagnifierPieceDefended(piece,pieces,board,colorPerspective,options){
     let enemyColor = 'black';
     if(piece.color === 'black'){
         enemyColor = 'white';
@@ -151,7 +166,7 @@ function evaluationMagnifierPieceDefended(piece,pieces,state,colorPerspective,op
     if(options.pieceAttacked){
         colorToUse  = piece.color
     }
-    if(isPositionAttacked(state,colorToUse,piece.x,piece.y)){
+    if(isPositionAttacked({board:board,pieces:pieces,turn:colorPerspective},colorToUse,piece.x,piece.y)){
         if(options.pieceValue){
             return options.relativeValue * options.pieceValue*piece.value
         }
@@ -162,7 +177,7 @@ function evaluationMagnifierPieceDefended(piece,pieces,state,colorPerspective,op
     return 0
 }
 
-function evaluationMagnifierKingTropism(piece,pieces,state,colorPerspective,options){
+function evaluationMagnifierKingTropism(piece,pieces,board,colorPerspective,options){
 
     /*
         options - 
@@ -176,7 +191,7 @@ function evaluationMagnifierKingTropism(piece,pieces,state,colorPerspective,opti
    let shortestDistance = 100;
 
 
-   setBoardDimensions(state.board);
+   setBoardDimensions(board);
    targets= pieces.filter((el)=> {
         if(!options.defendersSearch){
             return el.color != colorPerspective && el.value > 500;
@@ -371,4 +386,16 @@ function defaultCharacter(weight){
             ]
     }
 
+}
+
+
+function maskedDefaultCharacter(weight){
+    switch(weight){
+        default:
+        case 0:
+            return [
+                {method:evaluationMagnifierMaxOptions,options:{posValue:0.1,mask:positionMaskDefault}},
+                {method:evaluationMagnifierPiece, options:{pieceValue:1 }}
+            ]
+    }
 }

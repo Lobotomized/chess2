@@ -580,7 +580,7 @@ function drawPiece(x, y, img, size) {
     break;
 
     case 'blackLongCat.png':
-        ctx.drawImage(bLongCat,-300, 0, 1250, 1250, x * size, y * size, size, size);
+        ctx.drawImage(bLongCat,-27, -10, 120, 120, x * size, y * size, size, size);
     break;
     case 'whiteLongCat.png':
         ctx.drawImage(wLongCat, -300, 0, 1250, 1250, x * size, y * size, size, size);

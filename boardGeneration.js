@@ -121,7 +121,7 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     }
     else if(raceBlack == 'test'){
         pieces.push(
-                juggernautFactory('white', 0, 2),
+                rookFactory('white', 0, 2),rookFactory('white', 0, 6)
 
         )
     }
@@ -176,7 +176,8 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     }
     else if(raceWhite == 'test'){
         pieces.push(
-            kingFactory('black', 0, 4)
+            crystalFactory('black', 0, 4)
+            // ,swordsMen('black', 6, 4)
              )
     }
 

@@ -51,8 +51,8 @@ const AIColor = getParams(window.location.href).AIColor
 let AIPower = getParams(window.location.href).AIPower;
 AIPower = parseInt(AIPower);
 
-if(!AIPower){
-    AIPower = 500;
+if(AIPower === undefined){
+    AIPower = 1;
 }
 
 
@@ -303,7 +303,7 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
             hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
             state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
             if(state.turn === AIColor){
-                w.postMessage(JSONfn.stringify({state:state, color:AIColor, depth:AIPower}));
+                w.postMessage(JSONfn.stringify({state:state, color:AIColor, AIPower:AIPower}));
 
                 w.onmessage = function(event){
                     let move = JSONfn.parse(event.data)
@@ -315,16 +315,16 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
                         if(move.removedTurns){
                             removedTurns = [...removedTurns, ...move.removedTurns]
                         }
-                        w.postMessage(JSONfn.stringify({state:state, color:AIColor, depth:AIPower, removedTurns:removedTurns}));
+                        w.postMessage(JSONfn.stringify({state:state, color:AIColor, AIPower:AIPower, removedTurns:removedTurns}));
                     }
                 }
             }
             else if(AIColor === 'allAI'){
-                w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:AIPower}));
+                w.postMessage(JSONfn.stringify({state:state, color:state.turn, AIPower:AIPower}));
                 w.onmessage = function(event){
                     let move = JSONfn.parse(event.data)
                     AIMove(move.pieceCounter, move.xClicked, move.yClicked, state.turn)
-                    w.postMessage(JSONfn.stringify({state:state, color:state.turn, depth:AIPower}));
+                    w.postMessage(JSONfn.stringify({state:state, color:state.turn, AIPower:AIPower}));
                 }
             }
         }

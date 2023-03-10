@@ -1,257 +1,17 @@
 importScripts('/pieceDefinitions.js')
 importScripts('/helperFunctions.js')
 importScripts('/moveMethods.js')
+importScripts('/src/AI/general.js')
+
 importScripts('/src/AI/magnifiers.js')
+importScripts('/src/AI/filters.js')
+
 
 importScripts('/src/jsonfn.js')
 
-//let globalPosValue = 0.1//Math.random();
 
 
-// function evaluationMagnifierMaxOptions(piece,pieces,state,colorPerspective){
-//     lightBoardFE(piece,{pieces:pieces, board:state.board, turn:piece.color},'allowedMove',undefined,true)
-//     const filtered = state.board.filter((square) => {
-//         return square['allowedMove']
-//     })
-//     return filtered.length * globalPosValue*piece.posValue;
-// }
-// let kingTropism = 0.5;
-
-
-//Code related variables
-// let valuableEnemy = false;
-
-// function evaluationMagnifierKingTropism(piece,pieces,state,colorPerspective){
-//     if(piece.value > 500){
-//         return 0;
-//     }
-//     if(!valuableEnemy || valuableEnemy.color === colorPerspective){
-//         valuableEnemy= pieces.find((el)=> {
-//             return el.color != colorPerspective && el.value > 500;
-//         })
-//     }
-
-//     if(!valuableEnemy){
-//         return 0;
-//     }
-//     let distanceX = Math.abs(piece.x - valuableEnemy.x);
-//     let distanceY = Math.abs(piece.y - valuableEnemy.y);
-
-//     if(distanceX > distanceY){
-//         return 7*kingTropism - distanceX * kingTropism;
-//     }
-//     else{
-//         return 7*kingTropism -distanceY * kingTropism
-//     }
-// }
-
-function evaluateBoard(colorPerspective, pieces, state,magnifierMethods){
-    let counter = 0;
-    let valueTransformer = 1;
-    let valueCounter = 0;
-    while(pieces.length > counter){
-        const piece = pieces[counter]
-        if(colorPerspective === piece.color){
-            let magnifier = 0;
-            magnifierMethods.forEach((magnifierObject) => {
-
-                if(!magnifierObject.onlyForEnemy){
-
-                    magnifier += magnifierObject.method(piece,pieces,state,piece.color,magnifierObject.options);
-                }
-            })
-
-            valueTransformer = magnifier;
-        }
-        else{
-            let magnifier = 0;
-
-            magnifierMethods.forEach((magnifierObject) => {
-                if(!magnifierObject.onlyForMe){
-                    magnifier += magnifierObject.method(piece,pieces,state,piece.color,magnifierObject.options);
-                }
-            })
-
-            valueTransformer = magnifier*-1;
-        }
-        valueCounter += valueTransformer;
-        counter++;
-    }
-    return valueCounter;
-}
-
-function safetyValue(colorPerspective, pieces,board){
-    let valueToReturn = 0;
-    let valuableEnemy= pieces.find((el)=> {
-        return el.color != colorPerspective && el.value > 500;
-    })
-    if(valuableEnemy)
-    {
-        pieces.forEach((piece) => {
-            if(piece.color != colorPerspective){
-                lightBoardFE(piece,{pieces:pieces, board:board, turn:colorPerspective},'attackingValuableFake', 'attackingValuable',undefined,true)
-            }
-        })
-        const filtered = board.filter((square) => {
-            return square.attackingValuable;
-        })
-        filtered.forEach((square) => {
-            if(square.x === valuableEnemy.x && square.y === valuableEnemy.y){
-                valueToReturn+=1;
-            }
-        })
-    }
-
-    return valueToReturn;
-}
- 
-function evaluateBoardDve(colorPerspective, pieces, state){
-    let counter = 0;
-    let valueTransformer = 1;
-    let valueCounter = 0;
-    const board = state.board;
-    let valuableEnemy= pieces.find((el)=> {
-        return el.color != state.color && el.value > 500;
-    })
-    while(pieces.length > counter){
-        const piece = pieces[counter]
-        lightBoardFE(piece,{pieces:pieces, board:board, turn:state.turn},'allowedMove',undefined,true)
-
-        let attackValue = 0;
-
-        const filtered = board.filter((square) => {
-            return square['allowedMove']
-        })
-        
-        let findSpecialSquare = filtered.find((square) => {
-            return square.x === valuableEnemy.x && square.y === valuableEnemy.y && square['allowedMove']
-        })
-        if(findSpecialSquare){
-            attackValue = 10000;
-        }
-         let magnifier = filtered.length * globalPosValue*piece.posValue;
-
-        if(colorPerspective === piece.color){
-            valueTransformer = piece.value ? piece.value + magnifier : 1 + magnifier +attackValue;
-        }
-        else{
-            valueTransformer = piece.value ? piece.value* -1 - magnifier : -1 - magnifier - attackValue;
-        }
-
-
-
-        
-        valueCounter += valueTransformer;
-
-
-        counter++;
-    }
-    return valueCounter;
-}
-
- 
- function generateMovesFromPieces(state,color){
-     const movesAndPieces = []
-     color = color ? color : getColorPieces.color;
-     let piecesCounter = 0;
-     const myPieces = !color ?state.pieces : getColorPieces(state.pieces,color) //getColorPieces(state.pieces,   color);
-     while(myPieces.length > piecesCounter){
-         let movesCounter = 0;
-         let piece = myPieces[piecesCounter]
-         lightBoardFE(piece,{pieces:state.pieces, board:state.board,turn:state.turn},'allowedMove',undefined,true)
-         const allowedMoves = state.board.filter((square) => {
-             return square.allowedMove;
-         })
-
-         while(allowedMoves.length > movesCounter){
-             const newPieces = JSONfn.parse(JSONfn.stringify(state.pieces))
-             let newMyPieces = getColorPieces(newPieces, color)
-             piece = newMyPieces[piecesCounter];
- 
- 
-             const square = allowedMoves[movesCounter]
-             playerMove({x:square.x, y:square.y},{board:state.board, pieces:newPieces, pieceSelected:piece , turn:color},true, undefined, 'allowedMove')
- 
- 
-             if( square && square.allowedMove){
-                 movesAndPieces.push({pieceCounter:piecesCounter,pieces:newPieces, xClicked:square.x, yClicked:square.y})
-             }
-             movesCounter++
-         }
-         piecesCounter++
-     }
-     return movesAndPieces
- }
-
-
- function minimaxDve(state,maximizer, depth, removedTurns){
-    const moves = generateMovesFromPieces(state,maximizer)
-    let enemy = 'black';
-    if(maximizer === 'black'){
-        enemy = 'white';
-    }
-                
-    let selectedMove = undefined;
-    let badMoveResults= []
-    let slizedMoves = moves //.slice(0,depth);
-    let lowestBadMoveResult = -999999;
-
-    slizedMoves.forEach((move, index) => {
-        let isItBanned;
-        if(removedTurns){
-            isItBanned = removedTurns.find((removedTurn) => {
-                return move.xClicked === removedTurn.xClicked && move.yClicked === removedTurn.yClicked && removedTurn.pieceCounter === move.pieceCounter
-            })
-        }
-        
-        if(isItBanned){
-            return;
-        }
-
-        const badMoves = generateMovesFromPieces({board:state.board,pieces:move.pieces},enemy)
-        let bestBadMove = {};
-        let badMoveValue = 999999;
-        let goodMoveResults = [];
-        badMoves.forEach((badMove) => {
-            let goodMoves = generateMovesFromPieces({board:state.board, pieces:badMove.pieces}, maximizer)
-            let bestGoodMove = {};
-            let goodMoveValue = 999999;
-            goodMoves.forEach((goodMove) => {
-                let thisValue = evaluateBoard(maximizer,goodMove.pieces, state, [])
-                if(thisValue < goodMoveValue){
-                    goodMoveValue = thisValue;
-                    bestGoodMove = {moveCounter:index, value:goodMoveValue,pieces:badMove.pieces}
-                }
-            })
-            goodMoveResults.push(bestGoodMove)
-        })
-        
-        if(!badMoves.length){
-            bestBadMove = {moveCounter:index, value:20,pieces:state.pieces};
-        }
-        
-        goodMoveResults.forEach((goodMoveResult) => {
-            if(goodMoveResult.value < badMoveValue){
-                badMoveValue = goodMoveResult.value;
-                bestBadMove = {moveCounter:goodMoveResult.moveCounter, value:badMoveValue};
-            }
-        })
-
-        
-        badMoveResults.push(bestBadMove)
-    })
-    badMoveResults.forEach((badMoveResult) => {
-        if(badMoveResult.value > lowestBadMoveResult ){
-            lowestBadMoveResult = badMoveResult.value;
-            selectedMove = {moveCounter:badMoveResult.moveCounter, value:lowestBadMoveResult};
-        }
-    })
-
-    return moves[selectedMove.moveCounter];
-
-}
-
- function minimax(state,maximizer, depth, removedTurns){    
+ function minimax(state,maximizer, depth, removedTurns){
     const moves = generateMovesFromPieces(state,maximizer)
     let enemy = 'black';
     if(maximizer === 'black'){
@@ -264,7 +24,7 @@ function evaluateBoardDve(colorPerspective, pieces, state){
 
     slizedMoves.forEach((move, index) => {
         let isItBanned;
-        if(removedTurns){
+        if(removedTurns && removedTurns.length){
             isItBanned = removedTurns.find((removedTurn) => {
                 return move.xClicked === removedTurn.xClicked && move.yClicked === removedTurn.yClicked && removedTurn.pieceCounter === move.pieceCounter
             })
@@ -278,19 +38,15 @@ function evaluateBoardDve(colorPerspective, pieces, state){
         let bestBadMove = {};
         let badMoveValue = -999999;
         badMoves.forEach((badMove) => {
-            // console.log(badMoves,enemy, '  wtf?!')
             let thisValue = undefined;
             if(maximizer === 'white'){
-                thisValue = evaluateBoard(enemy,badMove.pieces, state,
-                    positionalCharacter(2)
+                thisValue = evaluateBoard(enemy,badMove.pieces, state.board,
+                    positionalCharacter(0)
                     )
             }
             else{
-                thisValue = evaluateBoard(enemy,badMove.pieces, state,
-                    defensiveCharacter(2)
-
-                    // {method:evaluationMagnifierKingTropism, options:{relativeValue:0.2,defendersSearch:true, onlyForMe:true}},
-                    // {method:evaluationMagnifierKingTropism, options:{relativeValue:0.2,defendersSearch:true, onlyForMe:true}}
+                thisValue = evaluateBoard(enemy,badMove.pieces, state.board,
+                    defensiveCharacter(0)
                 ) 
             }
             if(thisValue > badMoveValue){
@@ -315,31 +71,106 @@ function evaluateBoardDve(colorPerspective, pieces, state){
 }
 
 
+function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters, filtersDepth,filtersEnemy){
+    state.id = crypto.randomUUID()
+    let enemy = getEnemy(maximizer);
+    let firstGen = generateMovesFromPieces(state,maximizer,filters);
+    if(!filtersDepth){
+        filtersDepth === 4;
+    }
+    
 
-function minimaxKing(state,maximizer, depth, removedTurns){
-    if(state.pieces.length > 8){
-        return minimax(state,maximizer, depth, removedTurns);
+    if(removedTurns && removedTurns.length){
+        firstGen = firstGen.filter((fgm) => {
+            let findSame = removedTurns.find((rtm) => {
+                return fgm.xClicked === rtm.xClicked && fgm.yClicked === rtm.yClicked && rtm.pieceCounter === fgm.pieceCounter
+            })
+            return findSame !== undefined;
+        })
+    }
+    if(depth === 2){
+
+        const secondGen = filtersDepth >= 2 && filtersEnemy ? generateMovesFromMoves(firstGen, enemy,state.board,filters) : generateMovesFromMoves(firstGen, enemy,state.board);
+    
+        evalMoves(secondGen,maximizer,state.board,magnifiers);
+        evalParents(firstGen,secondGen,true);
+        return getMoveByValue(firstGen)
+    }
+    else if(depth === 3){
+        const secondGen = filtersDepth >= 2 && filtersEnemy ? generateMovesFromMoves(firstGen, enemy,state.board,filters) : generateMovesFromMoves(firstGen, enemy,state.board);
+        const thirdGen =filtersDepth >= 3? generateMovesFromMoves(secondGen, maximizer,state.board,filters) : generateMovesFromMoves(secondGen, maximizer,state.board);
+    
+        evalMoves(thirdGen,maximizer,state.board,magnifiers);
+        evalParents(secondGen,thirdGen);
+        evalParents(firstGen,secondGen, true);
+
+        return getMoveByValue(firstGen)
+
+    }
+
+    else if(depth >= 4){
+        const secondGen = filtersDepth >= 2 && filtersEnemy ? generateMovesFromMoves(firstGen, enemy,state.board,filters) : generateMovesFromMoves(firstGen, enemy,state.board);
+        const thirdGen =filtersDepth >= 3? generateMovesFromMoves(secondGen, maximizer,state.board,filters) : generateMovesFromMoves(secondGen, maximizer,state.board);
+        const fourthGen = filtersDepth >= 4 && filtersEnemy ?generateMovesFromMoves(thirdGen, enemy,state.board, filters) : generateMovesFromMoves(thirdGen, enemy,state.board, filters);
+        
+        evalMoves(fourthGen,maximizer,state.board,defaultCharacter(0));
+        evalParents(thirdGen, fourthGen,true);
+        evalParents(secondGen, thirdGen,false);
+        evalParents(firstGen,secondGen,true);
+    
+        return getMoveByValue(firstGen)
     }
     else{
-        return minimaxDve(state,maximizer, depth, removedTurns);
+        return getMoveByValue(firstGen)
     }
 }
 
 
 self.addEventListener("message", function(e) {
     let obj = JSON.parse(e.data)
-    console.log('mesedj?')
     if(!obj.state.won){
-        //generateMovesFromPieces(obj.state,'black')
-            console.time('minimax')
-            //generateMovesFromPieces(obj.state,'black')
-            let move = minimax(obj.state,obj.color,obj.depth, obj.removedTurns)
-            console.timeEnd('minimax');
+
+            let move;
+            if(obj.AIPower === 0){
+                move = minimaxDeep(obj.state,obj.color,1, obj.removedTurns,)
+            }
+            else if(obj.AIPower === 1){
+                move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
+                    defaultCharacter(0),
+                    [
+                    {method:removeNonAttackingMovesFilter, options:{maximum:2,minPieceValue:2,randomException:0.3, filterDepth:1,
+                    exceptions:[pieceValueMustBeSmallerThanException,randomException]}},
+                    {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
+                    ]
+                )
+            }
+            else if(obj.AIPower === 2){
+
+                move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
+                    defaultCharacter(3),
+                    [
+                    {method:removeNonAttackingMovesFilter, options:{maximum:2,minPieceValue:2,randomException:0.3, 
+                    exceptions:[pieceValueMustBeSmallerThanException,randomException]}},
+                    {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
+                    ]
+                )
+
+            }
+            else if(obj.AIPower === 3){
+                move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
+                    defaultCharacter(0),
+                    []
+                )
+            }
+            else if(obj.AIPower === 4){
+                move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
+                    defaultCharacter(3),
+                    []
+                )
+            }
 
             move.removedTurns = obj.removedTurns;
-            console.time('postMessage')
             postMessage(JSONfn.stringify(move))
-            console.timeEnd('postMessage')
 
     }
 })
