@@ -107,7 +107,7 @@ self.addEventListener("message", function(e) {
             else if(obj.AIPower === 2){
 
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
-                    methods[obj.AICharacter](2),
+                    methods[obj.AICharacter](1),
                     [
                     {method:removeNonAttackingMovesFilter, options:{maximum:2,minPieceValue:2,randomException:0.3, 
                     exceptions:[pieceValueMustBeSmallerThanException,randomException]}},
@@ -124,7 +124,7 @@ self.addEventListener("message", function(e) {
             }
             else if(obj.AIPower === 4){
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
-                    methods[obj.AICharacter](2),
+                    methods[obj.AICharacter](1),
                     []
                 )
             }

@@ -31,6 +31,16 @@ function prohodBoard(board){
     }
 }
 
+function xyBoard(byX,byY,board){
+    board.length = 0;
+    for (let x = 0; x <= byX; x++) {
+        for (let y = 0; y <= byY; y++) {
+                
+                board.push({ light: false, x: x, y: y })
+        }
+    }
+}
+
 function raceChess(pieces, board){
     pieces.length = 0;
     board.length = 0;
@@ -62,6 +72,10 @@ function prohodRaceChoiceChess(pieces,board,raceWhite,raceBlack){
     prohodBoard(board)
 
 }
+
+
+
+
 
 function raceChoiceChess(pieces, board,raceWhite,raceBlack){
     pieces.length = 0;
@@ -588,6 +602,90 @@ function placeRandomPieces(pieces, next,maxX, maxY) {
     }
 }
 
+function missionOne(pieces,board){
+    for (let x = 0; x <= 7; x++) {
+        for (let y = 0; y <= 7; y++) {
+            const shirinni = !(x==4 || x==3|| x==2)
+            const viso4inni = y ===0 || y ===1 || y === 2
+            if(!((viso4inni && shirinni))){
+                board.push({ light: false, x: x, y: y })
+            }
+
+        }
+    }
+    pieces.length = 0;
+
+    pieces.push(
+        pawnFactory('black',2,2),pawnFactory('black',3,2),pawnFactory('black',4,2),
+        knightFactory('black',2,1),knightFactory('black',3,1),knightFactory('black',4,1),
+        rookFactory('black',2,0 ),kingFactory('black',3,0), rookFactory('black',4,0)
+    )
+
+    pieces.push(
+        bishopFactory('white',7,6),bishopFactory('white',0,4),
+        bishopFactory('white',7,5),bishopFactory('white',0,5),
+        pawnFactory('white',2,4),pawnFactory('white',3,4),pawnFactory('white',4,4),
+        pawnFactory('white',2,5),pawnFactory('white',3,5),pawnFactory('white',4,5),
+    )
+
+}
+
+
+function missionTwo(pieces,board){
+    xyBoard(7,7,board)
+    pieces.length = 0;
+
+    pieces.push(
+        knightFactory('black',0,0),knightFactory('black',0,2),knightFactory('black',0,1),
+        knightFactory('black',1,0),knightFactory('black',1,2),knightFactory('black',1,1),
+        knightFactory('black',2,0 ),knightFactory('black',2,1),knightFactory('black',2,2),
+
+        pawnFactory('black',3,2),pawnFactory('black',4,2),
+        knightFactory('black',3,1),knightFactory('black',4,1),
+        kingFactory('black',4,0), queenFactory('black',3,0),
+
+        knightFactory('black',5,0),knightFactory('black',5,1),knightFactory('black',5,2),
+        knightFactory('black',6,0),knightFactory('black',6,1),knightFactory('black',6,2),
+        knightFactory('black',7,0 ),knightFactory('black',7,1),knightFactory('black',7,2),
+    )
+
+    pieces.push(
+
+        pawnFactory('white',0,7),pawnFactory('white',1,7),pawnFactory('white',2,7),
+        pawnFactory('white',3,7),pawnFactory('white',4,7),pawnFactory('white',5,7),
+        pawnFactory('white',6,7),pawnFactory('white',7,7),
+
+        pawnFactory('white',0,6),pawnFactory('white',1,6),pawnFactory('white',2,6),
+        pawnFactory('white',3,6),pawnFactory('white',4,6),pawnFactory('white',5,6),
+        pawnFactory('white',6,6),pawnFactory('white',7,6),
+
+        pawnFactory('white',0,5),pawnFactory('white',1,5),pawnFactory('white',2,5),
+        pawnFactory('white',3,5),pawnFactory('white',4,5),pawnFactory('white',5,5),
+        pawnFactory('white',6,5),pawnFactory('white',7,5),
+        
+    )
+
+}
+
+function missionClassicBugsThree(pieces,board){
+    xyBoard(5,5,board)
+    pieces.length = 0;
+
+    pieces.push(
+        knightFactory('black',5,5),
+        
+    )
+
+    pieces.push(
+        queenBugFactory('white',0,1),
+        queenBugFactory('white',2,1),
+        queenBugFactory('white',4,1)
+    )
+
+}
+
+
+
 function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -602,7 +700,10 @@ try{
         raceChoiceChess: raceChoiceChess,
         hugeRandomChess:hugeRandomChess,
         grandRandomChess:grandRandomChess,
-        prohodRaceChoiceChess:prohodRaceChoiceChess
+        prohodRaceChoiceChess:prohodRaceChoiceChess,
+        missionOne:missionOne,
+        missionTwo:missionTwo,
+        missionClassicBugsThree:missionClassicBugsThree
     };
 }
 catch(err){

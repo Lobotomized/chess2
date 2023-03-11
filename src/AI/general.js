@@ -78,6 +78,10 @@ function evaluateBoard(colorPerspective, pieces, board,magnifierMethods){
          }
          piecesCounter++
      }
+     if(movesAndPieces.length  === 0 && filters && filters.length > 0){
+        console.log(filters)
+        return generateMovesFromPieces(state,color)
+     }
      return movesAndPieces
  }
 
