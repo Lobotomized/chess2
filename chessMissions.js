@@ -107,6 +107,10 @@ let lobby = newG({properties:{
                             }
                         }
                     }
+
+                    if(state.specialWinConditions && state.specialWinConditions.length){
+                        
+                    }
                 }
                 else {
                     closeLights(state.board);

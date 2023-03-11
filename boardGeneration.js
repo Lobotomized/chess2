@@ -41,7 +41,9 @@ function xyBoard(byX,byY,board){
     }
 }
 
-function raceChess(pieces, board){
+function raceChess(state){
+    pieces = state.pieces;
+    board = state.board;
     pieces.length = 0;
     board.length = 0;
     for (let x = 1; x <= 8; x++) {
@@ -66,8 +68,8 @@ function raceChess(pieces, board){
     )
 }
 
-function prohodRaceChoiceChess(pieces,board,raceWhite,raceBlack){
-    raceChoiceChess(pieces,board,raceWhite,raceBlack);
+function prohodRaceChoiceChess(state,raceWhite,raceBlack){
+    raceChoiceChess(state,raceWhite,raceBlack);
     board.length = 0;
     prohodBoard(board)
 
@@ -77,7 +79,9 @@ function prohodRaceChoiceChess(pieces,board,raceWhite,raceBlack){
 
 
 
-function raceChoiceChess(pieces, board,raceWhite,raceBlack){
+function raceChoiceChess(state,raceWhite,raceBlack){
+    pieces = state.pieces;
+    board = state.board;
     pieces.length = 0;
     if(!board.length){
         for (let x = 0; x <= 7; x++) {
@@ -199,7 +203,9 @@ function raceChoiceChess(pieces, board,raceWhite,raceBlack){
 }
 
 
-function mongolianChess(pieces,board){
+function mongolianChess(state){
+    pieces = state.pieces;
+    board = state.board;
     pieces.length = 0;
     board.length = 0;
     for (let x = 1; x <= 9; x++) {
@@ -222,9 +228,12 @@ function mongolianChess(pieces,board){
     }
 }
 
-function miniChess(pieces, board){
+function miniChess(state){
+    pieces = state.pieces;
+    board = state.board;
     pieces.length = 0;
     board.length = 0;
+    
     for (let x = 1; x <= 6; x++) {
         for (let y = 1; y <= 6; y++) {
             board.push({ light: false, x: x, y: y })
@@ -252,7 +261,9 @@ function miniChess(pieces, board){
         )
 }
 
-function classicChess(pieces, board){
+function classicChess(state){
+    pieces = state.pieces;
+    board = state.board;
     pieces.length = 0;
     board.length = 0;
 
@@ -288,7 +299,9 @@ function classicChess(pieces, board){
   
 }
 
-function randomChess(pieces,board){
+function randomChess(state){
+    pieces = state.pieces;
+    board = state.board;
     pieces.length = 0;
     board.length = 0;
 
@@ -308,7 +321,9 @@ function randomChess(pieces,board){
 
 }
 
-function hugeRandomChess(pieces,board){
+function hugeRandomChess(state){
+    pieces = state.pieces;
+    board = state.board;
     pieces.length = 0;
     board.length = 0;
 
@@ -328,7 +343,9 @@ function hugeRandomChess(pieces,board){
 
 }
 
-function grandRandomChess(pieces,board){
+function grandRandomChess(state){
+    pieces = state.pieces;
+    board = state.board;
     pieces.length = 0;
     board.length = 0;
 
@@ -348,7 +365,9 @@ function grandRandomChess(pieces,board){
 
 }
 
-function catchTheDragon(pieces, board){
+function catchTheDragon(state){
+    pieces = state.pieces;
+    board = state.board;
 
     pieces.length = 0;
     board.length = 0;
@@ -371,7 +390,9 @@ function catchTheDragon(pieces, board){
 
 }
 
-function makeBoard(pieces, board) {
+function makeBoard(state) {
+    pieces = state.pieces;
+    board = state.board;
     pieces.length = 0;
     board.length = 0;
     for (let x = 1; x <= 6; x++) {
@@ -602,7 +623,9 @@ function placeRandomPieces(pieces, next,maxX, maxY) {
     }
 }
 
-function missionOne(pieces,board){
+function missionOne(state){
+    pieces = state.pieces;
+    board = state.board;
     for (let x = 0; x <= 7; x++) {
         for (let y = 0; y <= 7; y++) {
             const shirinni = !(x==4 || x==3|| x==2)
@@ -631,7 +654,9 @@ function missionOne(pieces,board){
 }
 
 
-function missionTwo(pieces,board){
+function missionTwo(state){
+    pieces = state.pieces;
+    board = state.board;
     xyBoard(7,7,board)
     pieces.length = 0;
 
@@ -667,19 +692,21 @@ function missionTwo(pieces,board){
 
 }
 
-function missionClassicBugsThree(pieces,board){
+function missionClassicBugsThree(state){
+    pieces = state.pieces;
+    board = state.board;
     xyBoard(5,5,board)
     pieces.length = 0;
 
     pieces.push(
-        knightFactory('black',5,5),
+        knightFactory('black',4,5),
         
     )
 
     pieces.push(
-        queenBugFactory('white',0,1),
-        queenBugFactory('white',2,1),
-        queenBugFactory('white',4,1)
+        queenBugFactory('white',0,0),
+        queenBugFactory('white',2,0),
+        queenBugFactory('white',4,0)
     )
 
 }
