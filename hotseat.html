@@ -78,7 +78,7 @@ let ani = function(){
     let mouseY;
     let st = undefined;
     let endGame = false;
-    let boardheight;
+    let boardHeight;
     let boardWidth;
     let state;
     let hoveredPiece;
@@ -135,7 +135,7 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
         //Draw the game
         const myTurnH1 = document.getElementById('turn');
         canvas.width = squareLength * boardWidth + squareLength;
-        canvas.height = squareLength * boardWidth + squareLength;
+        canvas.height = squareLength * boardHeight + squareLength;
         state = secretState;
         if(hoveredPiece){
             if(hoveredPiece.color != hotseatGame.state.turn && hotseatGame.state.turn != undefined){

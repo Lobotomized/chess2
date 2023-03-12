@@ -689,10 +689,12 @@ function missionTwo(state){
         pawnFactory('white',6,5),pawnFactory('white',7,5),
         
     )
-
 }
 
-function missionClassicBugsThree(state){
+
+
+
+function missionClassicBugsOne(state){
     pieces = state.pieces;
     board = state.board;
     xyBoard(5,5,board)
@@ -711,6 +713,127 @@ function missionClassicBugsThree(state){
 
 }
 
+function missionClassicBugsTwo(state){
+    pieces = state.pieces;
+    board = state.board;
+    xyBoard(4,6,board)
+    pieces.length = 0;
+
+    pieces.push(
+        unpromotablePawn('black',4,1),
+        unpromotablePawn('black',3,1),
+        unpromotablePawn('black',2,1),
+        unpromotablePawn('black',1,1),
+        unpromotablePawn('black',0,1),
+
+        bishopFactory('black',0,0),
+        knightFactory('black', 1,0),
+        kingFactory('black',2,0),
+        knightFactory('black', 3,0),
+        bishopFactory('black', 4,0)
+    )
+
+    pieces.push(
+        spiderFactory('white',0,6),
+        spiderFactory('white',2,6),
+        spiderFactory('white',4,6)
+    )
+
+}
+
+function missionClassicBugsThree(state){
+    pieces = state.pieces;
+    board = state.board;
+    xyBoard(7,7,board)
+    pieces.length = 0;
+
+    pieces.push(
+
+        knightFactory('black',7,1),
+        knightFactory('black',6,1),
+        knightFactory('black',7,0),
+        knightFactory('black', 6,0),
+        
+
+        rookFactory('black',3,0),
+
+        pawnFactory('black',3,1),
+        pawnFactory('black',2,1),
+        pawnFactory('black',4,1),
+        pawnFactory('black',5,1),
+
+        knightFactory('black',1,1),
+        knightFactory('black',0,1),
+        knightFactory('black',0,0),
+        knightFactory('black', 1,0),
+
+        bishopFactory('black',2,0),
+        bishopFactory('black', 5,0),
+
+
+        kingFactory('black',4,0),
+
+    )
+
+    pieces.push(
+        queenBugFactory('white',0,7),
+        goliathBugFactory('white',1,7),
+        queenBugFactory('white',2,7),
+        goliathBugFactory('white',3,7),
+        queenBugFactory('white',4,7),
+        goliathBugFactory('white',5,7),
+        queenBugFactory('white',6,7),
+        goliathBugFactory('white',7,7),
+
+        antFactory('white',0,6),
+        antFactory('white',1,6),
+        antFactory('white',2,6),
+        antFactory('white',3,6),
+        antFactory('white',4,6),
+        antFactory('white',5,6),
+        antFactory('white',6,6),
+        antFactory('white',7,6)        
+
+
+    )
+
+}
+
+
+function missionClassicBugsFour(state){
+    pieces = state.pieces;
+    board = state.board;
+    xyBoard(7,7,board)
+    pieces.length = 0;
+
+    pieces.push(
+
+
+        pawnFactory('black',3,4),
+        pawnFactory('black',4,4),
+        pawnFactory('black',5,4),
+        pawnFactory('black',2,4),
+
+        pawnFactory('black',3,2),
+        pawnFactory('black',4,2),
+        pawnFactory('black',5,2),
+        pawnFactory('black',2,2),
+
+        rookFactory('black',2,3),
+        rookFactory('black',5,3),
+
+        kingFactory('black',4,3),
+        kingFactory('black',3,3),
+    )
+
+    pieces.push(
+        strongLadyBugFactory('white',0,7),
+        strongLadyBugFactory('white',7,7),
+        strongLadyBugFactory('white',7,0),
+        strongLadyBugFactory('white',0,0),
+    )
+
+}
 
 
 function getRndInteger(min, max) {
@@ -730,6 +853,8 @@ try{
         prohodRaceChoiceChess:prohodRaceChoiceChess,
         missionOne:missionOne,
         missionTwo:missionTwo,
+        missionClassicBugsOne:missionClassicBugsOne,
+        missionClassicBugsTwo:missionClassicBugsTwo,
         missionClassicBugsThree:missionClassicBugsThree
     };
 }
