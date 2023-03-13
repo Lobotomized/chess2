@@ -910,7 +910,7 @@ function missionClassicBugsFive(state){
         }
     }
 
-    state.countDown = 30;
+    state.countDown = 34;
     state.specialOnMoveEffects = [
         function(state){
             state.countDown -=1;
@@ -920,11 +920,17 @@ function missionClassicBugsFive(state){
                 })
 
                 for(let i = 7; i>=0 ; i--){
-                    console.log('wt!?')
                     state.pieces.push(knightFactory('black',i,7))
                 }
             }
             else if(state.countDown > 0){
+                state.pieces.forEach((piece) => {
+
+                    if(piece.color === 'white'){
+                        piece.value = 0.0001;
+                    }
+    
+                })
                 if(findPieceByXY(state.pieces,2,7) === -1){
                     placeRandomBug(state.pieces,2,7)
                 }
@@ -938,16 +944,26 @@ function missionClassicBugsFive(state){
                     placeRandomBug(state.pieces,5,7)
                 }
             }
-            
-            state.pieces.forEach((piece) => {
+            else{
+                state.pieces.forEach((piece) => {
 
-                if(piece.color === 'white'){
-                    piece.value = 0.0001;
-                }
-                if(piece.color === 'black'){
-                    piece.value = 0.0001;
-                }
-            })
+                    if(piece.icon.includes('Ladybug.png')){
+                        piece.value = 7.5;
+                    }
+                    else if(piece.icon.icludes('Spider.png')){
+                        piece.value= 5.5;
+                    }
+                    else if(piece.icon.includes('Ant.png')){
+                        piece.value = 0.6;
+                    }
+                    else if(piece.icon.includes('GoliathBug.png')){
+                        piece.value = 7.5;
+                    }
+    
+                })
+            }
+            
+
 
         }
     ]
