@@ -950,7 +950,7 @@ function missionClassicBugsFive(state){
                     if(piece.icon.includes('Ladybug.png')){
                         piece.value = 7.5;
                     }
-                    else if(piece.icon.icludes('Spider.png')){
+                    else if(piece.icon.includes('Spider.png')){
                         piece.value= 5.5;
                     }
                     else if(piece.icon.includes('Ant.png')){
