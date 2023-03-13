@@ -357,6 +357,11 @@ function getSinglePlayerGame() {
                 }
                 if (state.pieceSelected) {
                     if (playerMove(move, state)) {
+                        if(state.specialWinConditions && state.specialWinConditions.length){
+                            state.specialWinConditions.forEach((winCondition) => {
+                                winCondition(state);
+                            })
+                        }
                         changeTurn(state)
                         for (let i = state.pieces.length - 1; i >= 0; i--) {
                             if(state.pieces[i].color ==  state.turn){

@@ -107,9 +107,11 @@ let lobby = newG({properties:{
                             }
                         }
                     }
-
+                    console.log('tuka!?')
                     if(state.specialWinConditions && state.specialWinConditions.length){
-                        
+                        specialWinConditions.forEach((winCondition) => {
+                            winCondition(state);
+                        })
                     }
                 }
                 else {

@@ -636,6 +636,20 @@ function missionOne(state){
 
         }
     }
+
+    state.specialWinConditions = [
+        function(state){
+            if(state.pieces.length){
+                let whitePiece = state.pieces.find((piece) => {
+                    return piece.color === 'white'
+                })
+
+                if(!whitePiece){
+                    state.won = 'black';
+                }
+            }
+        }
+    ]
     pieces.length = 0;
 
     pieces.push(
@@ -659,6 +673,20 @@ function missionTwo(state){
     board = state.board;
     xyBoard(7,7,board)
     pieces.length = 0;
+
+    state.specialWinConditions = [
+        function(state){
+            if(state.pieces.length){
+                let whitePiece = state.pieces.find((piece) => {
+                    return piece.color === 'white'
+                })
+
+                if(!whitePiece){
+                    state.won = 'black';
+                }
+            }
+        }
+    ]
 
     pieces.push(
         knightFactory('black',0,0),knightFactory('black',0,2),knightFactory('black',0,1),
@@ -699,6 +727,27 @@ function missionClassicBugsOne(state){
     board = state.board;
     xyBoard(5,5,board)
     pieces.length = 0;
+    state.specialWinConditions = [
+        function(state){
+            if(state.pieces.length){
+                let queenBug = state.pieces.find((piece) => {
+                    return piece.icon.includes('QueenBug')
+                })
+
+                if(!queenBug){
+                    state.won = 'black'
+                }
+
+                let blackPiece = state.pieces.find((piece) => {
+                    return piece.color === 'black';
+                })
+
+                if(!blackPiece){
+                    state.won = 'white'
+                }
+            }
+        }
+    ]
 
     pieces.push(
         knightFactory('black',4,5),
@@ -718,6 +767,20 @@ function missionClassicBugsTwo(state){
     board = state.board;
     xyBoard(4,6,board)
     pieces.length = 0;
+
+    state.specialWinConditions = [
+        function(state){
+            if(state.pieces.length){
+                let whitePiece = state.pieces.find((piece) => {
+                    return piece.color === 'white'
+                })
+
+                if(!whitePiece){
+                    state.won = 'black';
+                }
+            }
+        }
+    ]
 
     pieces.push(
         unpromotablePawn('black',4,1),
@@ -746,6 +809,20 @@ function missionClassicBugsThree(state){
     board = state.board;
     xyBoard(7,7,board)
     pieces.length = 0;
+
+    state.specialWinConditions = [
+        function(state){
+            if(state.pieces.length){
+                let whitePiece = state.pieces.find((piece) => {
+                    return piece.color === 'white'
+                })
+
+                if(!whitePiece){
+                    state.won = 'black';
+                }
+            }
+        }
+    ]
 
     pieces.push(
 
@@ -806,6 +883,20 @@ function missionClassicBugsFour(state){
     xyBoard(7,7,board)
     pieces.length = 0;
 
+    state.specialWinConditions = [
+        function(state){
+            if(state.pieces.length){
+                let whitePiece = state.pieces.find((piece) => {
+                    return piece.color === 'white'
+                })
+
+                if(!whitePiece){
+                    state.won = 'black';
+                }
+            }
+        }
+    ]
+
     pieces.push(
 
 
@@ -855,7 +946,8 @@ try{
         missionTwo:missionTwo,
         missionClassicBugsOne:missionClassicBugsOne,
         missionClassicBugsTwo:missionClassicBugsTwo,
-        missionClassicBugsThree:missionClassicBugsThree
+        missionClassicBugsThree:missionClassicBugsThree,
+        missionClassicBugsFour:missionClassicBugsFour
     };
 }
 catch(err){
