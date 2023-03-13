@@ -775,19 +775,25 @@ function missionClassicBugsTwo(state){
                     return piece.color === 'white'
                 })
 
-                if(!whitePiece){
+                let endOfLine = state.pieces.find((piece) => {
+                    return piece.icon.includes('King.png') && piece.y === 6
+                })
+
+                if(!whitePiece || endOfLine){
                     state.won = 'black';
                 }
+
+                
             }
         }
     ]
 
     pieces.push(
-        unpromotablePawn('black',4,1),
-        unpromotablePawn('black',3,1),
-        unpromotablePawn('black',2,1),
-        unpromotablePawn('black',1,1),
-        unpromotablePawn('black',0,1),
+        pawnFactory('black',4,1),
+        pawnFactory('black',3,1),
+        pawnFactory('black',2,1),
+        pawnFactory('black',1,1),
+        pawnFactory('black',0,1),
 
         bishopFactory('black',0,0),
         knightFactory('black', 1,0),
