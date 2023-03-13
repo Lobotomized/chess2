@@ -9,7 +9,8 @@ try{
         cyborgFactory, executorFactory,crystalFactory,empoweredCrystalFactory,juggernautFactory,bootVesselFactory, electricCatFactory, scaryCatFactory, longCatFactory,
         fatCatFactory,
         blindCatFactory,
-        cuteCatFactory
+        cuteCatFactory,
+        strongLadyBugFactory
 
         
     
@@ -423,6 +424,20 @@ function makeBoard(state) {
     
 }
 
+function placeRandomBug(pieces,x,y){
+    const which = getRndInteger(1, 7)
+
+    switch(which){
+        case 1,2: pieces.push(strongLadyBugFactory('white',x,y))
+        break;
+        case 3,4: pieces.push(spiderFactory('white',x,y))
+        break;
+        case 5,6: pieces.push(goliathBugFactory('white',x,y))
+        break;
+        case 7: pieces.push(antFactory('white',x,y))
+        break;
+    }
+}   
 
 function placeRandomFrontPiece(pieces,next,maxX, maxY) {
     const which = getRndInteger(1, 7)
@@ -637,7 +652,7 @@ function missionOne(state){
         }
     }
 
-    state.specialWinConditions = [
+    state.specialOnMoveEffects = [
         function(state){
             if(state.pieces.length){
                 let whitePiece = state.pieces.find((piece) => {
@@ -674,7 +689,7 @@ function missionTwo(state){
     xyBoard(7,7,board)
     pieces.length = 0;
 
-    state.specialWinConditions = [
+    state.specialOnMoveEffects = [
         function(state){
             if(state.pieces.length){
                 let whitePiece = state.pieces.find((piece) => {
@@ -727,7 +742,7 @@ function missionClassicBugsOne(state){
     board = state.board;
     xyBoard(5,5,board)
     pieces.length = 0;
-    state.specialWinConditions = [
+    state.specialOnMoveEffects = [
         function(state){
             if(state.pieces.length){
                 let queenBug = state.pieces.find((piece) => {
@@ -768,7 +783,7 @@ function missionClassicBugsTwo(state){
     xyBoard(4,6,board)
     pieces.length = 0;
 
-    state.specialWinConditions = [
+    state.specialOnMoveEffects = [
         function(state){
             if(state.pieces.length){
                 let whitePiece = state.pieces.find((piece) => {
@@ -816,7 +831,7 @@ function missionClassicBugsThree(state){
     xyBoard(7,7,board)
     pieces.length = 0;
 
-    state.specialWinConditions = [
+    state.specialOnMoveEffects = [
         function(state){
             if(state.pieces.length){
                 let whitePiece = state.pieces.find((piece) => {
@@ -882,21 +897,98 @@ function missionClassicBugsThree(state){
 
 }
 
+function missionClassicBugsFive(state){
+    pieces = state.pieces;
+    board = state.board;
+    pieces.length = 0;
+    board.length = 0;
+    for (let x = 0; x <= 7; x++) {
+        for (let y = 0; y <= 7; y++) {
+            if(!((y===5 && !(x==4 || x==3 || x==2 || x==5)) || (y===4 && !(x==4 || x==3 || x==2 || x==5)))){
+                board.push({ light: false, x: x, y: y })
+            }
+        }
+    }
+
+    state.countDown = 30;
+    state.specialOnMoveEffects = [
+        function(state){
+            state.countDown -=1;
+            if(state.countDown === 0){
+                state.pieces = state.pieces.filter((piece) =>{
+                    return !(piece.color === 'white' && piece.y === 7)
+                })
+
+                for(let i = 7; i>=0 ; i--){
+                    console.log('wt!?')
+                    state.pieces.push(knightFactory('black',i,7))
+                }
+            }
+            else if(state.countDown > 0){
+                if(findPieceByXY(state.pieces,2,7) === -1){
+                    placeRandomBug(state.pieces,2,7)
+                }
+                if(findPieceByXY(state.pieces,3,7) === -1){
+                    placeRandomBug(state.pieces,3,7)
+                }
+                if(findPieceByXY(state.pieces,4,7) === -1){
+                    placeRandomBug(state.pieces,4,7)
+                }
+                if(findPieceByXY(state.pieces,5,7) === -1){
+                    placeRandomBug(state.pieces,5,7)
+                }
+            }
+            
+            state.pieces.forEach((piece) => {
+
+                if(piece.color === 'white'){
+                    piece.value = 0.0001;
+                }
+                if(piece.color === 'black'){
+                    piece.value = 0.0001;
+                }
+            })
+
+        }
+    ]
+
+
+    pieces.push(
+        spiderFactory('white',0,7),spiderFactory('white',1,7),
+        spiderFactory('white',6,7),spiderFactory('white',7,7)
+    )
+
+    pieces.push(
+        pawnFactory('black',2,4),pawnFactory('black',3,4),pawnFactory('black',4,4),pawnFactory('black',5,4),
+        pawnFactory('black',1,3),pawnFactory('black',2,3),pawnFactory('black',3,3),pawnFactory('black',4,3),pawnFactory('black',5,3),pawnFactory('black',6,3),
+
+        kingFactory('black',4,0),
+
+        rookFactory('black',2,0),rookFactory('black',5,0),
+        bishopFactory('black',0,0),bishopFactory('black',7,0)
+    )
+}
+
 
 function missionClassicBugsFour(state){
     pieces = state.pieces;
     board = state.board;
     xyBoard(7,7,board)
     pieces.length = 0;
+    
 
-    state.specialWinConditions = [
+    state.specialOnMoveEffects = [
         function(state){
             if(state.pieces.length){
                 let whitePiece = state.pieces.find((piece) => {
                     return piece.color === 'white'
                 })
 
-                if(!whitePiece){
+                let endOfLine = state.pieces.find((piece) => {
+                    return piece.icon.includes('King.png') && piece.y !== 7
+                })
+
+                if(!whitePiece || !endOfLine){
                     state.won = 'black';
                 }
             }
@@ -904,21 +996,16 @@ function missionClassicBugsFour(state){
     ]
 
     pieces.push(
-
-
         pawnFactory('black',3,4),
         pawnFactory('black',4,4),
         pawnFactory('black',5,4),
         pawnFactory('black',2,4),
-
         pawnFactory('black',3,2),
         pawnFactory('black',4,2),
         pawnFactory('black',5,2),
         pawnFactory('black',2,2),
-
         rookFactory('black',2,3),
         rookFactory('black',5,3),
-
         kingFactory('black',4,3),
         kingFactory('black',3,3),
     )

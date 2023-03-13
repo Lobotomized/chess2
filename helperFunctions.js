@@ -357,9 +357,9 @@ function getSinglePlayerGame() {
                 }
                 if (state.pieceSelected) {
                     if (playerMove(move, state)) {
-                        if(state.specialWinConditions && state.specialWinConditions.length){
-                            state.specialWinConditions.forEach((winCondition) => {
-                                winCondition(state);
+                        if(state.specialOnMoveEffects && state.specialOnMoveEffects.length){
+                            state.specialOnMoveEffects.forEach((effect) => {
+                                effect(state);
                             })
                         }
                         changeTurn(state)

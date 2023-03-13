@@ -107,9 +107,8 @@ let lobby = newG({properties:{
                             }
                         }
                     }
-                    console.log('tuka!?')
-                    if(state.specialWinConditions && state.specialWinConditions.length){
-                        specialWinConditions.forEach((winCondition) => {
+                    if(state.specialOnMoveEffects && state.specialOnMoveEffects.length){
+                        specialOnMoveEffects.forEach((winCondition) => {
                             winCondition(state);
                         })
                     }
