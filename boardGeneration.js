@@ -917,7 +917,7 @@ function missionClassicBugsFive(state){
             state.countDown -=1;
             if(state.countDown === 0){
                 state.pieces = state.pieces.filter((piece) =>{
-                    return !(piece.color === 'white' && piece.y === 7)
+                    return piece.y !== 7
                 })
 
                 for(let i = 7; i>=0 ; i--){
