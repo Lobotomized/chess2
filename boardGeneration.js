@@ -898,6 +898,46 @@ function missionClassicBugsThree(state){
 
 }
 
+
+
+function missionClassicBugsSix(state){
+    pieces = state.pieces;
+    board = state.board;
+    pieces.length = 0;
+    board.length = 0;
+    xyBoard(8,8,board);
+
+
+
+    pieces.push(
+        pawnFactory('black',0,2),pawnFactory('black',1,2),pawnFactory('black',2,2),pawnFactory('black',3,2),
+        pawnFactory('black',4,2),pawnFactory('black',5,2),pawnFactory('black',6,2),pawnFactory('black',7,2),pawnFactory('black',8,2),
+
+        queenFactory('black',2,0),kingFactory('black',3,0), kingFactory('black',4,0), kingFactory('black',5,0),queenFactory('black',6,0),
+
+        knightFactory('black',0,0),knightFactory('black',0,1),knightFactory('black',1,0),knightFactory('black',1,1),
+        knightFactory('black',7,0),knightFactory('black',7,1),knightFactory('black',8,0),knightFactory('black',8,1),
+
+        rookFactory('black',6,1),rookFactory('black',2,1),
+        bishopFactory('black',3,1),bishopFactory('black',4,1),bishopFactory('black',5,1),
+
+
+        antFactory('white',0,5),antFactory('white',1,5),antFactory('white',2,5),antFactory('white',3,5),
+        antFactory('white',4,5),antFactory('white',5,5),antFactory('white',6,5),antFactory('white',7,5),antFactory('white',8,5),
+        antFactory('white',0,6),antFactory('white',1,6),antFactory('white',2,6),antFactory('white',3,6),
+        antFactory('white',4,6),antFactory('white',5,6),antFactory('white',6,6),antFactory('white',7,6),antFactory('white',8,6),
+        ladyBugFactory('white',0,7),queenBugFactory('white',1,7),
+        queenBugFactory('white',7,7),ladyBugFactory('white',8,7),
+        queenBugFactory('white',2,7),queenBugFactory('white',6,7),
+        goliathBugFactory('white',3,7),goliathBugFactory('white',4,7),goliathBugFactory('white',5,7),
+        shroomFactory('white',3,8),shroomFactory('white',4,8),shroomFactory('white',5,8),
+
+        spiderFactory('white',0,8),spiderFactory('white',1,8),spiderFactory('white',2,8),
+
+        spiderFactory('white',6,8),spiderFactory('white',7,8),spiderFactory('white',8,8),
+        )
+}
+
 function missionClassicBugsFive(state){
     pieces = state.pieces;
     board = state.board;
