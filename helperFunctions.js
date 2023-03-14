@@ -344,7 +344,7 @@ function getSinglePlayerGame() {
 
                 if(state.whiteRace && state.blackRace){
                     state.turn = 'white'
-                    raceChoiceChess(state.pieces,state.board,state.whiteRace,state.blackRace)
+                    raceChoiceChess(state,state.whiteRace,state.blackRace)
                 }
             }   
             else{

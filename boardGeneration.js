@@ -82,6 +82,7 @@ function prohodRaceChoiceChess(state,raceWhite,raceBlack){
 
 function raceChoiceChess(state,raceWhite,raceBlack){
     pieces = state.pieces;
+    console.log(state)
     board = state.board;
     pieces.length = 0;
     if(!board.length){
