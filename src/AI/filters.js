@@ -22,7 +22,7 @@ function removeAttackedMovesFilter(options){
     if(isPositionAttacked(options.state,options.color,am.x, am.y)){
       return false;
     }
-    return false;
+    return true;
   })
 
   return res;

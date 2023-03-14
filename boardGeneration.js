@@ -1077,6 +1077,182 @@ function missionClassicBugsFour(state){
 }
 
 
+function missionClassicMedievalSix(state){
+    pieces = state.pieces;
+    pieces.length =0;
+    board = state.board;
+    board.length = 0;
+
+
+    pieces.push(
+
+    )
+}
+
+
+function missionClassicMedievalFive(state){
+    pieces = state.pieces;
+    pieces.length =0;
+    board = state.board;
+    board.length = 0;
+    for (let x = 0; x <= 7; x++) {
+        for (let y = 0; y <= 7; y++) {
+            if(!((y===5 && !(x==4 || x==3 || x==2 || x==5)) || (y===4 && !(x==4 || x==3 || x==2 || x==5)))){
+                board.push({ light: false, x: x, y: y })
+            }
+        }
+    }
+
+    pieces.push(
+        horseFactory('white',6,6),
+        horseFactory('white',7,7),
+
+        horseFactory('white',1,6),
+        horseFactory('white',0,7),
+
+        pigFactory('white',2,7),pigFactory('white',3,7),
+        pigFactory('white',4,7),pigFactory('white',5,7),
+
+        ghostFactory('white',2,6),ghostFactory('white',3,6),
+        ghostFactory('white',4,6),ghostFactory('white',5,6),
+
+
+        pawnFactory('black',1,3),pawnFactory('black',2,3),pawnFactory('black',3,3),pawnFactory('black',4,3),pawnFactory('black',5,3),pawnFactory('black',6,3),
+        pawnFactory('black',2,4),pawnFactory('black',3,4),pawnFactory('black',4,4),pawnFactory('black',5,4),
+
+        kingFactory('black',7,0),queenFactory('black',6,0),bishopFactory('black',6,1),bishopFactory('black',7,1),
+
+        knightFactory('black',1,0),knightFactory('black',2,0),knightFactory('black',2,1),knightFactory('black',1,1)
+    )
+}
+
+
+function missionClassicMedievalFour(state){
+    pieces = state.pieces;
+    pieces.length =0;
+    board = state.board;
+    board.length = 0;
+    
+    xyBoard(7,7);
+
+    pieces.push(
+
+    )
+}
+
+
+
+function missionClassicMedievalThree(state){
+    pieces = state.pieces;
+    pieces.length =0;
+    board = state.board;
+    board.length = 0;
+
+
+    pieces.push(
+        
+    )
+}
+
+function missionClassicMedievalTwo(state){
+    pieces = state.pieces;
+    pieces.length =0;
+    board = state.board;
+    board.length = 0;
+    xyBoard(6,6,board);
+
+    pieces.push(
+        unpromotablePawn('black',2,1),
+        unpromotablePawn('black',3,1),
+        unpromotablePawn('black',4,1),
+        unpromotablePawn('black',5,2),
+        unpromotablePawn('black',1,2),
+        unpromotablePawn('black',2,0),
+        unpromotablePawn('black',3,0),
+        unpromotablePawn('black',4,0),
+        unpromotablePawn('black',0,2),
+        unpromotablePawn('black',6,2),
+        unpromotablePawn('black',1,1),
+        unpromotablePawn('black',5,1),
+
+        bishopFactory('black',6,1),
+        horseFactory('white',3,3)
+    )
+}
+
+function missionClassicMedievalOne(state){
+    pieces = state.pieces;
+    pieces.length =0;
+    board = state.board;
+    board.length = 0;
+    xyBoard(6,6,board);
+    state.countDown = 24;
+    state.specialOnMoveEffects = [
+        function(state){
+            state.countDown-=1;
+
+            if(state.countDown > 0){
+                blackSquareColor = '#2C3333';
+                whiteSquareColor = '#CBE4DE';
+                dangerSquareColor = '#E7907F';
+                lightedSquareColor = '#0E8388';
+                blockedSquareColor = '#CF6A4E';
+                availableSquareColor = '#787F42';
+                backgroundColor = '#2E4F4F';
+                oldMoveSquareColor = '#D59148';
+                let line =  getRndInteger(0,6);
+                if(findPieceByXY(state.pieces,line,6) === -1){
+                    state.pieces.push(
+                        ghostFactory('white',line,6)
+                    )
+                }
+            }
+            else{
+                state.pieces = state.pieces.filter((piece) => {
+                    return !piece.icon.includes('Ghost.png')
+                })
+
+                blackSquareColor = '#7D6650';
+                whiteSquareColor = '#F7DFDA';
+                dangerSquareColor = '#E7907F';
+                lightedSquareColor = '#B0A875';
+                blockedSquareColor = '#CF6A4E';
+                availableSquareColor = '#787F42';
+                backgroundColor = '#675442';
+                oldMoveSquareColor = '#D59148';
+                state.won = 'black';
+            }
+
+            let bishop = state.pieces.find((piece)  => {
+                return piece.icon.includes('Bishop.png')
+            })
+
+            if(bishop === undefined){
+                state.won = 'white';
+            }
+        }
+    ]
+
+    pieces.push(
+        bishopFactory('black',3,0),
+        unpromotablePawn('black',0,1),
+        unpromotablePawn('black',1,1),
+        unpromotablePawn('black',2,1),
+        unpromotablePawn('black',3,1),
+        unpromotablePawn('black',4,1),
+        unpromotablePawn('black',5,1),
+        unpromotablePawn('black',6,1),
+
+        unpromotablePawn('black',0,0),
+        unpromotablePawn('black',1,0),
+        unpromotablePawn('black',2,0),
+        unpromotablePawn('black',4,0),
+        unpromotablePawn('black',5,0),
+        unpromotablePawn('black',6,0)
+    )
+}
+
+
 function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -1097,7 +1273,9 @@ try{
         missionClassicBugsOne:missionClassicBugsOne,
         missionClassicBugsTwo:missionClassicBugsTwo,
         missionClassicBugsThree:missionClassicBugsThree,
-        missionClassicBugsFour:missionClassicBugsFour
+        missionClassicBugsFour:missionClassicBugsFour,
+        missionClassicBugsFive:missionClassicBugsFive,
+        missionClassicBugsSix:missionClassicBugsSix
     };
 }
 catch(err){

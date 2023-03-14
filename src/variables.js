@@ -46,12 +46,12 @@
 // const oldMoveSquareColor = '#AF8964';
 
 //Deni Novi Novi
-const blackSquareColor = '#7D6650';
-const whiteSquareColor = '#F7DFDA';
-const dangerSquareColor = '#E7907F';
-const lightedSquareColor = '#B0A875';
-const blockedSquareColor = '#CF6A4E';
-const availableSquareColor = '#787F42';
-const backgroundColor = '#675442';
+let blackSquareColor = '#7D6650';
+let whiteSquareColor = '#F7DFDA';
+let dangerSquareColor = '#E7907F';
+let lightedSquareColor = '#B0A875';
+let blockedSquareColor = '#CF6A4E';
+let availableSquareColor = '#787F42';
+let backgroundColor = '#675442';
 
-const oldMoveSquareColor = '#D59148';
+let oldMoveSquareColor = '#D59148';
