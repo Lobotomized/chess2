@@ -1161,6 +1161,18 @@ function missionClassicMedievalTwo(state){
     board.length = 0;
     xyBoard(6,6,board);
 
+    try{
+        buildModal([
+            {type:'quote', classes:"",text:`Today we are going to catch a <b>hornless unicorn</b>.`,icon:"/blackBishop.png"},
+            {type:'quote', classes:"reverse",text:`You mean... like a horse?`,icon:"/blackPawn.png"},
+            {type:'quote', classes:"",text:`No, you fool. Like an unicorn without a horn.`,icon:"/blackBishop.png"},
+            {type:'objectives', classes:"",text:`Catch the unicorn. (Pawns can't be promoted without a king on the board)`}
+        ])
+    }
+    catch(err){
+
+    }
+
     pieces.push(
         unpromotablePawn('black',2,1),
         unpromotablePawn('black',3,1),
@@ -1186,7 +1198,20 @@ function missionClassicMedievalOne(state){
     board = state.board;
     board.length = 0;
     xyBoard(6,6,board);
-    state.countDown = 24;
+    try{
+        buildModal([
+            {type:'quote', classes:"",text:`The forest is haunted. <br>Spending the night here will surely mean most of us will die.`,icon:"/blackBishop.png"},
+            {type:'quote', classes:"reverse",text:`Can we not do it?`,icon:"/blackPawn.png"},
+            {type:'quote', classes:"",text:`No. I really want to piss of the wood gods. <br> Don't worry about me. I will be save behind you.`,icon:"/blackBishop.png"},
+            {type:'quote', classes:"reverse",text:`But who will take care of my cat =( ?`,icon:"/blackPawn.png"},
+            {type:'objectives', classes:"",text:`The night starts after you play your first move. Your bishop must survive till sunrise. (Pawns can't be promoted without a king on the board)`}
+        ])
+    }
+    catch(err){
+
+    }
+
+    state.countDown = 32;
     state.specialOnMoveEffects = [
         function(state){
             state.countDown-=1;
