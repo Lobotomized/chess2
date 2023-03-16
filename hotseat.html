@@ -27,6 +27,14 @@
 
         <style>
 
+            .mini-grid{
+                display:grid;
+                grid-template-columns: repeat(1fr 8);
+                grid-template-rows: repeat(1fr 8);
+                width:5vw;
+                height:5vw;
+            }
+
             .row-hotseat{
                 display:flex;
                 flex-direction: row;
@@ -72,8 +80,12 @@
     </div>
 
 
-    <div onclick="closeModal()" class="modal displayNone">
+    <div onclick="closeModal('modal')" class="modal displayNone">
 
+    </div>
+
+    <div onclick="closeModal('pieceModal')" class="pieceModal displayNone">
+        
     </div>
 
 
@@ -84,9 +96,16 @@
 
 <script>
 const modal = document.querySelector('.modal');
-
-let closeModal = function(){
-    modal.classList.add("displayNone")
+const pieceModal = document.querySelector('.pieceModal');
+let closeModal = function(which){
+    console.log('wtf?! ', which)
+    if(which === 'modal'){
+        modal.classList.add("displayNone")
+    }
+    else if(which === 'pieceModal'){
+        console.log('ami tuka!?')
+        pieceModal.classList.add("displayNone")
+    }
 }
 
 const buildModal = function(arr){
@@ -109,6 +128,35 @@ const buildModal = function(arr){
     })
 
     modal.classList.remove('displayNone')
+}
+
+const buildPieceModal = function(arr){
+    let theString;
+    arr.forEach((el) => {
+        theString  = `<div style="position:relative;width:${(squareLength/2) * (Math.sqrt(el.board.length))}px;height:${squareLength/2 * Math.sqrt(el.board.length)}px;">`
+            
+
+        el.board.forEach((square) => {
+            if(square.lighted){
+                theString += `<div style=" z-index:500; background:${availableSquareColor};width:${squareLength/2}px;height:${squareLength/2}px;border:solid black 1px; position:absolute; left:${(square.x)*squareLength/2}px;top:${(square.y)*squareLength/2}px;"></div>`;
+
+            }
+            else{
+                theString += `<div style="z-index:500; background:${backgroundColor};width:${squareLength/2}px;height:${squareLength/2}px;border:solid black 1px; position:absolute; left:${square.x*squareLength/2}px;top:${(square.y)*squareLength/2}px;"></div>`;
+            }
+
+            if(square.x ===el.pieceX && square.y === el.pieceY){
+                theString += `<img style="z-index:500;position:absolute; width:${squareLength/2}px;height:${squareLength/2}px; left:${square.x*squareLength/2}px;top:${(square.y)*squareLength/2}px;" src="/static/${el.icon}"></img>`
+            }
+        })
+        theString += `  <p style=" z-index:501; padding:5px; position:absolute; background:${backgroundColor}; top:${squareLength/2 * Math.sqrt(el.board.length)}px;">${el.description}</p>`
+    })
+
+    theString += `</div>`
+
+    pieceModal.innerHTML = theString
+    pieceModal.classList.remove('displayNone')
+
 }
 
 

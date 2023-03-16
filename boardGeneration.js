@@ -40,6 +40,7 @@ function xyBoard(byX,byY,board){
                 board.push({ light: false, x: x, y: y })
         }
     }
+    return board
 }
 
 function raceChess(state){
@@ -1162,11 +1163,29 @@ function missionClassicMedievalTwo(state){
     xyBoard(6,6,board);
 
     try{
+        let miniBord = xyBoard(8,8,[]);
+        let horse = horseFactory('white',4,4)
+        lightBoardFE(horse,{board:miniBord, pieces:[horse],turn:"white"},'lighted')
         buildModal([
             {type:'quote', classes:"",text:`Today we are going to catch a <b>hornless unicorn</b>.`,icon:"/blackBishop.png"},
             {type:'quote', classes:"reverse",text:`You mean... like a horse?`,icon:"/blackPawn.png"},
             {type:'quote', classes:"",text:`No, you fool. Like an unicorn without a horn.`,icon:"/blackBishop.png"},
-            {type:'objectives', classes:"",text:`Catch the unicorn. (Pawns can't be promoted without a king on the board)`}
+            {type:'objectives', classes:"",text:`Catch the unicorn. (Pawns can't be promoted without a king on the board)`},
+
+        ])
+
+        buildPieceModal([
+            {
+                type:'piece',
+                classes:"",
+                board:miniBord ,
+                icon:'whiteHorse.png',
+                pieceX:4,
+                pieceY:4,
+                description:`
+                    The hornless unicorn can move horizontally, vertically and diagonally (like a queen) but only 3 squares in each direction.
+                `
+            }
         ])
     }
     catch(err){
@@ -1205,6 +1224,22 @@ function missionClassicMedievalOne(state){
             {type:'quote', classes:"",text:`No. I really want to piss of the wood gods. <br> Don't worry about me. I will be save behind you.`,icon:"/blackBishop.png"},
             {type:'quote', classes:"reverse",text:`But who will take care of my cat =( ?`,icon:"/blackPawn.png"},
             {type:'objectives', classes:"",text:`The night starts after you play your first move. Your bishop must survive till sunrise. (Pawns can't be promoted without a king on the board)`}
+        ])
+        let miniBord = xyBoard(8,8,[]);
+        let ghost = ghostFactory('white',4,4)
+        lightBoardFE(ghost,{board:miniBord, pieces:[ghost],turn:"white"},'lighted')
+        buildPieceModal([
+            {
+                type:'piece',
+                classes:"",
+                board:miniBord ,
+                icon:'whiteGhost.png',
+                pieceX:4,
+                pieceY:4,
+                description:`
+                    The Ghost can move to the two squares infront of it. It can jump through squares like a knight would.
+                `
+            }
         ])
     }
     catch(err){
