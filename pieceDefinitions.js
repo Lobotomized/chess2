@@ -1375,7 +1375,7 @@ function pikeman(color, x, y){
     }
 }
 
-function copier(color, x, y){
+function kolbaFactory(color, x, y){
     let moves = []
 
     return {
@@ -1384,16 +1384,23 @@ function copier(color, x, y){
         x: x,
         y: y,
         color: color,
-        value:0.8,
+        value:999,
         posValue:0.1,
-        afterEnemyPieceTaken:function(enemyPiece,state){
-            this.moves = enemyPiece.moves;
-            let iconCode = enemyPiece.icon.replace('black', '');
-            iconCode = iconCode.replace('white', "");
+        afterPlayerMove:function(state){
+            let findRook = state.pieces.find((piece) => {
+                return piece.icon === 'blackRook.png'
+            })
 
-            this.icon = this.color + iconCode;
-            this.value = enemyPiece.value;
-            this.posValue = enemyPiece.posValue;
+            if(findRook){
+                this.value = 999 + (Math.abs(findRook.x - this.x) + Math.abs(findRook.y - this.y));
+
+            }
+            else{
+                this.value = 9999;
+            }
+        },
+        afterThisPieceTaken:function(state){
+            state.won = giveOppositeColor(this.color);
         }
     }
 }

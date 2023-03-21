@@ -83,7 +83,6 @@ function prohodRaceChoiceChess(state,raceWhite,raceBlack){
 
 function raceChoiceChess(state,raceWhite,raceBlack){
     pieces = state.pieces;
-    console.log(state)
     board = state.board;
     pieces.length = 0;
     if(!board.length){
@@ -867,8 +866,6 @@ function missionClassicBugsThree(state){
         knightFactory('black',0,0),
         knightFactory('black', 1,0),
 
-        bishopFactory('black',2,0),
-        bishopFactory('black', 5,0),
 
 
         kingFactory('black',4,0),
@@ -1091,7 +1088,100 @@ function missionClassicMedievalSix(state){
 }
 
 
+function missionClassicMedievalSix(state){
+    pieces = state.pieces;
+    pieces.length =0;
+    board = state.board;
+    board.length = 0;
+    for (let x = 0; x <= 7; x++) {
+        for (let y = 0; y <= 7; y++) {
+            if( !(x === 4 && y === 4 || x === 3 && y === 3 || y === 3 && x === 4|| y === 4 && x === 3)){
+                board.push({ light: false, x: x, y: y })
+            }
+        }
+    }
+
+    buildModal([
+        {type:'quote', classes:"",text:`The tree gods have crossed too many lines.</b> Peace is what we seek and peace is what we will get once we kill them. `,icon:"/blackKing.png"},
+        {type:'objectives', classes:"",text:`Kill the magical hat. <img style="height:50px;" src="static/whiteHat.png"></img>`}
+     ])
+
+    pieces.push(
+        
+    )
+}
+
+
+
 function missionClassicMedievalFive(state){
+    pieces = state.pieces;
+    pieces.length =0;
+    board = state.board;
+    board.length = 0;
+    
+    for (let x = 0; x <= 7; x++) {
+        for (let y = 0; y <= 7; y++) {
+            const shirinni = !(x==4 || x==3|| x==2 || x==5)
+            const viso4inni = y ===0 || y ===1 || y === 2
+            if(!((viso4inni && shirinni))){
+                board.push({ light: false, x: x, y: y })
+            }
+        }
+    }
+    let miniBord = xyBoard(8,8,[]);
+    let ricar = ricarFactory('white',4,4)
+    lightBoardFE(ricar,{board:miniBord, pieces:[ricar],turn:"white"},'lighted')
+    try{
+
+        buildModal([
+           {type:'quote', classes:"",text:`Sire, traitors have joined our enemy. <b>They ambushed us!</b>`,icon:"/blackRook.png"},
+           {type:'quote', classes:"",text:`Destroy them all!!!`,icon:"/blackKing.png"},
+           {type:'quote', classes:"reverse",text:` We were never on your side to betray you!`,icon:"/whiteKnight.png"},
+           {type:'objectives', text:`Leave no enemy Knights or Crusaders on the field`},
+        ])
+
+        buildPieceModal([
+            {
+                type:'piece',
+                classes:"",
+                board:miniBord ,
+                icon:'blackRicar.png',
+                pieceX:4,
+                pieceY:4,
+                description:`
+                    The crusader jumps above pieces and when he dies he spawns, a ghost behind him, waiting to avenge.
+                `
+            }
+        ])
+    }catch(err){
+
+    }
+    pieces.push(
+        pawnFactory('black',2,2),pawnFactory('black',3,2),pawnFactory('black',4,2),pawnFactory('black',5,2),
+        knightFactory('black',2,1),knightFactory('black',3,1),knightFactory('black',4,1),knightFactory('black',5,1),
+        rookFactory('black',2,0),bishopFactory('black',3,0),queenFactory('black',4,0),kingFactory('black',5,0)
+    )
+    
+    pieces.push(
+        pawnFactory('white',1,4),pawnFactory('white',2,4),pawnFactory('white',3,4),pawnFactory('white',4,4),pawnFactory('white',5,4),pawnFactory('white',6,4),
+        ricarFactory('white',1,5),ricarFactory('white',2,5),knightFactory('white',3,5),knightFactory('white',4,5),ricarFactory('white',5,5),ricarFactory('white',6,5),
+    )
+
+    state.specialOnMoveEffects = [
+        function(state){
+            let findHim = state.pieces.find((piece)=>{
+                return piece.icon.includes('whiteRicar.png') || piece.icon.includes('whiteKnight.png'); 
+            })
+
+            if(!findHim){
+                state.won = 'black';
+            }
+        }
+    ]
+}
+
+
+function missionClassicMedievalFour(state){
     pieces = state.pieces;
     pieces.length =0;
     board = state.board;
@@ -1102,6 +1192,39 @@ function missionClassicMedievalFive(state){
                 board.push({ light: false, x: x, y: y })
             }
         }
+    }
+
+    try{
+        let miniBord = xyBoard(8,8,[]);
+        let pig = pigFactory('white',4,7)
+        lightBoardFE(pig,{board:miniBord, pieces:[pig],turn:"white"},'lighted')
+        buildModal([
+            {type:'quote', classes:"reverse",text:`It was marvelous your majesty. And now we have the first hornless unicorn in our stables.</b>`,icon:"/blackBishop.png"},
+            {type:'quote', classes:"",text:`I can't even begin to imagine how one would look without a horn. 
+            <br> And I heard you pissed off the wood Gods as I always did in my youth.<br> You will have bright future young man.`,icon:"/blackKing.png"},
+            {type:'quote', classes:"",text:`He does remind of younger you. Much younger...`,icon:"/blackQueen.png"},
+            {type:'quote', classes:"",text:`...`,icon:"/blackKing.png"},
+            {type:'quote', classes:"reverse",text:`Sire the wood Gods have an army in front of our castle.</b> Why would they do this to us? We've done nothing to insult them...`,icon:"/blackRook.png"},
+            {type:'quote', classes:"",text:`I think certain black bishop is going to become a pawn on the front line soon...</b>`,icon:"/blackKing.png"},
+            {type:'objectives', classes:"",text:`Take all enemy pieces.</b>`,icon:"/blackKing.png"},
+        ])
+
+        buildPieceModal([
+            {
+                type:'piece',
+                classes:"",
+                board:miniBord ,
+                icon:'whitePig.png',
+                pieceX:4,
+                pieceY:7,
+                description:`
+                    The Pig can only move forward but it moves till the end of the line.
+                `
+            }
+        ])
+    }
+    catch(err){
+
     }
 
     pieces.push(
@@ -1121,26 +1244,11 @@ function missionClassicMedievalFive(state){
         pawnFactory('black',1,3),pawnFactory('black',2,3),pawnFactory('black',3,3),pawnFactory('black',4,3),pawnFactory('black',5,3),pawnFactory('black',6,3),
         pawnFactory('black',2,4),pawnFactory('black',3,4),pawnFactory('black',4,4),pawnFactory('black',5,4),
 
-        kingFactory('black',7,0),queenFactory('black',6,0),bishopFactory('black',6,1),bishopFactory('black',7,1),
+        kingFactory('black',7,0),queenFactory('black',6,0),rookFactory('black',6,1),bishopFactory('black',7,1),
 
-        knightFactory('black',1,0),knightFactory('black',2,0),knightFactory('black',2,1),knightFactory('black',1,1)
+        knightFactory('black',1,0),knightFactory('black',2,0),knightFactory('black',2,1),knightFactory('black',1,1),knightFactory('black',3,0),knightFactory('black',3,1)
     )
 }
-
-
-function missionClassicMedievalFour(state){
-    pieces = state.pieces;
-    pieces.length =0;
-    board = state.board;
-    board.length = 0;
-    
-    xyBoard(7,7);
-
-    pieces.push(
-
-    )
-}
-
 
 
 function missionClassicMedievalThree(state){
@@ -1148,10 +1256,97 @@ function missionClassicMedievalThree(state){
     pieces.length =0;
     board = state.board;
     board.length = 0;
+    for (let x = 0; x <= 7; x++) {
+        for (let y = 0; y <= 7; y++) {
+            let checkOne = !(x === 3 && y === 3)
+            let checkTwo = !(x === 3 && y === 4)
+            let checkThree = !(x===4 && y === 4)
+            let checkFour = !(x===2 && y === 5)
+            let checkFive = !(x===1 && y ===5)
+            let checkSix = !(x===1 && y ===6)
+            let checkSeven = !(x===6 && y ===2)
+            let checkEight = !(x===6 && y ===3)
+            let checkNine = !(x===3 && y ===7)
+            let checkTen = !(x===5 && y ===6)
+            let checkEleven = !(x===7 && y ===5)
+            let checkTwelve = !(x===0 && y ===3)
 
+            let checks = checkOne && checkTwo && checkThree && checkFour && checkFive && checkSix && checkSeven
+            && checkEight && checkNine && checkTen && checkEleven && checkTwelve
+            if(checks){
+                board.push({ light: false, x: x, y: y })
+            }
+
+        }
+    }
+    try{
+        let miniBord = xyBoard(8,8,[]);
+        let clown = clownFactory('white',4,4)
+        lightBoardFE(clown,{board:miniBord, pieces:[clown],turn:"white"},'lighted')
+        state.specialOnMoveEffects = [
+            function(state){
+                blackSquareColor = '#2C3333';
+                whiteSquareColor = '#CBE4DE';
+                dangerSquareColor = '#E7907F';
+                lightedSquareColor = '#0E8388';
+                blockedSquareColor = '#CF6A4E';
+                availableSquareColor = '#787F42';
+                backgroundColor = '#2E4F4F';
+                oldMoveSquareColor = '#D59148';
+                AIPower = 5;      
+                AICharater = 'defensiveCharacter'          
+                let findOne = state.pieces.find((piece) => {
+                    return piece.icon.includes('whiteClown.png') || piece.icon.includes('whiteHorse.png')
+                })
+
+                if(!findOne){
+                    state.won = 'black';
+                }
+
+                let findBlack = state.pieces.find((piece) => {
+                    return piece.color === 'black';
+                })
+
+                if(!findBlack){
+                    state.won = 'white';
+                }
+
+              
+            }
+        ]
+
+        buildModal([
+            {type:'quote', classes:"",text:`For some unknown reason the wood critters are angry with us.</b>
+                                            They killed the magician.`,icon:"/blackKnight.png"},
+            {type:'quote', classes:"",text:`We need to take back the potions or the tree gods are going to use it against our kingdom.</b>`,icon:"/blackRook.png"},
+            {type:'objectives', text:"Take the immovable potion and don't lose both of your pieces."}
+
+        ])
+        buildPieceModal([
+            {
+                type:'piece',
+                classes:"",
+                board:miniBord ,
+                icon:'whiteClown.png',
+                pieceX:4,
+                pieceY:4,
+                description:`
+                    The clown moves like a queen but it cannot take enemy pieces.</b>
+                    He has the power to swap places with any other ally for the price of a turn.
+                `
+            }
+        ])
+    }
+    catch(err){
+
+    }
 
     pieces.push(
-        
+        rookFactory('black',2,6),
+        knightFactory('black',0,7),
+        clownFactory('white', 0, 2),
+        horseFactory('white', 4,1),
+        kolbaFactory('white',7,0)
     )
 }
 
@@ -1222,7 +1417,7 @@ function missionClassicMedievalOne(state){
             {type:'quote', classes:"",text:`The forest is haunted. <br>Spending the night here will surely mean most of us will die.`,icon:"/blackBishop.png"},
             {type:'quote', classes:"reverse",text:`Can we not do it?`,icon:"/blackPawn.png"},
             {type:'quote', classes:"",text:`No. I really want to piss of the wood gods. <br> Don't worry about me. I will be save behind you.`,icon:"/blackBishop.png"},
-            {type:'quote', classes:"reverse",text:`But who will take care of my cat =( ?`,icon:"/blackPawn.png"},
+            {type:'quote', classes:"reverse",text:`But who will take care of my cat?`,icon:"/blackPawn.png"},
             {type:'objectives', classes:"",text:`The night starts after you play your first move. Your bishop must survive till sunrise. (Pawns can't be promoted without a king on the board)`}
         ])
         let miniBord = xyBoard(8,8,[]);

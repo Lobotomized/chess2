@@ -15,12 +15,11 @@ function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters){
     state.id = crypto.randomUUID()
     let enemy = getEnemy(maximizer);
     let firstGen = generateMovesFromPieces(state,maximizer,filters);
-    
 
     if(removedTurns && removedTurns.length){
         firstGen = firstGen.filter((fgm) => {
             let findSame = removedTurns.find((rtm) => {
-                return fgm.xClicked === rtm.xClicked && fgm.yClicked === rtm.yClicked && rtm.pieceCounter === fgm.pieceCounter
+                return !(fgm.xClicked === rtm.xClicked && fgm.yClicked === rtm.yClicked && rtm.pieceCounter === fgm.pieceCounter)
             })
             return findSame !== undefined;
         })
@@ -36,11 +35,10 @@ function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters){
     else if(depth === 3){
         const secondGen = generateMovesFromMoves(firstGen, enemy,state.board,filters, true);
         const thirdGen = generateMovesFromMoves(secondGen, maximizer,state.board,filters);
-    
         evalMoves(thirdGen,maximizer,state.board,magnifiers);
         evalParents(secondGen,thirdGen);
         evalParents(firstGen,secondGen, true);
-
+        console.log(getMoveByValue(firstGen), firstGen, ' wtf?!')
         return getMoveByValue(firstGen)
 
     }
@@ -130,11 +128,11 @@ self.addEventListener("message", function(e) {
             }
             else if(obj.AIPower === 5){
                 move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns,
-                    methods[obj.AICharacter](0),
+                    methods['defensiveCharacter'](0),
                     [
-                        {method:removeAttackedMovesFilter, options:{randomException:0.6,exceptions:[randomException]}},
-                        {method:removeNonAttackingMovesFilter, options:{randomException:0.5, 
-                            exceptions:[pieceAttackedException,randomException]}},
+                        // {method:removeAttackedMovesFilter, options:{randomException:0.6,exceptions:[randomException]}},
+                        // {method:removeNonAttackingMovesFilter, options:{randomException:0.5, 
+                        //     exceptions:[pieceAttackedException,randomException]}},
                     ]
                 )
             }

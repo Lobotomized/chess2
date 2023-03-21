@@ -114,12 +114,13 @@ function evaluateBoard(colorPerspective, pieces, board,magnifierMethods){
             }
         })
         if(parentMove.value === undefined && !weakest){
-            parentMove.value = -99999;
+            parentMove.value = -9999999999999999999;
         }
         else if(parentMove.value === undefined && weakest){
-            parentMove.value = 999999;
-        }
 
+            parentMove.value = 9999999999999999999;
+        }
+        
     })
  }
 

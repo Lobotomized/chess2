@@ -171,7 +171,7 @@ function animate(secretState){
                 drawColoredSquare(x*squareLength, y * squareLength, blockedSquareColor, squareLength)
             }
             else if(sq.special){
-                drawColoredSquare(x*squareLength, y * squareLength, '#855bb3', squareLength)
+                drawColoredSquare(x*squareLength, y * squareLength, specialSquareColor, squareLength)
             }
             else {
                 drawLightedSquare(x * squareLength, y * squareLength, squareLength);

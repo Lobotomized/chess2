@@ -347,7 +347,6 @@ html{
 
  .modal{
     position:absolute;
-    max-height:600px;
     max-width:600px;
     height:max-content;
     width:90%;
@@ -356,6 +355,14 @@ html{
     transform: translate(-50%, -50%);
     background:rgb(204,166,131,0.5);
     padding:20px;
+ }
+
+
+ @media only screen and (max-width: 600px) {
+   .modal{
+    top:auto;
+    width:90%;
+   }
  }
 
  .displayNone{
@@ -371,5 +378,6 @@ html{
     flex-direction: row;
     justify-content: center;
     position:absolute;
+    background-color: rgb(204,166,131,0.5);
     align-items: center;
  }

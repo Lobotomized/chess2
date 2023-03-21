@@ -41,8 +41,9 @@
                 justify-content: flex-start;
                 align-items: center;
                 margin-top:20px;
-                
-                background:#7D6650;
+                padding:20px;
+                line-height:2ch;
+                background:#F7DFDA;
                 border:solid black;
             }
 
@@ -98,13 +99,12 @@
 const modal = document.querySelector('.modal');
 const pieceModal = document.querySelector('.pieceModal');
 let closeModal = function(which){
-    console.log('wtf?! ', which)
     if(which === 'modal'){
         modal.classList.add("displayNone")
     }
     else if(which === 'pieceModal'){
-        console.log('ami tuka!?')
         pieceModal.classList.add("displayNone")
+        modal.classList.remove('displayNone');
     }
 }
 
@@ -132,31 +132,33 @@ const buildModal = function(arr){
 
 const buildPieceModal = function(arr){
     let theString;
+    let widthOrHeight = screen.width < screen.height? screen.width : screen.height;
+    let magicNumber = widthOrHeight > 800 ? squareLength/1.5 : squareLength
     arr.forEach((el) => {
-        theString  = `<div style="position:relative;width:${(squareLength/2) * (Math.sqrt(el.board.length))}px;height:${squareLength/2 * Math.sqrt(el.board.length)}px;">`
-            
+        theString  = `<div style="position:relative;width:${magicNumber * (Math.sqrt(el.board.length))}px;height:${magicNumber * Math.sqrt(el.board.length)}px;">`
+        
 
         el.board.forEach((square) => {
             if(square.lighted){
-                theString += `<div style=" z-index:500; background:${availableSquareColor};width:${squareLength/2}px;height:${squareLength/2}px;border:solid black 1px; position:absolute; left:${(square.x)*squareLength/2}px;top:${(square.y)*squareLength/2}px;"></div>`;
+                theString += `<div style=" z-index:500; background:${availableSquareColor};width:${magicNumber}px;height:${magicNumber}px;border:solid black 1px; position:absolute; left:${(square.x)*magicNumber}px;top:${(square.y)*magicNumber}px;"></div>`;
 
             }
             else{
-                theString += `<div style="z-index:500; background:${backgroundColor};width:${squareLength/2}px;height:${squareLength/2}px;border:solid black 1px; position:absolute; left:${square.x*squareLength/2}px;top:${(square.y)*squareLength/2}px;"></div>`;
+                theString += `<div style="z-index:500; background:${backgroundColor};width:${magicNumber}px;height:${magicNumber}px;border:solid black 1px; position:absolute; left:${square.x*magicNumber}px;top:${(square.y)*magicNumber}px;"></div>`;
             }
 
             if(square.x ===el.pieceX && square.y === el.pieceY){
-                theString += `<img style="z-index:500;position:absolute; width:${squareLength/2}px;height:${squareLength/2}px; left:${square.x*squareLength/2}px;top:${(square.y)*squareLength/2}px;" src="/static/${el.icon}"></img>`
+                theString += `<img style="z-index:500;position:absolute; width:${magicNumber}px;height:${magicNumber}px; left:${square.x*magicNumber}px;top:${(square.y)*magicNumber}px;" src="/static/${el.icon}"></img>`
             }
         })
-        theString += `  <p style=" z-index:501; padding:5px; position:absolute; background:${backgroundColor}; top:${squareLength/2 * Math.sqrt(el.board.length)}px;">${el.description}</p>`
+        theString += `  <p style=" z-index:501; padding:5px; position:absolute; color:#ffffff; background:${backgroundColor}; top:${magicNumber * Math.sqrt(el.board.length)}px;">${el.description}</p>`
     })
 
     theString += `</div>`
 
     pieceModal.innerHTML = theString
     pieceModal.classList.remove('displayNone')
-
+    closeModal('modal')
 }
 
 
