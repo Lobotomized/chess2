@@ -663,7 +663,7 @@ function lightBoardFE(piece, state, flag,blockedFlag, minimal) {
             state.board.forEach((square) => {
                 const innerPiece = pieceFromSquare(square, state.pieces);
                 if (innerPiece) {
-                    if (innerPiece.color == piece.color) {
+                    if (innerPiece.color == piece.color && innerPiece.icon != piece.icon) {
                         square[flag] = true;
                     }
                 }

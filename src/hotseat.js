@@ -110,6 +110,8 @@ function animate(secretState){
             body.style.background = backgroundColor
         }
         myTurnH1.innerText = state.message || '';
+        myTurnH1.style.color = whiteSquareColor;
+
         const height = getMaxX(state.board,'y')
         if(state.playerRef !== undefined){
             playerRef = state.playerRef

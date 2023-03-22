@@ -381,7 +381,7 @@ function clownFactory(color,x,y){
         friendlyPieceInteraction: function(state,friendlyPiece,prevMove) {
             if(friendlyPiece)
             {
-                if(friendlyPiece == state.pieceSelected){
+                if(friendlyPiece.icon === this.icon){
                     return true;
                 }
                 friendlyPiece.x = prevMove.x;

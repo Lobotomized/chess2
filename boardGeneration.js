@@ -1295,6 +1295,116 @@ function missionClassicMedievalFour(state){
 }
 
 
+function missionClassicMedievalThreeV2(state){
+    pieces = state.pieces;
+    pieces.length =0;
+    board = state.board;
+    board.length = 0;
+    for (let x = 0; x <= 7; x++) {
+        for (let y = 0; y <= 7; y++) {
+            let checkOne = !(x === 3 && y === 3)
+            let checkTwo = !(x === 3 && y === 4)
+            let checkThree = !(x===4 && y === 4)
+            let checkFour = !(x===2 && y === 5)
+            let checkFive = !(x===1 && y ===5)
+            let checkSix = !(x===1 && y ===6)
+            let checkSeven = !(x===6 && y ===2)
+            let checkEight = !(x===6 && y ===3)
+            let checkNine = !(x===3 && y ===7)
+            let checkTen = !(x===5 && y ===6)
+            let checkEleven = !(x===7 && y ===5)
+            let checkTwelve = !(x===0 && y ===3)
+
+            let checks = checkOne && checkTwo && checkThree && checkFour && checkFive && checkSix && checkSeven
+            && checkEight && checkNine && checkTen && checkEleven && checkTwelve
+            if(checks){
+                board.push({ light: false, x: x, y: y })
+            }
+
+        }
+    }
+    try{
+        let miniBord = xyBoard(8,8,[]);
+        let clown = clownFactory('white',4,4)
+        let turnCounter = 0;
+        lightBoardFE(clown,{board:miniBord, pieces:[clown],turn:"white"},'lighted')
+        state.specialOnMoveEffects = [
+            function(state){
+                state.pieces.forEach((piece) => {
+                    if(piece.icon === 'whiteClown.png'){
+                        piece.value = 10;
+                    }
+                })
+
+                blackSquareColor = '#2C3333';
+                whiteSquareColor = '#CBE4DE';
+                dangerSquareColor = '#E7907F';
+                lightedSquareColor = '#0E8388';
+                blockedSquareColor = '#CF6A4E';
+                availableSquareColor = '#787F42';
+                backgroundColor = '#2E4F4F';
+                oldMoveSquareColor = '#D59148';
+                let findOne = state.pieces.find((piece) => {
+                    return piece.icon.includes('whiteClown.png')
+                })
+
+                if(!findOne){
+                    state.won = 'black';
+                }
+                turnCounter++;
+                state.message = 35 - turnCounter+' turns left until you lose'
+                if(turnCounter >= 35){
+                    blackSquareColor = '#7D6650';
+                    whiteSquareColor = '#F7DFDA';
+                    dangerSquareColor = '#E7907F';
+                    lightedSquareColor = '#B0A875';
+                    blockedSquareColor = '#CF6A4E';
+                    availableSquareColor = '#787F42';
+                    backgroundColor = '#675442';
+                    oldMoveSquareColor = '#D59148';
+                    state.won = 'white'
+                    state.message = 'You lost'
+                }
+
+
+              
+            }
+        ]
+
+        buildModal([
+            {type:'quote', classes:"",text:`I will use the night to steal the Wood Gods potion and bring it to the king.</b>`,icon:"/blackRook.png"},
+            {type:'objectives', text:"Take the immovable potion or all the clowns before the night is over."}
+
+        ])
+        buildPieceModal([
+            {
+                type:'piece',
+                classes:"",
+                board:miniBord ,
+                icon:'whiteClown.png',
+                pieceX:4,
+                pieceY:4,
+                description:`
+                    The clown moves like a queen but it cannot take enemy pieces.</b>
+                    He has the power to swap places with any other ally for the price of a turn.
+                `
+            }
+        ])
+    }
+    catch(err){
+
+    }
+
+    pieces.push(
+        rookFactory('black',2,6),
+        clownFactory('white', 0, 2),
+        clownFactory('white', 5, 5),
+        clownFactory('white', 0, 6),
+        clownFactory('white', 7, 7),
+        kolbaFactory('white',7,0)
+    )
+}
+
 function missionClassicMedievalThree(state){
     pieces = state.pieces;
     pieces.length =0;
@@ -1389,6 +1499,7 @@ function missionClassicMedievalThree(state){
         rookFactory('black',2,6),
         knightFactory('black',0,7),
         clownFactory('white', 0, 2),
+        clownFactory('white', 1, 4),
         horseFactory('white', 4,1),
         kolbaFactory('white',7,0)
     )
