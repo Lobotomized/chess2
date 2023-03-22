@@ -1347,13 +1347,14 @@ function missionClassicMedievalThreeV2(state){
                 let findOne = state.pieces.find((piece) => {
                     return piece.icon.includes('whiteClown.png')
                 })
+                state.message = 25 - turnCounter+' turns left until you lose'
 
                 if(!findOne){
+                    state.message = 'You won'
                     state.won = 'black';
                 }
                 turnCounter++;
-                state.message = 35 - turnCounter+' turns left until you lose'
-                if(turnCounter >= 35){
+                if(turnCounter >= 25){
                     blackSquareColor = '#7D6650';
                     whiteSquareColor = '#F7DFDA';
                     dangerSquareColor = '#E7907F';
