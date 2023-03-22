@@ -71,7 +71,8 @@ self.addEventListener("message", function(e) {
                 defaultCharacter:defaultCharacter,
                 offensiveCharacter:offensiveCharacter,
                 defensiveCharacter:defensiveCharacter,
-                positionalCharacter:positionalCharacter
+                positionalCharacter:positionalCharacter,
+                positionalOffeniveCharacter:positionalOffensiveCharacter
             }
             if(obj.AIPower === -1){
                 if(obj.state.pieces.length > 20){

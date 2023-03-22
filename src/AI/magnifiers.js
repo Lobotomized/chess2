@@ -318,7 +318,7 @@ function offensiveCharacter(weight){
     }
 }
 
-function positionalOffeniveCharacter(weight){
+function positionalOffensiveCharacter(weight){
     if(!weight){
         weight = 0;
     }

@@ -1101,13 +1101,57 @@ function missionClassicMedievalSix(state){
         }
     }
 
+    let miniBord = xyBoard(8,8,[]);
+    let hat = hatFactory('white',4,4)
+    lightBoardFE(hat,{board:miniBord, pieces:[hat],turn:"white"},'lighted')
+    AIPower = 2;
+    AICharater = 'positionalOffensiveCharacter'
     buildModal([
-        {type:'quote', classes:"",text:`The tree gods have crossed too many lines.</b> Peace is what we seek and peace is what we will get once we kill them. `,icon:"/blackKing.png"},
-        {type:'objectives', classes:"",text:`Kill the magical hat. <img style="height:50px;" src="static/whiteHat.png"></img>`}
+        {type:'quote', classes:"",text:`The tree gods have crossed too many lines.</b> Peace is what we seek and peace is what we will get once we <b>KILL THEM</b>. `,icon:"/blackKing.png"},
+        {type:'objectives', classes:"",text:`Take at least one of the magical hats and the forest will lose it's magic.`}
      ])
 
+     buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board:miniBord ,
+            icon:'blackHat.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The Hat is a lose condition piece.</br> You cannot "check" it but once you take it the forest gods lose the game.</br>
+                The hat moves and takes like a rook and it can also move one diagonally without taking.
+            `
+        }
+    ])
+
     pieces.push(
-        
+        ricarFactory('white',1,5),ricarFactory('white',2,5),ricarFactory('white',0,5),
+
+        ricarFactory('white',5,5),ricarFactory('white',6,5),ricarFactory('white',7,5),
+
+        hatFactory('white',7,7), pigFactory('white',6,7), pigFactory('white',5,7),
+
+        hatFactory('white',0,7), pigFactory('white',1,7), pigFactory('white',2,7),
+
+        clownFactory('white',3,7), clownFactory('white',4,7),
+
+        horseFactory('white',3,5),        horseFactory('white',4,5),
+
+
+        kingFactory('black',0,0), rookFactory('black',1,0), rookFactory('black',2,0),
+        bishopFactory('black',5,0),bishopFactory('black',6,0), queenFactory('black',7,0),
+
+
+        pawnFactory('black',0,2),pawnFactory('black',1,2),pawnFactory('black',2,2),
+        pawnFactory('black',5,2),pawnFactory('black',6,2),pawnFactory('black',7,2),
+
+        pawnFactory('black',0,1),pawnFactory('black',1,1),pawnFactory('black',2,1),
+        pawnFactory('black',5,1),pawnFactory('black',6,1),pawnFactory('black',7,1),
+
+        knightFactory('black',3,2),knightFactory('black',4,2)
+
     )
 }
 
