@@ -1295,7 +1295,7 @@ function missionClassicMedievalFour(state){
 }
 
 
-function missionClassicMedievalThreeV2(state){
+function missionClassicMedievalThree(state){
     pieces = state.pieces;
     pieces.length =0;
     board = state.board;
@@ -1349,9 +1349,12 @@ function missionClassicMedievalThreeV2(state){
                 })
                 state.message = 25 - turnCounter+' turns left until you lose'
 
-                if(!findOne){
+                if(!findOne || state.won === 'black'){
                     state.message = 'You won'
                     state.won = 'black';
+                    buildModal([
+                        {type:'link', text:"Victory!!!", linkText:"Go to the next mission", link:"/hotseat?gameType=missionClassicMedievalFour&AIColor=white"}
+                    ])
                 }
                 turnCounter++;
                 if(turnCounter >= 25){
@@ -1365,6 +1368,10 @@ function missionClassicMedievalThreeV2(state){
                     oldMoveSquareColor = '#D59148';
                     state.won = 'white'
                     state.message = 'You lost'
+
+                    buildModal([
+                        {type:'link', text:"Defeat!!!", linkText:"Repeat the mission", link:"/hotseat?gameType=missionClassicMedievalThree&AIColor=white"}
+                    ])
                 }
 
 
@@ -1406,7 +1413,7 @@ function missionClassicMedievalThreeV2(state){
     )
 }
 
-function missionClassicMedievalThree(state){
+function missionClassicMedievalThreeV2(state){
     pieces = state.pieces;
     pieces.length =0;
     board = state.board;
@@ -1515,14 +1522,14 @@ function missionClassicMedievalTwo(state){
 
     try{
         let miniBord = xyBoard(8,8,[]);
-        let horse = horseFactory('white',4,4)
+        let horse = horseFactory('white',4,4);
+
         lightBoardFE(horse,{board:miniBord, pieces:[horse],turn:"white"},'lighted')
         buildModal([
             {type:'quote', classes:"",text:`Today we are going to catch a <b>hornless unicorn</b>.`,icon:"/blackBishop.png"},
             {type:'quote', classes:"reverse",text:`You mean... like a horse?`,icon:"/blackPawn.png"},
             {type:'quote', classes:"",text:`No, you fool. Like an unicorn without a horn.`,icon:"/blackBishop.png"},
             {type:'objectives', classes:"",text:`Catch the unicorn. (Pawns can't be promoted without a king on the board)`},
-
         ])
 
         buildPieceModal([
@@ -1543,6 +1550,19 @@ function missionClassicMedievalTwo(state){
 
     }
 
+    state.specialOnMoveEffects = [ 
+        function(state){
+            let findWhitePiece = state.pieces.find((piece) => {
+                return piece.color === 'white'
+            })
+            if(!findWhitePiece){
+                state.won = 'black';
+                buildModal([
+                    {type:'link', text:"Victory!!!", linkText:"Go to the next mission", link:"/hotseat?gameType=missionClassicMedievalThree&AIColor=white"}
+                ])
+            }
+        }
+    ]
     pieces.push(
         unpromotablePawn('black',2,1),
         unpromotablePawn('black',3,1),
@@ -1632,6 +1652,9 @@ function missionClassicMedievalOne(state){
                 backgroundColor = '#675442';
                 oldMoveSquareColor = '#D59148';
                 state.won = 'black';
+                buildModal([
+                    {type:'link', text:"Victory!!!", linkText:"Go to the next mission", link:"/hotseat?gameType=missionClassicMedievalTwo&AIColor=white"}
+                ])
             }
 
             let bishop = state.pieces.find((piece)  => {
@@ -1640,6 +1663,9 @@ function missionClassicMedievalOne(state){
 
             if(bishop === undefined){
                 state.won = 'white';
+                buildModal([
+                    {type:'link', text:"Defeat!!!", linkText:"Repeat the mission", link:"/hotseat?gameType=missionClassicMedievalOne&AIColor=white"}
+                ])
             }
         }
     ]

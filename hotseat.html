@@ -125,6 +125,17 @@ const buildModal = function(arr){
                 <p>${el.text}</p>
             </div>`
         }
+        else if(el.type === `link`){
+            modal.innerHTML += `
+
+            <div style="flex-direction:column;" class="row-hotseat">
+                <h2 style="margin-left:auto; margin-right:auto;">${el.text}</h2>
+
+                <a style="text-decoration:none;" href="${el.link}">${el.linkText}</a>
+
+            </div?
+            `
+        }
     })
 
     modal.classList.remove('displayNone')
