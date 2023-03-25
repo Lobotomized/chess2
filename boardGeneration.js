@@ -1317,7 +1317,7 @@ function missionClassicMedievalFour(state){
             if(findAllPieces.length < 5){
                 state.won = 'white';
                 buildModal([
-                    {type:'link', text:"Defeat!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicMedievalFourV2&AIColor=white"}
+                    {type:'link', text:"Defeat!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicMedievalFour&AIColor=white"}
                 ])
             }
 
