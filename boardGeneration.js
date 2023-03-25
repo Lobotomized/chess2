@@ -1295,7 +1295,7 @@ function missionClassicMedievalFourV2V2(state){
         )
 }
 
-function missionClassicMedievalFourV2(state){
+function missionClassicMedievalFour(state){
     pieces = state.pieces;
     pieces.length =0;
     board = state.board;
@@ -1369,7 +1369,7 @@ function missionClassicMedievalFourV2(state){
                 type:"objectives",
                 text:`Herd the pigs to the end of the board without taking them. Scare them with your pieces and they will move.  </br></br>
 
-                Scare multiple at once or non at all and the crusader might move, attempting to sabotage you.
+                Scare multiple at once or non at all and the crusader might move instead, attempting to sabotage you.
                 </br></br>
                 Don't lose a piece and herd the animals before night time.`
             }
@@ -1402,7 +1402,7 @@ function missionClassicMedievalFourV2(state){
         )
 }
 
-function missionClassicMedievalFour(state){
+function missionClassicMedievalFourV2(state){
     pieces = state.pieces;
     pieces.length =0;
     board = state.board;
@@ -1524,7 +1524,7 @@ function missionClassicMedievalThree(state){
                 let findOne = state.pieces.find((piece) => {
                     return piece.icon.includes('whiteClown.png')
                 })
-                state.message = 25 - turnCounter+' turns left until you lose'
+                state.message = 12 - turnCounter+' turns left until you lose'
 
                 if(!findOne || state.won === 'black'){
                     state.message = 'You won'
@@ -1533,8 +1533,10 @@ function missionClassicMedievalThree(state){
                         {type:'link', text:"Victory!!!", linkText:"Go to the next mission", link:"/hotseat?gameType=missionClassicMedievalFour&AIColor=white"}
                     ])
                 }
-                turnCounter++;
-                if(turnCounter >= 25){
+                if(state.turn === 'white'){
+                    turnCounter++;
+                }
+                if(turnCounter >= 12){
                     blackSquareColor = '#7D6650';
                     whiteSquareColor = '#F7DFDA';
                     dangerSquareColor = '#E7907F';
