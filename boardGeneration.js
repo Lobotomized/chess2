@@ -1367,9 +1367,13 @@ function missionClassicMedievalFour(state){
             {type:'quote', classes:"reverse",text:`I have no idea but be very careful. There might be intruders.</b>`,icon:"/blackBishop.png"},
             {
                 type:"objectives",
-                text:`Herd the pigs to the end of the board without taking them. Scare them with your pieces and they will move.  </br></br>
+                text:`Herd the pigs to the end of the board without taking them. Scare them with your pieces and they will move.  <br/>
+                Pigs protected by the crusader might ignore your threat too.
+                
+                </br></br>
 
-                Scare multiple at once or non at all and the crusader might move instead, attempting to sabotage you.
+                Scare multiple at once or non at all and the crusader might move instead, attempting to sabotage you. 
+                
                 </br></br>
                 Don't lose a piece and herd the animals before night time.`
             }
