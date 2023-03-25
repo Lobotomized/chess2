@@ -1225,6 +1225,91 @@ function missionClassicMedievalFive(state){
 }
 
 
+
+function missionClassicMedievalFourV2(state){
+    pieces = state.pieces;
+    pieces.length =0;
+    board = state.board;
+    board.length = 0;
+    state.turnsLeft = 30;
+    for (let x = 0; x <= 7; x++) {
+        for (let y = 0; y <= 7; y++) {
+            board.push({ light: false, x: x, y: y })
+        }
+    }
+    AIPower=5
+
+    state.specialOnMoveEffects = [
+        function(state){
+            let findAllPieces = state.pieces.filter((piece) => {
+                return piece.icon === 'whitePig.png' || piece.icon === 'blackBishop.png' || piece.icon === 'blackKnight.png'
+            })
+
+            if(findAllPieces.length < 5){
+                state.won = 'white';
+                buildModal([
+                    {type:'link', text:"Defeat!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicMedievalFourV2&AIColor=white"}
+                ])
+            }
+
+            let haveAllPigsFinished = state.pieces.filter((piece) => {
+                return piece.icon === "whitePig.png" && piece.y === 0;
+            })
+
+            if(haveAllPigsFinished.length ===3){
+                state.won = 'black';
+                buildModal([
+                    {type:'link', text:"Victory!!!", linkText:"Go to next mission", link:"/hotseat?gameType=missionClassicMedievalFive&AIColor=white"}
+                ])
+            }
+
+            state.turnsLeft -=1;
+
+            state.message = state.turnsLeft+ ' turns left.'
+        }
+    ]
+    try{
+        let miniBord = xyBoard(8,8,[]);
+        let pig = pigFactory('white',4,7)
+        lightBoardFE(pig,{board:miniBord, pieces:[pig],turn:"white"},'lighted')
+        buildModal([
+            {
+                type:"objectives",
+                text:`Herd the pigs to the end of the board without taking them. Scare them with your pieces and they will move.  </br>
+
+                Scare multiple at once and they might freeze so be careful.
+                </br> </br>The Crusader will try to sabotage you. </br></br>
+                Don't lose a piece and herd them before night time.`
+            }
+        ])
+        
+        buildPieceModal([
+            {
+                type:'piece',
+                classes:"",
+                board:miniBord ,
+                icon:'whitePig.png',
+                pieceX:4,
+                pieceY:7,
+                description:`
+                    The Pig can only move forward but it moves till the end of the line.
+                `
+            }
+        ])
+    }
+    catch(err){
+
+    }
+
+    pieces.push(
+        bishopFactory('black',7,0),knightFactory('black',7,6),
+
+        ricarFactory('white',1,1),
+
+        pigFactory('white',0,6),pigFactory('white',2,7),pigFactory('white',5,7)
+        )
+}
+
 function missionClassicMedievalFour(state){
     pieces = state.pieces;
     pieces.length =0;

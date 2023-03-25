@@ -38,7 +38,6 @@ function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters){
         evalMoves(thirdGen,maximizer,state.board,magnifiers);
         evalParents(secondGen,thirdGen);
         evalParents(firstGen,secondGen, true);
-        console.log(getMoveByValue(firstGen), firstGen, ' wtf?!')
         return getMoveByValue(firstGen)
 
     }
@@ -72,7 +71,7 @@ self.addEventListener("message", function(e) {
                 offensiveCharacter:offensiveCharacter,
                 defensiveCharacter:defensiveCharacter,
                 positionalCharacter:positionalCharacter,
-                positionalOffeniveCharacter:positionalOffensiveCharacter
+                positionalOffeniveCharacter:positionalOffensiveCharacter,
             }
             if(obj.AIPower === -1){
                 if(obj.state.pieces.length > 20){
