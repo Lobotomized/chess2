@@ -1225,6 +1225,75 @@ function missionClassicMedievalFive(state){
 }
 
 
+function missionClassicMedievalFourV2V2(state){
+    pieces = state.pieces;
+    pieces.length = 0;
+    board = state.board;
+    board.length = 0;
+    for (let x = 0; x <= 7; x++) {
+        for (let y = 0; y <= 7; y++) {
+            board.push({ light: false, x: x, y: y })
+        }
+    }
+    AIPower=5
+
+    state.specialOnMoveEffects = [
+        function(state){
+            let findAllPieces = state.pieces.filter((piece) => {
+                return piece.icon === 'whitePig.png' || piece.icon === 'blackBishop.png' || piece.icon === 'blackKnight.png'
+            })
+
+            if(findAllPieces.length < 5){
+                //state.won = 'white';
+                //buildModal([
+                //    {type:'link', text:"Defeat!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicMedievalFourV2&AIColor=white"}
+                //])
+            }
+        }
+    ]
+    try{
+        let miniBord = xyBoard(8,8,[]);
+        let pig = pigFactory('white',4,7)
+        lightBoardFE(pig,{board:miniBord, pieces:[pig],turn:"white"},'lighted')
+        buildModal([
+            {
+                type:"objectives",
+                text:`Herd the pigs to the end of the board without taking them. Scare them with your pieces and they will move.  </br>
+
+                Scare multiple at once and they might freeze so be careful.
+                </br> </br>The Crusader will try to sabotage you. </br></br>
+                Don't lose a piece and herd them before night time.`
+            }
+        ])
+        
+        buildPieceModal([
+            {
+                type:'piece',
+                classes:"",
+                board:miniBord ,
+                icon:'whitePig.png',
+                pieceX:4,
+                pieceY:7,
+                description:`
+                    The Pig can only move forward but it moves till the end of the line.
+                `
+            }
+        ])
+    }
+    catch(err){
+
+    }
+
+    pieces.push(
+        bishopFactory('black',7,0),
+        bishopFactory('black',7,1),
+
+        ricarFactory('white',1,6),
+        ricarFactory('white',2,6),
+        ricarFactory('white',3,6),
+        ricarFactory('white',4,6),
+        )
+}
 
 function missionClassicMedievalFourV2(state){
     pieces = state.pieces;
@@ -1263,9 +1332,29 @@ function missionClassicMedievalFourV2(state){
                 ])
             }
 
-            state.turnsLeft -=1;
+            if(state.turn === 'white'){
+                state.turnsLeft -=1;
+            }
 
-            state.message = state.turnsLeft+ ' turns left.'
+            if(state.turnsLeft > 0){
+                state.message = state.turnsLeft+ ' turns left.'
+            }
+            else{
+                state.message = "It's night time. We have to go back";
+                state.won = 'white';
+                blackSquareColor = '#2C3333';
+                whiteSquareColor = '#CBE4DE';
+                dangerSquareColor = '#E7907F';
+                lightedSquareColor = '#0E8388';
+                blockedSquareColor = '#CF6A4E';
+                availableSquareColor = '#787F42';
+                backgroundColor = '#2E4F4F';
+                oldMoveSquareColor = '#D59148';
+                buildModal([
+                    {type:'link', text:"We were too late", linkText:"Restart", link:"/hotseat?gameType=missionClassicMedievalFourV2&AIColor=white"}
+                ])
+            }
+
         }
     ]
     try{
@@ -1273,13 +1362,16 @@ function missionClassicMedievalFourV2(state){
         let pig = pigFactory('white',4,7)
         lightBoardFE(pig,{board:miniBord, pieces:[pig],turn:"white"},'lighted')
         buildModal([
+            {type:'quote', classes:"reverse",text:`The animals have gone insane. We have to herd them back before we lose some..</b>`,icon:"/blackBishop.png"},
+            {type:'quote', classes:"",text:`Why are they acting so strange? `,icon:"/blackKnight.png"},
+            {type:'quote', classes:"reverse",text:`I have no idea but be very careful. There might be intruders.</b>`,icon:"/blackBishop.png"},
             {
                 type:"objectives",
-                text:`Herd the pigs to the end of the board without taking them. Scare them with your pieces and they will move.  </br>
+                text:`Herd the pigs to the end of the board without taking them. Scare them with your pieces and they will move.  </br></br>
 
-                Scare multiple at once and they might freeze so be careful.
-                </br> </br>The Crusader will try to sabotage you. </br></br>
-                Don't lose a piece and herd them before night time.`
+                Scare multiple at once or non at all and the crusader might move, attempting to sabotage you.
+                </br></br>
+                Don't lose a piece and herd the animals before night time.`
             }
         ])
         
