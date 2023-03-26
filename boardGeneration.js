@@ -1075,20 +1075,7 @@ function missionClassicBugsFour(state){
 }
 
 
-function missionClassicMedievalSix(state){
-    pieces = state.pieces;
-    pieces.length =0;
-    board = state.board;
-    board.length = 0;
-
-
-    pieces.push(
-
-    )
-}
-
-
-function missionClassicMedievalSix(state){
+function missionClassicMedievalSeven(state){
     pieces = state.pieces;
     pieces.length =0;
     board = state.board;
@@ -1157,7 +1144,7 @@ function missionClassicMedievalSix(state){
 
 
 
-function missionClassicMedievalFive(state){
+function missionClassicMedievalSix(state){
     pieces = state.pieces;
     pieces.length =0;
     board = state.board;
@@ -1224,78 +1211,7 @@ function missionClassicMedievalFive(state){
     ]
 }
 
-
-function missionClassicMedievalFourV2V2(state){
-    pieces = state.pieces;
-    pieces.length = 0;
-    board = state.board;
-    board.length = 0;
-    for (let x = 0; x <= 7; x++) {
-        for (let y = 0; y <= 7; y++) {
-            board.push({ light: false, x: x, y: y })
-        }
-    }
-    AIPower=5
-
-    state.specialOnMoveEffects = [
-        function(state){
-            let findAllPieces = state.pieces.filter((piece) => {
-                return piece.icon === 'whitePig.png' || piece.icon === 'blackBishop.png' || piece.icon === 'blackKnight.png'
-            })
-
-            if(findAllPieces.length < 5){
-                //state.won = 'white';
-                //buildModal([
-                //    {type:'link', text:"Defeat!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicMedievalFourV2&AIColor=white"}
-                //])
-            }
-        }
-    ]
-    try{
-        let miniBord = xyBoard(8,8,[]);
-        let pig = pigFactory('white',4,7)
-        lightBoardFE(pig,{board:miniBord, pieces:[pig],turn:"white"},'lighted')
-        buildModal([
-            {
-                type:"objectives",
-                text:`Herd the pigs to the end of the board without taking them. Scare them with your pieces and they will move.  </br>
-
-                Scare multiple at once and they might freeze so be careful.
-                </br> </br>The Crusader will try to sabotage you. </br></br>
-                Don't lose a piece and herd them before night time.`
-            }
-        ])
-        
-        buildPieceModal([
-            {
-                type:'piece',
-                classes:"",
-                board:miniBord ,
-                icon:'whitePig.png',
-                pieceX:4,
-                pieceY:7,
-                description:`
-                    The Pig can only move forward but it moves till the end of the line.
-                `
-            }
-        ])
-    }
-    catch(err){
-
-    }
-
-    pieces.push(
-        bishopFactory('black',7,0),
-        bishopFactory('black',7,1),
-
-        ricarFactory('white',1,6),
-        ricarFactory('white',2,6),
-        ricarFactory('white',3,6),
-        ricarFactory('white',4,6),
-        )
-}
-
-function missionClassicMedievalFour(state){
+function missionClassicMedievalFive(state){
     pieces = state.pieces;
     pieces.length =0;
     board = state.board;
@@ -1317,7 +1233,7 @@ function missionClassicMedievalFour(state){
             if(findAllPieces.length < 5){
                 state.won = 'white';
                 buildModal([
-                    {type:'link', text:"Defeat!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicMedievalFour&AIColor=white"}
+                    {type:'link', text:"Defeat!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicMedievalFive&AIColor=white"}
                 ])
             }
 
@@ -1328,7 +1244,7 @@ function missionClassicMedievalFour(state){
             if(haveAllPigsFinished.length ===3){
                 state.won = 'black';
                 buildModal([
-                    {type:'link', text:"Victory!!!", linkText:"Go to next mission", link:"/hotseat?gameType=missionClassicMedievalFive&AIColor=white"}
+                    {type:'link', text:"Victory!!!", linkText:"Go to next mission", link:"/hotseat?gameType=missionClassicMedievalSix&AIColor=white"}
                 ])
             }
 
@@ -1351,7 +1267,7 @@ function missionClassicMedievalFour(state){
                 backgroundColor = '#2E4F4F';
                 oldMoveSquareColor = '#D59148';
                 buildModal([
-                    {type:'link', text:"We were too late", linkText:"Restart", link:"/hotseat?gameType=missionClassicMedievalFourV2&AIColor=white"}
+                    {type:'link', text:"We were too late", linkText:"Restart", link:"/hotseat?gameType=missionClassicMedievalSix&AIColor=white"}
                 ])
             }
 
@@ -1406,75 +1322,72 @@ function missionClassicMedievalFour(state){
         )
 }
 
-function missionClassicMedievalFourV2(state){
-    pieces = state.pieces;
-    pieces.length =0;
-    board = state.board;
-    board.length = 0;
-    for (let x = 0; x <= 7; x++) {
-        for (let y = 0; y <= 7; y++) {
-            if(!((y===5 && !(x==4 || x==3 || x==2 || x==5)) || (y===4 && !(x==4 || x==3 || x==2 || x==5)))){
-                board.push({ light: false, x: x, y: y })
+function missionClassicMedievalFour(state){
+    xyBoard(5,5,state.board)
+    AIPower = 5;
+    state.pieces = [
+        rookFactory('black',1,0),rookFactory('black',5,0),rookFactory('black',1,4),rookFactory('black',5,4),
+        bishopFactory('black',2,2),
+        ricarFactory('white',3,3)
+    ]
+    let miniBord = xyBoard(8,8,[]);
+    let ricar = ricarFactory('white',4,4)
+    lightBoardFE(ricar,{board:miniBord, pieces:[ricar],turn:"white"},'lighted')
+    state.specialOnMoveEffects = [
+        function(state){
+            let whitePieces = state.pieces.filter((piece) => {
+                return piece.color === 'white';
+            })
+            let blackPieces = state.pieces.filter((piece) => {
+                return piece.color === 'black';
+            })
+
+            if(whitePieces < 1){
+                state.won = 'black';
+                state.message = "You won";
+                buildModal(
+                    [
+                        {type:'link', text:"Victory!!!", linkText:"Go to the next mission", link:"/hotseat?gameType=missionClassicMedievalFive&AIColor=white"}
+                    ]
+                )
+            }
+
+            if(blackPieces.length < 5){
+                state.won = 'white';
+                state.message = "You lost"
+                
+                buildModal(
+                    [
+                        {type:'link', text:"Defeat!!!", linkText:"Repeat the mission", link:"/hotseat?gameType=missionClassicMedievalFour&AIColor=white"}
+                    ]
+                )
             }
         }
-    }
+    ]
 
-    try{
-        let miniBord = xyBoard(8,8,[]);
-        let pig = pigFactory('white',4,7)
-        lightBoardFE(pig,{board:miniBord, pieces:[pig],turn:"white"},'lighted')
-        buildModal([
-            {type:'quote', classes:"reverse",text:`It was marvelous your majesty. And now we have the first hornless unicorn in our stables.</b>`,icon:"/blackBishop.png"},
-            {type:'quote', classes:"",text:`I can't even begin to imagine how one would look without a horn. 
-            <br> And I heard you pissed off the wood Gods as I always did in my youth.<br> You will have bright future young man.`,icon:"/blackKing.png"},
-            {type:'quote', classes:"",text:`He does remind of younger you. Much younger...`,icon:"/blackQueen.png"},
-            {type:'quote', classes:"",text:`...`,icon:"/blackKing.png"},
-            {type:'quote', classes:"reverse",text:`Sire the wood Gods have an army in front of our castle.</b> Why would they do this to us? We've done nothing to insult them...`,icon:"/blackRook.png"},
-            {type:'quote', classes:"",text:`I think certain black bishop is going to become a pawn on the front line soon...</b>`,icon:"/blackKing.png"},
-            {type:'objectives', classes:"",text:`Take all enemy pieces.</b>`,icon:"/blackKing.png"},
-        ])
+    buildModal([
+        {type:'quote', classes:"",text:`Why are you standing against us brother?`,icon:"/blackRook.png"},
+        {type:'quote', classes:"reverse",text:`You have desecrated the forests.`,icon:"/whiteRicar.png"},
+        {type:'quote', classes:"",text:`So you betray your own?`,icon:"/blackRook.png"},
+        {type:'quote', classes:"reverse",text:`I was never on your side to betray you.`,icon:"/whiteRicar.png"},
+        {type:'objectives', text:"There should be no white pieces and the board and you shouldn't lose a piece."}
+    ])
+    buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board:miniBord ,
+            icon:'whiteRicar.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The Crusader can jump through pieces like a knight. <br/><br/>
 
-        buildPieceModal([
-            {
-                type:'piece',
-                classes:"",
-                board:miniBord ,
-                icon:'whitePig.png',
-                pieceX:4,
-                pieceY:7,
-                description:`
-                    The Pig can only move forward but it moves till the end of the line.
-                `
-            }
-        ])
-    }
-    catch(err){
-
-    }
-
-    pieces.push(
-        horseFactory('white',6,6),
-        horseFactory('white',7,7),
-
-        horseFactory('white',1,6),
-        horseFactory('white',0,7),
-
-        pigFactory('white',2,7),pigFactory('white',3,7),
-        pigFactory('white',4,7),pigFactory('white',5,7),
-
-        ghostFactory('white',2,6),ghostFactory('white',3,6),
-        ghostFactory('white',4,6),ghostFactory('white',5,6),
-
-
-        pawnFactory('black',1,3),pawnFactory('black',2,3),pawnFactory('black',3,3),pawnFactory('black',4,3),pawnFactory('black',5,3),pawnFactory('black',6,3),
-        pawnFactory('black',2,4),pawnFactory('black',3,4),pawnFactory('black',4,4),pawnFactory('black',5,4),
-
-        kingFactory('black',7,0),queenFactory('black',6,0),rookFactory('black',6,1),bishopFactory('black',7,1),
-
-        knightFactory('black',1,0),knightFactory('black',2,0),knightFactory('black',2,1),knightFactory('black',1,1),knightFactory('black',3,0),knightFactory('black',3,1)
-    )
+                If you take him and the square behind is free a ghost spawns there to avenge his comrade.
+            `
+        }
+    ])
 }
-
 
 function missionClassicMedievalThree(state){
     pieces = state.pieces;
@@ -1596,105 +1509,6 @@ function missionClassicMedievalThree(state){
     )
 }
 
-function missionClassicMedievalThreeV2(state){
-    pieces = state.pieces;
-    pieces.length =0;
-    board = state.board;
-    board.length = 0;
-    for (let x = 0; x <= 7; x++) {
-        for (let y = 0; y <= 7; y++) {
-            let checkOne = !(x === 3 && y === 3)
-            let checkTwo = !(x === 3 && y === 4)
-            let checkThree = !(x===4 && y === 4)
-            let checkFour = !(x===2 && y === 5)
-            let checkFive = !(x===1 && y ===5)
-            let checkSix = !(x===1 && y ===6)
-            let checkSeven = !(x===6 && y ===2)
-            let checkEight = !(x===6 && y ===3)
-            let checkNine = !(x===3 && y ===7)
-            let checkTen = !(x===5 && y ===6)
-            let checkEleven = !(x===7 && y ===5)
-            let checkTwelve = !(x===0 && y ===3)
-
-            let checks = checkOne && checkTwo && checkThree && checkFour && checkFive && checkSix && checkSeven
-            && checkEight && checkNine && checkTen && checkEleven && checkTwelve
-            if(checks){
-                board.push({ light: false, x: x, y: y })
-            }
-
-        }
-    }
-    try{
-        let miniBord = xyBoard(8,8,[]);
-        let clown = clownFactory('white',4,4)
-        lightBoardFE(clown,{board:miniBord, pieces:[clown],turn:"white"},'lighted')
-        state.specialOnMoveEffects = [
-            function(state){
-                blackSquareColor = '#2C3333';
-                whiteSquareColor = '#CBE4DE';
-                dangerSquareColor = '#E7907F';
-                lightedSquareColor = '#0E8388';
-                blockedSquareColor = '#CF6A4E';
-                availableSquareColor = '#787F42';
-                backgroundColor = '#2E4F4F';
-                oldMoveSquareColor = '#D59148';
-                AIPower = 5;      
-                AICharater = 'defensiveCharacter'          
-                let findOne = state.pieces.find((piece) => {
-                    return piece.icon.includes('whiteClown.png') || piece.icon.includes('whiteHorse.png')
-                })
-
-                if(!findOne){
-                    state.won = 'black';
-                }
-
-                let findBlack = state.pieces.find((piece) => {
-                    return piece.color === 'black';
-                })
-
-                if(!findBlack){
-                    state.won = 'white';
-                }
-
-              
-            }
-        ]
-
-        buildModal([
-            {type:'quote', classes:"",text:`For some unknown reason the wood critters are angry with us.</b>
-                                            They killed the magician.`,icon:"/blackKnight.png"},
-            {type:'quote', classes:"",text:`We need to take back the potions or the tree gods are going to use it against our kingdom.</b>`,icon:"/blackRook.png"},
-            {type:'objectives', text:"Take the immovable potion and don't lose both of your pieces."}
-
-        ])
-        buildPieceModal([
-            {
-                type:'piece',
-                classes:"",
-                board:miniBord ,
-                icon:'whiteClown.png',
-                pieceX:4,
-                pieceY:4,
-                description:`
-                    The clown moves like a queen but it cannot take enemy pieces.</b>
-                    He has the power to swap places with any other ally for the price of a turn.
-                `
-            }
-        ])
-    }
-    catch(err){
-
-    }
-
-    pieces.push(
-        rookFactory('black',2,6),
-        knightFactory('black',0,7),
-        clownFactory('white', 0, 2),
-        clownFactory('white', 1, 4),
-        horseFactory('white', 4,1),
-        kolbaFactory('white',7,0)
-    )
-}
 
 function missionClassicMedievalTwo(state){
     pieces = state.pieces;
