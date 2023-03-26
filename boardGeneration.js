@@ -1370,7 +1370,7 @@ function missionClassicMedievalFour(state){
         {type:'quote', classes:"reverse",text:`You have desecrated the forests.`,icon:"/whiteRicar.png"},
         {type:'quote', classes:"",text:`So you betray your own?`,icon:"/blackRook.png"},
         {type:'quote', classes:"reverse",text:`I was never on your side to betray you.`,icon:"/whiteRicar.png"},
-        {type:'objectives', text:"There should be no white pieces and the board and you shouldn't lose a piece."}
+        {type:'objectives', text:"There should be no white pieces left on the board. <br/> Don't lose a piece."}
     ])
     buildPieceModal([
         {
