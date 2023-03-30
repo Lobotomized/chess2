@@ -128,7 +128,18 @@ self.addEventListener("message", function(e) {
             }
             else if(obj.AIPower === 5){
                 move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns,
-                    methods['defensiveCharacter'](0),
+                    methods[obj.AICharacter](0),
+                    [
+                        // {method:removeAttackedMovesFilter, options:{randomException:0.6,exceptions:[randomException]}},
+                        // {method:removeNonAttackingMovesFilter, options:{randomException:0.5, 
+                        //     exceptions:[pieceAttackedException,randomException]}},
+                    ]
+                )
+            }
+            else if(obj.AIPower === 6){
+                move = minimaxDeep(obj.state,obj.color,4, obj.removedTurns,
+                    [{method:evaluationMagnifierPiece, options:{pieceValue:1 }}],
+                    
                     [
                         // {method:removeAttackedMovesFilter, options:{randomException:0.6,exceptions:[randomException]}},
                         // {method:removeNonAttackingMovesFilter, options:{randomException:0.5, 

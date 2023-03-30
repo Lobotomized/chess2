@@ -1,3 +1,4 @@
+
 try{
     var { kingFactory, knightFactory, mongolianKnightFactory, bishopFactory, rookFactory, queenFactory, pawnFactory, weakPawn, dragonFactory ,unpromotablePawn,
 
@@ -743,6 +744,30 @@ function missionClassicBugsOne(state){
     board = state.board;
     xyBoard(5,5,board)
     pieces.length = 0;
+    let miniBoard = xyBoard(8,8,[]);
+
+    let queenBug = queenBugFactory('white',4,4)
+    lightBoardFE(queenBug,{board:miniBoard, pieces:[queenBug],turn:"white"},'lighted')
+    buildModal([
+        {type:'quote', classes:"",text:`There is an infestation here! There is no time to notify the others. <br/>
+                                        <b>I have to save the village myself</b>.`,icon:"/blackKnight.png"},
+        
+        {type:'objectives', classes:"",text:`Leave no brood mothers on the board.`}
+    ])
+
+    buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board: miniBoard,
+            icon:'blackQueenBug.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The brood mother can't move. Instead she spawns ants. <br/><br/> Ants move up to two blockable squares forward and promote to brood mothers when they reach the end of the board. </br> 
+            `
+        }
+    ])
     state.specialOnMoveEffects = [
         function(state){
             if(state.pieces.length){
@@ -752,6 +777,12 @@ function missionClassicBugsOne(state){
 
                 if(!queenBug){
                     state.won = 'black'
+                    state.message='You won'
+                    buildModal([
+                        {type:'link', classes:"", text:'You won!',linkText:'Go to next level', link:`/hotseat?gameType=missionClassicBugsTwo&AIColor=white`}
+                        
+                    ])
+                
                 }
 
                 let blackPiece = state.pieces.find((piece) => {
@@ -760,6 +791,11 @@ function missionClassicBugsOne(state){
 
                 if(!blackPiece){
                     state.won = 'white'
+                    state.message='You lost'
+                    buildModal([
+                        {type:'link', classes:"", text:'You lost!',linkText:'Restart', link:`/hotseat?gameType=missionClassicBugsOne&AIColor=white`}
+                        
+                    ])
                 }
             }
         }
@@ -783,7 +819,35 @@ function missionClassicBugsTwo(state){
     board = state.board;
     xyBoard(4,6,board)
     pieces.length = 0;
+    // AIPower=5;
 
+    buildModal([
+        {type:'quote', classes:"",text:`My lord we are under attack. We might lose the battle. <br/><br/> We should evacuate you from here.`,icon:"/blackKnight.png"},
+        {type:'objectives', text:`
+            Get the prince to the end of the board or take all spiders. <br/><br/>
+            Pawns are not promotable.
+        `}
+        
+    ])
+
+    let miniBord = xyBoard(8,8,[]);
+    let spider = spiderFactory('white',4,4)
+
+    lightBoardFE(spider,{board:miniBord, pieces:[spider],turn:"white"},'lighted')
+    
+    buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board: miniBord,
+            icon:'blackSpider.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The spider can move both like a horse and like a king. </br> 
+            `
+        }
+    ])
     state.specialOnMoveEffects = [
         function(state){
             if(state.pieces.length){
@@ -797,6 +861,11 @@ function missionClassicBugsTwo(state){
 
                 if(!whitePiece || endOfLine){
                     state.won = 'black';
+
+                    buildModal([
+                        {type:'link', classes:"", text:'The prince is safe!',linkText:'Go to next level', link:`/hotseat?gameType=missionClassicBugsThree&AIColor=white`}
+                        
+                    ])
                 }
 
                 
@@ -805,11 +874,11 @@ function missionClassicBugsTwo(state){
     ]
 
     pieces.push(
-        pawnFactory('black',4,1),
-        pawnFactory('black',3,1),
-        pawnFactory('black',2,1),
-        pawnFactory('black',1,1),
-        pawnFactory('black',0,1),
+        unpromotablePawn('black',4,1),
+        unpromotablePawn('black',3,1),
+        unpromotablePawn('black',2,1),
+        unpromotablePawn('black',1,1),
+        unpromotablePawn('black',0,1),
 
         bishopFactory('black',0,0),
         knightFactory('black', 1,0),
@@ -829,68 +898,75 @@ function missionClassicBugsTwo(state){
 function missionClassicBugsThree(state){
     pieces = state.pieces;
     board = state.board;
-    xyBoard(7,7,board)
     pieces.length = 0;
+    AIPower = 6;
+    for (let x = 0; x <= 7; x++) {
+        for (let y = 0; y <= 7; y++) {
+                if(x%3 || (y === 7 && x == 3)|| (y === 0 && x == 6)|| (y === 4 && x === 3) || (y === 5 && x === 6)){
+                    board.push({ light: false, x: x, y: y })
+                }
+        }
+    }
+
+    let miniBord = xyBoard(8,8,[]);
+    let goliathBug = goliathBugFactory('white',4,4)
+
+    lightBoardFE(goliathBug,{board:miniBord, pieces:[goliathBug],turn:"white"},'lighted')
+    
+    buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board: miniBord,
+            icon:'blackGoliathBug.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The Goliath bug moves both like a king and a rook. </br> 
+            `
+        }
+    ])
+
+    buildModal([
+        {type:'quote', classes:"",text:`The Shroom is at the end of the map. We need to take it even if we have to sacrifice ourselves. <br/><br/>Otherwise the insectoids willw in.`,icon:"/blackKnight.png"},
+        {type:'objectives', text:`
+            Get the immovable shroom. The Goliath Bug will attempt to sabotage you.
+        `}
+        
+    ])
 
     state.specialOnMoveEffects = [
         function(state){
-            if(state.pieces.length){
-                let whitePiece = state.pieces.find((piece) => {
-                    return piece.color === 'white'
-                })
+            let shrooms = state.pieces.filter((piece) => {
+                return piece.icon.includes('whiteShroom.png')
+            });
 
-                if(!whitePiece){
-                    state.won = 'black';
-                }
+            let goliathBugs = state.pieces.filter((piece) => {
+                return piece.icon.includes('whiteGoliathBug.png');
+            })
+            if(!shrooms.length || !goliathBugs.length){
+                state.won = 'black';
+                buildModal({type:'link', classes:"", text:'Mission accomplished!',linkText:'Go to next level', link:`/hotseat?gameType=missionClassicBugsFour&AIColor=white`})
             }
+
+            let knights = state.pieces.filter((piece) => {
+                return piece.icon.includes('blackKnight.png')
+            })
+
+            if(!knights.length){
+                buildModal({type:'link', classes:"", text:'Mission failed',linkText:'Restart', link:`/hotseat?gameType=missionClassicBugsThree&AIColor=white`})
+
+            }
+            
+
         }
     ]
 
-    pieces.push(
 
-        knightFactory('black',7,1),
-        knightFactory('black',6,1),
-        knightFactory('black',7,0),
-        knightFactory('black', 6,0),
-        
-
-        rookFactory('black',3,0),
-
-        pawnFactory('black',3,1),
-        pawnFactory('black',2,1),
-        pawnFactory('black',4,1),
-        pawnFactory('black',5,1),
-
-        knightFactory('black',1,1),
-        knightFactory('black',0,1),
-        knightFactory('black',0,0),
-        knightFactory('black', 1,0),
-
-
-
-        kingFactory('black',4,0),
-
-    )
 
     pieces.push(
-        queenBugFactory('white',0,7),
-        goliathBugFactory('white',1,7),
-        queenBugFactory('white',2,7),
-        goliathBugFactory('white',3,7),
-        queenBugFactory('white',4,7),
-        goliathBugFactory('white',5,7),
-        queenBugFactory('white',6,7),
-        goliathBugFactory('white',7,7),
-
-        antFactory('white',0,6),
-        antFactory('white',1,6),
-        antFactory('white',2,6),
-        antFactory('white',3,6),
-        antFactory('white',4,6),
-        antFactory('white',5,6),
-        antFactory('white',6,6),
-        antFactory('white',7,6)        
-
+        goliathBugFactory('white',5,1),shroomFactory('white',7,7),
+        knightFactory('black',1,0),knightFactory('black',2,6)
 
     )
 
@@ -936,9 +1012,9 @@ function missionClassicBugsSix(state){
         )
 }
 
-function missionClassicBugsFive(state){
-    pieces = state.pieces;
-    board = state.board;
+function missionClassicBugsFive(parentState){
+    pieces = parentState.pieces;
+    board = parentState.board;
     pieces.length = 0;
     board.length = 0;
     for (let x = 0; x <= 7; x++) {
@@ -949,10 +1025,23 @@ function missionClassicBugsFive(state){
         }
     }
 
-    state.countDown = 34;
-    state.specialOnMoveEffects = [
+    parentState.countDown = 18;
+
+    buildModal([
+        {type:'objectives', classes:"",text:`Survive 18 turns before the cavalry arrives and than take all the remaining enemies.`}
+     ])
+     parentState.specialOnMoveEffects = [
         function(state){
-            state.countDown -=1;
+            if(state.turn === 'white'){
+                state.countDown -=1;
+            }
+            state.message = state.countDown +" turns till the cavalry arrives"
+            if(state.won === 'white'){
+                buildModal([
+                    {type:'link', text:"Defeat!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicBugsFive&AIColor=white"}
+                 ])
+            }
+
             if(state.countDown === 0){
                 state.pieces = state.pieces.filter((piece) =>{
                     return piece.y !== 7
@@ -984,22 +1073,34 @@ function missionClassicBugsFive(state){
                 }
             }
             else{
+
+                let counter = 0;
                 state.pieces.forEach((piece) => {
 
                     if(piece.icon.includes('Ladybug.png')){
+                        counter++;
                         piece.value = 7.5;
                     }
                     else if(piece.icon.includes('Spider.png')){
+                        counter++;
                         piece.value= 5.5;
                     }
                     else if(piece.icon.includes('Ant.png')){
+                        counter++;
                         piece.value = 0.6;
                     }
                     else if(piece.icon.includes('GoliathBug.png')){
+                        counter++;
                         piece.value = 7.5;
                     }
     
                 })
+
+                if(!counter){
+                    buildModal([
+                        {type:'link', text:"Victory!!!", linkText:"Go to next mission", link:"/hotseat?gameType=missionClassicBugsSix&AIColor=white"}
+                     ])
+                }
             }
             
 
@@ -1017,7 +1118,15 @@ function missionClassicBugsFive(state){
         pawnFactory('black',2,4),pawnFactory('black',3,4),pawnFactory('black',4,4),pawnFactory('black',5,4),
         pawnFactory('black',1,3),pawnFactory('black',2,3),pawnFactory('black',3,3),pawnFactory('black',4,3),pawnFactory('black',5,3),pawnFactory('black',6,3),
 
-        kingFactory('black',4,0),
+        kingFactory('black',4,0, {
+            gameEndedEvent:function(colorWon){
+                if(colorWon === 'white'){
+                    buildModal([
+                        {type:'link', text:"Defeat!!!", linkText:"Restart the mission", link:"/hotseat?gameType=missionClassicBugsFive&AIColor=white"}
+                     ])
+                }
+            }
+        }),
 
         rookFactory('black',2,0),rookFactory('black',5,0),
         bishopFactory('black',0,0),bishopFactory('black',7,0)
@@ -1050,19 +1159,60 @@ function missionClassicBugsFour(state){
         }
     ]
 
+
+
+    buildModal([
+        {type:'quote', classes:"",text:`Your majesties! The insectoids have found us unprepared. <br/><br/> We need to escape from here! `,icon:"/blackKing.png"},
+        {type:'objectives', classes:"",text:`Reach the last row with your two kings. <br/><br/>Pawns cannot be  promoted.`}
+     ])
+
+     let miniBord = xyBoard(8,8,[]);
+     let ladybug = strongLadyBugFactory('white',4,4)
+     lightBoardFE(ladybug,{board:miniBord, pieces:[ladybug],turn:"white"},'lighted')
+     buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board:miniBord ,
+            icon:'blackLadyBug.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The lady bug moves one time horizontally or vertically and than threes times in each diagonal. <br/><br/>
+                The movement is blockable and it's going to be stopped if any piece exist on the path.
+            `
+        }
+    ])
+
     pieces.push(
-        pawnFactory('black',3,4),
-        pawnFactory('black',4,4),
-        pawnFactory('black',5,4),
-        pawnFactory('black',2,4),
-        pawnFactory('black',3,2),
-        pawnFactory('black',4,2),
-        pawnFactory('black',5,2),
-        pawnFactory('black',2,2),
+        unpromotablePawn('black',3,4),
+        unpromotablePawn('black',4,4),
+        unpromotablePawn('black',5,4),
+        unpromotablePawn('black',2,4),
+        unpromotablePawn('black',3,2),
+        unpromotablePawn('black',4,2),
+        unpromotablePawn('black',5,2),
+        unpromotablePawn('black',2,2),
         rookFactory('black',2,3),
         rookFactory('black',5,3),
-        kingFactory('black',4,3),
-        kingFactory('black',3,3),
+        kingFactory('black',4,3, {
+            gameEndedEvent:function(colorWon){
+                if(colorWon === 'white'){
+                    buildModal([
+                        {type:'link', text:"Defeat!!!", linkText:"Restart the mission", link:"/hotseat?gameType=missionClassicBugsFour&AIColor=white"}
+                     ])
+                }
+            }
+        }),
+        kingFactory('black',3,3, {
+            gameEndedEvent:function(colorWon){
+                if(colorWon === 'white'){
+                    buildModal([
+                        {type:'link', text:"Defeat!!!", linkText:"Restart the mission", link:"/hotseat?gameType=missionClassicBugsFour&AIColor=white"}
+                     ])
+                }
+            }
+        }),
     )
 
     pieces.push(
@@ -1088,9 +1238,7 @@ function missionClassicMedievalSeven(state){
         }
     }
 
-    let miniBord = xyBoard(8,8,[]);
-    let hat = hatFactory('white',4,4)
-    lightBoardFE(hat,{board:miniBord, pieces:[hat],turn:"white"},'lighted')
+
     AIPower = 2;
     AICharater = 'positionalOffensiveCharacter'
     buildModal([
@@ -1098,6 +1246,9 @@ function missionClassicMedievalSeven(state){
         {type:'objectives', classes:"",text:`Take at least one of the magical hats and the forest will lose it's magic.`}
      ])
 
+     let miniBord = xyBoard(8,8,[]);
+     let hat = hatFactory('white',4,4)
+     lightBoardFE(hat,{board:miniBord, pieces:[hat],turn:"white"},'lighted')
      buildPieceModal([
         {
             type:'piece',
@@ -1159,30 +1310,12 @@ function missionClassicMedievalSix(state){
             }
         }
     }
-    let miniBord = xyBoard(8,8,[]);
-    let ricar = ricarFactory('white',4,4)
-    lightBoardFE(ricar,{board:miniBord, pieces:[ricar],turn:"white"},'lighted')
     try{
 
         buildModal([
            {type:'quote', classes:"",text:`Sire, traitors have joined our enemy. <b>They ambushed us!</b>`,icon:"/blackRook.png"},
            {type:'quote', classes:"",text:`Destroy them all!!!`,icon:"/blackKing.png"},
-           {type:'quote', classes:"reverse",text:` We were never on your side to betray you!`,icon:"/whiteKnight.png"},
            {type:'objectives', text:`Leave no enemy Knights or Crusaders on the field`},
-        ])
-
-        buildPieceModal([
-            {
-                type:'piece',
-                classes:"",
-                board:miniBord ,
-                icon:'blackRicar.png',
-                pieceX:4,
-                pieceY:4,
-                description:`
-                    The crusader jumps above pieces and when he dies he spawns, a ghost behind him, waiting to avenge.
-                `
-            }
         ])
     }catch(err){
 
@@ -1190,12 +1323,12 @@ function missionClassicMedievalSix(state){
     pieces.push(
         pawnFactory('black',2,2),pawnFactory('black',3,2),pawnFactory('black',4,2),pawnFactory('black',5,2),
         knightFactory('black',2,1),knightFactory('black',3,1),knightFactory('black',4,1),knightFactory('black',5,1),
-        rookFactory('black',2,0),bishopFactory('black',3,0),queenFactory('black',4,0),kingFactory('black',5,0)
+        bishopFactory('black',2,0),bishopFactory('black',3,0),queenFactory('black',4,0),kingFactory('black',5,0)
     )
     
     pieces.push(
-        pawnFactory('white',1,4),pawnFactory('white',2,4),pawnFactory('white',3,4),pawnFactory('white',4,4),pawnFactory('white',5,4),pawnFactory('white',6,4),
-        ricarFactory('white',1,5),ricarFactory('white',2,5),knightFactory('white',3,5),knightFactory('white',4,5),ricarFactory('white',5,5),ricarFactory('white',6,5),
+        pawnFactory('white',1,4),pawnFactory('white',2,4),ghostFactory('white',3,4),ghostFactory('white',4,4),pawnFactory('white',5,4),pawnFactory('white',6,4),
+        rookFactory('white',1,5),ricarFactory('white',2,5),knightFactory('white',3,5),knightFactory('white',4,5),ricarFactory('white',5,5),horseFactory('white',6,5),
     )
 
     state.specialOnMoveEffects = [
@@ -1206,6 +1339,11 @@ function missionClassicMedievalSix(state){
 
             if(!findHim){
                 state.won = 'black';
+                state.message='You won!'
+
+                buildModal([
+                    {type:'link', text:"Victory!!!", linkText:"Go to next mission", link:"/hotseat?gameType=missionClassicMedievalSeven&AIColor=white"}
+                ])
             }
         }
     ]
@@ -1267,7 +1405,7 @@ function missionClassicMedievalFive(state){
                 backgroundColor = '#2E4F4F';
                 oldMoveSquareColor = '#D59148';
                 buildModal([
-                    {type:'link', text:"We were too late", linkText:"Restart", link:"/hotseat?gameType=missionClassicMedievalSix&AIColor=white"}
+                    {type:'link', text:"We were too late", linkText:"Restart", link:"/hotseat?gameType=missionClassicMedievalFive&AIColor=white"}
                 ])
             }
 
@@ -1330,6 +1468,7 @@ function missionClassicMedievalFour(state){
         bishopFactory('black',2,2),
         ricarFactory('white',3,3)
     ]
+
     let miniBord = xyBoard(8,8,[]);
     let ricar = ricarFactory('white',4,4)
     lightBoardFE(ricar,{board:miniBord, pieces:[ricar],turn:"white"},'lighted')
@@ -1341,6 +1480,7 @@ function missionClassicMedievalFour(state){
             let blackPieces = state.pieces.filter((piece) => {
                 return piece.color === 'black';
             })
+
 
             if(whitePieces < 1){
                 state.won = 'black';

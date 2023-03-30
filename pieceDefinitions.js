@@ -706,14 +706,16 @@ function queenFactory(color, x, y) {
 
 
 
-function kingFactory(color, x, y) {
+function kingFactory(color, x, y, options) {
     return {
         icon: color + 'King.png',
         vulnerable: true,
         moved: false,
-        moves: [ { type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
-                 { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },
-                 { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }],
+        moves: [ 
+                // { type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
+                //  { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },
+                //  { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }
+                ],
         x: x,
         y: y,
         value:2000,
@@ -722,31 +724,37 @@ function kingFactory(color, x, y) {
 
         conditionalMoves: function(state){
             let toReturn = []
-            // if(!isPositionAttacked(state,this.color,this.x,this.y+1)){
-            //     toReturn.push({ type: 'absolute', x: 0, y: 1 });
-            // }
-            // if(!isPositionAttacked(state,this.color,this.x+1,this.y)){
-            //     toReturn.push({ type: 'absolute', x: 1, y: 0 });
-            // }
-            // if(!isPositionAttacked(state,this.color,this.x+1,this.y+1)){
-            //     toReturn.push({ type: 'absolute', x: 1, y: 1 });
-            // }
-            // if(!isPositionAttacked(state,this.color,this.x-1,this.y-1)){
-            //     toReturn.push({ type: 'absolute', x: -1, y: -1 });
-            // }
-            // //
-            // if(!isPositionAttacked(state,this.color,this.x,this.y-1)){
-            //     toReturn.push({ type: 'absolute', x: 0, y: -1 });
-            // }
-            // if(!isPositionAttacked(state,this.color,this.x-1,this.y)){
-            //     toReturn.push({ type: 'absolute', x: -1, y: 0 });
-            // }
-            // if(!isPositionAttacked(state,this.color,this.x-1,this.y+1)){
-            //     toReturn.push({ type: 'absolute', x: -1, y: 1 });
-            // }
-            // if(!isPositionAttacked(state,this.color,this.x+1,this.y-1)){
-            //     toReturn.push({ type: 'absolute', x: 1, y: -1 });
-            // }
+            let enemyKing = state.pieces.find((piece) => {
+                return piece.icon.includes('King.png') && piece.color != this.color
+            })
+
+            
+
+            if(!isPositionAttacked(state,this.color,this.x,this.y+1)){
+                toReturn.push({ type: 'absolute', x: 0, y: 1 });
+            }
+            if(!isPositionAttacked(state,this.color,this.x+1,this.y)){
+                toReturn.push({ type: 'absolute', x: 1, y: 0 });
+            }
+            if(!isPositionAttacked(state,this.color,this.x+1,this.y+1)){
+                toReturn.push({ type: 'absolute', x: 1, y: 1 });
+            }
+            if(!isPositionAttacked(state,this.color,this.x-1,this.y-1)){
+                toReturn.push({ type: 'absolute', x: -1, y: -1 });
+            }
+            //
+            if(!isPositionAttacked(state,this.color,this.x,this.y-1)){
+                toReturn.push({ type: 'absolute', x: 0, y: -1 });
+            }
+            if(!isPositionAttacked(state,this.color,this.x-1,this.y)){
+                toReturn.push({ type: 'absolute', x: -1, y: 0 });
+            }
+            if(!isPositionAttacked(state,this.color,this.x-1,this.y+1)){
+                toReturn.push({ type: 'absolute', x: -1, y: 1 });
+            }
+            if(!isPositionAttacked(state,this.color,this.x+1,this.y-1)){
+                toReturn.push({ type: 'absolute', x: 1, y: -1 });
+            }
             if(!this.moved){
                 const availableRooks = state.pieces.filter((piece) => {
                     let enemyColor = 'black'
@@ -787,9 +795,11 @@ function kingFactory(color, x, y) {
         afterThisPieceTaken: function (state) {
             if (this.color == 'white') {
                 state.won = 'black';
+                options?.gameEndedEvent(state.won);
             }
             else if (this.color == 'black') {
                 state.won = 'white';
+                options?.gameEndedEvent(state.won);
             }
         },
         afterEnemyPlayerMove: function(state,move){
@@ -835,6 +845,7 @@ function kingFactory(color, x, y) {
                 }
                 if(!possibleEscape){
                     state.won = enemyColor
+                    options?.gameEndedEvent(state.won);
                 }
             }
         },
