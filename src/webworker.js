@@ -89,6 +89,16 @@ self.addEventListener("message", function(e) {
             }
 
 
+            if(obj.AIPower === -2){
+                console.log('tuka vliza?')
+                move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
+                    methods[obj.AICharacter](0),
+                    [
+                        {method:removeNonAttackingMovesFilter, options:{maximum:2,minPieceValue:5, filterDepth:1,
+                        exceptions:[pieceValueMustBeSmallerThanException]}},
+                    ]
+                )
+            }
             if(obj.AIPower === 0){
                 move = minimaxDeep(obj.state,obj.color,1, obj.removedTurns,methods[obj.AICharacter](0))
             }

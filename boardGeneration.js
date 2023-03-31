@@ -11,7 +11,8 @@ try{
         fatCatFactory,
         blindCatFactory,
         cuteCatFactory,
-        strongLadyBugFactory
+        strongLadyBugFactory,
+        swordsMen
 
         
     
@@ -882,7 +883,15 @@ function missionClassicBugsTwo(state){
 
         bishopFactory('black',0,0),
         knightFactory('black', 1,0),
-        kingFactory('black',2,0),
+        kingFactory('black',2,0, {
+            gameEndedEvent:function(colorWon){
+                if(colorWon === 'white'){
+                    buildModal([
+                        {type:'link', text:"Defeat!!!", linkText:"Restart the mission", link:"/hotseat?gameType=missionClassicBugsFour&AIColor=white"}
+                     ])
+                }
+            }
+        }),
         knightFactory('black', 3,0),
         bishopFactory('black', 4,0)
     )
@@ -1824,6 +1833,241 @@ function missionClassicMedievalOne(state){
         unpromotablePawn('black',5,0),
         unpromotablePawn('black',6,0)
     )
+}
+
+function missionClassicPromotersTwo(state){
+    let board = state.board;
+    let pieces = state.pieces;
+    board.length = 0;
+    pieces.length = 0;
+    AIPower = -2;
+    for (let x = 0; x <= 7; x++) {
+        for (let y = 0; y <= 7; y++) {
+            let shirini = x === 1 || x === 2 || x ===3
+            let viso4inni = y === 3 || y === 4
+
+            if(!(viso4inni && !shirini)){
+                board.push({  x: x, y: y })
+            }
+
+        }
+    } 
+
+    let miniBord = xyBoard(8,8,[]);
+    let ghost = pikeman('white',4,4)
+    lightBoardFE(ghost,{board:miniBord, pieces:[ghost],turn:"white"},'lighted')
+
+    buildModal([
+        {type:'quote', text:`Surrender now usurper and your blood shall be spared.
+        
+        `,  icon:"blackRook.png"},
+        {type:'quote', classes:'reverse', text:"You can't breach the gates. It's your blood your sparing.",  icon:"whiteKing.png"},
+
+        {type:'objectives', text:`
+            Mate the enemy king.
+        `}
+    ])
+    buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board:miniBord ,
+            icon:'whitePikeman.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The pikeman can move without taking directly infront of him and to the left and right, but it attacks the 3 squares 2 infront of him. <br/>
+                [y:2, x:-1], [y:2, x:0], [y:2, x:1] (where x:0 y:0 is the position of the pikeman)
+            `
+        }
+    ])
+    
+    board.push({
+        y:3,
+        x:7
+    })
+    pieces.push(
+        pikeman('white',1,6),pikeman('white',2,6),pikeman('white',3,6),
+        pikeman('white',1,5),pikeman('white',2,5),pikeman('white',3,5),
+        swordsMen('white',1,3),swordsMen('white',2,3),swordsMen('white',3,3),
+        swordsMen('white',1,4),swordsMen('white',2,4),swordsMen('white',3,4),
+        kingFactory('white',0,7,{
+            gameEndedEvent:function(colorWon){
+                if(colorWon === 'black'){
+                    buildModal([
+                        {type:'link', text:"Victory!!!", linkText:"You Won!", link:"/hotseat?gameType=missionClassicBugsFour&AIColor=white"}
+                     ]) 
+                }
+            }
+        }),
+
+
+        rookFactory('black',7,0),rookFactory('black',6,0),knightFactory('black',0,0),knightFactory('black',2,0)
+    )
+    
+    
+}
+
+function missionClassicPromotersOne (state){
+    state.board = xyBoard(5,4,state.board)
+    state.pieces = [];
+
+    state.board.forEach((sq) => {
+        if(sq.y === 2){
+            sq.special = true;
+        }
+    })
+    state.pieces.push(
+        swordsMen('white',0,4) ,swordsMen('white',1,4), swordsMen('white',2,4),swordsMen('white',3,4), swordsMen('white',4,4),swordsMen('white',5,4),
+
+
+        pawnFactory('black',0,0) ,pawnFactory('black',1,0), pawnFactory('black',2,0),pawnFactory('black',3,0), pawnFactory('black',4,0),pawnFactory('black',5,0),
+
+    )
+    buildModal([
+        {type:'quote', text:`The King gave an order that anyone who fought in the Northern wars should leave their weapons and go back to the capitol.
+                            </br> Come on men. Let's not turn this into a theater.
+        
+        `,  icon:"blackPawn.png"},
+        {type:'quote', classes:'reverse', text:"The king should tell us this himself. It's his war we won with our blood.",  icon:"whiteSwordsmen.png"},
+        {type:'quote', text:`The law states...
+
+        `,  icon:"blackPawn.png"},
+        {type:'quote', classes:'reverse', text:"Don't quote laws to men with swords.",  icon:"whiteSwordsmen.png"},
+
+        {type:'objectives', text:`
+        Place a pawn on each of the brown squares to pacify the swordsmen.
+        `}
+    ])
+
+    let miniBord = xyBoard(8,8,[]);
+    let sMen = swordsMen('white',4,4)
+    lightBoardFE(sMen,{board:miniBord, pieces:[sMen],turn:"white"},'lighted')
+    buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board:miniBord ,
+            icon:'whiteSwordsmen.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The swordsmen can move and take on the three squares in front of him.
+            `
+        }
+    ])
+    state.specialOnMoveEffects = [
+        function(state){
+            let i = 5;
+            let youWin = true;
+
+            while(i>=0){
+                if(findPieceByXY(state.pieces,i,0) === -1){
+                    state.pieces.push(
+                        pawnFactory('black',i,0)
+                    )
+                }
+
+                if(findPieceByXY(state.pieces,i,4) === -1){
+                    state.pieces.push(
+                        swordsMen('white',i,4)
+                    )
+                }
+                let winingPiece = state.pieces[findPieceByXY(state.pieces,i,2)]
+                if(!(winingPiece != undefined && winingPiece.icon.includes('Pawn.png'))){
+                    youWin = false;
+                }
+                i-=1;
+            }
+            if(youWin){
+                state.won = 'black';
+                buildModal([
+                    {type:'link', text:"You Won!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicPromotersTwo&AIColor=white"}
+                ])
+            }
+        }
+    ]
+}
+
+function missionClassicPromotersOne (state){
+    state.board = xyBoard(5,4,state.board)
+    state.pieces = [];
+
+    state.board.forEach((sq) => {
+        if(sq.y === 2){
+            sq.special = true;
+        }
+    })
+    state.pieces.push(
+        swordsMen('white',0,4) ,swordsMen('white',1,4), swordsMen('white',2,4),swordsMen('white',3,4), swordsMen('white',4,4),swordsMen('white',5,4),
+
+
+        pawnFactory('black',0,0) ,pawnFactory('black',1,0), pawnFactory('black',2,0),pawnFactory('black',3,0), pawnFactory('black',4,0),pawnFactory('black',5,0),
+
+    )
+    buildModal([
+        {type:'quote', text:`The King gave an order that anyone who fought in the Northern wars should leave their weapons and go back to the capitol.
+                            </br> Come on men. Let's not turn this into a theater.
+        
+        `,  icon:"blackPawn.png"},
+        {type:'quote', classes:'reverse', text:"The king should tell us this himself. It's his war we won with our blood.",  icon:"whiteSwordsmen.png"},
+        {type:'quote', text:`The law states...
+
+        `,  icon:"blackPawn.png"},
+        {type:'quote', classes:'reverse', text:"Don't quote laws to men with swords.",  icon:"whiteSwordsmen.png"},
+
+        {type:'objectives', text:`
+        Place a pawn on each of the brown squares to pacify the swordsmen.
+        `}
+    ])
+
+    let miniBord = xyBoard(8,8,[]);
+    let sMen = swordsMen('white',4,4)
+    lightBoardFE(sMen,{board:miniBord, pieces:[sMen],turn:"white"},'lighted')
+    buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board:miniBord ,
+            icon:'whiteSwordsmen.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The swordsmen can move and take on the three squares in front of him.
+            `
+        }
+    ])
+    state.specialOnMoveEffects = [
+        function(state){
+            let i = 5;
+            let youWin = true;
+
+            while(i>=0){
+                if(findPieceByXY(state.pieces,i,0) === -1){
+                    state.pieces.push(
+                        pawnFactory('black',i,0)
+                    )
+                }
+
+                if(findPieceByXY(state.pieces,i,4) === -1){
+                    state.pieces.push(
+                        swordsMen('white',i,4)
+                    )
+                }
+                let winingPiece = state.pieces[findPieceByXY(state.pieces,i,2)]
+                if(!(winingPiece != undefined && winingPiece.icon.includes('Pawn.png'))){
+                    youWin = false;
+                }
+                i-=1;
+            }
+            if(youWin){
+                state.won = 'black';
+                buildModal([
+                    {type:'link', text:"You Won!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicPromotersTwo&AIColor=white"}
+                ])
+            }
+        }
+    ]
 }
 
 

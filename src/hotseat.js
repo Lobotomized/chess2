@@ -166,6 +166,9 @@ function animate(secretState){
                     }
                 }
             }
+            else if (sq.light) {
+                drawLightedSquare(x * squareLength, y * squareLength, squareLength);
+            }
             else if(sq.red){
                 drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength)
             }
@@ -175,9 +178,7 @@ function animate(secretState){
             else if(sq.special){
                 drawColoredSquare(x*squareLength, y * squareLength, specialSquareColor, squareLength)
             }
-            else {
-                drawLightedSquare(x * squareLength, y * squareLength, squareLength);
-            }
+
 
 
             

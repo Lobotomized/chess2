@@ -721,7 +721,7 @@ function kingFactory(color, x, y, options) {
         value:2000,
         posValue:posValue[3],
         color: color,
-
+        options:options,
         conditionalMoves: function(state){
             let toReturn = []
             let enemyKing = state.pieces.find((piece) => {
@@ -795,11 +795,14 @@ function kingFactory(color, x, y, options) {
         afterThisPieceTaken: function (state) {
             if (this.color == 'white') {
                 state.won = 'black';
-                options?.gameEndedEvent(state.won);
-            }
+                if(this.options){
+                    this.options?.gameEndedEvent(state.won);
+                }            }
             else if (this.color == 'black') {
                 state.won = 'white';
-                options?.gameEndedEvent(state.won);
+                if(this.options){
+                    this.options?.gameEndedEvent(state.won);
+                }
             }
         },
         afterEnemyPlayerMove: function(state,move){
@@ -845,7 +848,9 @@ function kingFactory(color, x, y, options) {
                 }
                 if(!possibleEscape){
                     state.won = enemyColor
-                    options?.gameEndedEvent(state.won);
+                    if(this.options){
+                        this.options?.gameEndedEvent(state.won);
+                    }                
                 }
             }
         },

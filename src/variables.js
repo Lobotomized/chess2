@@ -56,4 +56,4 @@ let backgroundColor = '#675442';
 
 let oldMoveSquareColor = '#D59148';
 
-let specialSquareColor = '#FCCE00'
+let specialSquareColor = '#694522'
