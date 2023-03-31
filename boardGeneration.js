@@ -1835,6 +1835,22 @@ function missionClassicMedievalOne(state){
     )
 }
 
+function missionClassicPromotersFour(state){
+    let board = state.board;
+    let pieces = state.pieces;
+    board.length = 0;
+    pieces.length = 0;
+    board = xyBoard(6,6,board);
+
+    pieces.push(
+        swordsMen('white',0,4),swordsMen('white',1,4),swordsMen('white',2,4),swordsMen('white',3,4),swordsMen('white',4,4),swordsMen('white',5,4),swordsMen('white',6,4),
+
+        pikeman('white',0,5),pikeman('white',1,5),pikeman('white',2,5),northernKing('white',3,5, {yTrigger:3}),pikeman('white',4,5),pikeman('white',5,5),pikeman('white',6,5),
+
+        kingFactory('black',5,0)
+    )
+}
+
 function missionClassicPromotersThree(state){
     let board = state.board;
     let pieces = state.pieces;
@@ -1998,7 +2014,7 @@ function missionClassicPromotersTwo(state){
             gameEndedEvent:function(colorWon){
                 if(colorWon === 'black'){
                     buildModal([
-                        {type:'link', text:"Victory!!!", linkText:"You Won!", link:"/hotseat?gameType=missionClassicBugsFour&AIColor=white"}
+                        {type:'link', text:"Victory!!!", linkText:"You Won!", link:"/hotseat?gameType=missionClassicPromotersThree&AIColor=white"}
                      ]) 
                 }
             }

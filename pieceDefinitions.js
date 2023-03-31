@@ -1286,7 +1286,7 @@ function swordsMen(color, x, y){
 }
 
 
-function northernKing(color, x, y){
+function northernKing(color, x, y, options){
     let moves = [{ type: 'absolute',  y: -1, x: 0 }]
 
     if (color == 'black') {
@@ -1331,8 +1331,13 @@ function northernKing(color, x, y){
             }
 
             this.value += 2;
+            
             let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
-            let fencerPower = this.color === 'black' ? this.y+1 : 8-this.y;
+            let fencerPower = this.color === 'black' ? this.y+1 : 8 -this.y;
+
+            if(options && options.yTrigger){
+                promoteCondition = this.y === options.yTrigger;
+            }
 
 
             if(promoteCondition){
