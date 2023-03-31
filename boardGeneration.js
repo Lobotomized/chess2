@@ -1876,8 +1876,14 @@ function missionClassicPromotersTwo(state){
             pieceX:4,
             pieceY:4,
             description:`
-                The pikeman can move without taking directly infront of him and to the left and right, but it attacks the 3 squares 2 infront of him. <br/>
-                [y:2, x:-1], [y:2, x:0], [y:2, x:1] (where x:0 y:0 is the position of the pikeman)
+                The pikeman can move without taking, directly infront of him and to the left and right but it attacks the 3 squares 2 infront of him. <br/>
+                Can attack : [y:2, x:-1], [y:2, x:0], [y:2, x:1] 
+                <br/>
+                Can move: [y:1,x:0], [y:0,x:1],[y:0,x:-1]
+                
+                <br/>
+                (where x:0 y:0 is the position of the pikeman)
+
             `
         }
     ])
