@@ -1835,6 +1835,103 @@ function missionClassicMedievalOne(state){
     )
 }
 
+function missionClassicPromotersThree(state){
+    let board = state.board;
+    let pieces = state.pieces;
+    board.length = 0;
+    pieces.length = 0;
+
+    board = xyBoard(5,7,board)
+
+    state.board.forEach((sq) => {
+        if(sq.y === 4){
+            sq.special = true;
+        }
+    })
+
+    buildModal([
+        {type:'quote', text:`If we don't kill  the rebelion quickly it might get worse. We need to be swift. 
+        
+        `,  icon:"blackPawn.png"},
+
+
+        {type:'objectives', text:`
+        Place a pawn on each of the brown squares to pacify rebels. <br/>
+        Your pawns can't be promoted and they get instantly spawned on the first row once the square is free.
+        `}
+    ])
+
+    let miniBord = xyBoard(8,8,[]);
+    let theShield = shield('white',4,4)
+    lightBoardFE(theShield,{board:miniBord, pieces:[theShield],turn:"white"},'lighted')
+    buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board:miniBord ,
+            icon:'whiteShield.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The defender moves and takes fully to the left and right but only one up and bottom.
+            `
+        }
+    ])
+    state.countDown = 55;
+    state.specialOnMoveEffects = [
+        function(state){
+            let i = 5;
+            let youWin = true;
+            
+            if(state.turn === 'white' && state.countDown > 0){
+                state.countDown -= 1;
+                state.message= state.countDown + " turns to pacify the rebels"
+            }
+            else if(state.countDown === 0){
+                buildModal([
+                    {type:'link', text:"Defeat!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicPromotersThree&AIColor=white"}
+                ])
+
+                state.message = "The rebels inspired, a revolution. You lost."
+            }
+
+
+            while(i>=0){
+                if(findPieceByXY(state.pieces,i,0) === -1){
+                    state.pieces.push(
+                        unpromotablePawn('black',i,0)
+                    )
+                }
+
+                let winingPiece = state.pieces[findPieceByXY(state.pieces,i,4)]
+                if(!(winingPiece != undefined && winingPiece.icon.includes('Pawn.png'))){
+                    youWin = false;
+                }
+                i-=1;
+            }
+            if(youWin){
+                state.won = 'black';
+                state.message = "You won!"
+                buildModal([
+                    {type:'link', text:"You Won!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicPromotersFour&AIColor=white"}
+                ])
+            }
+        }
+    ]
+
+    pieces.push(
+        shield('white',0,4)                                                                                                  ,shield('white',5,4),
+        swordsMen('white',0,5),swordsMen('white',1,5),swordsMen('white',2,5),swordsMen('white',3,5),swordsMen('white',4,5),swordsMen('white',5,5),
+        shield('white',0,6)                                                                                                  ,shield('white',5,6),
+        pikeman('white',0,7),pikeman('white',1,7),pikeman('white',2,7),pikeman('white',3,7),pikeman('white',4,7)            ,pikeman('white',5,7),
+
+
+        // pawnFactory('black',0,2),pawnFactory('black',1,2),pawnFactory('black',2,2),pawnFactory('black',3,2),pawnFactory('black',4,2),pawnFactory('black',5,2),
+        // pawnFactory('black',0,1),pawnFactory('black',1,1),pawnFactory('black',2,1),pawnFactory('black',3,1),pawnFactory('black',4,1),pawnFactory('black',5,1),
+        unpromotablePawn('black',0,0),unpromotablePawn('black',1,0),unpromotablePawn('black',2,0),unpromotablePawn('black',3,0),unpromotablePawn('black',4,0),unpromotablePawn('black',5,0),
+    )
+}
+
 function missionClassicPromotersTwo(state){
     let board = state.board;
     let pieces = state.pieces;
@@ -1927,7 +2024,7 @@ function missionClassicPromotersOne (state){
         swordsMen('white',0,4) ,swordsMen('white',1,4), swordsMen('white',2,4),swordsMen('white',3,4), swordsMen('white',4,4),swordsMen('white',5,4),
 
 
-        pawnFactory('black',0,0) ,pawnFactory('black',1,0), pawnFactory('black',2,0),pawnFactory('black',3,0), pawnFactory('black',4,0),pawnFactory('black',5,0),
+        unpromotablePawn('black',0,0) ,unpromotablePawn('black',1,0), unpromotablePawn('black',2,0),unpromotablePawn('black',3,0), unpromotablePawn('black',4,0),unpromotablePawn('black',5,0),
 
     )
     buildModal([
@@ -1942,7 +2039,9 @@ function missionClassicPromotersOne (state){
         {type:'quote', classes:'reverse', text:"Don't quote laws to men with swords.",  icon:"whiteSwordsmen.png"},
 
         {type:'objectives', text:`
-        Place a pawn on each of the brown squares to pacify the swordsmen.
+        Place a pawn on each of the brown squares to pacify the swordsmen. <br/>
+
+        Pawns can't be promoted.
         `}
     ])
 
@@ -1970,7 +2069,7 @@ function missionClassicPromotersOne (state){
             while(i>=0){
                 if(findPieceByXY(state.pieces,i,0) === -1){
                     state.pieces.push(
-                        pawnFactory('black',i,0)
+                        unpromotablePawn('black',i,0)
                     )
                 }
 
