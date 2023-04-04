@@ -1249,7 +1249,7 @@ function missionClassicMedievalSeven(state){
 
 
     AIPower = 2;
-    AICharater = 'positionalOffensiveCharacter'
+    AICharacter = 'positionalOffensiveCharacter'
     buildModal([
         {type:'quote', classes:"",text:`The tree gods have crossed too many lines.</b> Peace is what we seek and peace is what we will get once we <b>KILL THEM</b>. `,icon:"/blackKing.png"},
         {type:'objectives', classes:"",text:`Take at least one of the magical hats and the forest will lose it's magic.`}
@@ -1840,14 +1840,92 @@ function missionClassicPromotersFour(state){
     let pieces = state.pieces;
     board.length = 0;
     pieces.length = 0;
-    board = xyBoard(6,6,board);
+    board = xyBoard(4,6,board);
+    AIPower= -3;
+    AICharacter = 'offensiveCharacter'
+
+    buildModal(
+        [{type:'quote', text:`One of the false kings loyal to the usurper is trying to stage a coup at the capitol. <br/><br/>
+                             The militia should stop him. 
+        
+        `,  icon:"blackPawn.png"},
+         {type:'objectives',text:`
+            Capture the enemy Northern King. <br/> If he moves two times he will promote all swordsmen and pikeman to knights.
+         `}
+        ]
+    )
+
+    let miniBord = xyBoard(8,8,[]);
+    let nKing = northernKing('white',4,4)
+    lightBoardFE(nKing,{board:miniBord, pieces:[nKing],turn:"white"},'lighted')
+    buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board:miniBord ,
+            icon:'whiteNorthernKing.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The northern king can only move  and take one forward. <br/>
+                When he gets to certain rank (map dependant) he promotes all level 1 pieces to classic Knights. 
+                </br>When he moves forward he makes the Fencer piece stronger. 
+                </br>If he gets to the end of the board the promoters win. 
+                <br/><br/>
+                The Northern King is a lose condition piece. If you take him and there are no other Northern Kings or Archeologists the opponent loses.
+            `
+        }
+    ])
+
+    state.specialOnMoveEffects = [
+        function(state){
+            let nKing = state.pieces.filter((piece) => {
+                return piece.icon.includes('NorthernKing.png')
+            })
+
+            if(!nKing){
+                buildModal([
+                    {type:'link', text:"You Won!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicPromotersFive&AIColor=white"}
+                ])
+            }
+            else if(nKing.y === 0){
+                buildModal([
+                    {type:'link', text:"You Lost!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicPromotersFour&AIColor=white"}
+                ])
+            }
+
+            let bPawns = state.pieces.filter((piece) => {
+                return piece.icon.includes('blackPawn.png') && piece.color === 'black';
+            })
+
+            if(bPawns.length === 0){
+                buildModal([
+                    {type:'link', text:"You Lost!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicPromotersFour&AIColor=white"}
+                ])
+            }
+        }
+    ]
 
     pieces.push(
-        swordsMen('white',0,4),swordsMen('white',1,4),swordsMen('white',2,4),swordsMen('white',3,4),swordsMen('white',4,4),swordsMen('white',5,4),swordsMen('white',6,4),
+        swordsMen('white',0,4),swordsMen('white',1,4),swordsMen('white',2,4),swordsMen('white',3,4),swordsMen('white',4,4),
 
-        pikeman('white',0,5),pikeman('white',1,5),pikeman('white',2,5),northernKing('white',3,5, {yTrigger:3}),pikeman('white',4,5),pikeman('white',5,5),pikeman('white',6,5),
+        pikeman('white',0,5),pikeman('white',1,5),pikeman('white',2,5),northernKing('white',3,6),pikeman('white',4,5),
 
-        kingFactory('black',5,0)
+        unpromotablePawn('black',0,1),unpromotablePawn('black',1,1),unpromotablePawn('black',2,1),unpromotablePawn('black',3,1),unpromotablePawn('black',4,1),
+        unpromotablePawn('black',0,0),unpromotablePawn('black',1,0),unpromotablePawn('black',2,0),unpromotablePawn('black',3,0),unpromotablePawn('black',4,0)
+    )
+}
+
+function test(state){
+    let board = state.board;
+    let pieces = state.pieces;
+    board.length = 0;
+    pieces.length = 0;
+
+    board = xyBoard(5,7,board)
+
+    pieces.push(
+        kingFactory('white',4,4),kingFactory('black',2,2)
     )
 }
 

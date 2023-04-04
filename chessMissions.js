@@ -59,9 +59,9 @@ let lobby = newG({properties:{
                     else if(move.x === 1 && move.y ==5){
                         state.whiteRace = 'cyborgs'
                     }
-                    else if(move.x === 1 && move.y ==6){
-                        state.whiteRace = 'cat'
-                    }
+                    // else if(move.x === 1 && move.y ==6){
+                    //     state.whiteRace = 'cat'
+                    // }
                 }
                 else if(player.ref == state.black){
                     if(move.x  == 1 && move.y == 1){
@@ -79,9 +79,9 @@ let lobby = newG({properties:{
                     else if(move.x === 1 && move.y ==5){
                         state.blackRace = 'cyborgs'
                     }
-                    else if(move.x === 1 && move.y ==6){
-                        state.blackRace = 'cat'
-                    }
+                    // else if(move.x === 1 && move.y ==6){
+                    //     state.blackRace = 'cat'
+                    // }
                 }
 
             if(state.whiteRace && state.blackRace){
@@ -164,10 +164,10 @@ let lobby = newG({properties:{
                     search.x = 1;
                     search.y = 5;
                 }
-                else if(copyState.blackRace == 'cat'){
-                    search.x = 1;
-                    search.y = 6;
-                }
+                // else if(copyState.blackRace == 'cat'){
+                //     search.x = 1;
+                //     search.y = 6;
+                // }
             }
             else{
                 if(copyState.whiteRace == 'medieval'){
@@ -190,10 +190,10 @@ let lobby = newG({properties:{
                     search.x = 1;
                     search.y = 5;
                 }
-                else if(copyState.whiteRace == 'cat'){
-                    search.x = 1;
-                    search.y = 6;
-                }
+                // else if(copyState.whiteRace == 'cat'){
+                //     search.x = 1;
+                //     search.y = 6;
+                // }
             }
 
         }

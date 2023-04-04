@@ -72,6 +72,7 @@ self.addEventListener("message", function(e) {
                 defensiveCharacter:defensiveCharacter,
                 positionalCharacter:positionalCharacter,
                 positionalOffeniveCharacter:positionalOffensiveCharacter,
+                noPosition:noPosition
             }
             if(obj.AIPower === -1){
                 if(obj.state.pieces.length > 20){
@@ -88,9 +89,20 @@ self.addEventListener("message", function(e) {
                 }
             }
 
+            if(obj.AIPower === -3){
+                console.log('here?!')
+                move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns,
+                    positionalCharacter(2),
+                    [
+                        // {method:removeNonAttackingMovesFilter, options:{minPieceValue:2,
+                        // exceptions:[randomException]}},
+                        // {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
+                    ]
+                )
+
+            }
 
             if(obj.AIPower === -2){
-                console.log('tuka vliza?')
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
                     methods[obj.AICharacter](0),
                     [

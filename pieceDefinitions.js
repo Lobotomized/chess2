@@ -3,7 +3,7 @@
 try{
     var {playerMove} = require('./moveMethods.js')
     var {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecked, findPieceByXY, 
-        findCopyPieceByXY, areYouCheckedWithoutTempMoves} = require('./helperFunctions')
+        findCopyPieceByXY, areYouCheckedWithoutTempMoves, isPositionAttacked} = require('./helperFunctions')
     
 }
 catch(err){
@@ -728,31 +728,100 @@ function kingFactory(color, x, y, options) {
                 return piece.icon.includes('King.png') && piece.color != this.color
             })
 
+            let squaresToRemove = []
             
+            if(enemyKing){
+                squaresToRemove = [
+                    {
+                        x:enemyKing.x+1,
+                        y:enemyKing.y
+                    },
+                    {
+                        x:enemyKing.x-1,
+                        y:enemyKing.y
+                    },
+                    {
+                        x:enemyKing.x,
+                        y:enemyKing.y + 1
+                    },
+                    {
+                        x:enemyKing.x + 1,
+                        y:enemyKing.y + 1
+                    },
+                    {
+                        x:enemyKing.x-1,
+                        y:enemyKing.y + 1
+                    },
+                    {
+                        x:enemyKing.x,
+                        y:enemyKing.y-1
+                    },
+                    {
+                        x:enemyKing.x+1,
+                        y:enemyKing.y-1
+                    },
+                    {
+                        x:enemyKing.x-1,
+                        y:enemyKing.y-1
+                    },
+                ]
+            }
 
-            if(!isPositionAttacked(state,this.color,this.x,this.y+1)){
+            if(!isPositionAttacked(state,this.color,this.x,this.y+1) && 
+                !squaresToRemove.find((sq) => {
+                    return sq.x === this.x && sq.y === this.y+1
+                })
+            ){
                 toReturn.push({ type: 'absolute', x: 0, y: 1 });
             }
-            if(!isPositionAttacked(state,this.color,this.x+1,this.y)){
+            if(!isPositionAttacked(state,this.color,this.x+1,this.y) && 
+                !squaresToRemove.find((sq) => {
+                    return sq.x === this.x+1 && sq.y === this.y
+                })
+            ){
                 toReturn.push({ type: 'absolute', x: 1, y: 0 });
             }
-            if(!isPositionAttacked(state,this.color,this.x+1,this.y+1)){
+            if(!isPositionAttacked(state,this.color,this.x+1,this.y+1) && 
+                !squaresToRemove.find((sq) => {
+                    return sq.x === this.x+1 && sq.y === this.y+1
+                })
+            ){
                 toReturn.push({ type: 'absolute', x: 1, y: 1 });
             }
-            if(!isPositionAttacked(state,this.color,this.x-1,this.y-1)){
+            if(!isPositionAttacked(state,this.color,this.x-1,this.y-1) && 
+                !squaresToRemove.find((sq) => {
+                    return sq.x === this.x-1 && sq.y === this.y-1
+                })
+            ){
                 toReturn.push({ type: 'absolute', x: -1, y: -1 });
             }
             //
-            if(!isPositionAttacked(state,this.color,this.x,this.y-1)){
+            if(!isPositionAttacked(state,this.color,this.x,this.y-1) && 
+                !squaresToRemove.find((sq) => {
+                    return sq.x === this.x && sq.y === this.y-1
+                })
+            ){
                 toReturn.push({ type: 'absolute', x: 0, y: -1 });
             }
-            if(!isPositionAttacked(state,this.color,this.x-1,this.y)){
+            if(!isPositionAttacked(state,this.color,this.x-1,this.y)  && 
+                !squaresToRemove.find((sq) => {
+                    return sq.x === this.x-1 && sq.y === this.y
+                })
+            ){
                 toReturn.push({ type: 'absolute', x: -1, y: 0 });
             }
-            if(!isPositionAttacked(state,this.color,this.x-1,this.y+1)){
+            if(!isPositionAttacked(state,this.color,this.x-1,this.y+1) && 
+                !squaresToRemove.find((sq) => {
+                    return sq.x === this.x-1 && sq.y === this.y+1
+                })
+            ){
                 toReturn.push({ type: 'absolute', x: -1, y: 1 });
             }
-            if(!isPositionAttacked(state,this.color,this.x+1,this.y-1)){
+            if(!isPositionAttacked(state,this.color,this.x+1,this.y-1) && 
+                !squaresToRemove.find((sq) => {
+                    return sq.x === this.x + 1 && sq.y === this.y-1
+                })
+                ){
                 toReturn.push({ type: 'absolute', x: 1, y: -1 });
             }
             if(!this.moved){
@@ -1300,6 +1369,7 @@ function northernKing(color, x, y, options){
         color: color,
         value:800,
         posValue:1,
+        options:options,
         afterThisPieceTaken: function (state) {
             
             let find = state.pieces.find((el) => {
@@ -1335,8 +1405,8 @@ function northernKing(color, x, y, options){
             let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
             let fencerPower = this.color === 'black' ? this.y+1 : 8 -this.y;
 
-            if(options && options.yTrigger){
-                promoteCondition = this.y === options.yTrigger;
+            if(this.options && this.options.yTrigger){
+                promoteCondition = this.y === this.options.yTrigger;
             }
 
 

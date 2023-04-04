@@ -399,6 +399,14 @@ function defaultCharacter(weight){
 }
 
 
+function noPosition(){
+    return [
+        {method:evaluationMagnifierPiece, options:{pieceValue:1.1 }},
+        // {method:evaluationMagnifierPieceDefended, options:{relativeValue:0.1}}
+    ]
+}
+
+
 function maskedDefaultCharacter(weight){
     switch(weight){
         default:
