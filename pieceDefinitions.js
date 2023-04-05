@@ -1356,10 +1356,10 @@ function swordsMen(color, x, y){
 
 
 function northernKing(color, x, y, options){
-    let moves = [{ type: 'absolute',  y: -1, x: 0 }]
+    let moves = [{ type: 'absolute',  y: -1, x: 0 },{ type: 'absolute',  y: -1, x: -1 },{ type: 'absolute',  y: -1, x: 1 }]
 
     if (color == 'black') {
-        moves = [{ type: 'absolute',  y: 1, x: 0 }];
+        moves = [{ type: 'absolute',  y: 1, x: 0 },{ type: 'absolute',  y: 1, x: -1 },{ type: 'absolute',  y: 1, x: 1 }];
     }
     return {
         icon: color + 'NorthernKing.png',
@@ -1567,10 +1567,10 @@ function shield(color, x, y){
 }
 
 function plagueDoctor(color, x, y){
-    let moves = [{ type: 'absolute',  y: -1, x: 0 }]
+    let moves = [{ type: 'absolute',  y: -1, x: 0 },{ type: 'absolute',  y: -1, x: -1 },{ type: 'absolute',  y: -1, x: 1 }]
 
     if (color == 'black') {
-        moves = [{ type: 'absolute',  y: 1, x: 0 }];
+        let moves = [{ type: 'absolute',  y: 1, x: 0 },{ type: 'absolute',  y: 1, x: -1 },{ type: 'absolute',  y: 1, x: 1 }]
     }
     return {
         icon: color + 'PlagueDoctor.png',
