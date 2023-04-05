@@ -185,27 +185,6 @@ html{
       padding-bottom:50px;
   }
 
-  .pieces{
-      display:flex;
-      flex-direction:column;
-      width:50vw;
-      max-width:300px;
-  }
-
-  .piece > img{
-      width:50vw;
-      max-width:300px;
-  }
-  .pieces > h1{
-      text-align:center; 
-  }
-  .piece{
-      width:50vw;
-      max-width:300px;
-      color:var(--white-square-color);
-      text-align:center;
-      font-size:18px;
-  }
 
   .games > lobby-game{
       margin-top:10px;
@@ -353,7 +332,12 @@ html{
  .marginMedium {
      margin:50px;
  }
-
+ .pieces{
+    display:flex;
+    flex-direction:column;
+    width:50vw;
+    max-width:300px;
+}
  .modal{
     position:absolute;
     max-width:600px;

@@ -1947,34 +1947,34 @@ function juggernautFactory(color,x,y){
         conditionalMoves: function (state) {
             let toReturn = [];
             cyborgTeleport(state,this,toReturn);
-            const freeThere = (x,y) =>{
+            const takenSquare = (x,y) =>{
                 return state.pieces.find((piece) => {
                     return piece.y === y  && x === piece.x;
                 })
 
             } 
             toReturn.push({ type: 'absolute', y: -1, x: 0 })
-            if(!freeThere(this.x,this.y-1)){
+            if(!takenSquare(this.x,this.y-1)){
                 toReturn.push(
                     
                     { type: 'absolute', y: -2, x: 0 },
                     { type: 'absolute', y: -1, x: 1 },
                     { type: 'absolute', y: -1, x: -1 }
                 )
-                if(!freeThere(this.x,this.y-2)){
+                if(!takenSquare(this.x,this.y-2)){
                     toReturn.push(
                         { type: 'absolute', y: -3, x: 0 },
                         { type: 'absolute', y: -2, x: 1 },
                         { type: 'absolute', y: -2, x: -1 }
                     )
                 }
-                if(!freeThere(this.x-1,this.y-1)){
+                if(!takenSquare(this.x-1,this.y-1)){
                     toReturn.push(
                         { type: 'absolute', y: -1, x: -2 },
                         { type: 'absolute', y: -2, x: -1 }
                     )
                 }
-                if(!freeThere(this.x+1,this.y-1)){
+                if(!takenSquare(this.x+1,this.y-1)){
                     toReturn.push(
                         { type: 'absolute', y: -1, x: 2 },
                         { type: 'absolute', y: -2, x: 1 }
@@ -1983,27 +1983,27 @@ function juggernautFactory(color,x,y){
             }
 
             toReturn.push({ type: 'absolute', y: 1, x: 0 })
-            if(!freeThere(this.x,this.y+1)){
+            if(!takenSquare(this.x,this.y+1)){
                 toReturn.push(
                     
                     { type: 'absolute', y: 2, x: 0 },
                     { type: 'absolute', y: 1, x: 1 },
                     { type: 'absolute', y: 1, x: -1 }
                 )
-                if(!freeThere(this.x,this.y+2)){
+                if(!takenSquare(this.x,this.y+2)){
                     toReturn.push(
                         { type: 'absolute', y: 3, x: 0 },
                         { type: 'absolute', y: 2, x: 1 },
                         { type: 'absolute', y: 2, x: -1 }
                     )
                 }
-                if(!freeThere(this.x-1,this.y+1)){
+                if(!takenSquare(this.x-1,this.y+1)){
                     toReturn.push(
                         { type: 'absolute', y: 1, x: -2 },
                         { type: 'absolute', y: 2, x: -1 },
                     )
                 }
-                if(!freeThere(this.x+1,this.y+1)){
+                if(!takenSquare(this.x+1,this.y+1)){
                     toReturn.push(
                         { type: 'absolute', y: 1, x: 2 },
                         { type: 'absolute', y: 2, x: 1 },
@@ -2013,27 +2013,27 @@ function juggernautFactory(color,x,y){
 
 
             toReturn.push({ type: 'absolute', x: -1, y: 0 })
-            if(!freeThere(this.x -1,this.y)){
+            if(!takenSquare(this.x -1,this.y)){
                 toReturn.push(
                     
                     { type: 'absolute', x: -2, y: 0 },
                     { type: 'absolute', x: -1, y: 1 },
                     { type: 'absolute', x: -1, y: -1 }
                 )
-                if(!freeThere(this.x-2,this.y)){
+                if(!takenSquare(this.x-2,this.y)){
                     toReturn.push(
                         { type: 'absolute', x: -3, y: 0 },
                         { type: 'absolute', x: -2, y: 1 },
                         { type: 'absolute', x: -2, y: -1 }
                     )
                 }
-                if(!freeThere(this.x-1,this.y-1)){
+                if(!takenSquare(this.x-1,this.y-1)){
                     toReturn.push(
                         { type: 'absolute', x: -1, y: -2 },
                         
                     )
                 }
-                if(!freeThere(this.x-1,this.y+1)){
+                if(!takenSquare(this.x-1,this.y+1)){
                     toReturn.push(
                         { type: 'absolute', x: -1, y: 2 },
                         { type: 'absolute', x: -2, y: 1 },
@@ -2042,26 +2042,26 @@ function juggernautFactory(color,x,y){
             }
 
             toReturn.push({ type: 'absolute', x: 1, y: 0 })
-            if(!freeThere(this.x +1,this.y)){
+            if(!takenSquare(this.x +1,this.y)){
                 toReturn.push(
                     
                     { type: 'absolute', x: 2, y: 0 },
                     { type: 'absolute', x: 1, y: 1 },
                     { type: 'absolute', x: 1, y: -1 }
                 )
-                if(!freeThere(this.x+2,this.y)){
+                if(!takenSquare(this.x+2,this.y)){
                     toReturn.push(
                         { type: 'absolute', x: 3, y: 0 },
                         { type: 'absolute', x: 2, y: 1 },
                         { type: 'absolute', x: 2, y: -1 }
                     )
                 }
-                if(!freeThere(this.x+1,this.y-1)){
+                if(!takenSquare(this.x+1,this.y-1)){
                     toReturn.push(
                         { type: 'absolute', x: 1, y: -2 },
                     )
                 }
-                if(!freeThere(this.x+1,this.y+1)){
+                if(!takenSquare(this.x+1,this.y+1)){
                     toReturn.push(
                         { type: 'absolute', x: 1, y: 2 },
                         { type: 'absolute', x: 2, y: 1 },

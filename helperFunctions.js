@@ -297,6 +297,31 @@ function getParams (url) {
     return params;
 };
 
+
+function checkRemi(state){
+    let yourPieces = state.pieces.filter((piece) => {
+        return piece.color === state.turn;
+    })
+
+    let i = yourPieces.length -1;
+    let isItRemi = true;
+    while(i >= 0){
+        lightBoardFE(yourPieces[i],state,'counted');
+
+        let availableSquares = state.board.filter((sq) => {
+            return sq.counted;
+        });
+
+        if(availableSquares.length){
+            isItRemi = false;
+            i = -1;
+        }
+        i--;
+    }
+
+    return isItRemi;
+}
+
 function getSinglePlayerGame() {
     const g = new newGame({
         baseState: {
@@ -363,6 +388,11 @@ function getSinglePlayerGame() {
                             })
                         }
                         changeTurn(state)
+                        if(checkRemi(state)){
+                            state.won = 'tie'
+                            return;
+                        }
+
                         for (let i = state.pieces.length - 1; i >= 0; i--) {
                             if(state.pieces[i].color ==  state.turn){
                                 if (state.pieces[i].afterEnemyPlayerMove) {
@@ -684,6 +714,9 @@ function lightBoardFE(piece, state, flag,blockedFlag, minimal) {
                         square[flag] = true;
                     }
                 }
+                else{
+                    square[blockedFlag] = true;
+                }
             }
         }
         else if (move.type == 'blockable') {
@@ -882,7 +915,8 @@ try{
         pieceFromSquare,
         blockableCheck,
         lightBoardFE,
-        isPositionAttacked
+        isPositionAttacked,
+        checkRemi
     }
 }
 catch(err){

@@ -53,14 +53,15 @@ if(comingGameType){
 }
 
 
+
 if(hotseatGame.state.gameType){
     window[hotseatGame.state.gameType](hotseatGame.state,hotseatGame.state.whiteRace,hotseatGame.state.blackRace)
 }
 
 
 const AIProps = {
-state:undefined,
-color:'white'
+    state:undefined,
+    color:'white'
 }
 
 
@@ -79,6 +80,7 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
     lightBoardFE(selectedPiece,{pieces:state.pieces, board:state.board, turn:state.turn})
     hotseatGame.move(state.turn,{ x: xClicked, y: yClicked });
 }
+
 function animate(secretState){
     //Draw the game
     const myTurnH1 = document.getElementById('turn');
@@ -178,11 +180,6 @@ function animate(secretState){
             else if(sq.special){
                 drawColoredSquare(x*squareLength, y * squareLength, specialSquareColor, squareLength)
             }
-
-
-
-            
-            
         })
         if(state.oldMove){
             const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);
@@ -222,6 +219,10 @@ function animate(secretState){
                 forfeitTextButton.innerText = 'White Won'
 
             }
+            else if(state.won === 'tie'){
+                forfeitTextButton.innerText = 'Game ended in a draw'
+            }
+            
         }
 
 

@@ -7,10 +7,10 @@ app.use('/moveMethods.js', express.static('./moveMethods.js'))
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const newG = require('./globby').newIOServerV2;
-const {miniChess, randomChess,  catchTheDragon, mongolianChess, classicChess, raceChess, raceChoiceChess} = require('./boardGeneration.js')
+const {miniChess, randomChess,  catchTheDragon, mongolianChess, classicChess, raceChess, raceChoiceChess, test} = require('./boardGeneration.js')
 const { selectPiece, playerMove, checkTurn, changeTurn, closeLights } = require('./moveMethods.js')
 const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFactory,blindCatFactory} = require('./pieceDefinitions.js')
-const {lightBoardFE} = require('./helperFunctions.js');
+const {lightBoardFE, checkRemi} = require('./helperFunctions.js');
 app.use('/static', express.static('public'))
 app.use('/src', express.static('src'))
 
@@ -41,6 +41,7 @@ let lobby = newG({properties:{
         started:false
     },
     moveFunction: function (player, move, state) {
+
         if(state.turn == 'menu'){
 
                 if(player.ref == state.white){
@@ -100,6 +101,10 @@ let lobby = newG({properties:{
             if (state.pieceSelected) {
                 if (playerMove(move, state)) {
                     changeTurn(state)
+                    if(checkRemi(state)){
+                        state.won = 'tie'
+                        return;
+                    }
                     for (let i = state.pieces.length - 1; i >= 0; i--) {
                         if(state.pieces[i].color ==  state.turn){
                             if (state.pieces[i].afterEnemyPlayerMove) {
@@ -288,6 +293,10 @@ let lobby = newG({properties:{
             else if(roomData.mode == 'classicChess'){
                 state.gameType = 'classiChess'
                 classicChess(state.pieces,state.board)
+            }
+            else if(roomData.mode === 'test'){
+                state.gameType = 'test';
+                test(state);
             }
             else if(roomData.mode == 'raceChess'){
                 state.gameType = 'raceChess'

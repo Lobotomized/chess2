@@ -288,11 +288,27 @@
 
                         myTurnH1.innerText = 'White Won'
                         forfeitTextButton.innerText = 'You Won'
+                        enemy.innerText = ''
+                        me.innerText = ''
                     }
                     else if(IAM == 'black'){
                         forfeitTextButton.innerText = 'You Lost'
                     }
 
+                }
+                else if(state.won === 'tie'){
+                        flagImage.style.display ='none'
+                        forfeitTextButton.style.paddingLeft = '31px';
+                        forfeitTextButton.style.paddingRight = '31px';
+                        forfeitTextButton.style.paddingLeft = '31px';
+                        forfeitTextButton.style.paddingTop = '24px';
+                        forfeitTextButton.style.paddingBottom = '24px';
+                        forfeitTextButton.style.marginRight='0px';
+
+                        myTurnH1.innerText = 'Draw'
+                        enemy.innerText = ''
+                        me.innerText = ''
+                        forfeitTextButton.innerText = 'Game ended in a Draw'
                 }
             }
         }

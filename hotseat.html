@@ -152,7 +152,9 @@ const buildPieceModal = function(arr){
         el.board.forEach((square) => {
             if(square.lighted){
                 theString += `<div style=" z-index:500; background:${availableSquareColor};width:${magicNumber}px;height:${magicNumber}px;border:solid black 1px; position:absolute; left:${(square.x)*magicNumber}px;top:${(square.y)*magicNumber}px;"></div>`;
-
+            }
+            else if(square.blocked){
+                theString += `<div style=" z-index:500; background:${blockedSquareColor};width:${magicNumber}px;height:${magicNumber}px;border:solid black 1px; position:absolute; left:${(square.x)*magicNumber}px;top:${(square.y)*magicNumber}px;"></div>`;
             }
             else{
                 theString += `<div style="z-index:500; background:${backgroundColor};width:${magicNumber}px;height:${magicNumber}px;border:solid black 1px; position:absolute; left:${square.x*magicNumber}px;top:${(square.y)*magicNumber}px;"></div>`;
