@@ -120,7 +120,7 @@ function raceChoiceChess(state, raceWhite, raceBlack) {
     }
     else if (raceBlack === 'promoters') {
         pieces.push(
-            pikeman('black', 0, 2), swordsMen('black', 1, 2), pikeman('black', 2, 2), swordsMen('black', 3, 2), swordsMen('black', 4, 2), pikeman('black', 5, 2), swordsMen('black', 6, 2), pikeman('black', 7, 2),
+            pikeman('black', 2, 1), swordsMen('black', 1, 2), pikeman('black', 2, 2), swordsMen('black', 3, 2), swordsMen('black', 4, 2), pikeman('black', 5, 2), swordsMen('black', 6, 2), pikeman('black', 5, 1),
             shield('black', 1, 1), shield('black', 6, 1),
             sleepingDragon('black', 0, 0), gargoyleFactory('black', 1, 0), gargoyleFactory('black', 2, 0), plagueDoctor('black', 3, 0), northernKing('black', 4, 0), fencer('black', 5, 0), fencer('black', 6, 0), sleepingDragon('black', 7, 0)
         )
