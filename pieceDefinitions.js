@@ -1570,7 +1570,7 @@ function plagueDoctor(color, x, y){
     let moves = [{ type: 'absolute',  y: -1, x: 0 },{ type: 'absolute',  y: -1, x: -1 },{ type: 'absolute',  y: -1, x: 1 }]
 
     if (color == 'black') {
-        let moves = [{ type: 'absolute',  y: 1, x: 0 },{ type: 'absolute',  y: 1, x: -1 },{ type: 'absolute',  y: 1, x: 1 }]
+        moves = [{ type: 'absolute',  y: 1, x: 0 },{ type: 'absolute',  y: 1, x: -1 },{ type: 'absolute',  y: 1, x: 1 }]
     }
     return {
         icon: color + 'PlagueDoctor.png',
