@@ -47,11 +47,17 @@ class gallery  extends HTMLElement {
                 background:${background};
                 display:flex;
                 flex-direction:column;
+                min-height:100vh;
+                align-items:center;
+                justify-content:center;
+
                 
             }
             .navigation{
                 display:flex;
-                flex-direction:row;
+                flex-direction:column;
+                max-width:300px;
+                align-content:center;
                 justify-content:space-around;
                 flex-wrap:wrap;
             }
