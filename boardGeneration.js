@@ -11,7 +11,7 @@ try{
         blindCatFactory,
         cuteCatFactory,
         strongLadyBugFactory,
-        swordsMen
+        newBrainBugFactory
 
         
     
@@ -2285,6 +2285,35 @@ function missionClassicPromotersOne (state){
         }
     ]
 }
+
+function randomGame(state){
+    state.pieces.length = 0;
+    state.board.length = 0;
+    state.board = xyBoard(10,10,state.board)
+
+    state.pieces = [
+        knightFactory('black',0,0), newBrainBugFactory('black',0,1),
+        knightFactory('black',0,2), newBrainBugFactory('black',0,3),
+        knightFactory('black',0,4), newBrainBugFactory('black',0,5),
+        knightFactory('black',0,6), newBrainBugFactory('black',0,7),
+
+        knightFactory('white',10,0), newBrainBugFactory('white',10,1),
+        knightFactory('white',10,2), newBrainBugFactory('white',10,3),
+        knightFactory('white',10,4), newBrainBugFactory('white',10,5),
+        knightFactory('white',10,6), newBrainBugFactory('white',10,7)
+    ]
+}
+
+
+function novaIgra(state){
+    state.pieces.length = 0 ;
+    state.board = xyBoard(7,7,state.board)
+    state.pieces = [
+        newBishopFactory('black',3,3),
+        newBishopFactory('white',4,5)
+    ]
+}
+
 
 
 function getRndInteger(min, max) {

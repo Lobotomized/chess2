@@ -9,95 +9,109 @@ try{
 catch(err){
 
 }
+JSONfn = {};
 
-    function returnPieceWithColor(x,y,color,state){
-       return state.pieces.find((el) => {
-           return el.x === x && el.y === y && el.color === color;
-       })
+JSONfn.stringify = function(obj) {
+    return JSON.stringify(obj,function(key, value){
+            return (typeof value === 'function' ) ? value.toString() : value;
+        });
+}
+
+JSONfn.parse = function(str) {
+    return JSON.parse(str,function(key, value){
+        if(typeof value != 'string') return value;
+        return ( value.substring(0,8) == 'function') ? eval('('+value+')') : value;
+    });
+}
+
+function returnPieceWithColor(x,y,color,state){
+    return state.pieces.find((el) => {
+        return el.x === x && el.y === y && el.color === color;
+    })
+}
+
+function conditionalSplice(array,index){
+    if(index> -1){
+        array.splice(index,1)
     }
+}
 
-    function conditionalSplice(array,index){
-        if(index> -1){
-            array.splice(index,1)
+function conditionalSpliceWithBonus(state,index,color){
+
+    if(index> -1){
+        if(state.pieces[index].afterThisPieceTaken){
+            state.pieces[index].afterThisPieceTaken(state);
+        }
+        if(state.pieces[index].color != color || !color){
+            state.pieces.splice(index,1)
         }
     }
+}
 
-    function conditionalSpliceWithBonus(state,index,color){
-
-        if(index> -1){
-            if(state.pieces[index].afterThisPieceTaken){
-                state.pieces[index].afterThisPieceTaken(state);
-            }
-            if(state.pieces[index].color != color || !color){
-                state.pieces.splice(index,1)
-            }
-        }
-    }
-
-    function pieceAroundMe(state,aroundWhat,pieceTypeIcon){
-        let gore =  state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y+1)]?.icon?.includes(pieceTypeIcon) && aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y+1)]?.color;
-        let dolu = state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y-1)]?.icon?.includes(pieceTypeIcon) && aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y-1)]?.color;
-        let lqvo = state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y)]?.color;
-        let dqsno = state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y)]?.icon?.includes(pieceTypeIcon) && aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y)]?.color;;
-        let lqvoGore = state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y+1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y+1)]?.color;;
-        let dqsnoGore = state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y+1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y+1)]?.color;
-        let lqvoDolu = state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y-1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y-1)]?.color;;
-        let dqsnoDolu = state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y-1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y-1)]?.color;;
-        
-        return gore || dolu || lqvo || dqsno || lqvoGore || dqsnoGore || lqvoDolu || dqsnoDolu;
-    }
-
+function pieceAroundMe(state,aroundWhat,pieceTypeIcon){
+    let gore =  state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y+1)]?.icon?.includes(pieceTypeIcon) && aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y+1)]?.color;
+    let dolu = state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y-1)]?.icon?.includes(pieceTypeIcon) && aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y-1)]?.color;
+    let lqvo = state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y)]?.color;
+    let dqsno = state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y)]?.icon?.includes(pieceTypeIcon) && aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y)]?.color;;
+    let lqvoGore = state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y+1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y+1)]?.color;;
+    let dqsnoGore = state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y+1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y+1)]?.color;
+    let lqvoDolu = state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y-1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y-1)]?.color;;
+    let dqsnoDolu = state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y-1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y-1)]?.color;;
     
+    return gore || dolu || lqvo || dqsno || lqvoGore || dqsnoGore || lqvoDolu || dqsnoDolu;
+}
 
-    function cyborgTeleport(state,me,toReturn){
-        let piece = returnPieceWithColor(me.x+0,me.y-1,me.color,state);
-        if(piece && piece?.icon != me.icon){
-            toReturn.push({ type: 'takeMove', x: 0, y: -1, friendlyPieces:true })
-        }
-        piece = returnPieceWithColor(me.x+0,me.y+1,me.color,state)
-        if(piece && piece?.icon != me.icon){
-            toReturn.push({ type: 'takeMove', x: 0, y: 1, friendlyPieces:true })
-        }
-        piece = returnPieceWithColor(me.x+1,me.y-1,me.color,state)
-        if(piece && piece?.icon != me.icon){
-            toReturn.push({ type: 'takeMove', x: 1, y: -1, friendlyPieces:true })
-        }
-        piece = returnPieceWithColor(me.x+1,me.y+1,me.color,state)
-        if(piece && piece?.icon != me.icon){
-            toReturn.push({ type: 'takeMove', x: 1, y: 1, friendlyPieces:true })
-        }
-        piece = returnPieceWithColor(me.x+1,me.y+0,me.color,state)
-        if(piece && piece?.icon != me.icon){
-            toReturn.push({ type: 'takeMove', x: 1, y: 0, friendlyPieces:true })
-        }
-        piece = returnPieceWithColor(me.x-1,me.y+0,me.color,state)
-        if(piece && piece?.icon != me.icon){
-            toReturn.push({ type: 'takeMove', x: -1, y: 0, friendlyPieces:true })
-        }
-        piece = returnPieceWithColor(me.x-1,me.y-1,me.color,state)
 
-        if(piece && piece?.icon != me.icon){
-            toReturn.push({ type: 'takeMove', x: -1, y:-1, friendlyPieces:true })
-        }
-        piece = returnPieceWithColor(me.x-1,me.y+1,me.color,state)
 
-        if(piece && piece?.icon != me.icon){
-            toReturn.push({ type: 'takeMove', x: -1, y: 1, friendlyPieces:true })
-        }
+function cyborgTeleport(state,me,toReturn){
+    let piece = returnPieceWithColor(me.x+0,me.y-1,me.color,state);
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: 0, y: -1, friendlyPieces:true })
     }
-    function getRndInteger(min, max) {
-        return Math.floor(Math.random() * (max - min + 1)) + min;
+    piece = returnPieceWithColor(me.x+0,me.y+1,me.color,state)
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: 0, y: 1, friendlyPieces:true })
     }
-    
-    let posValue = [
-        0.1,
-        0.5,
-        1,
-        2,
-        3,
-        4
-    ]
-    
+    piece = returnPieceWithColor(me.x+1,me.y-1,me.color,state)
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: 1, y: -1, friendlyPieces:true })
+    }
+    piece = returnPieceWithColor(me.x+1,me.y+1,me.color,state)
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: 1, y: 1, friendlyPieces:true })
+    }
+    piece = returnPieceWithColor(me.x+1,me.y+0,me.color,state)
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: 1, y: 0, friendlyPieces:true })
+    }
+    piece = returnPieceWithColor(me.x-1,me.y+0,me.color,state)
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: -1, y: 0, friendlyPieces:true })
+    }
+    piece = returnPieceWithColor(me.x-1,me.y-1,me.color,state)
+
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: -1, y:-1, friendlyPieces:true })
+    }
+    piece = returnPieceWithColor(me.x-1,me.y+1,me.color,state)
+
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: -1, y: 1, friendlyPieces:true })
+    }
+}
+function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+let posValue = [
+    0.1,
+    0.5,
+    1,
+    2,
+    3,
+    4
+]
+
     
     
 function knightFactory(color, x, y) {
@@ -795,7 +809,6 @@ function kingFactory(color, x, y, options) {
             ){
                 toReturn.push({ type: 'absolute', x: -1, y: -1 });
             }
-            //
             if(!isPositionAttacked(state,this.color,this.x,this.y-1) && 
                 !squaresToRemove.find((sq) => {
                     return sq.x === this.x && sq.y === this.y-1
@@ -2295,6 +2308,24 @@ function cuteCatFactory(color, x, y) {
         }
     }
 }
+
+
+function newBrainBugFactory(color,x,y){
+    return {
+        icon:color+'BrainBug.png',
+        x:x,
+        y:y,
+        color:color,
+        value:3,
+        posValue:0.1,
+        moves:[
+            {
+                x:1,y:1,type:'takeMove',repeat:true,
+            },
+
+        ]
+    }
+}
 try{
     module.exports = {
         queenBugFactory:queenBugFactory,
@@ -2343,7 +2374,8 @@ try{
         blindCatFactory:blindCatFactory,
         fatCatFactory:fatCatFactory,
         cuteCatFactory:cuteCatFactory,
-        strongLadyBugFactory:strongLadyBugFactory
+        strongLadyBugFactory:strongLadyBugFactory,
+        newBrainBugFactory:newBrainBugFactory
         
     }
 }
