@@ -3,7 +3,7 @@
 try{
     var {playerMove} = require('./moveMethods.js')
     var {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecked, findPieceByXY, 
-        findCopyPieceByXY, areYouCheckedWithoutTempMoves, isPositionAttacked} = require('./helperFunctions')
+        findCopyPieceByXY, areYouCheckedWithoutTempMoves, isPositionAttacked, lightBoardFE} = require('./helperFunctions')
     
 }
 catch(err){
