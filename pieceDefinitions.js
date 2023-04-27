@@ -1442,7 +1442,7 @@ function northernKing(color, x, y, options){
             state.pieces.forEach((piece) => {
                 if(piece.color === this.color && piece.icon === piece.color + 'Fencer.png'){
                     piece.moves =  [];
-                    for(let i = fencerPower; i>=0; i--){
+                    for(let i = fencerPower; i>0; i--){
                         piece.moves.push(
                             {type: 'absolute', y: i, x: i },
                             {type: 'absolute', y:-i, x:-i},
@@ -1642,7 +1642,7 @@ function plagueDoctor(color, x, y){
             }
             state.pieces.forEach((piece) => {
                 if(piece.color === this.color && piece.icon === piece.color + 'Gargoyle.png'){
-                    for(let i = kolbaPower; i>=0; i--){
+                    for(let i = kolbaPower; i>0; i--){
                         piece.moves.push(
                             {type: 'absolute', y: i, x: 0 },
                             {type: 'absolute', y:-i, x:0},
