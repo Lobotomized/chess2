@@ -81,11 +81,11 @@ function removeWellPositionedPiecesFilter(options){
   return allowedMoves
 }
 
-function pieceValueMustBeSmallerThanException(options){
+function pieceValueMustBeBiggerThanException(options){
     return options.piece.value > options.minPieceValue;
 }
 
-function pieceValueMustBeBiggerThanException(options){
+function pieceValueMustBeSmallerThanException(options){
   return options.piece.value < options.maxPieceValue;
 }
 

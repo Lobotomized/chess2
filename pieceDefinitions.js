@@ -2072,6 +2072,7 @@ function juggernautFactory(color,x,y){
                 if(!takenSquare(this.x+1,this.y-1)){
                     toReturn.push(
                         { type: 'absolute', x: 1, y: -2 },
+                        { type: 'absolute', x: 2, y: -1 },
                     )
                 }
                 if(!takenSquare(this.x+1,this.y+1)){

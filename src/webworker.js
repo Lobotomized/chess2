@@ -89,6 +89,30 @@ self.addEventListener("message", function(e) {
                 }
             }
 
+            if(obj.AIPower === -5){
+                move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns,
+                    [{method:evaluationMagnifierPiece, options:{pieceValue:1}}],
+                    [
+                        {method:removeNonAttackingMovesFilter, options:{maxPieceValue:2,
+                        exceptions:[randomException,pieceValueMustBeSmallerThanException]}},
+                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:20, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
+                    ]
+                )
+            }
+
+            if(obj.AIPower === -4){
+                move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns,
+                    [{method:evaluationMagnifierPiece, options:{pieceValue:1}}],
+                    [
+                        {method:removeNonAttackingMovesFilter, options:{minPieceValue:20,
+                        exceptions:[randomException, pieceValueMustBeSmallerThanException]}},
+                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:20, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
+                    ]
+                )
+
+            }
+
+
             if(obj.AIPower === -3){
                 console.log('here?!')
                 move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns,

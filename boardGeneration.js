@@ -1834,6 +1834,88 @@ function missionClassicMedievalOne(state){
     )
 }
 
+
+function missionClassicPromotersFive(state){
+    let board = state.board;
+    let pieces = state.pieces;
+    board.length = 0;
+    pieces.length = 0;
+    board = xyBoard(7,7,board);
+    //AIPower= -3;
+    //AICharacter = 'offensiveCharacter'
+
+
+    buildModal(
+        [{type:'quote', text:`One of the false kings loyal to the usurper is trying to stage a coup at the capitol. <br/><br/>
+                             The militia should stop him. 
+        
+        `,  icon:"blackPawn.png"},
+         {type:'objectives',text:`
+            Capture the enemy Northern King. <br/> If he moves two times he will promote all swordsmen and pikeman to knights.
+         `}
+        ]
+    )
+
+    let miniBord = xyBoard(8,8,[]);
+    let wFencer = bishopFactory('white',4,4)
+
+    AIPower = -4;
+    
+
+    lightBoardFE(wFencer,{board:miniBord, pieces:[wFencer],turn:"white"},'lighted')
+    buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board:miniBord ,
+            icon:'whiteFencer.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The fencer moves diagonally with speed depending on how many moves the Northern King have made. <br/>
+                It can jump through pieces like a knight.
+            `
+        }
+    ])
+
+    state.specialOnMoveEffects = [
+        function(state){
+            let i = 4;
+            let nKing = state.pieces.filter((piece) => {
+                return piece.icon.includes('NorthernKing.png')
+            })
+
+            if(!nKing){
+                buildModal([
+                    {type:'link', text:"You Won!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicPromotersFive&AIColor=white"}
+                ])
+            }
+            else if(nKing.y === 0){
+                buildModal([
+                    {type:'link', text:"You Lost!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicPromotersFour&AIColor=white"}
+                ])
+            }
+
+            while(i>=0){
+                let winingPiece = state.pieces[findPieceByXY(state.pieces,i,4)]
+                if(!(winingPiece != undefined && winingPiece.icon.includes('Pawn.png'))){
+                    youWin = false;
+                }
+                i-=1;
+            }
+        }
+    ]
+
+    pieces.push(
+
+        fencer('white',0,7),fencer('white',1,7),fencer('white',2,7),fencer('white',3,7),northernKing('white',7,7),
+
+        pawnFactory('black',4,0),pawnFactory('black',5,0),pawnFactory('black',6,0),kingFactory('black',7,0),
+        pawnFactory('black',4,1),pawnFactory('black',5,1),pawnFactory('black',6,1),pawnFactory('black',7,1),
+        pawnFactory('black',4,2),pawnFactory('black',5,2),pawnFactory('black',6,2),pawnFactory('black',7,2)
+    )
+}
+
 function missionClassicPromotersFour(state){
     let board = state.board;
     let pieces = state.pieces;
@@ -1842,11 +1924,7 @@ function missionClassicPromotersFour(state){
     board = xyBoard(4,6,board);
     //AIPower= -3;
     //AICharacter = 'offensiveCharacter'
-    board.forEach((square) => {
-        if(square.x < 5 && square.y === 5){
-            square.special = true;
-        }
-    })
+
 
     buildModal(
         [{type:'quote', text:`One of the false kings loyal to the usurper is trying to stage a coup at the capitol. <br/><br/>
@@ -1903,16 +1981,6 @@ function missionClassicPromotersFour(state){
             }
 
             while(i>=0){
-                if(findPieceByXY(state.pieces,i,0) === -1){
-                    state.pieces.push(
-                        knightFactory('black',i,0)
-                    )
-                }
-                if(findPieceByXY(state.pieces,4-i,0) === -1){
-                    state.pieces.push(
-                        swordsMen('white',4-i,4)
-                    )
-                }
                 let winingPiece = state.pieces[findPieceByXY(state.pieces,i,4)]
                 if(!(winingPiece != undefined && winingPiece.icon.includes('Pawn.png'))){
                     youWin = false;
@@ -1923,12 +1991,10 @@ function missionClassicPromotersFour(state){
     ]
 
     pieces.push(
-        swordsMen('white',0,3),swordsMen('white',1,3),swordsMen('white',2,3),swordsMen('white',3,3),swordsMen('white',4,3),
 
-        pikeman('white',0,4),pikeman('white',1,4),pikeman('white',2,4),pikeman('white',3,4),pikeman('white',4,4),
-        swordsMen('white',0,5),swordsMen('white',1,5),northernKing('white',2,5, {yTrigger:3}),swordsMen('white',3,5),swordsMen('white',4,5),
+        pikeman('white',0,5),pikeman('white',1,5),northernKing('white',2,5, {yTrigger:3}),pikeman('white',3,5),pikeman('white',4,5),
 
-        knightFactory('black',0,0),knightFactory('black',1,0),knightFactory('black',2,0),knightFactory('black',3,0),knightFactory('black',4,0)
+        knightFactory('black',0,0),knightFactory('black',1,0),knightFactory('black',3,0),knightFactory('black',4,0)
     )
 }
 
@@ -2205,86 +2271,7 @@ function missionClassicPromotersOne (state){
     ]
 }
 
-function missionClassicPromotersOne (state){
-    state.board = xyBoard(5,4,state.board)
-    state.pieces = [];
 
-    state.board.forEach((sq) => {
-        if(sq.y === 2){
-            sq.special = true;
-        }
-    })
-    state.pieces.push(
-        swordsMen('white',0,4) ,swordsMen('white',1,4), swordsMen('white',2,4),swordsMen('white',3,4), swordsMen('white',4,4),swordsMen('white',5,4),
-
-
-        pawnFactory('black',0,0) ,pawnFactory('black',1,0), pawnFactory('black',2,0),pawnFactory('black',3,0), pawnFactory('black',4,0),pawnFactory('black',5,0),
-
-    )
-    buildModal([
-        {type:'quote', text:`The King gave an order that anyone who fought in the Northern wars should leave their weapons and go back to the capitol.
-                            </br> Come on men. Let's not turn this into a theater.
-        
-        `,  icon:"blackPawn.png"},
-        {type:'quote', classes:'reverse', text:"The king should tell us this himself. It's his war we won with our blood.",  icon:"whiteSwordsmen.png"},
-        {type:'quote', text:`The law states...
-
-        `,  icon:"blackPawn.png"},
-        {type:'quote', classes:'reverse', text:"Don't quote laws to men with swords.",  icon:"whiteSwordsmen.png"},
-
-        {type:'objectives', text:`
-        Place a pawn on each of the special squares to pacify the swordsmen.
-        `}
-    ])
-
-    let miniBord = xyBoard(8,8,[]);
-    let sMen = swordsMen('white',4,4)
-    lightBoardFE(sMen,{board:miniBord, pieces:[sMen],turn:"white"},'lighted')
-    buildPieceModal([
-        {
-            type:'piece',
-            classes:"",
-            board:miniBord ,
-            icon:'whiteSwordsmen.png',
-            pieceX:4,
-            pieceY:4,
-            description:`
-                The swordsmen can move and take on the three squares in front of him.
-            `
-        }
-    ])
-    state.specialOnMoveEffects = [
-        function(state){
-            let i = 5;
-            let youWin = true;
-
-            while(i>=0){
-                if(findPieceByXY(state.pieces,i,0) === -1){
-                    state.pieces.push(
-                        pawnFactory('black',i,0)
-                    )
-                }
-
-                if(findPieceByXY(state.pieces,i,4) === -1){
-                    state.pieces.push(
-                        swordsMen('white',i,4)
-                    )
-                }
-                let winingPiece = state.pieces[findPieceByXY(state.pieces,i,2)]
-                if(!(winingPiece != undefined && winingPiece.icon.includes('Pawn.png'))){
-                    youWin = false;
-                }
-                i-=1;
-            }
-            if(youWin){
-                state.won = 'black';
-                buildModal([
-                    {type:'link', text:"You Won!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicPromotersTwo&AIColor=white"}
-                ])
-            }
-        }
-    ]
-}
 
 function randomGame(state){
     state.pieces.length = 0;
@@ -2304,15 +2291,6 @@ function randomGame(state){
     ]
 }
 
-
-function novaIgra(state){
-    state.pieces.length = 0 ;
-    state.board = xyBoard(7,7,state.board)
-    state.pieces = [
-        newBishopFactory('black',3,3),
-        newBishopFactory('white',4,5)
-    ]
-}
 
 
 
