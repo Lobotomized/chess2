@@ -561,7 +561,7 @@ function dragonFactory(color,x,y){
         color: color,
         x:x,
         y:y,
-        icon:'dragonImage',
+        icon:'Dragon',
         moves: [{ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
         { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
         { type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
@@ -1342,8 +1342,7 @@ function queenBugFactory(color,x,y){
             if(currentShrooms.length == 1){
                 ant.moves = ant.weakMoves;
             }
-            state.turn = giveOppositeColor(state.turn)
-            return false;
+            return true;
         }
     }
 }

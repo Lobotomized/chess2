@@ -206,6 +206,164 @@ function raceChoiceChess(state,raceWhite,raceBlack){
 }
 
 
+function morphingRaceChoiceChess(state,raceWhite,raceBlack){
+    raceChoiceChess(state,raceWhite,raceBlack);
+
+
+    state.specialOnMoveEffects= [
+        function(state){
+            let thePiece = getRandomPiece(state.pieces,state.turn)
+            let morphIntoFunc = returnMorphingPoolPiece(thePiece)
+            if(morphIntoFunc){
+                let morphInto = returnMorphingPoolPiece(thePiece)(thePiece.color,thePiece.x,thePiece.y);
+                state.pieces.splice(state.pieces.indexOf(thePiece),1);
+                state.pieces.push(morphInto)
+
+                console.log(morphInto, thePiece)
+                state.board.forEach((square) => {
+                    if(square.x != thePiece.x || square.y != thePiece.y){
+                        square.special= false;
+                    }
+                    else{
+                        square.special = true;
+                    }
+                })
+
+
+            }
+
+
+        }
+    ]
+
+    //Pick random piece
+
+    //Pick
+}
+
+function returnMorphingPoolPiece(piece){
+    let key = piece.icon.replace('white','').replace('black', '').replace('.png','');
+    let arr = [];
+    switch(key){
+        case 'Pawn':
+                arr = [cyborgFactory, antFactory, ghostFactory, swordsMen, pikeman]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Knight':
+                arr = [bootVesselFactory, executorFactory, spiderFactory, ricarFactory, pigFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Bishop':
+                arr = [bootVesselFactory, executorFactory, spiderFactory, ricarFactory, pigFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Rook':
+                arr = [goliathBugFactory, strongLadyBugFactory, horseFactory, dragonFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Queen':
+                arr = [juggernautFactory, goliathBugFactory, dragonFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Ant':
+                arr = [cyborgFactory, pawnFactory, ghostFactory, swordsMen, pikeman]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'GoliathBug':
+                arr = [queenFactory, juggernautFactory, dragonFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Spider':
+                arr = [knightFactory, bishopFactory, bootVesselFactory, executorFactory, ricarFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'QueenBug':
+                arr = [bishopFactory, bootVesselFactory, executorFactory, ricarFactory, pigFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'LadyBug':
+                arr = [rookFactory, horseFactory, dragonFactory, pigFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Ghost':
+                arr = [cyborgFactory, pawnFactory, antFactory, swordsMen, pikeman]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Horse':
+                arr = [goliathBugFactory, dragonFactory, juggernautFactory, queenFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Clown':
+                arr = [pawnFactory, cyborgFactory, antFactory, ghostFactory, swordsMen, pikeman, queenFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Ricar':
+                arr = [bishopFactory, bootVesselFactory, executorFactory, queenBugFactory, spiderFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Pig':
+                arr = [bishopFactory, bootVesselFactory, executorFactory, strongLadyBugFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Executor':
+                arr = [knightFactory, bishopFactory, spiderFactory, strongLadyBugFactory, ricarFactory, pigFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Cyborg':
+                arr = [pawnFactory, antFactory, ghostFactory, swordsMen, pikeman]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Juggernaut':
+                arr = [queenFactory, goliathBugFactory, dragonFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Bootvessel':
+                arr = [knightFactory, bishopFactory, spiderFactory, ricarFactory, pigFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        
+        case 'Pikeman':
+                arr = [pawnFactory, antFactory, cyborgFactory, ghostFactory, swordsMen]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Swordsmen':
+                arr = [pawnFactory, antFactory, cyborgFactory, ghostFactory, pikeman]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Gargoyle':
+                arr = [sleepingDragon]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'SleepingDragon':
+                arr = [queenFactory, juggernautFactory, goliathBugFactory, dragonFactory, horseFactory]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+        case 'Dragon':
+            break;
+        case 'Fencer':
+                arr = [sleepingDragon]
+                return arr[Math.floor(Math.random()*arr.length)]
+            break;
+
+        default:
+                return false
+            break;
+        
+    }
+
+
+}
+
+function getRandomPiece(pieces,color){
+    let filteredPieces = pieces.filter((piece) => {
+        return color === piece.color && !piece.icon.includes('Shroom.png') && !piece.icon.includes('King.png')
+        && !piece.icon.includes('Hat.png') && !piece.icon.includes('PlagueDoctor.png')&& !piece.icon.includes('NorthernKing.png')
+    })
+
+    return filteredPieces[Math.floor(Math.random()*filteredPieces.length)];
+}
+
+
 function mongolianChess(state){
     pieces = state.pieces;
     board = state.board;
@@ -2272,24 +2430,6 @@ function missionClassicPromotersOne (state){
 }
 
 
-
-function randomGame(state){
-    state.pieces.length = 0;
-    state.board.length = 0;
-    state.board = xyBoard(10,10,state.board)
-
-    state.pieces = [
-        knightFactory('black',0,0), newBrainBugFactory('black',0,1),
-        knightFactory('black',0,2), newBrainBugFactory('black',0,3),
-        knightFactory('black',0,4), newBrainBugFactory('black',0,5),
-        knightFactory('black',0,6), newBrainBugFactory('black',0,7),
-
-        knightFactory('white',10,0), newBrainBugFactory('white',10,1),
-        knightFactory('white',10,2), newBrainBugFactory('white',10,3),
-        knightFactory('white',10,4), newBrainBugFactory('white',10,5),
-        knightFactory('white',10,6), newBrainBugFactory('white',10,7)
-    ]
-}
 
 
 
