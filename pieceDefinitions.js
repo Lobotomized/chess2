@@ -561,7 +561,7 @@ function dragonFactory(color,x,y){
         color: color,
         x:x,
         y:y,
-        icon:'Dragon',
+        icon:color+'Dragon.png',
         moves: [{ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
         { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
         { type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
