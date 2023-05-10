@@ -7,7 +7,7 @@ app.use('/moveMethods.js', express.static('./moveMethods.js'))
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const newG = require('./globby').newIOServerV2;
-const {miniChess, randomChess,  catchTheDragon, mongolianChess, classicChess, raceChess, raceChoiceChess, test} = require('./boardGeneration.js')
+const {miniChess, randomChess,  catchTheDragon, mongolianChess, classicChess, raceChess, raceChoiceChess, test,morphingRaceChoiceChess} = require('./boardGeneration.js')
 const { selectPiece, playerMove, checkTurn, changeTurn, closeLights } = require('./moveMethods.js')
 const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFactory,blindCatFactory} = require('./pieceDefinitions.js')
 const {lightBoardFE, checkRemi} = require('./helperFunctions.js');
@@ -87,7 +87,12 @@ let lobby = newG({properties:{
 
             if(state.whiteRace && state.blackRace){
                 state.turn = 'white'
-                raceChoiceChess(state,state.whiteRace,state.blackRace)
+                if(state.gameType === 'morphingRaceChoiceChess'){
+                    morphingRaceChoiceChess(state,state.whiteRace,state.blackRace)
+
+                }else{
+                    raceChoiceChess(state,state.whiteRace,state.blackRace)
+                }
             }
         }   
         else{
@@ -113,7 +118,7 @@ let lobby = newG({properties:{
                         }
                     }
                     if(state.specialOnMoveEffects && state.specialOnMoveEffects.length){
-                        specialOnMoveEffects.forEach((winCondition) => {
+                        state.specialOnMoveEffects.forEach((winCondition) => {
                             winCondition(state);
                         })
                     }
@@ -312,6 +317,18 @@ let lobby = newG({properties:{
                 }
                 state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4), empoweredCrystalFactory('white',1,5),blindCatFactory('white',1,6))
                 state.gameType = 'raceChoiceChess'
+                state.turn = 'menu'
+            }
+            else if(roomData.mode == 'morphingRaceChoiceChess'){
+                state.pieces.length = 0;
+                state.board.length = 0;
+                for (let x = 0; x <= 7; x++) {
+                    for (let y = 0; y <= 7; y++) {
+                            state.board.push({ light: false, x: x, y: y })
+                    }
+                }
+                state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4), empoweredCrystalFactory('white',1,5),blindCatFactory('white',1,6))
+                state.gameType = 'morphingRaceChoiceChess'
                 state.turn = 'menu'
             }
         }

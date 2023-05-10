@@ -219,7 +219,6 @@ function morphingRaceChoiceChess(state,raceWhite,raceBlack){
                 state.pieces.splice(state.pieces.indexOf(thePiece),1);
                 state.pieces.push(morphInto)
 
-                console.log(morphInto, thePiece)
                 state.board.forEach((square) => {
                     if(square.x != thePiece.x || square.y != thePiece.y){
                         square.special= false;
@@ -2457,7 +2456,8 @@ try{
         missionClassicBugsFour:missionClassicBugsFour,
         missionClassicBugsFive:missionClassicBugsFive,
         missionClassicBugsSix:missionClassicBugsSix,
-        test:test
+        test:test,
+        morphingRaceChoiceChess:morphingRaceChoiceChess
     };
 }
 catch(err){
