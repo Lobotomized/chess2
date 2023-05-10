@@ -557,116 +557,20 @@ function pawnFactory(color, x, y) {
 }
 
 function dragonFactory(color,x,y){
- return {
-        color: color,
-        x:x,
-        y:y,
-        icon:color+'Dragon.png',
-        moves: [{ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
-        { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
-        { type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
-        { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 },
-        { type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
-        { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 },
-        { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: 1, x: -2 },
-        { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }],
-
-        afterPlayerMove: function (state, move) {
-            let enemyColor = 'black';
-            if (this.color == 'black') {
-                enemyColor = 'white'
-            }
-
-            if(state.turn != this.color){
-                return;
-            }
-            
-            for (let i = state.pieces.length - 1; i >= 0; i--) {
-                const piece = state.pieces[i]
-                let tempMoves = [];
-                if (piece.conditionalMoves) {
-                    tempMoves = piece.conditionalMoves(state);
-                }
-            
-                
-                for(let ii = [...piece.moves, ...tempMoves].length-1; ii>=0; ii--){
-                    const move = [...piece.moves, ...tempMoves][ii];
-                    if (piece.color == enemyColor) {
-
-                        if ((move.type == 'absolute' || move.type == 'takeMove') && !move.impotent) {
-                            if(piece.x + move.x === this.x && piece.y + move.y === this.y){
-                                state.message = "Playing this move will leave you checked!"
-                                return true
-                            }
-                        }
-                        else if (move.type == 'blockable'  && !move.impotent) {
-                            if (move.repeat) {
-                                const limit = move.limit || 100;
-                                const offsetX = move.offsetX || 0;
-                                const offsetY = move.offsetY || 0;
-                                
-                                if(blockableCheck(state, move.x, move.y, piece.x + offsetX, piece.y + offsetY, move, limit, this) == 'block'){
-                                    state.message = "Playing this move will leave you checked!"
-                                    return true
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return
-        },
-        
-    afterEnemyPlayerMove: function(state,move){
-        let enemyColor = 'black';
-        if (this.color == 'black') {
-            enemyColor = 'white'
+    return {
+                color: color,
+                x:x,
+                y:y,
+                icon:color+'Dragon.png',
+                moves: [
+                    { type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
+                    { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
+                    { type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
+                    { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 },
+                    { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: 1, x: -2 },
+                    { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }
+                ],
         }
-        if(areYouChecked(state,enemyColor,this)){
-            let fakeState = JSON.parse(JSON.stringify(state));
-            let possibleEscape = false;
-            for(let i = fakeState.pieces.length - 1; i>=0; i--){
-                let friendlyPiece = fakeState.pieces[i];
-                let tempMoves = [];
-
-                if(friendlyPiece.color == this.color){
-                    if (friendlyPiece.conditionalMoves) {
-                        tempMoves = friendlyPiece.conditionalMoves(state); //  If the piece is from your team we gonna need it's conditional moves.
-                    }
-                    fakeState.turn = this.color;
-
-                    fakeState.pieceSelected = friendlyPiece;
-
-                    lightBoardFE(friendlyPiece,fakeState, 'light',undefined,true)
-
-                    const lightedSquares = fakeState.board.filter((sq) => {
-                        return sq.light == true;
-                    })
-
-                    lightedSquares.forEach((sq) => {
-                        friendlyPiece = fakeState.pieces[i];
-                        fakeState.pieceSelected = friendlyPiece;
-                        lightBoardFE(friendlyPiece,fakeState, 'light',undefined,true)
-
-                        fakeKing = fakeState.pieces.find((piece) => {
-                            return piece.x == this.x && piece.y == this.y
-                        });
-                        playerMove({x:sq.x, y:sq.y},fakeState)
-
-                        if(!areYouChecked(fakeState,enemyColor,fakeKing)){
-                            possibleEscape = true;
-                        }
-                        fakeState = JSON.parse(JSON.stringify(state));
-                    })
-
-                }
-            }
-            if(!possibleEscape){
-                state.won = enemyColor
-            }
-        }
-    } 
-}
 }
 
 function bishopFactory(color, x, y) {
@@ -1627,7 +1531,8 @@ function plagueDoctor(color, x, y){
                 state.pieces.forEach((piece) => {
                     if(piece.color === this.color && piece.icon === piece.color + 'SleepingDragon.png'){
                         piece.icon =  piece.color+'Dragon.png';
-                        piece.moves =  [{ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
+                        piece.moves =  [
+                        { type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
                         { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
                         { type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
                         { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 },
