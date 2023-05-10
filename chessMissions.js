@@ -105,7 +105,6 @@ let lobby = newG({properties:{
             }
             if (state.pieceSelected) {
                 if (playerMove(move, state)) {
-                    changeTurn(state)
                     if(checkRemi(state)){
                         state.won = 'tie'
                         return;
@@ -122,6 +121,8 @@ let lobby = newG({properties:{
                             winCondition(state);
                         })
                     }
+                    changeTurn(state)
+
                 }
                 else {
                     closeLights(state.board);
