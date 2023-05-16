@@ -10,28 +10,60 @@ class gallery  extends HTMLElement {
       let itemBackground = this.getAttribute('itemBackground') ? this.getAttribute('itemBackground') : whiteSquareColor
       let hoveredHeaderBackground = this.getAttribute('hoveredHeaderBackground') ? this.getAttribute('hoveredHeaderBackground') : dangerSquareColor
       let elements = [];
+      let buttonText = this.getAttribute('buttonText') ? this.getAttribute('buttonText') : 'Back';
+      let hideBackButton = this.getAttribute('hideBackButton') ? true : false;
+      
+      this.resetToStart = function(){
+        const navigation = this.shadowRoot.querySelector('#navigation');
 
+        elements.forEach((el, index) => {
+            elements[index].style = "display:none;"
+        })
+        navigation.classList.remove('hide')
+
+      }
+      
+      this.backClick = function(e){
+        const navigation = this.shadowRoot.querySelector('#navigation');
+        const backButton = this.shadowRoot.querySelector('#back');
+
+
+        if(e.target.classList.contains('back')){
+            elements.forEach((el, index) => {
+                elements[index].style = "display:none;"
+            })
+            
+            navigation.classList.remove('hide')
+            backButton.classList.add('hide');
+        }
+
+        elements.forEach((el) => {
+            if(el.resetToStart){
+                el.resetToStart();
+            }
+        })
+
+        console.log(elements[0].resetToStart())
+        
+      }
 
       this.onClick =  function(e, item){
-        const selected = shadowRoot.querySelector('.selected');
-        if(selected){
-            selected.classList.remove('selected');
+        const navigation = this.shadowRoot.querySelector('#navigation');
+        const backButton = this.shadowRoot.querySelector('#back');
+
+        if(!this.hideBackButton){
+            backButton.classList.remove('hide');
         }
-        if(e.path){
-            e.path[0].classList.add('selected')
+        if(this.hideOnClick && elements[item] !== undefined){
+            navigation.classList.add('hide')
         }
-        else if (e.explicitOriginalTarget){
-            e.explicitOriginalTarget.classList.add('selected')
-        }
-        
-        // console.log(item)
         elements.forEach((el, index) => {
             elements[index].style = "display:none;"
         })
         elements.forEach((el, index) => {
-                if(index == item){
-                    elements[item].style = ""
-                }
+            if(index == item){
+                elements[item].style = ""
+            }
         })
       }
       
@@ -41,13 +73,13 @@ class gallery  extends HTMLElement {
                 elements[index].style = "display:none;"
         })
       })
+
       shadowRoot.innerHTML = `
         <style>
             .mainBoard{
                 background:${background};
                 display:flex;
                 flex-direction:column;
-                min-height:100vh;
                 align-items:center;
                 justify-content:center;
 
@@ -60,6 +92,10 @@ class gallery  extends HTMLElement {
                 align-content:center;
                 justify-content:space-around;
                 flex-wrap:wrap;
+            }
+
+            .hide{
+                display:none;
             }
             .itemHeader{
                 cursor:pointer;
@@ -94,10 +130,13 @@ class gallery  extends HTMLElement {
             <div id="content" class="content">
                 <slot id="slot" />
             </div>
+            
+            <div class="back hide" id="back">
+                <h1 class="itemHeader back">${buttonText}</h1>
+            </div>
 
         </div>
       `;
-    
     }
 
     connectedCallback(){
@@ -110,7 +149,13 @@ class gallery  extends HTMLElement {
         let that = this;
         items.forEach((item, index) => {
             item.onclick = ((e) => {
-                return that.onClick(e,index)})
+                return that.onClick(e,index)
+            })
+        })
+
+        const backButton = this.shadowRoot.querySelectorAll('#back');
+        backButton[0].onclick = ((e) => {
+            return that.backClick(e);
         })
         
         // const slot = this.shadowRoot.querySelector('#slot')
@@ -119,6 +164,10 @@ class gallery  extends HTMLElement {
         this.selectedBackground = this.getAttribute('selectedBackground') ? this.getAttribute('selectedBackground') : 'black'
         this.itemBackground = this.getAttribute('itemBackground') ? this.getAttribute('itemBackground') : 'white'
         this.hoveredHeaderBackground = this.getAttribute('hoveredHeaderBackground') ? this.getAttribute('hoveredHeaderBackground') : 'black'
+        this.hideOnClick=  this.getAttribute('hideOnClick') ? true : false
+        this.buttonText = this.getAttribute('buttonText') ? this.getAttribute('buttonText') : 'Back';
+        this.hideBackButton = this.getAttribute('hideBackButton') ? true : false;
+        this.shadowRoot.querySelector('#back').innerHTML = `<h1 class="itemHeader back">${this.buttonText}</h1>`
     }
 
   }
