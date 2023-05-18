@@ -209,6 +209,9 @@ function raceChoiceChess(state,raceWhite,raceBlack){
 function morphingRaceChoiceChess(state,raceWhite,raceBlack){
     raceChoiceChess(state,raceWhite,raceBlack);
 
+    buildModal([
+        {type:'objectives', classes:"",text:`After every move one of your pieces mutates to another one.`}
+     ])
 
     state.specialOnMoveEffects= [
         function(state){
@@ -368,6 +371,9 @@ function mongolianChess(state){
     board = state.board;
     pieces.length = 0;
     board.length = 0;
+    buildModal([
+        {type:'objectives', classes:"",text:`Whoever manages to step on the purple square and than step out of it wins the game.`}
+     ])
     for (let x = 1; x <= 9; x++) {
         for (let y = 1; y <= 9; y++) {
             if(x == 5 && y == 5){
@@ -426,6 +432,8 @@ function classicChess(state){
     board = state.board;
     pieces.length = 0;
     board.length = 0;
+
+    state.turn = 'white';
 
     for (let x = 1; x <= 8; x++) {
         for (let y = 1; y <= 8; y++) {

@@ -32,9 +32,13 @@
         }
 
         const hotseatGameStart = function(){
-            let ifWhiteAI = document.querySelector('#aiWhite').value === 'on';
-            let ifBlackAI = document.querySelector('#aiBlack').value === 'on';
+            let ifWhiteAI = document.querySelector('#aiWhite').checked
+            let ifBlackAI = document.querySelector('#aiBlack').checked;
+            console.log( document.querySelector('#aiBlack').checked)
             let ifAllAI = ifWhiteAI && ifBlackAI;
+
+            let gameType = document.querySelector('#gameType')?.value;
+            gameType = gameType ? `&gameType=${gameType}` : ''
             let aiColor = '&AIColor=';
 
             if(ifAllAI){
@@ -47,7 +51,7 @@
                 aiColor += 'black'
             }
             
-            window.location.href = `/hotseat?whiteRace=${raceWhite}&blackRace=${raceBlack}${aiColor}`
+            window.location.href = `/hotseat?whiteRace=${raceWhite}&blackRace=${raceBlack}${aiColor}${gameType}`
         }
     </script>
 
@@ -122,7 +126,9 @@
 
         let startNewGame = function(){
             let gameName = document.getElementById('gameName').value
-            window.location.replace(`/play?roomId=${gameName}&mode=${gameMode}`)
+            let gameType = document.querySelector('#selectMode')?.value;
+
+            window.location.replace(`/play?roomId=${gameName}&mode=${gameType}`)
         }
 
 
@@ -130,7 +136,7 @@
 </head>
 <body>
 <div class="topMenu">
-        <gallery-game buttonText="To Start"  hideOnClick="true"  headings='["Multiplayer","Single Player",  "Pieces"]'>
+        <gallery-game buttonText="Back"  hideOnClick="true"  headings='["Multiplayer","Single Player",  "Pieces"]'>
 
         <gallery-game hideBackButton="true" hideOnClick="true" headings='["Create Game", "Join Game"]'> 
             <div>
@@ -142,6 +148,13 @@
                     <div><h1 id="mongolianChess" onclick="selectMode(this,'mongolianChess')" class="gameMode">Mongolian Chess</h1></div>
                     <div><h1 id="randomchess" onclick="selectMode(this,'randomchess')" class="gameMode">Randomized Mini Chess</h1></div> -->
                     <button class="createButton" onclick="startNewGame()">Start</button>
+
+                    <select name="" id="selectMode">
+                        <option value="raceChoiceChess">Chess 2</option>
+                        <option value="minichess">Mini chess</option>
+                        <option value="mongolianChess">Mongolian chess</option>
+                        <option value="randomChess">Random chess</option>
+                    </select>
                 </div>
             </div>
 
@@ -170,9 +183,24 @@
                 <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'promoters')" src="/static/blackNorthernKing.png" alt="">
                 <!-- <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'cat')" src="/static/blackBlindCat.png" alt=""> -->
                 <span>Make AI : </span> <input id="aiBlack" type="checkbox">
+                
 
+                
                 <div class="marginMedium">
-                    <a class="startGame column" onclick="hotseatGameStart()">Start Game</a>
+                    <a class="startGame column" onclick="hotseatGameStart()">Start Game</a> 
+
+                    <label for="">Mode</label>
+                    <select name="" id="gameType">
+                        <option value="raceChoiceChess">Chess 2</option>
+                        <option value="classicChess">Chess 1</option>
+                        <option value="miniChess">Minichess</option>
+                        <option value="morphingRaceChoiceChess">Morphing Chess 2</option>
+                        <option value="mongolianChess">Mongolian Chess</option>
+                        <option value="randomChess">Random Chess</option>
+                        <option value="hugeRandomChess">9 x 9 Random Chess</option>
+                        <option value="grandRandomChess">11 x 11 random Chess</option>
+
+                    </select>
                 </div>
 
             </div>

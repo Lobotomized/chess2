@@ -334,6 +334,9 @@ html{
 
  .marginMedium {
      margin:50px;
+     display:flex;
+     flex-direction: column;
+     justify-content: stretch;
  }
  .pieces{
     display:flex;

@@ -41,10 +41,7 @@ class gallery  extends HTMLElement {
             if(el.resetToStart){
                 el.resetToStart();
             }
-        })
-
-        console.log(elements[0].resetToStart())
-        
+        })        
       }
 
       this.onClick =  function(e, item){
@@ -158,8 +155,7 @@ class gallery  extends HTMLElement {
             return that.backClick(e);
         })
         
-        // const slot = this.shadowRoot.querySelector('#slot')
-        // console.log(slot)
+
         this.background = this.getAttribute('background') ? this.getAttribute('background') : 'rgb(0,0,0,0.8)'
         this.selectedBackground = this.getAttribute('selectedBackground') ? this.getAttribute('selectedBackground') : 'black'
         this.itemBackground = this.getAttribute('itemBackground') ? this.getAttribute('itemBackground') : 'white'

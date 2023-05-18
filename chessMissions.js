@@ -282,7 +282,10 @@ let lobby = newG({properties:{
         if(!state.board.length){
             if(roomData.mode == 'minichess'){
                 state.gameType = 'minichess'
-                miniChess(state.pieces, state.board);
+                console.log(state, ' tuka!?')
+                state.pieces =[];
+                state.board = [];
+                miniChess(state);
             }
             else if(roomData.mode == 'randomchess'){
                 state.gameType = 'randomchess'
@@ -290,15 +293,15 @@ let lobby = newG({properties:{
             }
             else if(roomData.mode == 'catchthedragon'){
                 state.gameType = 'catchthedragon'
-                catchTheDragon(state.pieces,state.board)
+                catchTheDragon(state)
             }
             else if(roomData.mode == 'mongolianChess'){
                 state.gameType = 'mongolianChess'
-                mongolianChess(state.pieces,state.board)
+                mongolianChess(state)
             }
             else if(roomData.mode == 'classicChess'){
                 state.gameType = 'classiChess'
-                classicChess(state.pieces,state.board)
+                classicChess(state)
             }
             else if(roomData.mode === 'test'){
                 state.gameType = 'test';
@@ -306,7 +309,7 @@ let lobby = newG({properties:{
             }
             else if(roomData.mode == 'raceChess'){
                 state.gameType = 'raceChess'
-                raceChess(state.pieces,state.board)
+                raceChess(state)
             }
             else if(roomData.mode == 'raceChoiceChess'){
                 state.pieces.length = 0;

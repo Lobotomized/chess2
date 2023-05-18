@@ -1319,7 +1319,7 @@ function northernKing(color, x, y, options){
             this.value += 2;
             
             let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
-            let fencerPower = this.color === 'black' ? this.y+1 : 8 -this.y;
+            let fencerPower = this.color === 'black' ? this.y : 7 -this.y;
 
             if(this.options && this.options.yTrigger){
                 promoteCondition = this.y === this.options.yTrigger;
@@ -1526,7 +1526,7 @@ function plagueDoctor(color, x, y){
             }
             this.value += 2;
             let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
-            let kolbaPower = this.color === 'black' ? this.y+1 : 8-this.y;
+            let kolbaPower = this.color === 'black' ? this.y : 7-this.y;
             if(promoteCondition){
                 state.pieces.forEach((piece) => {
                     if(piece.color === this.color && piece.icon === piece.color + 'SleepingDragon.png'){
