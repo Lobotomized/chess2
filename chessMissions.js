@@ -282,7 +282,6 @@ let lobby = newG({properties:{
         if(!state.board.length){
             if(roomData.mode == 'minichess'){
                 state.gameType = 'minichess'
-                console.log(state, ' tuka!?')
                 state.pieces =[];
                 state.board = [];
                 miniChess(state);

@@ -209,9 +209,14 @@ function raceChoiceChess(state,raceWhite,raceBlack){
 function morphingRaceChoiceChess(state,raceWhite,raceBlack){
     raceChoiceChess(state,raceWhite,raceBlack);
 
-    buildModal([
-        {type:'objectives', classes:"",text:`After every move one of your pieces mutates to another one.`}
-     ])
+    try{
+        buildModal([
+            {type:'objectives', classes:"",text:`After every move one of your pieces mutates to another one.`}
+         ])
+    }
+    catch(err){
+
+    }
 
     state.specialOnMoveEffects= [
         function(state){

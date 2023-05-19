@@ -554,6 +554,19 @@ function getSinglePlayerGame() {
                     state.gameType = 'raceChoiceChess'
                     state.turn = 'menu'
                 }
+                else if(roomData.mode == 'morphingRaceChoiceChess'){
+                    state.pieces.length = 0;
+                    state.board.length = 0;
+                    for (let x = 0; x <= 7; x++) {
+                        for (let y = 0; y <= 7; y++) {
+                                state.board.push({ light: false, x: x, y: y })
+                        }
+                    }
+
+                    state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3))
+                    state.gameType = 'morphingRaceChoiceChess'
+                    state.turn = 'menu'
+                }
             }
         },
         rooms:true,
