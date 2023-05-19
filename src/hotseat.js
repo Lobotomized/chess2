@@ -1,10 +1,13 @@
 
 const AIColor = getParams(window.location.href).AIColor
-let AIPower = getParams(window.location.href).AIPower;
-if(AIPower === undefined || typeof AIPower === 'NaN'){
-    AIPower = 1;
+let AIPowerWhite = getParams(window.location.href).AIPowerWhite;
+let AIPowerBlack = getParams(window.location.href).AIPowerBlack;
+let aiPowers = {
+    white:AIPowerWhite ? AIPowerWhite : 1 ,
+
+    black:AIPowerBlack ? AIPowerBlack : 1
+
 }
-AIPower = parseInt(AIPower);
 
 let ani = function(){
     animate(hotseatGame.returnState())
@@ -255,7 +258,7 @@ canvas.addEventListener('click', (e) => {
         hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
         state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
         if(state.turn === AIColor){
-            w.postMessage(JSONfn.stringify({state:state, color:AIColor, AIPower:AIPower}));
+            w.postMessage(JSONfn.stringify({state:state, color:AIColor, AIPower:aiPowers[state.turn]}));
 
             w.onmessage = function(event){
                 let move = JSONfn.parse(event.data)
@@ -267,16 +270,16 @@ canvas.addEventListener('click', (e) => {
                     if(move.removedTurns){
                         removedTurns = [...removedTurns, ...move.removedTurns]
                     }
-                    w.postMessage(JSONfn.stringify({state:state, color:AIColor, AIPower:AIPower, removedTurns:removedTurns}));
+                    w.postMessage(JSONfn.stringify({state:state, color:AIColor, AIPower:aiPowers[state.turn], removedTurns:removedTurns}));
                 }
             }
         }
         else if(AIColor === 'allAI'){
-            w.postMessage(JSONfn.stringify({state:state, color:state.turn, AIPower:AIPower}));
+            w.postMessage(JSONfn.stringify({state:state, color:state.turn, AIPower:aiPowers[state.turn]}));
             w.onmessage = function(event){
                 let move = JSONfn.parse(event.data)
                 AIMove(move.pieceCounter, move.xClicked, move.yClicked, state.turn)
-                w.postMessage(JSONfn.stringify({state:state, color:state.turn, AIPower:AIPower}));
+                w.postMessage(JSONfn.stringify({state:state, color:state.turn, AIPower:aiPowers[state.turn]}));
             }
         }
     }

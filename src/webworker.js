@@ -74,6 +74,7 @@ self.addEventListener("message", function(e) {
                 positionalOffeniveCharacter:positionalOffensiveCharacter,
                 noPosition:noPosition
             }
+            obj.AIPower = parseInt(obj.AIPower)
             if(obj.AIPower === -1){
                 if(obj.state.pieces.length > 20){
                     obj.AIPower = 1;
@@ -114,7 +115,6 @@ self.addEventListener("message", function(e) {
 
 
             if(obj.AIPower === -3){
-                console.log('here?!')
                 move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns,
                     positionalCharacter(2),
                     [
@@ -139,6 +139,7 @@ self.addEventListener("message", function(e) {
                 move = minimaxDeep(obj.state,obj.color,1, obj.removedTurns,methods[obj.AICharacter](0))
             }
             else if(obj.AIPower === 1){
+                console.log(obj)
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
                     methods[obj.AICharacter](0),
                     [
@@ -161,6 +162,7 @@ self.addEventListener("message", function(e) {
 
             }
             else if(obj.AIPower === 3){
+                console.log(obj , '   i tuka')
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
                     methods[obj.AICharacter](0),
                     []
@@ -193,6 +195,50 @@ self.addEventListener("message", function(e) {
                     ]
                 )
             }
+
+
+            if(obj.AIPower === 101){
+                console.time('101')
+                move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
+                    methods[obj.AICharacter](0),
+                    [
+                        {method:removeNonAttackingMovesFilter, options:{maximum:2,minPieceValue:2,randomException:0.3, filterDepth:1,
+                        exceptions:[pieceValueMustBeSmallerThanException,randomException]}},
+                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
+                    ]
+                )
+                console.timeEnd('101')
+            }
+
+            else if(obj.AIPower === 102){
+                move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
+                    methods[obj.AICharacter](0),
+                    [
+                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
+                    ]
+                )
+            }
+            else if(obj.AIPower === 103){
+                move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
+                    methods[obj.AICharacter](0),
+                    [
+                    ]
+                )
+            }
+            else if(obj.AIPower === 104){
+                console.time('104')
+                move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns,
+                    methods[obj.AICharacter](0),
+                    [
+                        {method:removeNonAttackingMovesFilter, options:{randomException:0.8, 
+                        exceptions:[pieceAttackedException,randomException]}},
+                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
+                    ]
+                )
+
+                console.timeEnd('104')
+            }
+            console.log(obj.AIPower)
             move.removedTurns = obj.removedTurns;
             postMessage(JSONfn.stringify(move))
 

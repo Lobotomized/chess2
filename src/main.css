@@ -32,7 +32,8 @@ h1{
 .row {
     display: flex;
     flex-direction: row;
-    justify-content:space-around
+    justify-content:space-around;
+    align-items: center;
 }
 
 .forfeitText{
@@ -74,6 +75,10 @@ body{
     margin:0;
     background-size: 800px 800px;
     background-position: 0 0, 0 400px, 400px -400px, -400px 0px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 
 
@@ -119,8 +124,16 @@ html{
     display:flex;
     flex-direction: column;
     align-items:center;
-    padding-bottom:50px;
+    gap:20px;
 }
+
+.mode-row{
+    display:flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+
 
 @media only screen and (max-width: 600px) {
     .black{
@@ -155,7 +168,7 @@ html{
   }
 
   .createButton{
-      background:var(--black-square-color);
+      /* background:var(--black-square-color);
       color:var(--white-square-color);
       padding:25px;
       padding-left:100px;
@@ -166,8 +179,35 @@ html{
       cursor:pointer;
       margin-top:50px;
       box-shadow:none;
-      border:var(--black-square-color);
+      border:var(--black-square-color); */
+      all: unset;
+      cursor: pointer;
+      padding-top: 20px;
+      padding-bottom: 20px;
+      padding-left: 40px;
+      padding-right: 40px;
+      border-radius: 20px;
+      background: #F7DFDA;
+      color: #7D6650;
+      font-size: 2em;
+      font-weight: bolder;
+      text-align: center;
   }
+
+  select{
+    all:unset;
+    cursor: pointer;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+    border-radius: 20px;
+    background: #F7DFDA;
+    color: #7D6650;
+    font-size: 1em;
+    font-weight: bolder;
+    text-align: center;
+  }   
 
   .createButton:hover{
       color:var(--white-square-color);
@@ -337,6 +377,7 @@ html{
      display:flex;
      flex-direction: column;
      justify-content: stretch;
+     gap:20px;
  }
  .pieces{
     display:flex;
