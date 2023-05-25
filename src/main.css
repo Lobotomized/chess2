@@ -400,7 +400,7 @@ html{
 
  @media only screen and (max-width: 600px) {
    .modal{
-    top:auto;
+    /* top:auto; */
     width:90%;
    }
  }
@@ -422,11 +422,14 @@ html{
     align-items: center;
  }
 
+ .campaign > h2{
+    margin-bottom:0px;
+ }
  .campaign > a{
     display:inline-flex;
     align-items: center;
     text-decoration: none;
-    margin:15px;
+    margin-top:15px;
  }
  .campaign > a > img{
     width:50px;    

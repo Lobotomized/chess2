@@ -139,7 +139,6 @@ self.addEventListener("message", function(e) {
                 move = minimaxDeep(obj.state,obj.color,1, obj.removedTurns,methods[obj.AICharacter](0))
             }
             else if(obj.AIPower === 1){
-                console.log(obj)
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
                     methods[obj.AICharacter](0),
                     [
@@ -162,7 +161,6 @@ self.addEventListener("message", function(e) {
 
             }
             else if(obj.AIPower === 3){
-                console.log(obj , '   i tuka')
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
                     methods[obj.AICharacter](0),
                     []
@@ -175,6 +173,7 @@ self.addEventListener("message", function(e) {
                 )
             }
             else if(obj.AIPower === 5){
+
                 move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns,
                     methods[obj.AICharacter](0),
                     [

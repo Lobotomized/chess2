@@ -989,7 +989,7 @@ function missionClassicBugsTwo(state){
     board = state.board;
     xyBoard(4,6,board)
     pieces.length = 0;
-    // AIPower=5;
+    // aiPowers['white']=5;
 
     buildModal([
         {type:'quote', classes:"",text:`My lord we are under attack. We might lose the battle. <br/><br/> We should evacuate you from here.`,icon:"/blackKnight.png"},
@@ -1077,7 +1077,7 @@ function missionClassicBugsThree(state){
     pieces = state.pieces;
     board = state.board;
     pieces.length = 0;
-    AIPower = 6;
+    aiPowers['white'] = 6;
     for (let x = 0; x <= 7; x++) {
         for (let y = 0; y <= 7; y++) {
                 if(x%3 || (y === 7 && x == 3)|| (y === 0 && x == 6)|| (y === 4 && x === 3) || (y === 5 && x === 6)){
@@ -1417,7 +1417,7 @@ function missionClassicMedievalSeven(state){
     }
 
 
-    AIPower = 2;
+    aiPowers['white'] = 2;
     AICharacter = 'positionalOffensiveCharacter'
     buildModal([
         {type:'quote', classes:"",text:`The tree gods have crossed too many lines.</b> Peace is what we seek and peace is what we will get once we <b>KILL THEM</b>. `,icon:"/blackKing.png"},
@@ -1538,7 +1538,7 @@ function missionClassicMedievalFive(state){
             board.push({ light: false, x: x, y: y })
         }
     }
-    AIPower=5
+    aiPowers['white']=5
 
     state.specialOnMoveEffects = [
         function(state){
@@ -1640,7 +1640,7 @@ function missionClassicMedievalFive(state){
 
 function missionClassicMedievalFour(state){
     xyBoard(5,5,state.board)
-    AIPower = 5;
+    aiPowers['white'] = 5;
     state.pieces = [
         rookFactory('black',1,0),rookFactory('black',5,0),rookFactory('black',1,4),rookFactory('black',5,4),
         bishopFactory('black',2,2),
@@ -2011,7 +2011,7 @@ function missionClassicPromotersFive(state){
     board.length = 0;
     pieces.length = 0;
     board = xyBoard(7,7,board);
-    //AIPower= -3;
+    //aiPowers['white']= -3;
     //AICharacter = 'offensiveCharacter'
 
 
@@ -2029,7 +2029,7 @@ function missionClassicPromotersFive(state){
     let miniBord = xyBoard(8,8,[]);
     let wFencer = bishopFactory('white',4,4)
 
-    AIPower = -4;
+    aiPowers['white'] = -4;
     
 
     lightBoardFE(wFencer,{board:miniBord, pieces:[wFencer],turn:"white"},'lighted')
@@ -2092,7 +2092,7 @@ function missionClassicPromotersFour(state){
     board.length = 0;
     pieces.length = 0;
     board = xyBoard(4,6,board);
-    //AIPower= -3;
+    //aiPowers['white']= -3;
     //AICharacter = 'offensiveCharacter'
 
 
@@ -2284,7 +2284,7 @@ function missionClassicPromotersTwo(state){
     let pieces = state.pieces;
     board.length = 0;
     pieces.length = 0;
-    AIPower = -2;
+    aiPowers['white'] = -2;
     for (let x = 0; x <= 7; x++) {
         for (let y = 0; y <= 7; y++) {
             let shirini = x === 1 || x === 2 || x ===3

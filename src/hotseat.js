@@ -3,10 +3,9 @@ const AIColor = getParams(window.location.href).AIColor
 let AIPowerWhite = getParams(window.location.href).AIPowerWhite;
 let AIPowerBlack = getParams(window.location.href).AIPowerBlack;
 let aiPowers = {
-    white:AIPowerWhite ? AIPowerWhite : 1 ,
+    white:AIPowerWhite ? AIPowerWhite : 3 ,
 
-    black:AIPowerBlack ? AIPowerBlack : 1
-
+    black:AIPowerBlack ? AIPowerBlack : 3
 }
 
 let ani = function(){

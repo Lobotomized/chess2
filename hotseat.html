@@ -144,7 +144,7 @@ const buildModal = function(arr){
 const buildPieceModal = function(arr){
     let theString;
     let widthOrHeight = screen.width < screen.height? screen.width : screen.height;
-    let magicNumber = widthOrHeight > 800 ? squareLength/1.5 : squareLength
+    let magicNumber = widthOrHeight > 800 ? squareLength/1.5 : squareLength/2
     arr.forEach((el) => {
         theString  = `<div style="position:relative;width:${magicNumber * (Math.sqrt(el.board.length))}px;height:${magicNumber * Math.sqrt(el.board.length)}px;">`
         
