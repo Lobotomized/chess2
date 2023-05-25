@@ -1056,7 +1056,7 @@ function missionClassicBugsTwo(state){
             gameEndedEvent:function(colorWon){
                 if(colorWon === 'white'){
                     buildModal([
-                        {type:'link', text:"Defeat!!!", linkText:"Restart the mission", link:"/hotseat?gameType=missionClassicBugsFour&AIColor=white"}
+                        {type:'link', text:"Defeat!!!", linkText:"Restart the mission", link:"/hotseat?gameType=missionClassicBugsTwo&AIColor=white"}
                      ])
                 }
             }
