@@ -131,7 +131,7 @@ self.addEventListener("message", function(e) {
                     methods[obj.AICharacter](0),
                     [
                         {method:removeNonAttackingMovesFilter, options:{maximum:2,minPieceValue:5, filterDepth:1,
-                        exceptions:[pieceValueMustBeSmallerThanException]}},
+                        exceptions:[pieceValueMustBeBiggerThanException]}},
                     ]
                 )
             }

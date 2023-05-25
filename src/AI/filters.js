@@ -57,6 +57,7 @@ function nthChanceToRemovePieceFilter(options){
 
 function removeNonAttackingMovesFilter(options){
   let {allowedMoves, color,state} = options;
+
   if(exceptionsChecker(options)){
     return allowedMoves;
   }
