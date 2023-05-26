@@ -131,7 +131,7 @@ class pieces extends HTMLElement {
         <div class="piece">
             <img src="/static/whiteLadyBug.png" alt=""> 
             <p>
-                If you have two shrooms the Spider is moving both like a Classic Bishop and a Classic King.
+                If you have two shrooms the LadyBug is moving one horizontally and three diagonally starting from there.
                 <br> <br>
                 Else it moves only like a King.
             </p>
@@ -141,7 +141,7 @@ class pieces extends HTMLElement {
         <div class="piece">
             <img src="/static/blackGoliathBug.png" alt=""> 
             <p>
-                If you have two shrooms the Spider is moving both like a Classic Rook and a Classic King.
+                If you have two shrooms the Goliath Bug is moving both like a Classic Rook and a Classic King.
                 <br> <br>
                 Else it moves only like a King.
             </p>
