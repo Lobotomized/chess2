@@ -34,6 +34,8 @@ h1{
     flex-direction: row;
     justify-content:space-around;
     align-items: center;
+    flex-wrap: wrap;
+
 }
 
 .forfeitText{
@@ -320,10 +322,7 @@ html{
     font-size:25px;
     font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif;
   }
-  .row{
-    display:flex;
-    flex-direction:row;
-  }
+
 
   .startGame{
     color:white;

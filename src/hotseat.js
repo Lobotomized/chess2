@@ -261,7 +261,7 @@ canvas.addEventListener('click', (e) => {
 
             w.onmessage = function(event){
                 let move = JSONfn.parse(event.data)
-
+                console.log(move)
                 AIMove(move.pieceCounter, move.xClicked, move.yClicked, AIColor)
                 if(state.turn === AIColor){
                     let removedTurns = [{...move}]

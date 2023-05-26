@@ -237,7 +237,6 @@ self.addEventListener("message", function(e) {
 
                 console.timeEnd('104')
             }
-            console.log(obj.AIPower)
             move.removedTurns = obj.removedTurns;
             postMessage(JSONfn.stringify(move))
 
