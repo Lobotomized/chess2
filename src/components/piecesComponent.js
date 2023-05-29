@@ -156,6 +156,146 @@ class pieces extends HTMLElement {
             </p>
         </div>
 
+
+        
+        <h1>Cyborgs </h1>
+
+
+        <p>
+        Tough fraction that's very resistant to surprise mate tactics. Has the most powerful piece in the game.  <br>
+        
+        Every piece of this fraction can swap places with ally pieces around it.
+        
+        </p>
+
+
+        <div class="piece">
+            <img src="/static/blackCyborg.png" alt=""> 
+            <p>
+                The Cyborg is the basic piece of the cyborgs fraction.
+                <br>
+                It jumps and takes on the second square infront of it.  If it gets to the final square it promotes into a Juggernaut (the strongest piece in the game).
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/whiteBootVessel.png" alt=""> 
+            <p>
+                The Boot Vessel moves diagonally till the end of the board, missing every second square. It still can be blocked if there is something on it's path. 
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/blackExecutor.png" alt=""> 
+            <p>
+                The Executor moves horizontally and vertically till the end of the board, missing every second square. It still can be blocked if there is something on it's path. 
+            </p>
+        </div> 
+
+
+        <div class="piece">
+            <img src="/static/whiteJuggernaut.png" alt=""> 
+            <p>
+                The Juggernaut is the strongest piece in the game <br>
+                He can move three times. Every move is with one horizontal or one vertical speed. If  it takes a piece his move has ended. 
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/blackCrystal.png" alt=""> 
+            <p>
+                The Crystal moves one square in every direction <br>
+                If it's taken and there is an Empowered Crystal on your board the Empowered Crystal transforms to Crystal. 
+                If there is no Empowered Crystal and this piece is taken you lose the game.
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/whiteCrystalEmpowered.png" alt=""> 
+            <p>
+            The Empowered Crystal moves diagonally, horizontally and vertically till the end of the board, missing every second square. It still can be blocked if there is something on it's path. 
+            <br>
+                If it's taken and there is a Crystal on your board the Crystal transforms to Empowered Crystal. 
+                If there is no Crystal and this piece is taken you lose the game.
+            </p>
+        </div> 
+
+
+        <h1>The Rebel Alliance </h1>
+
+        <p>
+            The Rebel Alliance is a fraction based on the promotion mechanic. 
+            It slowly pushes the board and every time one if their lose condition pieces moves forward it upgrades many of the pieces.
+        </p>
+
+        <div class="piece">
+            <img src="/static/blackSwordsmen.png" alt=""> 
+            <p>
+                The swordsman moves and takes one infront of itself and one diagonally in each direction ahead.
+
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/whitePikeman.png" alt=""> 
+            <p>
+                The pikeman moves without taking one square ahead, one left and one right. 
+                It can take the three squares, two ahead of him. ([x:1,y:2],[x:0,y:2],[x:-1,y:2] where the pikeman is at [x:0,y:0])
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/blackShield.png" alt=""> 
+            <p>
+                The defender can move and take horizontally with infinit speed and one vertically.
+            </p>
+        </div>
+
+        
+        <div class="piece">
+            <img src="/static/whiteSleepingDragon.png" alt=""> 
+            <p>
+                The Sleeping Dragon cannot move. If it awakes it gets the moves of a Rook and a Knight
+            </p>
+        </div>
+
+        
+        <div class="piece">
+            <img src="/static/blackGargoyle.png" alt=""> 
+            <p>
+                The Gargoyle moves horizontally and vertically and can jump through pieces. It's speed is equal to the rank of the Plague Archeologist.
+            </p>
+        </div>
+
+        <div class="piece">
+            <img src="/static/whiteFencer.png" alt=""> 
+            <p>
+                The Fencer moves diagonally and can jump through pieces. It's speed is equal to the rank of the Plague Archeologist.
+            </p>
+        </div>
+
+        <div class="piece">
+            <img src="/static/blackPlagueDoctor.png" alt=""> 
+            <p>
+                The Plague Archeologist moves and takes one infront of itself and one diagonally in each direction ahead.
+                <br/>
+                Every time it moves  it upgrades the Gargoyle and if it gets to rank 4 it awakes the Dragon.
+                <br/>
+                If it get's to the final rank you win the game. If you lose both the Northern King and the Plague Archeologist you lose the game.
+            </p>
+        </div>
+
+        <div class="piece">
+            <img src="/static/whiteNorthernKing.png" alt=""> 
+            <p>
+                The Rebel King moves and takes one infront of itself and one diagonally in each direction ahead.
+                <br/>
+                Every time it moves  it upgrades the Fencer and if it gets to rank 4 all the swordsmen and pikemen are promoted to knights.
+                <br/>
+                If it get's to the final rank you win the game. If you lose both the Northern King and the Plague Archeologist you lose the game.
+            </p>
+        </div>
+
         <h1>Classic </h1>
 
 
@@ -196,7 +336,7 @@ class pieces extends HTMLElement {
         <div class="piece">
             <img src="/static/blackQueen.png" alt=""> 
             <p>
-                The Queen is the most powerful piece in the game.
+                The Queen is the second most powerful piece in the game.
 
                <br> <br>
                It can move and take diagonally, vertically and horizontally until it is blocked.
