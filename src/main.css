@@ -437,3 +437,7 @@ html{
  #blackPlayerSelect, #whitePlayerSelect{
     margin-left:10px;
  }
+
+ .movesFirstRow{
+    margin-top:10px;
+ }

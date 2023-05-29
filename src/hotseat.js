@@ -2,6 +2,8 @@
 const AIColor = getParams(window.location.href).AIColor
 let AIPowerWhite = getParams(window.location.href).AIPowerWhite;
 let AIPowerBlack = getParams(window.location.href).AIPowerBlack;
+let whoStarts = getParams(window.location.href).starts;
+
 let aiPowers = {
     white:AIPowerWhite ? AIPowerWhite : 3 ,
 
@@ -235,12 +237,20 @@ function animate(secretState){
 
 } 
 
+if(whoStarts === 'whiteStarts'){
+    hotseatGame.state.turn = 'white'
+}
+else{
+    hotseatGame.state.turn = 'black';
+}
+
 canvas.addEventListener('click', (e) => {
     const hotseat = true;
     const state = hotseatGame.state;
     if(!w){
         w = new Worker("src/webworker.js");
     }
+
     if(hotseat || state.turn !=  AIColor){
         var element = canvas, offsetX = 0, offsetY = 0, mx, my;
         // Compute the total offset. It's possible to cache this if you want

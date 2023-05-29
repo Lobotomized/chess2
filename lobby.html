@@ -35,12 +35,18 @@
             let ifWhiteAI = document.querySelector('#whitePlayerSelect').value
             let ifBlackAI = document.querySelector('#blackPlayerSelect').value;
 
+            let whoStartsFirst = document.querySelector('#whoStartsFirst').value;
+
             let ifAllAI =  ifWhiteAI != '' && ifBlackAI != '';
 
             let gameType = document.querySelector('#gameType')?.value;
             gameType = gameType ? `&gameType=${gameType}` : ''
             let aiColor = '&AIColor=';
             let aiPower = ''
+
+            let startMoveString = `&starts=${whoStartsFirst}`
+
+            
 
             if(ifAllAI){
                 aiColor+='allAI'
@@ -54,8 +60,10 @@
                 aiColor += 'black'
                 aiPower += `&AIPowerBlack=${ifBlackAI}`
             }
+
+
             
-            window.location.href = `/hotseat?whiteRace=${raceWhite}&blackRace=${raceBlack}${aiColor}${gameType}${aiPower}`
+            window.location.href = `/hotseat?whiteRace=${raceWhite}&blackRace=${raceBlack}${aiColor}${gameType}${aiPower}${startMoveString}`
         }
     </script>
 
@@ -205,6 +213,14 @@
                         <option value="103">Strong AI</option>
                         <option value="104">Slow thinker AI</option>
                     </select>
+                </div>
+
+                <div class="row movesFirstRow">
+                    <select id="whoStartsFirst">
+                        <option value="whiteStarts">White Moves First</option>
+                        <option value="blackStarts">Black Moves First</option>
+                    </select>
+
                 </div>
 
                 
