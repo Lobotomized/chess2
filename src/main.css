@@ -401,6 +401,7 @@ html{
    .modal{
     /* top:auto; */
     top:0;
+    min-height:100%;
     transform: translate(-50%, 0%);
 
     width:90%;
