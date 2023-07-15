@@ -62,7 +62,9 @@ class gallery  extends HTMLElement {
                 elements[item].style = ""
             }
         })
-      }
+
+        history.pushState({ page: 1 }, e.target.innerText, "?page="+e.target.innerText)      
+    }
       
       shadowRoot.addEventListener('slotchange', (e) => {
         elements = e.target.assignedElements();

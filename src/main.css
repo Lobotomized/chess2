@@ -445,3 +445,35 @@ html{
  .movesFirstRow{
     margin-top:10px;
  }
+
+ #menuDialog{
+    max-width:600px;
+    height:max-content;
+    background:rgb(204,166,131,0.5);
+    padding:20px;
+ }
+ .dialogContent{
+    display:flex;
+    flex-direction: column;
+    gap:10px;
+ }
+
+ .dialogButton{
+    all:unset;
+    cursor:pointer;
+    padding-top:10px;
+    padding-bottom:10px;
+    padding-left:20px;
+    padding-right:20px;
+    border-radius:20px;
+    background:var(--white-square-color);
+    color:var(--black-square-color);
+    background:#F7DFDA;
+
+    text-align:center;
+ }
+
+ .dialogButton:hover{
+    color:var(--white-square-color);
+    background:var(--danger-square-color);
+}

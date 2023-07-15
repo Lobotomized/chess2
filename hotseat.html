@@ -114,13 +114,18 @@
         </div>
         <div class="times">
             <h1 class="clock" id="blackClock"></h1>
-            <button class="row exitButton" style="display:none;" id="exitButton"><span id="forfeitText" class="forfeitText">Game Continues</span> <img id="flagImage" style="width:50px; height:50px;" src="/static/whiteFlag.svg" alt="" /></button>
+            <button onclick="openMenuDialog()" class="row exitButton" style="display:none;" id="exitButton"><span id="forfeitText" class="forfeitText">Open Menu</span> <img id="flagImage" style="width:50px; height:50px;" src="/static/whiteFlag.svg" alt="" /></button>
     
             <h1 class="clock" id="whiteClock"></h1>
         </div>
     </div>
 
-
+    <dialog id="menuDialog">
+        <div class="dialogContent">
+            <button class="dialogButton" onclick="closeMenuDialog()">Return to game</button>
+            <a class="dialogButton" href="/">Go to Start</a>
+        </div>
+    </dialog>
     <div onclick="closeModal('modal')" class="modal displayNone">
 
     </div>
@@ -146,6 +151,14 @@ let closeModal = function(which){
         pieceModal.classList.add("displayNone")
         modal.classList.remove('displayNone');
     }
+}
+
+const openMenuDialog = function(){
+    document.getElementById("menuDialog").showModal();
+}
+
+const closeMenuDialog = function(){
+    document.getElementById("menuDialog").close();
 }
 
 const buildModal = function(arr){
