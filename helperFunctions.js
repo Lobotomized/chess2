@@ -916,6 +916,11 @@ function getColorPieces(pieces,color){
     return myPieces
 }
 
+
+function copyLinkToClipboard(){
+    navigator.clipboard.writeText(window.location)
+}
+
 try{
     module.exports = {
         findCopyPieceByXY,

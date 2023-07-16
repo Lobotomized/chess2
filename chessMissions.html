@@ -73,6 +73,9 @@
             <h1 class="clock" id="whiteClock"></h1>
         </div>
         <div class="row message">
+            <div>
+                
+            </div>
             <h3 id="turn"></h3>
         </div>
 
@@ -354,7 +357,8 @@
             }
         }
         else {
-            myTurnH1.innerText = 'Waiting for Opponent'
+            myTurnH1.innerHTML = `<a onclick="copyLinkToClipboard()" href="#">Click here and paste to a friend or wait for a stranger</a>`
+
         }
 
     })
