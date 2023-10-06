@@ -2005,6 +2005,8 @@ function missionClassicMedievalOne(state){
 }
 
 
+
+
 function missionClassicPromotersFive(state){
     let board = state.board;
     let pieces = state.pieces;
@@ -2439,6 +2441,59 @@ function missionClassicPromotersOne (state){
             }
         }
     ]
+}
+
+
+function missionClassicCyborgsOne (state){
+    state.board = xyBoard(5,5,state.board)
+    state.pieces = [];
+    let king = kingFactory('black',5,0)
+    state.pieces.push(
+        king, unpromotablePawn('black',4,0),unpromotablePawn('black',3,0),
+        unpromotablePawn('black',4,1),unpromotablePawn('black',5,1),unpromotablePawn('black',3,1),
+        juggernautFactory('white',0,4)
+    )
+    buildModal([
+        {type:'quote', text:`Your majesty be careful! We have never seen a beast like this!`,  icon:"blackPawn.png"},
+        {type:'quote', classes:'reverse', text:"What is this abomination!?!",  icon:"blackKing.png"},
+
+        {type:'objectives', text:`
+            Get with the king till the end of the board. 
+            <br/>
+
+            Pawns are not getting promoted.
+        `}
+    ])
+
+    aiPowers['white'] = 5;
+    state.specialOnMoveEffects = [
+        function(){
+            if(king.y === 5){
+                state.won='black'
+                buildModal([
+                    {type:'link', text:"Victory!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicCyborgsTwo&AIColor=white"}
+                ])
+            }
+
+        }
+    ]
+
+    let miniBord = xyBoard(8,8,[]);
+    let jugg = juggernautFactory('white',4,4)
+    lightBoardFE(jugg,{board:miniBord, pieces:[jugg],turn:"white"},'lighted')
+    buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board:miniBord ,
+            icon:'whiteJuggernaut.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The juggernaut can move three consecutive times with one speed horizontally or vertically. If it takes a piece it's turn is over.
+            `
+        }
+    ])
 }
 
 
