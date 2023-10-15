@@ -2467,11 +2467,17 @@ function missionClassicCyborgsOne (state){
 
     aiPowers['white'] = 5;
     state.specialOnMoveEffects = [
-        function(){
+        function(state){
             if(king.y === 5){
                 state.won='black'
                 buildModal([
-                    {type:'link', text:"Victory!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicCyborgsTwo&AIColor=white"}
+                    {type:'link', text:"Victory!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicCyborgsOne&AIColor=white"}
+                ])
+            }
+            if(state.won === 'white'){
+                buildModal([
+                    {type:'link', classes:"", text:'Defeat!!!',linkText:'Restart the mission', link:`/hotseat?gameType=missionClassicCyborgsOne&AIColor=white`}
+                    
                 ])
             }
 
@@ -2491,6 +2497,89 @@ function missionClassicCyborgsOne (state){
             pieceY:4,
             description:`
                 The juggernaut can move three consecutive times with one speed horizontally or vertically. If it takes a piece it's turn is over.
+            `
+        }
+    ])
+}
+
+function missionClassicCyborgsTwo (state){
+    state.board = xyBoard(6,6,state.board)
+    state.pieces = [];
+    // state.board = state.board.filter((sq) => {
+    //     return !(sq.x === 1 && sq.y ===1) 
+    // })
+    state.pieces.push(
+        knightFactory('black',0,1),
+        knightFactory('black',6,2),
+        knightFactory('black',6,6),
+        cyborgFactory('white',2,3),
+        cyborgFactory('white',1,6),
+        cyborgFactory('white',4,4),
+        cyborgFactory('white',6,5),
+        cyborgFactory('white',5,5)
+    )
+    buildModal([
+        {type:'quote', text:`The aliens are attacking! We have to stop them!`,  icon:"blackKnight.png"},
+        {type:'objectives', text:`
+            Take all the cyborgs.<br/>
+            If there are any cyborgs left but they have no legal moves, you lose.
+        `}
+    ])
+
+    aiPowers['white'] = 5;
+    state.specialOnMoveEffects = [
+        function(){
+            const thePiece = state.pieces.find((pi) => {
+                return pi.icon.includes("whiteCyborg.png")
+            })
+
+            if(!thePiece){
+                state.won = "black"
+                buildModal([
+                    {type:'link', text:"Victory!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicCyborgsThree&AIColor=white"}
+                ])
+                return;
+            }
+            else if(state.won === "tie"){
+                state.won = "black";
+                console.log('tuka!?')
+                buildModal([
+                    {type:'link', classes:"", text:'Defeat!!!',linkText:'Restart the mission', link:`/hotseat?gameType=missionClassicCyborgsTwo&AIColor=white`}
+                ])
+                return;
+            }
+
+
+            const theKnight = state.pieces.find((pi) => {
+                return pi.icon.includes("blackKnight.png");
+            })
+
+            if(!theKnight){
+                state.won = "white";
+                buildModal([
+                    {type:'link', classes:"", text:'Defeat!!!',linkText:'Restart the mission', link:`/hotseat?gameType=missionClassicCyborgsTwo&AIColor=white`}
+                    
+                ])
+                return;
+            }
+            
+        }
+    ]
+
+    let miniBord = xyBoard(8,8,[]);
+    let cyborg = cyborgFactory('white',4,4)
+    lightBoardFE(cyborg,{board:miniBord, pieces:[cyborg],turn:"white"},'lighted')
+    buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board:miniBord ,
+            icon:'whiteCyborg.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The cyborg jumps one square horizontally. <br/>
+                If it get's to the end of the board it turns into a <img width="25px" src="static/whiteJuggernaut.png"/> 
             `
         }
     ])
