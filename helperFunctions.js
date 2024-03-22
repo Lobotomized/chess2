@@ -382,29 +382,29 @@ function getSinglePlayerGame() {
                 }
                 if (state.pieceSelected) {
                     if (playerMove(move, state)) {
+                        if(state.specialOnMoveEffects && state.specialOnMoveEffects.length){
+                            state.specialOnMoveEffects.forEach((effect) => {
+                                effect(state);
+                            })
+                        }
                         changeTurn(state)
                         if(checkRemi(state)){
                             state.won = 'tie'
-                        }
-                        if(state.won !== 'tie'){
-                            for (let i = state.pieces.length - 1; i >= 0; i--) {
-                                if(state.pieces[i].color ==  state.turn){
-                                    if (state.pieces[i].afterEnemyPlayerMove) {
-                                        state.pieces[i].afterEnemyPlayerMove(state, playerMove)
-                                    }
-                                }
-                            }
-                        }
-                        else{
-                            if(state.specialOnMoveEffects && state.specialOnMoveEffects.length){
-                                state.specialOnMoveEffects.forEach((effect) => {
+                            if(state.specialOnDrawEffects){
+                                state.specialOnDrawEffects.forEach((effect) => {
                                     effect(state);
                                 })
                             }
-                            return
+                            return;
                         }
 
-
+                        for (let i = state.pieces.length - 1; i >= 0; i--) {
+                            if(state.pieces[i].color ==  state.turn){
+                                if (state.pieces[i].afterEnemyPlayerMove) {
+                                    state.pieces[i].afterEnemyPlayerMove(state, playerMove)
+                                }
+                            }
+                        }
                     }
                     else {
                         closeLights(state.board);

@@ -2505,9 +2505,6 @@ function missionClassicCyborgsOne (state){
 function missionClassicCyborgsTwo (state){
     state.board = xyBoard(6,6,state.board)
     state.pieces = [];
-    // state.board = state.board.filter((sq) => {
-    //     return !(sq.x === 1 && sq.y ===1) 
-    // })
     state.pieces.push(
         knightFactory('black',0,1),
         knightFactory('black',6,2),
@@ -2527,6 +2524,15 @@ function missionClassicCyborgsTwo (state){
     ])
 
     aiPowers['white'] = 5;
+    state.specialOnDrawEffects =  [
+        function(){
+            state.won = "black";
+            buildModal([
+                {type:'link', classes:"", text:'Defeat!!!',linkText:'Restart the mission', link:`/hotseat?gameType=missionClassicCyborgsTwo&AIColor=white`}
+            ])
+            return;
+        }
+    ]
     state.specialOnMoveEffects = [
         function(){
             const thePiece = state.pieces.find((pi) => {
@@ -2540,15 +2546,6 @@ function missionClassicCyborgsTwo (state){
                 ])
                 return;
             }
-            else if(state.won === "tie"){
-                state.won = "black";
-                console.log('tuka!?')
-                buildModal([
-                    {type:'link', classes:"", text:'Defeat!!!',linkText:'Restart the mission', link:`/hotseat?gameType=missionClassicCyborgsTwo&AIColor=white`}
-                ])
-                return;
-            }
-
 
             const theKnight = state.pieces.find((pi) => {
                 return pi.icon.includes("blackKnight.png");
@@ -2584,6 +2581,60 @@ function missionClassicCyborgsTwo (state){
         }
     ])
 }
+
+
+function missionClassicCyborgsThree (state){
+    state.board = xyBoard(7,7,state.board)
+    state.pieces = [];
+    aiPowers['white'] = 5;
+    let king = kingFactory('black',0,0)
+    state.pieces.push(
+        bootVesselFactory('white',7,6),
+        bootVesselFactory('white',6,7),
+        bootVesselFactory('white',6,6),
+        juggernautFactory('white',7,7),
+        king
+    )
+    buildModal([
+        {type:'quote', text:`The aliens are attacking! We have to stop them!`,  icon:"blackKnight.png"},
+        {type:'objectives', text:`
+            Take all the cyborgs.<br/>
+            If there are any cyborgs left but they have no legal moves, you lose.
+        `}
+    ])
+    console.log('wtf')
+
+    state.specialOnMoveEffects = [
+        function(){
+            if(king.y === 7){
+                state.won="black";
+            }
+        }
+    ]
+
+    let miniBord = xyBoard(8,8,[]);
+    let bootVessel = bootVesselFactory('white',4,4)
+    lightBoardFE(bootVessel,{board:miniBord, pieces:[bootVessel],turn:"white"},'lighted')
+    buildPieceModal([
+        {
+            type:'piece',
+            classes:"",
+            board:miniBord ,
+            icon:'whiteBootVessel.png',
+            pieceX:4,
+            pieceY:4,
+            description:`
+                The Boot Vessel moves diagonally till the end of the board, but it misses every second square. <br/>
+                It still can get blocked. 
+
+                <br/><br/>
+                All cyborgs peaces can swap positions if they have one square distance and are of different types.
+            `
+        }
+    ])
+}
+
+
 
 
 
