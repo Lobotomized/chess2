@@ -2602,8 +2602,6 @@ function missionClassicCyborgsThree (state){
             If there are any cyborgs left but they have no legal moves, you lose.
         `}
     ])
-    console.log('wtf')
-
     state.specialOnMoveEffects = [
         function(){
             if(king.y === 7){

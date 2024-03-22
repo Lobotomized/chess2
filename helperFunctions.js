@@ -302,7 +302,6 @@ function checkRemi(state){
     let yourPieces = state.pieces.filter((piece) => {
         return piece.color === state.turn;
     })
-
     let i = yourPieces.length -1;
     let isItRemi = true;
     while(i >= 0){
@@ -317,6 +316,9 @@ function checkRemi(state){
             i = -1;
         }
         i--;
+    }
+    if(!yourPieces.length){
+        isItRemi = false;
     }
 
     return isItRemi;
