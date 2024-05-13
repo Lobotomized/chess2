@@ -85,6 +85,72 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
     hotseatGame.move(state.turn,{ x: xClicked, y: yClicked });
 }
 
+function drawBoard(squares) {
+    // 1. Try to find an existing board container
+    let boardContainer = document.querySelector('.board-container');
+  
+    // If it doesn't exist, create it as before
+    if (!boardContainer) {
+      boardContainer = document.createElement('div');
+      boardContainer.classList.add('board-container');
+      document.body.appendChild(boardContainer);
+  
+      // 2. Calculate grid properties (optional, adjust as needed)
+      const columns = Math.max(...squares.map(square => square.x)) + 1;
+      const rows = Math.max(...squares.map(square => square.y)) + 1;
+  
+      // 3. Set up CSS grid styles for the container
+      boardContainer.style.display = 'grid';
+      boardContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+      boardContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+  
+        // 6. Make the grid responsive using CSS (move here)
+    const boardStyle = document.createElement('style');
+    boardStyle.textContent = `
+      .board-container {
+        width: 90vw; /* Adjust width as needed */
+        max-width: 600px; /* Set a maximum width */
+        aspect-ratio: 1 / 1; /* Maintain a square aspect ratio */
+      }
+      .square {
+        width: 100%; /* Make squares fill their grid cells */
+        height: 100%; 
+      }
+    `;
+    document.head.appendChild(boardStyle);
+  
+    }
+  
+    // 4. Clear existing squares from the board
+    boardContainer.innerHTML = ''; // Remove any previous squares
+  
+    // 5. (Re)create and style squares
+    squares.forEach(square => {
+      const squareDiv = document.createElement('div');
+      squareDiv.classList.add('square');
+      squareDiv.style.gridColumn = `${square.x + 1}`; 
+      squareDiv.style.gridRow = `${square.y + 1}`;   
+      if (square.light) {
+          squareDiv.style.backgroundColor = lightedSquareColor;
+      } else if (square.special) {
+          squareDiv.style.backgroundColor = specialSquareColor;
+      } else {
+          squareDiv.style.backgroundColor = square.color || ((square.x + square.y) % 2 === 0 ? whiteSquareColor : blackSquareColor); 
+      }
+      boardContainer.appendChild(squareDiv);
+    });
+  
+     // 7. Add click event listener to the board container
+     boardContainer.addEventListener('click', (event) => {
+      const clickedSquare = event.target; 
+      if (clickedSquare.classList.contains('square')) {
+        const x = parseInt(clickedSquare.style.gridColumn, 10) - 1;
+        const y = parseInt(clickedSquare.style.gridRow, 10) - 1;
+        handleSquareClick(x, y); 
+      }
+    });
+  }
+
 function animate(secretState){
     //Draw the game
     const myTurnH1 = document.getElementById('turn');
@@ -96,144 +162,102 @@ function animate(secretState){
             lightBoardFE(hoveredPiece,state,'red','grey')
         }
     }
-    if (state.pieces) {
-        if(exitButton.hasAttribute('style')){
-            exitButton.removeAttribute('style')
-        }
-        //Draw Squares
-        const me = document.getElementById('blackClock');
-        const enemy = document.getElementById('whiteClock');
-        const body = document.getElementsByTagName('body')[0];
-        const forfeitTextButton = document.getElementById('forfeitText');
-        if (state.turn == 'black') {
-            body.style.background = backgroundColor
-            me.style.color = whiteSquareColor;
-            enemy.style.color = whiteSquareColor;
-        }
-        else {
-            me.style.color = blackSquareColor;
-            enemy.style.color = blackSquareColor;
-            body.style.background = backgroundColor
-        }
-        myTurnH1.innerText = state.message || '';
-        myTurnH1.style.color = whiteSquareColor;
 
-        const height = getMaxX(state.board,'y')
-        if(state.playerRef !== undefined){
-            playerRef = state.playerRef
-        }
-
-        boardWidth  = state.board.reduce((accumulator, currentValue) => {
-            if(accumulator > currentValue.x){
-                return accumulator
-            }
-            else{
-                return currentValue.x
-            }
-        })
-        boardHeight  = state.board.reduce((accumulator, currentValue) => {
-            if(accumulator > currentValue.y){
-                return accumulator
-            }
-            else{
-                return currentValue.y
-            }
-        })
-
-        state.board.forEach((sq,index) => {
-            let y = sq.y;
-            let x = sq.x;
+      drawBoard(state.board)
+    //     state.board.forEach((sq,index) => {
+    //         let y = sq.y;
+    //         let x = sq.x;
 
 
-            let orderFirst = true;
-            if(y%2 != 0){
-                orderFirst = false;
-            }
-                if (!sq.light && !sq.special && !sq.red && !sq.grey) {
-                if(orderFirst){
-                    if(x % 2 != 0){
-                        drawBlackSquare(x * squareLength, y * squareLength, squareLength)
-                    }
-                    else{
-                        drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
-                    }
-                }
-                else{
-                    if(x % 2 != 0){
-                        drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
-                    }
-                    else{
-                        drawBlackSquare(x * squareLength, y * squareLength, squareLength)
-                    }
-                }
-                if(state.pieceSelected){
-                    if(x == state.pieceSelected.x && y == state.pieceSelected.y){
-                        drawColoredSquare(x*squareLength, y*squareLength,availableSquareColor, squareLength)
-                    }
-                }
-            }
-            else if (sq.light) {
-                drawLightedSquare(x * squareLength, y * squareLength, squareLength);
-            }
-            else if(sq.red){
-                drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength)
-            }
-            else if(sq.grey){
-                drawColoredSquare(x*squareLength, y * squareLength, blockedSquareColor, squareLength)
-            }
-            else if(sq.special){
-                drawColoredSquare(x*squareLength, y * squareLength, specialSquareColor, squareLength)
-            }
-        })
-        if(state.oldMove){
-            const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);
-            const newSquare = findSquareByXY(state.board,state.oldMove.currentX, state.oldMove.currentY);
+    //         let orderFirst = true;
+    //         if(y%2 != 0){
+    //             orderFirst = false;
+    //         }
+    //             if (!sq.light && !sq.special && !sq.red && !sq.grey) {
+    //             if(orderFirst){
+    //                 if(x % 2 != 0){
+    //                     drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+    //                 }
+    //                 else{
+    //                     drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+    //                 }
+    //             }
+    //             else{
+    //                 if(x % 2 != 0){
+    //                     drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+    //                 }
+    //                 else{
+    //                     drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+    //                 }
+    //             }
+    //             if(state.pieceSelected){
+    //                 if(x == state.pieceSelected.x && y == state.pieceSelected.y){
+    //                     drawColoredSquare(x*squareLength, y*squareLength,availableSquareColor, squareLength)
+    //                 }
+    //             }
+    //         }
+    //         else if (sq.light) {
+    //             drawLightedSquare(x * squareLength, y * squareLength, squareLength);
+    //         }
+    //         else if(sq.red){
+    //             drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength)
+    //         }
+    //         else if(sq.grey){
+    //             drawColoredSquare(x*squareLength, y * squareLength, blockedSquareColor, squareLength)
+    //         }
+    //         else if(sq.special){
+    //             drawColoredSquare(x*squareLength, y * squareLength, specialSquareColor, squareLength)
+    //         }
+    //     })
+    //     if(state.oldMove){
+    //         const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);
+    //         const newSquare = findSquareByXY(state.board,state.oldMove.currentX, state.oldMove.currentY);
 
-            if(hotseatGame.state.turn === 'black'){
-                if(!oldSquare.light){
-                    drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
-                }
-                if(!newSquare.light){
-                    drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
-                }
-            }
-            else if(hotseatGame.state.turn === 'white'){
+    //         if(hotseatGame.state.turn === 'black'){
+    //             if(!oldSquare.light){
+    //                 drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
+    //             }
+    //             if(!newSquare.light){
+    //                 drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
+    //             }
+    //         }
+    //         else if(hotseatGame.state.turn === 'white'){
 
-                if(!oldSquare.light){
-                    drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
-                }
-                if(!newSquare.light){
-                    drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
-                }
-            }
+    //             if(!oldSquare.light){
+    //                 drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
+    //             }
+    //             if(!newSquare.light){
+    //                 drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
+    //             }
+    //         }
 
-        }
+    //     }
 
-        //Draw Pieces
-        state.pieces.forEach((piece) => {
-            drawPiece(piece.x, piece.y, piece.icon, squareLength)
-        })
-        if (state.won) {
-            if (state.won == 'black') {
+    //     //Draw Pieces
+    //     state.pieces.forEach((piece) => {
+    //         drawPiece(piece.x, piece.y, piece.icon, squareLength)
+    //     })
+    //     if (state.won) {
+    //         if (state.won == 'black') {
                 
-                forfeitTextButton.innerText = 'Black Won'
-            }
-            else if (state.won == 'white') {
+    //             forfeitTextButton.innerText = 'Black Won'
+    //         }
+    //         else if (state.won == 'white') {
 
-                forfeitTextButton.innerText = 'White Won'
+    //             forfeitTextButton.innerText = 'White Won'
 
-            }
-            else if(state.won === 'tie'){
-                forfeitTextButton.innerText = 'Game ended in a draw'
-            }
+    //         }
+    //         else if(state.won === 'tie'){
+    //             forfeitTextButton.innerText = 'Game ended in a draw'
+    //         }
             
-        }
+    //     }
 
 
-    }
-    else {
-        myTurnH1.innerText = 'Waiting for Opponent'
-    }
+    // }
+    // else {
+    //     myTurnH1.innerText = 'Waiting for Opponent'
+    // }
 
 } 
 
