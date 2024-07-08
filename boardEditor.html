@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    :root {
+      --bg-color: #4b4747;  
+      --text-color: #ffffff; 
+      --accent-color: #7aaccc;  
+      --accent-hover: #c25766; 
+      --active-color: #b990ca; 
+    }
+    
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; 
+    }
+    
+    .container {
+      display: grid;
+      grid-template-columns: 150px 300px 1fr; 
+      height: 100vh; 
+    }
+    #navigation {
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    #navigation button {
+      background-color: var(--accent-color);
+      color: var(--text-color);
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    #navigation button:hover {
+      background-color: var(--accent-hover);
+    }
+    #menu {
+      background-color: var(--bg-color); 
+      color: var(--text-color);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    #menu label { 
+      font-weight: bold;
+    }
+    
+    #menu input[type="number"] { 
+      width: 80px;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    
+    #menu button { 
+      background-color: var(--accent-color); 
+      color: var(--text-color);
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s; 
+    }
+    
+    #menu button:hover { 
+      background-color: var(--accent-hover); 
+    }
+    
+    #menu button#removeSquares.remove-mode {
+      background-color: #dc3545; 
+    }
+    
+    #menu button#addSquares.add-mode {
+      background-color: #dc3545; 
+    }
+    
+    #chessboard {
+      display: grid;
+      border: 2px solid black;
+      max-width: fit-content;
+      margin: 20px auto; 
+    }
+    
+    .square {
+      width: 50px;
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .square img { /* Style for images placed on squares */
+      width: 100%; 
+      height: 100%;
+      object-fit: contain;
+    }
+    
+    .black {
+      background-color: #b58863;
+    }
+    
+    .white {
+      background-color: #f0d9b5;
+    }
+    
+    .row{
+      display:flex;
+      flex-direction: row;
+      gap:5px;
+      justify-content: space-around;
+    }
+    
+    
+    #pieces { /* Renamed empty to pieces */
+      display:none;
+      flex-direction: column;
+      padding: 20px;
+      overflow-y: auto;
+      background-color: var(--bg-color);
+      color: var(--text-color); 
+    }
+    
+    #pieces button {
+      background-color: var(--accent-color);
+      color: var(--text-color);
+      padding: 10px 15px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-bottom: 10px; 
+      transition: background-color 0.3s;
+    }
+    
+    #pieces button:hover {
+      background-color: var(--accent-hover);
+    }
+    
+    #pieces img { 
+      width: 80px;    
+      height: 80px;
+      object-fit: contain;
+      margin: 10px auto;
+      cursor: pointer; /* Indicate that images are clickable */
+      transition: transform 0.2s, box-shadow 0.2s; /* Add transitions for smooth effect */
+    }
+    
+    #pieces img.selected {  /* Style for selected image */
+      transform: scale(1.1);   /* Slightly enlarge */
+      box-shadow: 0 0 10px 5px var(--accent-color); /* Add a glow/border */
+    }
+    #pieces::-webkit-scrollbar {
+      width: 8px;             
+    }
+    
+    #pieces::-webkit-scrollbar-track {
+      background: #f1f1f1;    
+    }
+    
+    #pieces::-webkit-scrollbar-thumb {
+      background: var(--accent-color);  
+      border-radius: 4px;   
+    }
+    
+    #pieces::-webkit-scrollbar-thumb:hover {
+      background: var(--accent-hover); 
+    } 
+    
+    .error{
+      color:var(--accent-hover)
+    }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+  <div id="navigation">
+    
+    <input id="variantName" placeholder="Variant Name" type="text">
+    <span class="error" id="error"></span>
+    <button id="createBoard">Create Board</button>
+    <button id="placePieces">Place Pieces</button>
+    <button id="generateArray">Generate</button>
+
+
+  </div>
+  <div id="pieces">
+    <button id="showWhite">White</button>
+    <button id="showBlack">Black</button>
+    <div id="imageContainer"></div>
+  </div>
+  <div id="menu">
+    <h2>Chessboard Settings</h2>
+    <label for="columns">Columns:</label>
+    <input type="number" id="columns" value="8" min="1"><br><br>
+    <label for="rows">Rows:</label>
+    <input type="number" id="rows" value="8" min="1"><br><br>
+    <button id="changeDimensions">Change Dimensions</button>
+    <div class="row">
+      <button id="removeSquares">Remove Squares</button>
+      <button id="addSquares">Add Squares</button>
+
+    </div>
+  </div>
+
+  <div class="chessBoardContainer">
+    <div id="chessboard"></div>
+  </div>
+</div>
+
+<script>
+  const chessboard = document.getElementById("chessboard");
+  const columnsInput = document.getElementById("columns");
+  const rowsInput = document.getElementById("rows");
+  const changeDimensionsButton = document.getElementById("changeDimensions");
+  const removeSquaresButton = document.getElementById("removeSquares");
+  const addSquaresButton = document.getElementById("addSquares");
+  
+  const generateArrayButton = document.getElementById("generateArray");
+  
+  
+  let removeMode = false;
+  let addMode = false;
+  let selectedImage = null;
+  
+  const piecesObjectArray = [];
+  
+  function generateChessboard(cols, rows) {
+    chessboard.innerHTML = "";
+    chessboard.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    chessboard.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+  
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        const square = document.createElement("div");
+        square.classList.add("square");
+        square.classList.add((r + c) % 2 === 0 ? "white" : "black");
+        chessboard.appendChild(square);
+        square.dataset.x = c; // Store x coordinate
+        square.dataset.y = r; // Store y coordinate
+  
+        square.addEventListener("click", () => {
+          if (removeMode) {
+            square.style.background = "black";
+            square.innerHTML = "";
+          }
+          else if(addMode){
+            square.style.background = ""
+          }
+  
+          if (selectedImage && square.style.background != "black") { // Check if an image is selected
+  
+            const existingPieceIndex = piecesObjectArray.findIndex(piece => piece.x === c && piece.y === r); 
+  
+            if (existingPieceIndex !== -1) { 
+              // Remove the existing piece if found
+              piecesObjectArray.splice(existingPieceIndex, 1); 
+            } 
+            // Create a new image element to place on the square
+            const newImg = document.createElement('img');
+            newImg.src = selectedImage.src;
+            newImg.alt = selectedImage.alt;
+  
+            let pieceColor = 'white';
+            let lastPath = newImg.src.split('/').pop()
+  
+            if(lastPath.includes('black')){
+              pieceColor = 'black'
+            }
+            // Clear existing content in the square and append the new image
+            square.innerHTML = '';
+            square.appendChild(newImg);
+            let factoryString = newImg.alt;
+            
+            factoryString = unitImages[newImg.alt].slice(0,-4);
+            factoryString = factoryString.charAt(0).toLowerCase() + factoryString.slice(1) +`Factory('${pieceColor}'  , ${c},${r})`;
+            piecesObjectArray.push({
+              x:c,
+              y:r,  
+              color:pieceColor,
+              pieceType:unitImages[newImg.alt],
+              // factory:factoryString
+            })
+          }
+        });
+      }
+    }
+  }
+  
+  // Initial chessboard on load
+  generateChessboard(8, 8);
+  
+  changeDimensionsButton.addEventListener("click", () => {
+    const newCols = parseInt(columnsInput.value, 10);
+    const newRows = parseInt(rowsInput.value, 10);
+  
+    if (newCols >= 1 && newRows >= 1) {
+      generateChessboard(newCols, newRows);
+    } else {
+      alert("Invalid dimensions. Both values must be at least 1.");
+    }
+  });
+  
+  
+  
+  
+  generateArrayButton.addEventListener("click", () => {
+    const squaresArray = Array.from(chessboard.children)
+      .filter(square => square.style.background !== "black") // Include only visible squares
+      .map(square => ({
+        light: false, 
+        x: parseInt(square.dataset.x, 10),
+        y: parseInt(square.dataset.y, 10)
+      }));
+    
+    let variantName = document.getElementById('variantName').value
+    let errorSpan = document.getElementById('error')
+
+    if(!variantName || variantName === ''){
+      errorSpan.innerHTML = 'Name is mandatory'
+      return;
+    }
+    errorSpan.innerHTML = ''
+    fetch('/maps', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          name:variantName,
+          squares:squaresArray,
+          pieces:piecesObjectArray
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Success:', data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+      });
+  });
+  
+  removeSquaresButton.addEventListener("click", () => {
+    removeMode = !removeMode;
+  
+    if (removeMode) {
+      removeSquaresButton.textContent = "Exit Remove Mode";
+      removeSquaresButton.classList.add("remove-mode"); // Add class for styling
+      addSquaresButton.classList.remove("add-mode"); // Add class for styling
+      addSquaresButton.textContent = "Add Squares";
+  
+      addMode = false;
+  
+    } else {
+      removeSquaresButton.textContent = "Remove Squares";
+      removeSquaresButton.classList.remove("remove-mode"); // Remove the class
+    }
+  });
+  
+  addSquaresButton.addEventListener("click", () => {
+    addMode = !addMode;
+  
+    if (addMode) {
+      addSquaresButton.textContent = "Exit Add Mode";
+      addSquaresButton.classList.add("add-mode"); // Add class for styling
+      removeSquaresButton.classList.remove("remove-mode"); // Add class for styling
+      removeSquaresButton.textContent = "Remove Squares";
+  
+  
+      removeMode = false;
+    } else {
+      addSquaresButton.textContent = "Add Squares";
+      addSquaresButton.classList.remove("add-mode"); // Remove the class
+    }
+  });
+  
+  // Get references to the new buttons and the menu
+  const createBoardButton = document.getElementById("createBoard");
+  const placePiecesButton = document.getElementById("placePieces");
+  const menu = document.getElementById("menu");
+  const pieces = document.getElementById("pieces");
+  const imageContainer = document.getElementById("imageContainer");
+  const showWhiteButton = document.getElementById("showWhite");
+  const showBlackButton = document.getElementById("showBlack");
+  
+  // Object with unit image names
+  const unitImages = {
+      queenBugImage: "QueenBug.png",
+      kingImage: "King.png",
+      shroomImage: "Shroom.png",
+      pawnImage: "Pawn.png",
+      goliathBugImage: "GoliathBug.png",
+      antImage: "Ant.png",
+      knightImage: "Knight.png",
+      rookImage: "Rook.png",
+      queenImage: "Queen.png",
+      bishopImage: "Bishop.png",
+      dragonImage: "Dragon.png",
+      ricarImage: "Ricar.png",
+      horseImage: "Horse.png",
+      ghostImage: "Ghost.png",
+      hatImage: "Hat.png",
+      clownImage: "Clown.png",
+      pigImage: "Pig.png",
+      ladyBugImage: "LadyBug.png",
+      spiderImage: "Spider.png",
+      swordsMenImage: "SwordsMen.png",
+      northernKingImage: "NorthernKing.png",
+      pikemanImage: "Pikeman.png",
+      gargoyleImage: "Gargoyle.png",
+      fencerImage: "Fencer.png",
+      generalImage: "General.png",
+      shieldImage: "Shield.png",
+      plagueDoctorImage: "PlagueDoctor.png",
+      starManImage: "StarMan.png",
+      sleepingDragonImage: "SleepingDragon.png",
+      cyborgImage: "Cyborg.png",
+      crystalImage: "Crystal.png",
+      empoweredCrystalImage: "CrystalEmpowered.png",
+      executorImage: "Executor.png",
+      juggernautImage: "Juggernaut.png",
+      bootVesselImage: "BootVessel.png",
+  
+      electricCatImage: "ElectricCat.png",
+      longCatImage: "LongCat.png",
+      scaryCatImage: "ScaryCat.png",
+      blindCatImage: "BlindCat.png",
+      fatCatImage: "FatCat.png",
+      cuteCatImage: "CuteCat.png"
+  };
+  
+  // Function to generate images in the container
+  function generateImages(color) {
+      imageContainer.innerHTML = ""; 
+  
+      for (const unit in unitImages) {
+        const img = document.createElement("img");
+        img.src = '/static/'+color + unitImages[unit];
+        img.alt = unit;
+        imageContainer.appendChild(img);
+  
+        img.addEventListener("click", () => {
+          if (selectedImage == img) { //Check if user clicked on selected image
+            selectedImage.classList.remove("selected");
+            selectedImage = null;
+          }else{
+              // Deselect the previously selected image (if any)
+            if (selectedImage) {
+              selectedImage.classList.remove("selected");
+            }
+  
+            // Select the new image and store it in the variable
+            selectedImage = img;
+            selectedImage.classList.add("selected");
+          }
+        });
+  
+      }
+      showWhiteButton.style.backgroundColor = color === "white" ? "var(--active-color)" : "var(--accent-color)";
+      showBlackButton.style.backgroundColor = color === "black" ? "var(--active-color)" : "var(--accent-color)";
+    }
+  
+  // Initial display (show white images)
+  generateImages("white");
+  
+  // Event listeners for color buttons
+  showWhiteButton.addEventListener("click", () => generateImages("white"));
+  showBlackButton.addEventListener("click", () => generateImages("black"));
+  
+  createBoardButton.addEventListener("click", () => {
+    menu.style.display = "flex";
+    pieces.style.display = "none";
+    selectedImage.classList.remove("selected");
+    selectedImage = null;
+    addSquaresButton.classList.remove("add-mode"); // Add class for styling
+    addSquaresButton.textContent = "Add Squares";
+    removeSquaresButton.textContent = "Remove Squares";
+    removeSquaresButton.classList.remove("remove-mode"); // Remove the class
+  });
+  
+  placePiecesButton.addEventListener("click", () => {
+    menu.style.display = "none";
+    pieces.style.display = "flex";
+    addMode = false;
+    removeMode = false;
+  });
+  </script>
+
+</body>
+</html>

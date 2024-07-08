@@ -52,7 +52,7 @@ let dangerSquareColor = '#E7907F';
 let lightedSquareColor = '#B0A875';
 let blockedSquareColor = '#CF6A4E';
 let availableSquareColor = '#787F42';
-let backgroundColor = '#675442';
+let backgroundColor = 'black';
 
 let oldMoveSquareColor = '#D59148';
 

@@ -51,6 +51,7 @@ hotseatGame.state.turn = 'menu'
 hotseatGame.state.whiteRace = getParams(window.location.href).whiteRace || 'medieval'
 hotseatGame.state.blackRace = getParams(window.location.href).blackRace || 'bug'
 hotseatGame.state.turn = 'black'
+hotseatGame.state.customGameId = getParams(window.location.href).customGameId || ''
 let comingGameType = getParams(window.location.href).gameType;
 if(comingGameType){
     hotseatGame.state.gameType = comingGameType;
@@ -59,7 +60,19 @@ if(comingGameType){
 
 
 if(hotseatGame.state.gameType){
-    window[hotseatGame.state.gameType](hotseatGame.state,hotseatGame.state.whiteRace,hotseatGame.state.blackRace)
+    if(hotseatGame.state.gameType === 'customMap'){
+        window[hotseatGame.state.gameType](hotseatGame.state,hotseatGame.state.whiteRace,hotseatGame.state.blackRace).then(() => {
+            setInterval(ani, 100)
+        })
+    }
+    else{
+        window[hotseatGame.state.gameType](hotseatGame.state,hotseatGame.state.whiteRace,hotseatGame.state.blackRace)
+        setInterval(ani, 100)
+
+    }
+}
+else{
+    setInterval(ani, 100)
 }
 
 
@@ -282,7 +295,7 @@ canvas.addEventListener('click', (e) => {
                 }
             }
         }
-        else if(AIColor === 'allAI'){
+        else if(AIColor === 'all'){
             w.postMessage(JSONfn.stringify({state:state, color:state.turn, AIPower:aiPowers[state.turn]}));
             w.onmessage = function(event){
                 let move = JSONfn.parse(event.data)
@@ -314,5 +327,5 @@ canvas.addEventListener('mousemove', (e) => {
     // animate(state)
 })
 
-setInterval(ani, 100)
+// setInterval(ani, 100)
 
