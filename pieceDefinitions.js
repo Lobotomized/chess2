@@ -1865,7 +1865,17 @@ function juggernautFactory(color,x,y){
             let toReturn = [];
             cyborgTeleport(state,this,toReturn);
             const takenSquare = (x,y) =>{
+                
+                
+
                 return state.pieces.find((piece) => {
+                    let findSquare = state.board.find((item) =>{
+                        return item.x === x && item.y === y;
+                    })
+
+                    if(!findSquare){
+                        return true
+                    }
                     return piece.y === y  && x === piece.x;
                 })
 

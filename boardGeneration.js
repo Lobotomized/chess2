@@ -2634,10 +2634,796 @@ function missionClassicCyborgsThree (state){
 
 
 
+function juggerMaze(state){
+    state.board = [
+        {
+            "light": false,
+            "x": 0,
+            "y": 0
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 0
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 0
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 0
+        },
+        {
+            "light": false,
+            "x": 4,
+            "y": 0
+        },
+        {
+            "light": false,
+            "x": 5,
+            "y": 0
+        },
+        {
+            "light": false,
+            "x": 6,
+            "y": 0
+        },
+        {
+            "light": false,
+            "x": 8,
+            "y": 0
+        },
+        {
+            "light": false,
+            "x": 10,
+            "y": 0
+        },
+        {
+            "light": false,
+            "x": 11,
+            "y": 0
+        },
+        {
+            "light": false,
+            "x": 0,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 4,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 5,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 6,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 7,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 8,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 9,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 10,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 11,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 0,
+            "y": 2
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 2
+        },
+        {
+            "light": false,
+            "x": 4,
+            "y": 2
+        },
+        {
+            "light": false,
+            "x": 6,
+            "y": 2
+        },
+        {
+            "light": false,
+            "x": 8,
+            "y": 2
+        },
+        {
+            "light": false,
+            "x": 10,
+            "y": 2
+        },
+        {
+            "light": false,
+            "x": 11,
+            "y": 2
+        },
+        {
+            "light": false,
+            "x": 0,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 4,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 5,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 6,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 7,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 8,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 9,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 10,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 11,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 0,
+            "y": 4
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 4
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 4
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 4
+        },
+        {
+            "light": false,
+            "x": 4,
+            "y": 4
+        },
+        {
+            "light": false,
+            "x": 5,
+            "y": 4
+        },
+        {
+            "light": false,
+            "x": 6,
+            "y": 4
+        },
+        {
+            "light": false,
+            "x": 7,
+            "y": 4
+        },
+        {
+            "light": false,
+            "x": 8,
+            "y": 4
+        },
+        {
+            "light": false,
+            "x": 10,
+            "y": 4
+        },
+        {
+            "light": false,
+            "x": 11,
+            "y": 4
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 5
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 5
+        },
+        {
+            "light": false,
+            "x": 5,
+            "y": 5
+        },
+        {
+            "light": false,
+            "x": 7,
+            "y": 5
+        },
+        {
+            "light": false,
+            "x": 9,
+            "y": 5
+        },
+        {
+            "light": false,
+            "x": 10,
+            "y": 5
+        },
+        {
+            "light": false,
+            "x": 11,
+            "y": 5
+        },
+        {
+            "light": false,
+            "x": 0,
+            "y": 6
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 6
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 6
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 6
+        },
+        {
+            "light": false,
+            "x": 4,
+            "y": 6
+        },
+        {
+            "light": false,
+            "x": 5,
+            "y": 6
+        },
+        {
+            "light": false,
+            "x": 6,
+            "y": 6
+        },
+        {
+            "light": false,
+            "x": 7,
+            "y": 6
+        },
+        {
+            "light": false,
+            "x": 8,
+            "y": 6
+        },
+        {
+            "light": false,
+            "x": 9,
+            "y": 6
+        },
+        {
+            "light": false,
+            "x": 10,
+            "y": 6
+        },
+        {
+            "light": false,
+            "x": 11,
+            "y": 6
+        },
+        {
+            "light": false,
+            "x": 0,
+            "y": 7
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 7
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 7
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 7
+        },
+        {
+            "light": false,
+            "x": 4,
+            "y": 7
+        },
+        {
+            "light": false,
+            "x": 5,
+            "y": 7
+        },
+        {
+            "light": false,
+            "x": 6,
+            "y": 7
+        },
+        {
+            "light": false,
+            "x": 7,
+            "y": 7
+        },
+        {
+            "light": false,
+            "x": 8,
+            "y": 7
+        },
+        {
+            "light": false,
+            "x": 9,
+            "y": 7
+        },
+        {
+            "light": false,
+            "x": 10,
+            "y": 7
+        },
+        {
+            "light": false,
+            "x": 11,
+            "y": 7
+        },
+        {
+            "light": false,
+            "x": 0,
+            "y": 8
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 8
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 8
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 8
+        },
+        {
+            "light": false,
+            "x": 4,
+            "y": 8
+        },
+        {
+            "light": false,
+            "x": 5,
+            "y": 8
+        },
+        {
+            "light": false,
+            "x": 6,
+            "y": 8
+        },
+        {
+            "light": false,
+            "x": 7,
+            "y": 8
+        },
+        {
+            "light": false,
+            "x": 8,
+            "y": 8
+        },
+        {
+            "light": false,
+            "x": 9,
+            "y": 8
+        },
+        {
+            "light": false,
+            "x": 10,
+            "y": 8
+        },
+        {
+            "light": false,
+            "x": 11,
+            "y": 8
+        },
+        {
+            "light": false,
+            "x": 0,
+            "y": 9
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 9
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 9
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 9
+        },
+        {
+            "light": false,
+            "x": 4,
+            "y": 9
+        },
+        {
+            "light": false,
+            "x": 5,
+            "y": 9
+        },
+        {
+            "light": false,
+            "x": 6,
+            "y": 9
+        },
+        {
+            "light": false,
+            "x": 7,
+            "y": 9
+        },
+        {
+            "light": false,
+            "x": 8,
+            "y": 9
+        },
+        {
+            "light": false,
+            "x": 9,
+            "y": 9
+        },
+        {
+            "light": false,
+            "x": 10,
+            "y": 9
+        },
+        {
+            "light": false,
+            "x": 11,
+            "y": 9
+        },
+        {
+            "light": false,
+            "x": 0,
+            "y": 10
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 10
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 10
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 10
+        },
+        {
+            "light": false,
+            "x": 4,
+            "y": 10
+        },
+        {
+            "light": false,
+            "x": 5,
+            "y": 10
+        },
+        {
+            "light": false,
+            "x": 6,
+            "y": 10
+        },
+        {
+            "light": false,
+            "x": 7,
+            "y": 10
+        },
+        {
+            "light": false,
+            "x": 8,
+            "y": 10
+        },
+        {
+            "light": false,
+            "x": 9,
+            "y": 10
+        },
+        {
+            "light": false,
+            "x": 10,
+            "y": 10
+        },
+        {
+            "light": false,
+            "x": 11,
+            "y": 10
+        },
+        {
+            "light": false,
+            "x": 0,
+            "y": 11
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 11
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 11
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 11
+        },
+        {
+            "light": false,
+            "x": 4,
+            "y": 11
+        },
+        {
+            "light": false,
+            "x": 5,
+            "y": 11
+        },
+        {
+            "light": false,
+            "x": 6,
+            "y": 11
+        },
+        {
+            "light": false,
+            "x": 7,
+            "y": 11
+        },
+        {
+            "light": false,
+            "x": 8,
+            "y": 11
+        },
+        {
+            "light": false,
+            "x": 9,
+            "y": 11
+        },
+        {
+            "light": false,
+            "x": 10,
+            "y": 11
+        },
+        {
+            "light": false,
+            "x": 11,
+            "y": 11
+        }
+    ]
+    state.pieces = [
+        knightFactory('black',1, 4),
+        knightFactory('black',3, 4),
+        knightFactory('black',5, 4),
+        knightFactory('black',7, 4),
+        knightFactory('black',8, 3),
+        knightFactory('black',8, 1),
+
+        kingFactory('black', 10, 10),
+
+        juggernautFactory('white',2,0),
+        juggernautFactory('white', 4, 0)
+    ];
+}
 
 
+function testingMission(state){
+    state.board = [
+        {
+            "light": false,
+            "x": 0,
+            "y": 0
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 0
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 0
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 0
+        },
+        {
+            "light": false,
+            "x": 0,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 1
+        },
+        {
+            "light": false,
+            "x": 0,
+            "y": 2
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 2
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 2
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 2
+        },
+        {
+            "light": false,
+            "x": 0,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 1,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 2,
+            "y": 3
+        },
+        {
+            "light": false,
+            "x": 3,
+            "y": 3
+        }
+    ]
+
+    state.pieces = [
+        pawnFactory('white', 0,2),pawnFactory('white', 1,2),pawnFactory('white', 2,2),pawnFactory('white', 3,2),
+        kingFactory('white', 3,3),antFactory('white', 2,3),antFactory('white', 1,3),antFactory('white', 0,3),
+        pawnFactory('black', 0,1),pawnFactory('black', 1,1),pawnFactory('black', 2,1),pawnFactory('black', 3,1),
+        kingFactory('black', 0,0),antFactory('black', 1,0),antFactory('black', 2,0),antFactory('black', 3,0),
+    ]
+
+}
 
 
+async function customMap(state){
+    state.pieces = [];
+    state.board = [];
+    const resp = await fetch('/maps/'+state.customGameId);
+    let json;
+
+    try{
+        json = await resp.json()
+    }
+    catch(err){
+        console.log(err, ' error4e')
+    }
+    console.log(json, '  json?')
+    const thePieces = json.pieces.map((piece) => {
+        let pieceString = piece.pieceType.slice(0,-4).toLowerCase() + 'Factory'
+        console.log(pieceString , ' wtf?')
+        return window[pieceString](piece.color,piece.x,piece.y)
+    })
+    state.board = json.squares;
+    state.pieces = thePieces//json.pieces;
+    console.log(state.pieces)
+}
 
 function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -2663,7 +3449,10 @@ try{
         missionClassicBugsFive:missionClassicBugsFive,
         missionClassicBugsSix:missionClassicBugsSix,
         test:test,
-        morphingRaceChoiceChess:morphingRaceChoiceChess
+        morphingRaceChoiceChess:morphingRaceChoiceChess,
+        juggerMaze:juggerMaze,
+        testingMission:testingMission,
+        customMap:customMap
     };
 }
 catch(err){

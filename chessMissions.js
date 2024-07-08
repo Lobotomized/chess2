@@ -1,5 +1,7 @@
 const express = require('express');
 const app = express();
+const mongoose = require('mongoose');
+const Map = require('./models/map'); // Import the Map model
 app.use('/boardGeneration.js', express.static('./boardGeneration.js'))
 app.use('/pieceDefinitions.js', express.static('./pieceDefinitions.js'))
 app.use('/helperFunctions.js', express.static('./helperFunctions.js'))
@@ -15,6 +17,14 @@ app.use('/static', express.static('public'))
 app.use('/src', express.static('src'))
 
 
+
+mongoose.connect('mongodb+srv://Lobotomy:Micasmu4ka@cluster0.tippd.mongodb.net/chess2')
+.then(() => {
+    console.log('Connected to MongoDB');
+})
+.catch(err => {
+    console.error('Error connecting to MongoDB:', err);
+});
 
 
 
@@ -361,10 +371,86 @@ app.get('/play', function(req,res){
     return res.status(200).sendFile(__dirname + '/chessMissions.html');
 })
 
+app.get('/customMaps', function(req,res){
+    return res.status(200).sendFile(__dirname + '/customMaps.html');
+})
+
+
 app.get('/hotseat', function(req,res){
     return res.status(200).sendFile(__dirname + '/hotseat.html');
 })
 
+app.get('/create-board', function(req,res){
+    return res.status(200).sendFile(__dirname + '/boardEditor.html');
+})
+
+// POST endpoint to create a map
+app.use(express.json()); // Middleware to parse JSON body
+
+
+app.post('/maps', async (req, res) => {
+    try {
+        const newMap = new Map(req.body);
+        const savedMap = await newMap.save();
+        res.status(201).json(savedMap);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/maps/:id', async (req, res) => {
+    Map.findById(req.params.id).then((map) => {
+        console.log(map)
+        return res.status(200).json(map);
+    }).catch(() => {
+        console.log(error)
+        res.status(500).json({ error: error.message });
+    })
+});
+
+app.put('/maps/:id', async (req, res) => {
+    try {
+        // Find the existing map document by the provided ID
+        const map = await Map.findByIdAndUpdate(req.params.id, req.body, {
+        new: true, // Return the updated map
+        runValidators: true, // Apply schema validation
+        });
+
+        if (!map) {
+        return res.status(404).json({ error: "Map not found" });
+        }
+
+        res.status(200).json(map);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.get('/maps', async (req, res) => {
+    try {
+      const pageSize = parseInt(req.query.pageSize) || 10;
+      const pageNumber = parseInt(req.query.page) || 1;
+  
+      const options = {
+        skip: pageSize * (pageNumber - 1),
+        limit: pageSize,
+      };
+  
+      const mapCount = await Map.countDocuments();
+      const maps = await Map.find({}, null, options);
+  
+      res.status(200).json({
+        maps,
+        pageSize,
+        pageNumber,
+        pageCount: Math.ceil(mapCount / pageSize),
+        totalMapCount: mapCount,
+      });
+    } catch (error) {
+      console.error('Error fetching maps: ', error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }); 
 
 http.listen(8080, function () {
     console.log('listening on *:8080');
