@@ -961,7 +961,7 @@ function antFactory(color,x,y, direction){
                     return piece.x == move.x && piece.y == move.y
                 })
                 state.pieces.splice(state.pieces.indexOf(me),1);
-                state.pieces.push(queenBugFactory(this.color,move.x,move.y));
+                state.pieces.push(queenbugFactory(this.color,move.x,move.y));
                 return true;
             }
             return true;
@@ -1223,7 +1223,7 @@ function giveOppositeColor(color){
 }
 
 
-function queenBugFactory(color,x,y){
+function queenbugFactory(color,x,y){
     return {
         icon: color+'QueenBug.png',
         moves: [{ type: 'absolute', x: 0, y: -1, impotent:true }, { type: 'absolute', x: 0, y: 1 , impotent:true},
@@ -1654,7 +1654,7 @@ function cyborgFactory(color,x,y){
     }
 }
 
-function bootVesselFactory(color,x,y){
+function bootvesselFactory(color,x,y){
     let moves = [
     { type: 'blockable', repeat: true, x: 1, y: 1, missedSquareX:1, missedSquareY:1, offsetX:1, offsetY:1 }, 
     { type: 'blockable', repeat: true, x: -1, y: -1, missedSquareX:-1, missedSquareY:-1, offsetX:-1, offsetY:-1 },
@@ -2243,7 +2243,7 @@ function newBrainBugFactory(color,x,y){
 }
 try{
     module.exports = {
-        queenBugFactory:queenBugFactory,
+        queenbugFactory:queenbugFactory,
         kingFactory: kingFactory,
         //brainBugFactory: brainBugFactory,
         shroomFactory:shroomFactory,
@@ -2281,7 +2281,7 @@ try{
         empoweredCrystalFactory:empoweredCrystalFactory,
         executorFactory:executorFactory,
         juggernautFactory:juggernautFactory,
-        bootVesselFactory:bootVesselFactory,
+        bootvesselFactory:bootvesselFactory,
 
         electricCatFactory:electricCatFactory,
         longCatFactory:longCatFactory,

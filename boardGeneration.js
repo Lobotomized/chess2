@@ -1,12 +1,12 @@
 try{
     var { kingFactory, knightFactory, mongolianKnightFactory, bishopFactory, rookFactory, queenFactory, pawnFactory, weakPawn, dragonFactory ,unpromotablePawn,
 
-        clownFactory, ricarFactory, horseFactory, hatFactory, ghostFactory, pigFactory, ladyBugFactory, queenBugFactory, goliathBugFactory, antFactory,
+        clownFactory, ricarFactory, horseFactory, hatFactory, ghostFactory, pigFactory, ladyBugFactory, queenbugFactory, goliathBugFactory, antFactory,
         shroomFactory, spiderFactory,
     
         swordsMen, pikeman, sleepingDragon,gargoyleFactory,fencer, shield, plagueDoctor, northernKing,
     
-        cyborgFactory, executorFactory,crystalFactory,empoweredCrystalFactory,juggernautFactory,bootVesselFactory, electricCatFactory, scaryCatFactory, longCatFactory,
+        cyborgFactory, executorFactory,crystalFactory,empoweredCrystalFactory,juggernautFactory,bootvesselFactory, electricCatFactory, scaryCatFactory, longCatFactory,
         fatCatFactory,
         blindCatFactory,
         cuteCatFactory,
@@ -114,7 +114,7 @@ function raceChoiceChess(state,raceWhite,raceBlack){
     }
     else if(raceBlack == 'bug'){
         pieces.push(
-        antFactory('black',0,1),   queenBugFactory('black',1,1), antFactory('black',2,1),        antFactory('black',3,1),         antFactory('black',4,1),    antFactory('black',5,1),       queenBugFactory('black',6,1), antFactory('black',7,1),
+        antFactory('black',0,1),   queenbugFactory('black',1,1), antFactory('black',2,1),        antFactory('black',3,1),         antFactory('black',4,1),    antFactory('black',5,1),       queenbugFactory('black',6,1), antFactory('black',7,1),
         shroomFactory('black',0,0),spiderFactory('black',1,0),   ladyBugFactory('black',2,0),    goliathBugFactory('black',3,0),   goliathBugFactory('black',4,0),ladyBugFactory('black', 5,0), spiderFactory('black',6,0), shroomFactory('black',7,0)
         )
     }
@@ -128,7 +128,7 @@ function raceChoiceChess(state,raceWhite,raceBlack){
     else if(raceBlack == 'cyborgs'){
        pieces.push(
             cyborgFactory('black',0,2),   cyborgFactory('black',1,2),cyborgFactory('black',2,2),        cyborgFactory('black',3,2),    cyborgFactory('black',4,2),      cyborgFactory('black',5,2), cyborgFactory('black',6,2),    cyborgFactory('black',7,2),
-            juggernautFactory('black',0,0),crystalFactory('black',1,0),  executorFactory('black',2,0), bootVesselFactory('black',3,0),   bootVesselFactory('black',4,0),executorFactory('black', 5,0), empoweredCrystalFactory('black',6,0),juggernautFactory('black',7,0),
+            juggernautFactory('black',0,0),crystalFactory('black',1,0),  executorFactory('black',2,0), bootvesselFactory('black',3,0),   bootvesselFactory('black',4,0),executorFactory('black', 5,0), empoweredCrystalFactory('black',6,0),juggernautFactory('black',7,0),
             )
     }
     else if(raceBlack==='cat'){
@@ -168,7 +168,7 @@ function raceChoiceChess(state,raceWhite,raceBlack){
     }
     else if(raceWhite == 'bug'){
         pieces.push(
-        antFactory('white',0,6),   queenBugFactory('white',1,6),antFactory('white',2,6),        antFactory('white',3,6),    antFactory('white',4,6),      antFactory('white',5,6), queenBugFactory('white',6,6),    antFactory('white',7,6),
+        antFactory('white',0,6),   queenbugFactory('white',1,6),antFactory('white',2,6),        antFactory('white',3,6),    antFactory('white',4,6),      antFactory('white',5,6), queenbugFactory('white',6,6),    antFactory('white',7,6),
         shroomFactory('white',0,7),spiderFactory('white',1,7),  ladyBugFactory('white',2,7), goliathBugFactory('white',3,7),   goliathBugFactory('white',4,7),ladyBugFactory('white', 5,7), spiderFactory('white',6,7),shroomFactory('white',7,7)
         )
     }
@@ -183,7 +183,7 @@ function raceChoiceChess(state,raceWhite,raceBlack){
     else if(raceWhite === 'cyborgs'){
         pieces.push(
             cyborgFactory('white',0,5),   cyborgFactory('white',1,5),cyborgFactory('white',2,5),        cyborgFactory('white',3,5),    cyborgFactory('white',4,5),      cyborgFactory('white',5,5), cyborgFactory('white',6,5),    cyborgFactory('white',7,5),
-            juggernautFactory('white',0,7),crystalFactory('white',1,7),  executorFactory('white',2,7), bootVesselFactory('white',3,7),   bootVesselFactory('white',4,7),executorFactory('white', 5,7), empoweredCrystalFactory('white',6,7),juggernautFactory('white',7,7),
+            juggernautFactory('white',0,7),crystalFactory('white',1,7),  executorFactory('white',2,7), bootvesselFactory('white',3,7),   bootvesselFactory('white',4,7),executorFactory('white', 5,7), empoweredCrystalFactory('white',6,7),juggernautFactory('white',7,7),
             )
     }
     else if(raceWhite == 'cat'){
@@ -257,11 +257,11 @@ function returnMorphingPoolPiece(piece){
                 return arr[Math.floor(Math.random()*arr.length)]
             break;
         case 'Knight':
-                arr = [bootVesselFactory, executorFactory, spiderFactory, ricarFactory, pigFactory]
+                arr = [bootvesselFactory, executorFactory, spiderFactory, ricarFactory, pigFactory]
                 return arr[Math.floor(Math.random()*arr.length)]
             break;
         case 'Bishop':
-                arr = [bootVesselFactory, executorFactory, spiderFactory, ricarFactory, pigFactory]
+                arr = [bootvesselFactory, executorFactory, spiderFactory, ricarFactory, pigFactory]
                 return arr[Math.floor(Math.random()*arr.length)]
             break;
         case 'Rook':
@@ -281,11 +281,11 @@ function returnMorphingPoolPiece(piece){
                 return arr[Math.floor(Math.random()*arr.length)]
             break;
         case 'Spider':
-                arr = [knightFactory, bishopFactory, bootVesselFactory, executorFactory, ricarFactory]
+                arr = [knightFactory, bishopFactory, bootvesselFactory, executorFactory, ricarFactory]
                 return arr[Math.floor(Math.random()*arr.length)]
             break;
         case 'QueenBug':
-                arr = [bishopFactory, bootVesselFactory, executorFactory, ricarFactory, pigFactory]
+                arr = [bishopFactory, bootvesselFactory, executorFactory, ricarFactory, pigFactory]
                 return arr[Math.floor(Math.random()*arr.length)]
             break;
         case 'LadyBug':
@@ -305,11 +305,11 @@ function returnMorphingPoolPiece(piece){
                 return arr[Math.floor(Math.random()*arr.length)]
             break;
         case 'Ricar':
-                arr = [bishopFactory, bootVesselFactory, executorFactory, queenBugFactory, spiderFactory]
+                arr = [bishopFactory, bootvesselFactory, executorFactory, queenbugFactory, spiderFactory]
                 return arr[Math.floor(Math.random()*arr.length)]
             break;
         case 'Pig':
-                arr = [bishopFactory, bootVesselFactory, executorFactory, strongLadyBugFactory]
+                arr = [bishopFactory, bootvesselFactory, executorFactory, strongLadyBugFactory]
                 return arr[Math.floor(Math.random()*arr.length)]
             break;
         case 'Executor':
@@ -657,8 +657,8 @@ function placeRandomFrontPiece(pieces,next,maxX, maxY) {
             break;
         case 5:
             pieces.push(
-                queenBugFactory('black', maxX-blackNext.x, blackNext.y),
-                queenBugFactory('white', whiteNext.x, whiteNext.y)
+                queenbugFactory('black', maxX-blackNext.x, blackNext.y),
+                queenbugFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 6:
@@ -766,8 +766,8 @@ function placeRandomPieces(pieces, next,maxX, maxY) {
             break;
         case 12:
             pieces.push(
-                bootVesselFactory('black', maxX-blackNext.x, blackNext.y),
-                bootVesselFactory('white', whiteNext.x, whiteNext.y)
+                bootvesselFactory('black', maxX-blackNext.x, blackNext.y),
+                bootvesselFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 13:
@@ -784,8 +784,8 @@ function placeRandomPieces(pieces, next,maxX, maxY) {
             break;
         case 15:
             pieces.push(
-                queenBugFactory('black', maxX-blackNext.x, blackNext.y),
-                queenBugFactory('white', whiteNext.x, whiteNext.y)
+                queenbugFactory('black', maxX-blackNext.x, blackNext.y),
+                queenbugFactory('white', whiteNext.x, whiteNext.y)
             )
             break;
         case 16:
@@ -916,7 +916,7 @@ function missionClassicBugsOne(state){
     pieces.length = 0;
     let miniBoard = xyBoard(8,8,[]);
 
-    let queenBug = queenBugFactory('white',4,4)
+    let queenBug = queenbugFactory('white',4,4)
     lightBoardFE(queenBug,{board:miniBoard, pieces:[queenBug],turn:"white"},'lighted')
     buildModal([
         {type:'quote', classes:"",text:`There is an infestation here! There is no time to notify the others. <br/>
@@ -977,9 +977,9 @@ function missionClassicBugsOne(state){
     )
 
     pieces.push(
-        queenBugFactory('white',0,0),
-        queenBugFactory('white',2,0),
-        queenBugFactory('white',4,0)
+        queenbugFactory('white',0,0),
+        queenbugFactory('white',2,0),
+        queenbugFactory('white',4,0)
     )
 
 }
@@ -1178,9 +1178,9 @@ function missionClassicBugsSix(state){
         antFactory('white',4,5),antFactory('white',5,5),antFactory('white',6,5),antFactory('white',7,5),antFactory('white',8,5),
         antFactory('white',0,6),antFactory('white',1,6),antFactory('white',2,6),antFactory('white',3,6),
         antFactory('white',4,6),antFactory('white',5,6),antFactory('white',6,6),antFactory('white',7,6),antFactory('white',8,6),
-        ladyBugFactory('white',0,7),queenBugFactory('white',1,7),
-        queenBugFactory('white',7,7),ladyBugFactory('white',8,7),
-        queenBugFactory('white',2,7),queenBugFactory('white',6,7),
+        ladyBugFactory('white',0,7),queenbugFactory('white',1,7),
+        queenbugFactory('white',7,7),ladyBugFactory('white',8,7),
+        queenbugFactory('white',2,7),queenbugFactory('white',6,7),
         goliathBugFactory('white',3,7),goliathBugFactory('white',4,7),goliathBugFactory('white',5,7),
         shroomFactory('white',3,8),shroomFactory('white',4,8),shroomFactory('white',5,8),
 
@@ -2589,9 +2589,9 @@ function missionClassicCyborgsThree (state){
     aiPowers['white'] = 5;
     let king = kingFactory('black',0,0)
     state.pieces.push(
-        bootVesselFactory('white',7,6),
-        bootVesselFactory('white',6,7),
-        bootVesselFactory('white',6,6),
+        bootvesselFactory('white',7,6),
+        bootvesselFactory('white',6,7),
+        bootvesselFactory('white',6,6),
         juggernautFactory('white',7,7),
         king
     )
@@ -2611,7 +2611,7 @@ function missionClassicCyborgsThree (state){
     ]
 
     let miniBord = xyBoard(8,8,[]);
-    let bootVessel = bootVesselFactory('white',4,4)
+    let bootVessel = bootvesselFactory('white',4,4)
     lightBoardFE(bootVessel,{board:miniBord, pieces:[bootVessel],turn:"white"},'lighted')
     buildPieceModal([
         {
