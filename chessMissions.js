@@ -400,7 +400,6 @@ app.post('/maps', async (req, res) => {
 
 app.get('/maps/:id', async (req, res) => {
     Map.findById(req.params.id).then((map) => {
-        console.log(map)
         return res.status(200).json(map);
     }).catch(() => {
         console.log(error)
@@ -426,7 +425,7 @@ app.put('/maps/:id', async (req, res) => {
     }
 });
 
-app.get('/gameTester', function(req,res){
+app.post('/gameTester', function(req,res){
             let state = {
             "pieces": [
                 {
@@ -540,10 +539,9 @@ app.get('/gameTester', function(req,res){
         }
     
     const piece = req.body.piece;
-    const playerMove = req.body.playerMove;
+    const theMove = req.body.playerMove;
     const turn = req.body.turn
-    playerMove(playerMove,{board:state.board, pieces:state.pieces, pieceSelected:piece , turn:turn},true, undefined, 'allowedMove')
-
+    playerMove(theMove,{board:state.board, pieces:state.pieces, pieceSelected:state.pieces[piece] , turn:turn},true, undefined, 'allowedMove')
     return res.status(200).json({state:state, moves:generateMovesFromPieces(state,state.turn,[])})
 })
 
@@ -582,7 +580,6 @@ http.listen(8080, function () {
     if(!filters){
         filters = [];
     }
-    console.log(state)
      const movesAndPieces = []
      let piecesCounter = 0;
      const myPieces = getColorPieces(state.pieces,color) 
