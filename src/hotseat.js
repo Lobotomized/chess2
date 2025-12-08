@@ -296,6 +296,7 @@ canvas.addEventListener('click', (e) => {
             }
         }
         else if(AIColor === 'all'){
+            console.log('tuka')
             w.postMessage(JSONfn.stringify({state:state, color:state.turn, AIPower:aiPowers[state.turn]}));
             w.onmessage = function(event){
                 let move = JSONfn.parse(event.data)

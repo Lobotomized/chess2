@@ -42,6 +42,7 @@ function evaluateBoard(colorPerspective, pieces, board,magnifierMethods){
     if(!filters){
         filters = [];
     }
+    console.log(state)
      const movesAndPieces = []
      let piecesCounter = 0;
      const myPieces = getColorPieces(state.pieces,color) 

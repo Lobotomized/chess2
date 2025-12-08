@@ -12,7 +12,7 @@ const newG = require('./globby').newIOServerV2;
 const {miniChess, randomChess,  catchTheDragon, mongolianChess, classicChess, raceChess, raceChoiceChess, test,morphingRaceChoiceChess} = require('./boardGeneration.js')
 const { selectPiece, playerMove, checkTurn, changeTurn, closeLights } = require('./moveMethods.js')
 const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFactory,blindCatFactory} = require('./pieceDefinitions.js')
-const {lightBoardFE, checkRemi} = require('./helperFunctions.js');
+const {lightBoardFE, checkRemi, getColorPieces} = require('./helperFunctions.js');
 app.use('/static', express.static('public'))
 app.use('/src', express.static('src'))
 
@@ -359,7 +359,7 @@ io:io,
 rooms:true})
 
 app.get('/', function (req, res) {
-    
+
     return res.status(200).sendFile(__dirname + '/lobby.html');
 });
 
@@ -426,6 +426,127 @@ app.put('/maps/:id', async (req, res) => {
     }
 });
 
+app.get('/gameTester', function(req,res){
+            let state = {
+            "pieces": [
+                {
+                    "icon": "whiteKnight.png",
+                    "moves": [
+                        {
+                            "type": "absolute",
+                            "y": 2,
+                            "x": 1
+                        },
+                        {
+                            "type": "absolute",
+                            "y": 2,
+                            "x": -1
+                        },
+                        {
+                            "type": "absolute",
+                            "y": -2,
+                            "x": 1
+                        },
+                        {
+                            "type": "absolute",
+                            "y": -2,
+                            "x": -1
+                        },
+                        {
+                            "type": "absolute",
+                            "y": 1,
+                            "x": 2
+                        },
+                        {
+                            "type": "absolute",
+                            "y": 1,
+                            "x": -2
+                        },
+                        {
+                            "type": "absolute",
+                            "y": -1,
+                            "x": 2
+                        },
+                        {
+                            "type": "absolute",
+                            "y": -1,
+                            "x": -2
+                        }
+                    ],
+                    "x": 3,
+                    "y": 3,
+                    "color": "white",
+                    "value": 2.5,
+                    "posValue": 2
+                }
+            ],
+            "board": [
+                {
+                    "x": 0,
+                    "y": 0,
+                    "allowedMove": false,
+                    "light": false
+                },
+                {
+                    "x": 1,
+                    "y": 0,
+                    "allowedMove": false,
+                    "light": false
+                },
+                {
+                    "x": 2,
+                    "y": 0,
+                    "allowedMove": false,
+                    "light": false
+                },
+                {
+                    "x": 0,
+                    "y": 1,
+                    "allowedMove": false,
+                    "light": false
+                },
+                {
+                    "x": 1,
+                    "y": 1,
+                    "allowedMove": false,
+                    "light": false
+                },
+                {
+                    "x": 2,
+                    "y": 1,
+                    "allowedMove": true,
+                    "light": false
+                },
+                {
+                    "x": 0,
+                    "y": 2,
+                    "allowedMove": false,
+                    "light": false
+                },
+                {
+                    "x": 1,
+                    "y": 2,
+                    "allowedMove": true,
+                    "light": false
+                },
+                {
+                    "x": 2,
+                    "y": 2,
+                    "allowedMove": false,
+                    "light": false
+                }
+            ],
+            "turn": "white"
+        }
+    
+    const piece = req.body.piece;
+    const playerMove = req.body.playerMove;
+    const turn = req.body.turn
+    playerMove(playerMove,{board:state.board, pieces:state.pieces, pieceSelected:piece , turn:turn},true, undefined, 'allowedMove')
+
+    return res.status(200).json({state:state, moves:generateMovesFromPieces(state,state.turn,[])})
+})
+
 app.get('/maps', async (req, res) => {
     try {
       const pageSize = parseInt(req.query.pageSize) || 10;
@@ -455,3 +576,51 @@ app.get('/maps', async (req, res) => {
 http.listen(8080, function () {
     console.log('listening on *:8080');
 });
+
+
+ function generateMovesFromPieces(state,color, filters,enemy){
+    if(!filters){
+        filters = [];
+    }
+    console.log(state)
+     const movesAndPieces = []
+     let piecesCounter = 0;
+     const myPieces = getColorPieces(state.pieces,color) 
+     
+
+     while(myPieces.length > piecesCounter){
+         let movesCounter = 0;
+         let piece = myPieces[piecesCounter]
+         lightBoardFE(piece,{pieces:state.pieces, board:state.board,turn:state.turn},'allowedMove',undefined,true)
+         let allowedMoves = state.board.filter((square) => {
+             return square.allowedMove;
+         })
+         filters.forEach((filter) => {
+            if(!enemy || filter.allowEnemy){
+                allowedMoves = filter.method({
+                    state,allowedMoves,myPieces,piecesCounter,piece,color,...filter.options
+                })
+            }
+         })
+         while(allowedMoves.length > movesCounter){
+             const newPieces = JSONfn.parse(JSONfn.stringify(state.pieces))
+             let newMyPieces = getColorPieces(newPieces, color)
+             piece = newMyPieces[piecesCounter];
+ 
+ 
+             const square = allowedMoves[movesCounter]
+             playerMove({x:square.x, y:square.y},{board:state.board, pieces:newPieces, pieceSelected:piece , turn:color},true, undefined, 'allowedMove')
+ 
+ 
+             if( square && square.allowedMove){
+                 movesAndPieces.push({piece:piece,pieces:newPieces, xClicked:square.x, yClicked:square.y, parent:state.id, id:crypto.randomUUID()})
+             }
+             movesCounter++
+         }
+         piecesCounter++
+     }
+     if(movesAndPieces.length  === 0 && filters && filters.length > 0){
+        return generateMovesFromPieces(state,color)
+     }
+     return movesAndPieces
+ }

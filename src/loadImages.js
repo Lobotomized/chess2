@@ -2,10 +2,8 @@ let folderSrc =  "lg"
 function setImageSource() { 
     const screenWidth = window.innerWidth;
     if (screenWidth < 700) {
-        console.log('vliza li tuka!?')
         folderSrc = 'sm';
     } else {
-        console.log('asdf')
         folderSrc = 'lg';
     }
   }
@@ -309,7 +307,6 @@ function drawPiece(x, y, img, size) {
     else{
         sizePiece = size;
     }
-    console.log(sizePiece)
     switch (img) {
         case 'blackBishop.png':
             

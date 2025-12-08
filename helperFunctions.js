@@ -942,7 +942,8 @@ try{
         blockableCheck,
         lightBoardFE,
         isPositionAttacked,
-        checkRemi
+        checkRemi,
+        getColorPieces
     }
 }
 catch(err){
