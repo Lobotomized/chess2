@@ -1,0 +1,169 @@
+{
+    "state":{
+            "pieces": [
+                {
+                    "icon":"blackShroom.png",
+                    "moves":[  {
+                        "type": "absolute",
+                        "y": 2,
+                        "x": 1
+                    },
+                    {
+                        "type": "absolute",
+                        "y": 2,
+                        "x": -1
+                    },
+                    {
+                        "type": "absolute",
+                        "y": -2,
+                        "x": 1
+                    },
+                    {
+                        "type": "absolute",
+                        "y": -2,
+                        "x": -1
+                    },
+                    {
+                        "type": "absolute",
+                        "y": 1,
+                        "x": 2
+                    },
+                    {
+                        "type": "absolute",
+                        "y": 1,
+                        "x": -2
+                    },
+                    {
+                        "type": "absolute",
+                        "y": -1,
+                        "x": 2
+                    },
+                    {
+                        "type": "absolute",
+                        "y": -1,
+                        "x": -2
+                    }],
+                    "color":"black",
+                    "x":2,
+                    "y":1,
+                    "afterThisPieceTaken":"state.won = 1"
+                },
+                {
+                    "icon": "whiteKnight.png",
+                    "afterThisPieceTaken":"state.won = 2",
+                    "moves": [
+                        {
+                            "type": "absolute",
+                            "y": 2,
+                            "x": 1
+                        },
+                        {
+                            "type": "absolute",
+                            "y": 2,
+                            "x": -1
+                        },
+                        {
+                            "type": "absolute",
+                            "y": -2,
+                            "x": 1
+                        },
+                        {
+                            "type": "absolute",
+                            "y": -2,
+                            "x": -1
+                        },
+                        {
+                            "type": "absolute",
+                            "y": 1,
+                            "x": 2
+                        },
+                        {
+                            "type": "absolute",
+                            "y": 1,
+                            "x": -2
+                        },
+                        {
+                            "type": "absolute",
+                            "y": -1,
+                            "x": 2
+                        },
+                        {
+                            "type": "absolute",
+                            "y": -1,
+                            "x": -2
+                        }
+                    ],
+                    "x": 3,
+                    "y": 3,
+                    "color": "white",
+                    "value": 2.5,
+                    "posValue": 2
+                }
+            ],
+            "board": [
+                {
+                    "x": 0,
+                    "y": 0,
+                    "allowedMove": false,
+                    "light": false
+                },
+                {
+                    "x": 1,
+                    "y": 0,
+                    "allowedMove": false,
+                    "light": false
+                },
+                {
+                    "x": 2,
+                    "y": 0,
+                    "allowedMove": false,
+                    "light": false
+                },
+                {
+                    "x": 0,
+                    "y": 1,
+                    "allowedMove": false,
+                    "light": false
+                },
+                {
+                    "x": 1,
+                    "y": 1,
+                    "allowedMove": false,
+                    "light": false
+                },
+                {
+                    "x": 2,
+                    "y": 1,
+                    "allowedMove": true,
+                    "light": false
+                },
+                {
+                    "x": 0,
+                    "y": 2,
+                    "allowedMove": false,
+                    "light": false
+                },
+                {
+                    "x": 1,
+                    "y": 2,
+                    "allowedMove": true,
+                    "light": false
+                },
+                {
+                    "x": 2,
+                    "y": 2,
+                    "allowedMove": false,
+                    "light": false
+                }
+            ],
+            "turn": "white"
+        },
+    "pieceAt": {
+        "x":3,
+        "y":3
+    },
+            "playerMove":{
+                "x":1,
+                "y":2
+            }
+}

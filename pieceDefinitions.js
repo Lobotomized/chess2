@@ -1178,6 +1178,8 @@ function spiderFactory(color,x,y){
     }
 }
 
+
+
 function shroomFactory(color,x,y){
     return {
         icon: color+'Shroom.png',

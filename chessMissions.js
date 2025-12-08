@@ -424,15 +424,20 @@ app.put('/maps/:id', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
-
 app.post('/gameTester', function(req,res){
-            const state = req.body.state;
+    const state = req.body.state;
+    const pieceAt = req.body.pieceAt;
+    const piece = state.pieces.findIndex((piece) => {
+        return piece.x == pieceAt.x && piece.y == pieceAt.y
+    })
+
     
-    const piece = req.body.piece;
     const theMove = req.body.playerMove;
-    const turn = req.body.turn
-    playerMove(theMove,{board:state.board, pieces:state.pieces, pieceSelected:state.pieces[piece] , turn:turn},true, undefined, 'allowedMove')
-    console.log(state)
+    state.pieces[0].afterThisPieceTaken = new Function('state', state.pieces[0].afterThisPieceTaken) 
+    if(playerMove(theMove,{board:state.board, pieces:state.pieces, pieceSelected:state.pieces[piece] , turn:state.turn},true, undefined, 'allowedMove')){
+        state.turn = state.turn == 'white' ? 'black' : 'white'
+    }
+ 
     return res.status(200).json({state:state, moves:generateMovesFromPieces(state,state.turn,[])})
 })
 
@@ -494,14 +499,14 @@ http.listen(8080, function () {
              const newPieces = JSONfn.parse(JSONfn.stringify(state.pieces))
              let newMyPieces = getColorPieces(newPieces, color)
              piece = newMyPieces[piecesCounter];
- 
- 
+            let pieceAt  = {x:piece.x, y:piece.y}
+            
              const square = allowedMoves[movesCounter]
              playerMove({x:square.x, y:square.y},{board:state.board, pieces:newPieces, pieceSelected:piece , turn:color},true, undefined, 'allowedMove')
  
- 
+            
              if( square && square.allowedMove){
-                 movesAndPieces.push({piece:piece,pieces:newPieces, xClicked:square.x, yClicked:square.y, parent:state.id, id:crypto.randomUUID()})
+                 movesAndPieces.push({pieceAt:pieceAt, xClicked:square.x, yClicked:square.y})
              }
              movesCounter++
          }
