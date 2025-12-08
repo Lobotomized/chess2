@@ -432,6 +432,7 @@ app.post('/gameTester', function(req,res){
     const theMove = req.body.playerMove;
     const turn = req.body.turn
     playerMove(theMove,{board:state.board, pieces:state.pieces, pieceSelected:state.pieces[piece] , turn:turn},true, undefined, 'allowedMove')
+    console.log(state)
     return res.status(200).json({state:state, moves:generateMovesFromPieces(state,state.turn,[])})
 })
 

@@ -131,7 +131,6 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
             }
             enemyPiece.x = undefined;
             enemyPiece.y = undefined;
-            
             state.pieces.splice(state.pieces.indexOf(enemyPiece), 1)
         }
     }
