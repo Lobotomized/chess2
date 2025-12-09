@@ -433,7 +433,15 @@ app.post('/gameTester', function(req,res){
 
     
     const theMove = req.body.playerMove;
-    state.pieces[0].afterThisPieceTaken = new Function('state', state.pieces[0].afterThisPieceTaken) 
+    state.pieces.forEach((piece) => {
+        if(piece.afterThisPieceTaken){
+            piece.afterThisPieceTaken = new Function('state', piece.afterThisPieceTaken) 
+        }
+        if(piece.afterThisPieceMoves){
+            piece.afterThisPieceMoves = new Function('state', piece.afterThisPieceMoves) 
+        }
+    })
+
     if(playerMove(theMove,{board:state.board, pieces:state.pieces, pieceSelected:state.pieces[piece] , turn:state.turn},true, undefined, 'allowedMove')){
         state.turn = state.turn == 'white' ? 'black' : 'white'
     }

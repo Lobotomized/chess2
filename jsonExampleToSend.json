@@ -3,101 +3,57 @@
             "pieces": [
                 {
                     "icon":"blackShroom.png",
-                    "moves":[  {
-                        "type": "absolute",
-                        "y": 2,
-                        "x": 1
-                    },
-                    {
-                        "type": "absolute",
-                        "y": 2,
-                        "x": -1
-                    },
-                    {
-                        "type": "absolute",
-                        "y": -2,
-                        "x": 1
-                    },
-                    {
-                        "type": "absolute",
-                        "y": -2,
-                        "x": -1
-                    },
-                    {
-                        "type": "absolute",
-                        "y": 1,
-                        "x": 2
-                    },
-                    {
-                        "type": "absolute",
-                        "y": 1,
-                        "x": -2
-                    },
-                    {
-                        "type": "absolute",
-                        "y": -1,
-                        "x": 2
-                    },
-                    {
-                        "type": "absolute",
-                        "y": -1,
-                        "x": -2
-                    }],
+                    "moves":[
+                    { "type": "absolute", "x": 0, "y": 1 },{ "type": "absolute", "x": 1, "y": 0 },{ "type": "absolute", "x": 1, "y": 1 },
+                    { "type": "absolute", "x": -1, "y": -1 },{ "type": "absolute", "x": 0, "y": -1 },{ "type": "absolute", "x": -1, "y": 0 },
+                    { "type": "absolute", "x": -1, "y": 1 },{ "type": "absolute", "x": 1, "y": -1 }
+                        ],
                     "color":"black",
                     "x":2,
-                    "y":1,
-                    "afterThisPieceTaken":"state.won = 1"
+                    "y":0,
+                    "afterThisPieceTaken":"state.won = 1",
+                    "afterThisPieceMoves":"if(this.y === 2){this.value = 2000;state.won = 2}"
                 },
                 {
-                    "icon": "whiteKnight.png",
+                    "icon":"blackKing.png",
+                    "moves":[
+                    { "type": "absolute", "x": 0, "y": 1 },{ "type": "absolute", "x": 1, "y": 0 },{ "type": "absolute", "x": 1, "y": 1 },
+                    { "type": "absolute", "x": -1, "y": -1 },{ "type": "absolute", "x": 0, "y": -1 },{ "type": "absolute", "x": -1, "y": 0 },
+                    { "type": "absolute", "x": -1, "y": 1 },{ "type": "absolute", "x": 1, "y": -1 }
+                        ],
+                    "color":"black",
+                    "x":0,
+                    "y":0
+                },
+                {
+                    "icon": "whiteKing.png",
                     "afterThisPieceTaken":"state.won = 2",
+                     "afterThisPieceMoves":"if(this.y === 2){this.value = 2000;state.won = 1}",
                     "moves": [
-                        {
-                            "type": "absolute",
-                            "y": 2,
-                            "x": 1
-                        },
-                        {
-                            "type": "absolute",
-                            "y": 2,
-                            "x": -1
-                        },
-                        {
-                            "type": "absolute",
-                            "y": -2,
-                            "x": 1
-                        },
-                        {
-                            "type": "absolute",
-                            "y": -2,
-                            "x": -1
-                        },
-                        {
-                            "type": "absolute",
-                            "y": 1,
-                            "x": 2
-                        },
-                        {
-                            "type": "absolute",
-                            "y": 1,
-                            "x": -2
-                        },
-                        {
-                            "type": "absolute",
-                            "y": -1,
-                            "x": 2
-                        },
-                        {
-                            "type": "absolute",
-                            "y": -1,
-                            "x": -2
-                        }
+                    { "type": "absolute", "x": 0, "y": 1 },{ "type": "absolute", "x": 1, "y": 0 },{ "type": "absolute", "x": 1, "y": 1 },
+                    { "type": "absolute", "x": -1, "y": -1 },{ "type": "absolute", "x": 0, "y": -1 },{ "type": "absolute", "x": -1, "y": 0 },
+                    { "type": "absolute", "x": -1, "y": 1 },{ "type": "absolute", "x": 1, "y": -1 }
                     ],
-                    "x": 3,
-                    "y": 3,
+                    "x": 0,
+                    "y": 2,
                     "color": "white",
                     "value": 2.5,
                     "posValue": 2
+                },
+                {
+                    "icon": "whiteKing.png",
+                    "afterThisPieceTaken":"state.won = 2",
+                    "moves": [
+                    { "type": "absolute", "x": 0, "y": 1 },{ "type": "absolute", "x": 1, "y": 0 },{ "type": "absolute", "x": 1, "y": 1 },
+                    { "type": "absolute", "x": -1, "y": -1 },{ "type": "absolute", "x": 0, "y": -1 },{ "type": "absolute", "x": -1, "y": 0 },
+                    { "type": "absolute", "x": -1, "y": 1 },{ "type": "absolute", "x": 1, "y": -1 }
+                    ],
+                    "x": 2,
+                    "y": 2,
+                    "color": "white",
+                    "value": 2.5,
+                    "posValue": 2
+                
                 }
             ],
             "board": [
@@ -159,11 +115,11 @@
             "turn": "white"
         },
     "pieceAt": {
-        "x":3,
-        "y":3
+        "x":2,
+        "y":0
     },
             "playerMove":{
                 "x":1,
-                "y":2
+                "y":1
             }
 }
