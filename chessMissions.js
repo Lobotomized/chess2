@@ -430,7 +430,7 @@ app.post('/gameTester', function(req,res){
     const piece = state.pieces.findIndex((piece) => {
         return piece.x == pieceAt.x && piece.y == pieceAt.y
     })
-
+    state.pieceSelected = piece;
     
     const theMove = req.body.playerMove;
     state.pieces.forEach((piece) => {
@@ -442,7 +442,7 @@ app.post('/gameTester', function(req,res){
         }
     })
 
-    if(playerMove(theMove,{board:state.board, pieces:state.pieces, pieceSelected:state.pieces[piece] , turn:state.turn},true, undefined, 'allowedMove')){
+    if(playerMove(theMove,state,true, undefined, 'allowedMove')){
         state.turn = state.turn == 'white' ? 'black' : 'white'
     }
  
