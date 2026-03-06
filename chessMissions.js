@@ -11,7 +11,22 @@ const io = require('socket.io')(http);
 const newG = require('./globby').newIOServerV2;
 const {miniChess, randomChess,  catchTheDragon, mongolianChess, classicChess, raceChess, raceChoiceChess, test,morphingRaceChoiceChess} = require('./boardGeneration.js')
 const { selectPiece, playerMove, checkTurn, changeTurn, closeLights } = require('./moveMethods.js')
-const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFactory,blindCatFactory} = require('./pieceDefinitions.js')
+const pieceDefinitions = require('./pieceDefinitions.js');
+const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFactory,blindCatFactory} = pieceDefinitions;
+
+const iconToFactoryMap = {};
+Object.keys(pieceDefinitions).forEach(key => {
+    const factory = pieceDefinitions[key];
+    if(typeof factory === 'function'){
+        try {
+            const piece = factory('white', 0, 0);
+            if(piece && piece.icon){
+                let iconName = piece.icon.replace('white', '').replace('.png', '');
+                iconToFactoryMap[iconName] = factory;
+            }
+        } catch (e) {}
+    }
+});
 const {lightBoardFE, checkRemi, getColorPieces} = require('./helperFunctions.js');
 app.use('/static', express.static('public'))
 app.use('/src', express.static('src'))
@@ -427,21 +442,53 @@ app.put('/maps/:id', async (req, res) => {
 app.post('/gameTester', function(req,res){
     const state = req.body.state;
     const pieceAt = req.body.pieceAt;
-    const piece = state.pieces.findIndex((piece) => {
+    const piece = state.pieces.find((piece) => {
         return piece.x == pieceAt.x && piece.y == pieceAt.y
     })
     state.pieceSelected = piece;
     
     const theMove = req.body.playerMove;
     state.pieces.forEach((piece) => {
-        if(piece.afterThisPieceTaken){
-            piece.afterThisPieceTaken = new Function('state', piece.afterThisPieceTaken) 
+        if(!piece.icon) return;
+        
+        let iconName = piece.icon.replace('.png','');
+        const color = piece.color;
+        if(iconName.startsWith(color)){
+            iconName = iconName.substring(color.length);
         }
-        if(piece.afterThisPieceMoves){
-            piece.afterThisPieceMoves = new Function('state', piece.afterThisPieceMoves) 
+        
+        const lowerFirst = (s) => s.charAt(0).toLowerCase() + s.slice(1);
+        const baseName = lowerFirst(iconName);
+        
+        let factory = pieceDefinitions[baseName + 'Factory'];
+        if(!factory){
+            factory = pieceDefinitions[baseName];
+        }
+        if(!factory){
+            factory = iconToFactoryMap[iconName];
+        }
+        
+        if(factory){
+            const freshPiece = factory(piece.color, piece.x, piece.y, piece.options);
+            
+            const hooks = [
+                'afterThisPieceTaken',
+                'afterThisPieceMoves',
+                'afterPieceMove',
+                'conditionalMoves',
+                'friendlyPieceInteraction',
+                'afterEnemyPieceTaken',
+                'afterPlayerMove',
+                'afterEnemyPlayerMove'
+            ];
+            
+            hooks.forEach(hook => {
+                if(freshPiece[hook]){
+                    piece[hook] = freshPiece[hook];
+          (theMove, '  ')      }
+            });
         }
     })
-
     if(playerMove(theMove,state,true, undefined, 'allowedMove')){
         state.turn = state.turn == 'white' ? 'black' : 'white'
     }

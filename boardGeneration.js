@@ -11,7 +11,9 @@ try{
         blindCatFactory,
         cuteCatFactory,
         strongLadyBugFactory,
-        newBrainBugFactory
+        newBrainBugFactory,
+        simpleKingFactory,
+        kingLikeFactory
 
         
     
@@ -610,6 +612,24 @@ function placeRandomBug(pieces,x,y){
         break;
     }
 }   
+
+function asenGame(state){
+    aiPowers['black'] = 6;
+    aiPowers['white'] = 6;
+    xyBoard(4,4,state.board)
+
+    state.pieces = [
+        
+        simpleKingFactory('black', 1,4),
+        kingLikeFactory('black', 2,4),
+        knightFactory('black', 3,4),
+
+        
+        simpleKingFactory('white', 1,0),
+        kingLikeFactory('white', 2,0),
+        knightFactory('white',3,0)
+    ]
+}
 
 function placeRandomFrontPiece(pieces,next,maxX, maxY) {
     const which = getRndInteger(1, 7)
@@ -3308,6 +3328,9 @@ function juggerMaze(state){
 }
 
 
+
+
+
 function testingMission(state){
     state.board = [
         {
@@ -3414,7 +3437,6 @@ async function customMap(state){
     catch(err){
         console.log(err, ' error4e')
     }
-    console.log(json, '  json?')
     const thePieces = json.pieces.map((piece) => {
         let pieceString = piece.pieceType.slice(0,-4).toLowerCase() + 'Factory'
         console.log(pieceString , ' wtf?')
@@ -3422,7 +3444,6 @@ async function customMap(state){
     })
     state.board = json.squares;
     state.pieces = thePieces//json.pieces;
-    console.log(state.pieces)
 }
 
 function getRndInteger(min, max) {
@@ -3452,7 +3473,8 @@ try{
         morphingRaceChoiceChess:morphingRaceChoiceChess,
         juggerMaze:juggerMaze,
         testingMission:testingMission,
-        customMap:customMap
+        customMap:customMap,
+        asenGame:asenGame
     };
 }
 catch(err){

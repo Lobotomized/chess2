@@ -189,6 +189,7 @@
     <button id="createBoard">Create Board</button>
     <button id="placePieces">Place Pieces</button>
     <button id="generateArray">Generate</button>
+    <button id="generateJSON">Generate JSON</button>
 
 
   </div>
@@ -217,6 +218,12 @@
 </div>
 
 <script>
+  window.module = { exports: {} };
+  window.require = function(path) { return {}; };
+</script>
+<script src="pieceDefinitions.js"></script>
+
+<script>
   const chessboard = document.getElementById("chessboard");
   const columnsInput = document.getElementById("columns");
   const rowsInput = document.getElementById("rows");
@@ -225,6 +232,7 @@
   const addSquaresButton = document.getElementById("addSquares");
   
   const generateArrayButton = document.getElementById("generateArray");
+  const generateJSONButton = document.getElementById("generateJSON");
   
   
   let removeMode = false;
@@ -347,6 +355,53 @@
       .catch((error) => {
         console.error('Error:', error);
       });
+  });
+
+  generateJSONButton.addEventListener("click", () => {
+      const squaresArray = Array.from(chessboard.children)
+          .filter(square => square.style.background !== "black")
+          .map(square => ({
+              light: false, 
+              x: parseInt(square.dataset.x, 10),
+              y: parseInt(square.dataset.y, 10),
+              _id: "generated_" + Math.random().toString(36).substr(2, 9) 
+          }));
+
+      const pieces = piecesObjectArray.map(p => {
+          const imageName = p.pieceType; 
+          const name = imageName.replace('.png', '');
+          const lowerName = name.charAt(0).toLowerCase() + name.slice(1);
+          
+          let factory = window[lowerName + 'Factory'];
+          if (!factory) factory = window[lowerName];
+          
+          if (factory) {
+              return factory(p.color, p.x, p.y);
+          } else {
+              console.error("No factory found for " + imageName);
+              return null;
+          }
+      }).filter(p => p !== null);
+
+      const state = {
+          state: {
+              pieces: pieces,
+              board: squaresArray,
+              turn: "white"
+          }
+      };
+      
+      let jsonString;
+      if (window.JSONfn) {
+          jsonString = window.JSONfn.stringify(state);
+      } else {
+          jsonString = JSON.stringify(state, null, 2);
+      }
+      
+      console.log(jsonString);
+      
+      const win = window.open("", "JSON Output", "width=800,height=600");
+      win.document.body.innerHTML = '<textarea style="width:100%;height:100%">' + jsonString + '</textarea>';
   });
   
   removeSquaresButton.addEventListener("click", () => {

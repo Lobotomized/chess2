@@ -622,7 +622,67 @@ function queenFactory(color, x, y) {
 }
 
 
+function simpleKingFactory(color, x, y){
+    return {
+        icon: color + 'King.png',
+        vulnerable: true,
+        moved: false,
+        value:1000,
+        posValue:1,
+        x: x,
+        y: y,
+        color:color,
+        moves: [ 
+            { type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
+            { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },
+            { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }
+        ],
+        afterPlayerMove: function (state,move,prevMove){
+            if(this.color==='white'){
+                
+                if(this.y === 4){
+                    this.value = 2000
+                    state.won = this.color
+                }
+            }
+            else{
 
+                if(this.y === 0){
+                    this.value = 2000
+                    state.won = this.color
+                }
+            }
+
+        },
+        afterThisPieceTaken: function (state) {
+            if (this.color == 'white') {
+                state.won = 'black';
+             }
+            else if (this.color == 'black') {
+                state.won = 'white';
+            }
+        },
+    }
+}
+
+function kingLikeFactory(color, x, y){
+    return {
+        icon: color + 'SleepingDragon.png',
+        vulnerable: true,
+        moved: false,
+        value:5,
+        posValue:1,
+        color:color,
+        x: x,
+        y: y,
+        moves: [ 
+            { type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
+            { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },
+            { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }
+        ],
+
+    }
+}
 
 function kingFactory(color, x, y, options) {
     return {
@@ -630,10 +690,10 @@ function kingFactory(color, x, y, options) {
         vulnerable: true,
         moved: false,
         moves: [ 
-                // { type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
-                //  { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },
-                //  { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }
-                ],
+                 { type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
+                 { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },
+                 { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }
+               ],
         x: x,
         y: y,
         value:2000,
@@ -2292,7 +2352,9 @@ try{
         fatCatFactory:fatCatFactory,
         cuteCatFactory:cuteCatFactory,
         strongLadyBugFactory:strongLadyBugFactory,
-        newBrainBugFactory:newBrainBugFactory
+        newBrainBugFactory:newBrainBugFactory,
+        kingLikeFactory:kingLikeFactory,
+        simpleKingFactory:simpleKingFactory
         
     }
 }
