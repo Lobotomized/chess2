@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess 2 - Hotseat</title>
+    <link rel="stylesheet" href="/src/main.css">
+    <style>
+        /* Chess-inspired variables */
+        :root {
+            --board-light: #f0d9b5;
+            --board-dark: #b58863;
+            --piece-white: #ffffff;
+            --piece-black: #2e2e2e;
+            --highlight: #829769;
+            --threat: #e53e3e;
+            --selected: #f7e98e;
+        }
+
+        body {
+            background: linear-gradient(45deg, var(--board-dark) 25%, var(--board-light) 25%, var(--board-light) 75%, var(--board-dark) 75%);
+            background-size: 80px 80px;
+            color: var(--piece-black);
+            font-family: 'Georgia', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* Chess board pattern overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(0,0,0,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 75% 75%, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Navigation - Chess piece inspired */
+        nav {
+            width: 100%;
+            background: linear-gradient(135deg, var(--piece-black) 0%, #1a1a1a 100%);
+            padding: 12px 0;
+            display: flex;
+            justify-content: center;
+            border-bottom: 4px solid var(--board-dark);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        nav a {
+            color: var(--board-light);
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            padding: 6px 12px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        nav a:hover {
+            color: var(--selected);
+            background: rgba(240, 217, 181, 0.1);
+            border-color: var(--board-light);
+            transform: translateY(-2px);
+        }
+        nav a.active {
+            color: var(--selected);
+            background: rgba(247, 233, 142, 0.2);
+            border-color: var(--selected);
+            box-shadow: 0 0 10px rgba(247, 233, 142, 0.5);
+        }
+        
+        .icon {
+            height: 24px;
+            width: auto;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .hotseat {
+            width: 90%;
+            max-width: 800px;
+            margin-top: 30px;
+            background: rgba(240, 217, 181, 0.95);
+            border: 8px solid var(--piece-black);
+            border-radius: 12px;
+            box-shadow: 
+                0 0 0 4px var(--board-dark),
+                0 15px 40px rgba(0,0,0,0.4);
+            padding: 30px;
+            position: relative;
+        }
+
+        h1 {
+            color: var(--piece-black);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+            background: linear-gradient(135deg, var(--board-light) 0%, #e8d4a0 100%);
+            padding: 20px;
+            border-radius: 8px;
+            border: 3px solid var(--board-dark);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .racePickImage {
+            width: 60px;
+            height: 60px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            border-radius: 8px;
+            padding: 5px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.5);
+        }
+        .racePickImage:hover {
+            border-color: var(--highlight);
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.8);
+        }
+        .racePickImageSelectedWhite {
+            border-color: var(--threat);
+            background-color: rgba(229, 62, 62, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(229, 62, 62, 0.4);
+        }
+        .racePickImageSelectedBlack {
+            border-color: var(--threat);
+            background-color: rgba(229, 62, 62, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 0 10px rgba(229, 62, 62, 0.4);
+        }
+
+        .startGame {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--piece-black) 0%, #2a2a2a 100%);
+            color: var(--board-light);
+            font-weight: bold;
+            cursor: pointer;
+            border: 3px solid var(--board-dark);
+            font-size: 18px;
+            box-sizing: border-box;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-decoration: none;
+            margin-top: 20px;
+        }
+        
+        .startGame:hover {
+            background: linear-gradient(135deg, #2a2a2a 0%, var(--piece-black) 100%);
+            color: var(--selected);
+            border-color: var(--selected);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        select {
+            padding: 12px;
+            background: var(--piece-white);
+            border: 2px solid var(--board-dark);
+            color: var(--piece-black);
+            font-family: 'Georgia', serif;
+            font-size: 16px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            min-width: 200px;
+        }
+        select:focus {
+            outline: none;
+            border-color: var(--highlight);
+            box-shadow: 0 0 8px rgba(130, 151, 105, 0.5);
+        }
+
+        .movesFirstRow {
+            margin-top: 10px;
+        }
+
+        label {
+            color: var(--piece-black);
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            .hotseat {
+                width: 95%;
+                padding: 15px;
+                margin-top: 15px;
+                border-width: 4px;
+            }
+            .racePickImage {
+                width: 40px;
+                height: 40px;
+                padding: 3px;
+            }
+            .row {
+                gap: 8px;
+                padding: 10px;
+                margin-bottom: 15px;
+            }
+            select {
+                width: 100%;
+                min-width: unset;
+                font-size: 14px;
+                padding: 8px;
+            }
+            h1 {
+                font-size: 18px;
+                margin-bottom: 10px;
+            }
+            .icon {
+                height: 20px;
+            }
+            
+            nav {
+                padding: 8px 0;
+                justify-content: flex-start; /* Allow scrolling from start */
+            }
+            nav a {
+                margin: 0 5px;
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+            
+            .startGame {
+                font-size: 16px;
+                padding: 12px;
+            }
+            
+            label {
+                font-size: 16px;
+            }
+            
+            /* Stack controls vertically on very small screens */
+            .movesFirstRow {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .movesFirstRow label {
+                margin-right: 0;
+                margin-bottom: 5px;
+                text-align: center;
+            }
+        }
+    </style>
+    <script>
+        let raceWhite = 'classic';
+        let raceBlack = 'classic';
+        const cleanSelect = function(selected,removedClass, race){
+            var elems = document.querySelectorAll("."+removedClass);
+            [].forEach.call(elems, function(el) {
+                el.classList.remove(removedClass);
+            });
+            selected.classList.add(removedClass)
+
+            if(removedClass === 'racePickImageSelectedWhite'){
+                raceWhite = race;
+            }
+            else{
+                raceBlack = race;
+            }
+        }
+
+        const hotseatGameStart = function(){
+            let ifWhiteAI = document.querySelector('#whitePlayerSelect').value
+            let ifBlackAI = document.querySelector('#blackPlayerSelect').value;
+
+            let whoStartsFirst = document.querySelector('#whoStartsFirst').value;
+
+            let ifAllAI =  ifWhiteAI != '' && ifBlackAI != '';
+
+            let gameType = document.querySelector('#gameType')?.value;
+            gameType = gameType ? `&gameType=${gameType}` : ''
+            let aiColor = '&AIColor=';
+            let aiPower = ''
+
+            let startMoveString = `&starts=${whoStartsFirst}`
+
+            
+
+            if(ifAllAI){
+                aiColor+='all'
+                aiPower += `&AIPowerWhite=${ifWhiteAI}&AIPowerBlack=${ifBlackAI}`
+            }
+            else if(ifWhiteAI){
+                aiColor += 'white'
+                aiPower += `&AIPowerWhite=${ifWhiteAI}`
+            }
+            else if(ifBlackAI){
+                aiColor += 'black'
+                aiPower += `&AIPowerBlack=${ifBlackAI}`
+            }
+
+
+            
+            window.location.href = `/hotseat?whiteRace=${raceWhite}&blackRace=${raceBlack}${aiColor}${gameType}${aiPower}${startMoveString}`
+        }
+    </script>
+</head>
+<body>
+    <nav>
+        <a href="/"><img src="/static/lg/whiteKing.png" class="icon"> Lobby</a>
+        <a href="/hotseat-menu" class="active"><img src="/static/lg/whiteRicar.png" class="icon"> Hotseat</a>
+        <a href="/campaign"><img src="/static/lg/whiteHorse.png" class="icon"> Campaign</a>
+        <a href="/pieces"><img src="/static/lg/whitePikeman.png" class="icon"> Pieces</a>
+        <a href="/customMaps"><img src="/static/lg/whiteShroom.png" class="icon"> Custom Maps</a>
+        <a href="/create-board"><img src="/static/lg/whiteNorthernKing.png" class="icon"> Board Editor</a>
+    </nav>
+
+    <div class="hotseat">
+        <h1><img src="/static/lg/whiteKing.png" class="icon"> Pick White Race</h1>
+        <div class="row">
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'medieval')" src="/static/lg/whiteClown.png" alt="">
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'bug')" src="/static/lg/whiteAnt.png" alt="">
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'classic')" src="/static/lg/whiteKing.png" alt="">
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'cyborgs')" src="/static/lg/whiteCrystal.png" alt="">
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'promoters')" src="/static/lg/whiteNorthernKing.png" alt="">
+            <select name="" id="whitePlayerSelect">
+                <option value="">Human Player</option>
+                <option value="101">Weak AI</option>
+                <option value="102">Medium AI</option>
+                <option value="103">Strong AI</option>
+                <option value="104">Slow thinker AI</option>
+            </select>
+        </div>
+
+        <h1><img src="/static/lg/blackKing.png" class="icon"> Pick Black Race</h1>
+        <div class="row">
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'medieval')" src="/static/lg/blackClown.png" alt="">
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'bug')" src="/static/lg/blackAnt.png" alt="">
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'classic')" src="/static/lg/blackKing.png" alt="">
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'cyborgs')" src="/static/lg/blackCrystal.png" alt="">
+            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'promoters')" src="/static/lg/blackNorthernKing.png" alt="">
+            <select  name="" id="blackPlayerSelect">
+                <option value="">Human Player</option>
+                <option value="101" selected="selected">Weak AI</option>
+                <option value="102" >Medium AI</option>
+                <option value="103">Strong AI</option>
+                <option value="104">Slow thinker AI</option>
+            </select>
+        </div>
+
+        <div class="row movesFirstRow">
+            <label style="margin-right: 10px;">Who Moves First:</label>
+            <select id="whoStartsFirst">
+                <option value="whiteStarts">White Moves First</option>
+                <option value="blackStarts">Black Moves First</option>
+            </select>
+        </div>
+
+        <div class="row" style="flex-direction: column; margin-top: 30px;">
+            <label for="gameType" style="font-size: 20px;"><img src="/static/lg/whiteQueen.png" class="icon"> Mode</label>
+            <select name="" id="gameType" style="width: 100%;">
+                <option value="raceChoiceChess">Chess 2</option>
+                <option value="classicChess">Chess 1</option>
+                <option value="miniChess">Minichess</option>
+                <option value="morphingRaceChoiceChess">Morphing Chess 2</option>
+                <option value="mongolianChess">Mongolian Chess</option>
+                <option value="randomChess">Random Chess</option>
+                <option value="hugeRandomChess">9 x 9 Random Chess</option>
+                <option value="grandRandomChess">11 x 11 random Chess</option>
+            </select>
+            <a class="startGame column" onclick="hotseatGameStart()"><img src="/static/lg/whiteKing.png" class="icon"> Start Game <img src="/static/lg/blackKing.png" class="icon"></a> 
+        </div>
+
+    </div>
+</body>
+</html>

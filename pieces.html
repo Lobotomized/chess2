@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess 2 - Pieces</title>
+    <link rel="stylesheet" href="/src/main.css">
+    <style>        
+        /* Chess-inspired variables */
+        :root {
+            --board-light: #f0d9b5;
+            --board-dark: #b58863;
+            --piece-white: #ffffff;
+            --piece-black: #2e2e2e;
+            --highlight: #829769;
+            --threat: #e53e3e;
+            --selected: #f7e98e;
+        }
+
+        body {
+            background: linear-gradient(45deg, var(--board-dark) 25%, var(--board-light) 25%, var(--board-light) 75%, var(--board-dark) 75%);
+            background-size: 80px 80px;
+            color: var(--piece-black);
+            font-family: 'Georgia', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* Chess board pattern overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(0,0,0,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 75% 75%, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Navigation - Chess piece inspired */
+        nav {
+            width: 100%;
+            background: linear-gradient(135deg, var(--piece-black) 0%, #1a1a1a 100%);
+            padding: 12px 0;
+            display: flex;
+            justify-content: center;
+            border-bottom: 4px solid var(--board-dark);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        nav a {
+            color: var(--board-light);
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            padding: 6px 12px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        nav a:hover {
+            color: var(--selected);
+            background: rgba(240, 217, 181, 0.1);
+            border-color: var(--board-light);
+            transform: translateY(-2px);
+        }
+        nav a.active {
+            color: var(--selected);
+            background: rgba(247, 233, 142, 0.2);
+            border-color: var(--selected);
+            box-shadow: 0 0 10px rgba(247, 233, 142, 0.5);
+        }
+        
+        .icon {
+            height: 24px;
+            width: auto;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin-top: 30px;
+            background: rgba(240, 217, 181, 0.95);
+            border: 8px solid var(--piece-black);
+            border-radius: 12px;
+            box-shadow: 
+                0 0 0 4px var(--board-dark),
+                0 15px 40px rgba(0,0,0,0.4);
+            padding: 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--piece-black);
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 28px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            width: 100%;
+            border-bottom: 3px solid var(--board-dark);
+            padding-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .piece {
+            width: 100%;
+            max-width: 600px;
+            color: var(--piece-black);
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--board-light) 0%, #e8d4a0 100%);
+            border: 2px solid var(--piece-black);
+            border-radius: 8px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .piece:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+            border-color: var(--highlight);
+        }
+
+        .piece img {
+            width: 100%;
+            max-width: 150px;
+            height: auto;
+            margin-bottom: 15px;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
+        }
+
+        p {
+            max-width: 600px;
+            text-align: center;
+            margin: 0 auto 20px auto;
+            line-height: 1.6;
+        }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            body {
+                background-size: 60px 60px;
+            }
+            nav {
+                padding: 12px 0;
+                justify-content: flex-start;
+            }
+            nav a {
+                font-size: 12px;
+                margin: 0 8px;
+                padding: 5px 10px;
+            }
+            .container {
+                width: 95%;
+                padding: 20px;
+                margin-top: 20px;
+                border-width: 4px;
+            }
+            h1 {
+                font-size: 24px;
+                margin-top: 15px;
+            }
+            .piece {
+                padding: 15px;
+                font-size: 16px;
+            }
+            .piece img {
+                max-width: 100px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            nav a {
+                font-size: 11px;
+                margin: 0 5px;
+                padding: 4px 8px;
+            }
+            .container {
+                padding: 15px;
+            }
+            h1 {
+                font-size: 20px;
+            }
+            .piece {
+                padding: 12px;
+                font-size: 14px;
+            }
+            .icon {
+                height: 18px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            nav a {
+                font-size: 10px;
+                margin: 2px 4px;
+                padding: 3px 6px;
+            }
+            h1 {
+                font-size: 18px;
+            }
+            .piece img {
+                max-width: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/"><img src="/static/lg/whiteKing.png" class="icon"> Lobby</a>
+        <a href="/hotseat-menu"><img src="/static/lg/whiteRicar.png" class="icon"> Hotseat</a>
+        <a href="/campaign"><img src="/static/lg/whiteHorse.png" class="icon"> Campaign</a>
+        <a href="/pieces" class="active"><img src="/static/lg/whitePikeman.png" class="icon"> Pieces</a>
+        <a href="/customMaps"><img src="/static/lg/whiteShroom.png" class="icon"> Custom Maps</a>
+        <a href="/create-board"><img src="/static/lg/whiteNorthernKing.png" class="icon"> Board Editor</a>
+    </nav>
+
+    <div class="container">
+        <h1><img src="/static/lg/whiteRicar.png" class="icon"> Crusaders <img src="/static/lg/blackClown.png" class="icon"></h1>
+
+        <p>
+            The Crusaders are a tactical fraction with many mobile pieces. <br> <br>
+            It has smaller taking potential than the other fractions, but they can organize their forces the quickest. 
+            Use your clown to position your single-directional units.
+            <br><br>
+            The Crusaders are a fraction for players who want to make beautiful, multipiece attacks.
+        </p>
+        <div class="piece">
+            <img src="/static/lg/blackClown.png" alt="">
+            <p>
+                The Clown is one of the more unique units in the Crusader's arsenal.<br> <br>
+                It can move as a Classic Queen, but it can't take enemy pieces.      <br>            
+                Instead, it has the powerful ability to swap positions with any other piece you have.
+            </p>
+        </div>
+
+        <div class="piece">
+            <img src="/static/lg/whiteRicar.png" alt="">
+            <p>
+                The Crusader is another piece with a unique ability.
+                <br><br>
+                
+                It can jump-move(like the classic Knight) by two in any direction. This includes horizontal, vertical, and all four diagonals.
+                <br><br>
+                This means that this piece both has the limitations of the knight (it can't move quickly through the board) 
+                AND the limitations of a bishop since it can never access half the squares.
+                <br><br>
+                What makes this piece strong is its special ability. After it gets taken it checks if the square behind it is empty and summons a Ghost of 
+                the Vendetta right behind it. <br><br>
+                Ready to avenge his comrade!                
+            </p>
+        </div>
+
+        <div class="piece">
+            <img src="/static/lg/blackGhost.png" alt="">
+            <p>
+                The Ghost of the Vendetta is the weakest piece of the crusaders. 
+                It can move one or two squares in front of itself, but it can also jump to the second while ignoring blockers.
+            </p>
+        </div>
+
+        <div class="piece">
+            <img src="/static/lg/whiteHorse.png" alt="">
+            <p>
+                The Cavalry is moving like a small Queen.  In every direction and diagonal but with a limitation of 3 squares distance.
+
+            </p>
+        </div>
+
+
+        <div class="piece">
+            <img src="/static/lg/blackPig.png" alt="">
+            <p>
+                The Pig can move and take forward until it is blocked. <br> <br>
+                (Hint: Use the Clown to position it where you want the attack to happen.)
+            </p>
+        </div>
+
+        <div class="piece">
+            <img src="/static/lg/whiteHat.png" alt="">
+            <p>
+                You have two magical hats! Losing any of them loses you the game.
+                <br> <br>
+                They move and take like a rook and also can move by one in each diagonal impotently (they can't take pieces).
+            </p>
+        </div>
+
+
+        <h1><img src="/static/lg/blackAnt.png" class="icon"> Insectoids <img src="/static/lg/whiteQueenBug.png" class="icon"> <br> <span style="font-size: 0.8em; width: 100%;">(Strategical Fraction)</span></h1>
+
+
+        <p>
+            The insectoids are a strategical, slow-play fraction they have the powerful ability to 
+            spawn more pieces BUT also the horrible weakness of having immovable lose-condition pieces.
+            <br><br>
+            Insectoids are best for players who see a couple of threats in advance.            </p>
+
+
+        <div class="piece">
+            <img src="/static/lg/blackAnt.png" alt="">
+            <p>
+                The ant is the basic piece of the insectoids. <br>
+                It can move and take two forward (until it is blocked). If it gets to the last square it promotes itself to a Bug Queen.
+                <br>
+                If one of your shrooms is taken the Ant will be able to move and take only one square forward.
+            </p>
+        </div>
+
+        <div class="piece">
+            <img src="/static/lg/whiteQueenBug.png" alt="">
+            <p>
+                The Bug Queen can't move, but it can spawn Ants in every nondiagonal square around it.                </p>
+        </div>
+
+
+        <div class="piece">
+            <img src="/static/lg/blackSpider.png" alt="">
+            <p>
+                If you have two shrooms the Spider is moving both like a Classic Knight and a Classic King.
+                <br> <br>
+                Else it moves only like a King.
+            </p>
+        </div>
+
+        <div class="piece">
+            <img src="/static/lg/whiteLadyBug.png" alt=""> 
+            <p>
+                If you have two shrooms the LadyBug is moving one horizontally and three diagonally starting from there.
+                <br> <br>
+                Else it moves only like a King.
+            </p>
+        </div>
+
+
+        <div class="piece">
+            <img src="/static/lg/blackGoliathBug.png" alt=""> 
+            <p>
+                If you have two shrooms the Goliath Bug is moving both like a Classic Rook and a Classic King.
+                <br> <br>
+                Else it moves only like a King.
+            </p>
+        </div>
+
+
+        <div class="piece">
+            <img src="/static/lg/whiteShroom.png" alt=""> 
+            <p>
+                The Shroom can't move. If you lose both - you lose the game. <br>
+                If you lose one - all your pieces become much weaker.
+            </p>
+        </div>
+
+
+        
+        <h1><img src="/static/lg/blackCyborg.png" class="icon"> Cyborgs <img src="/static/lg/whiteJuggernaut.png" class="icon"></h1>
+
+
+        <p>
+        Tough fraction that's very resistant to surprise mate tactics. Has the most powerful piece in the game.  <br>
+        
+        Every piece of this fraction can swap places with ally pieces around it.
+        
+        </p>
+
+
+        <div class="piece">
+            <img src="/static/lg/blackCyborg.png" alt=""> 
+            <p>
+                The Cyborg is the basic piece of the cyborgs fraction.
+                <br>
+                It jumps and takes on the second square infront of it.  If it gets to the final square it promotes into a Juggernaut (the strongest piece in the game).
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/lg/whiteBootVessel.png" alt=""> 
+            <p>
+                The Boot Vessel moves diagonally till the end of the board, missing every second square. It still can be blocked if there is something on it's path. 
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/lg/blackExecutor.png" alt=""> 
+            <p>
+                The Executor moves horizontally and vertically till the end of the board, missing every second square. It still can be blocked if there is something on it's path. 
+            </p>
+        </div> 
+
+
+        <div class="piece">
+            <img src="/static/lg/whiteJuggernaut.png" alt=""> 
+            <p>
+                The Juggernaut is the strongest piece in the game <br>
+                He can move three times. Every move is with one horizontal or one vertical speed. If  it takes a piece his move has ended. 
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/lg/blackCrystal.png" alt=""> 
+            <p>
+                The Crystal moves one square in every direction <br>
+                If it's taken and there is an Empowered Crystal on your board the Empowered Crystal transforms to Crystal. 
+                If there is no Empowered Crystal and this piece is taken you lose the game.
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/lg/whiteCrystalEmpowered.png" alt=""> 
+            <p>
+            The Empowered Crystal moves diagonally, horizontally and vertically till the end of the board, missing every second square. It still can be blocked if there is something on it's path. 
+            <br>
+                If it's taken and there is a Crystal on your board the Crystal transforms to Empowered Crystal. 
+                If there is no Crystal and this piece is taken you lose the game.
+            </p>
+        </div> 
+
+
+        <h1><img src="/static/lg/blackPlagueDoctor.png" class="icon"> The Rebel Alliance <img src="/static/lg/whiteNorthernKing.png" class="icon"></h1>
+
+        <p>
+            The Rebel Alliance is a fraction based on the promotion mechanic. 
+            It slowly pushes the board and every time one if their lose condition pieces moves forward it upgrades many of the pieces.
+        </p>
+
+        <div class="piece">
+            <img src="/static/lg/blackSwordsmen.png" alt=""> 
+            <p>
+                The swordsman moves and takes one infront of itself and one diagonally in each direction ahead.
+
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/lg/whitePikeman.png" alt=""> 
+            <p>
+                The pikeman moves without taking one square ahead, one left and one right. 
+                It can take the three squares, two ahead of him. ([x:1,y:2],[x:0,y:2],[x:-1,y:2] where the pikeman is at [x:0,y:0])
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/lg/blackShield.png" alt=""> 
+            <p>
+                The defender can move and take horizontally with infinit speed and one vertically.
+            </p>
+        </div>
+
+        
+        <div class="piece">
+            <img src="/static/lg/whiteSleepingDragon.png" alt=""> 
+            <p>
+                The Sleeping Dragon cannot move. If it awakes it gets the moves of a Rook and a Knight
+            </p>
+        </div>
+
+        
+        <div class="piece">
+            <img src="/static/lg/blackGargoyle.png" alt=""> 
+            <p>
+                The Gargoyle moves horizontally and vertically and can jump through pieces. It's speed is equal to the rank of the Plague Archeologist.
+            </p>
+        </div>
+
+        <div class="piece">
+            <img src="/static/lg/whiteFencer.png" alt=""> 
+            <p>
+                The Fencer moves diagonally and can jump through pieces. It's speed is equal to the rank of the Plague Archeologist.
+            </p>
+        </div>
+
+        <div class="piece">
+            <img src="/static/lg/blackPlagueDoctor.png" alt=""> 
+            <p>
+                The Plague Archeologist moves and takes one infront of itself and one diagonally in each direction ahead.
+                <br/>
+                Every time it moves  it upgrades the Gargoyle and if it gets to rank 4 it awakes the Dragon.
+                <br/>
+                If it get's to the final rank you win the game. If you lose both the Northern King and the Plague Archeologist you lose the game.
+            </p>
+        </div>
+
+        <div class="piece">
+            <img src="/static/lg/whiteNorthernKing.png" alt=""> 
+            <p>
+                The Rebel King moves and takes one infront of itself and one diagonally in each direction ahead.
+                <br/>
+                Every time it moves  it upgrades the Fencer and if it gets to rank 4 all the swordsmen and pikemen are promoted to knights.
+                <br/>
+                If it get's to the final rank you win the game. If you lose both the Northern King and the Plague Archeologist you lose the game.
+            </p>
+        </div>
+
+        <h1><img src="/static/lg/whiteKing.png" class="icon"> Classic <img src="/static/lg/blackQueen.png" class="icon"></h1>
+
+
+        <p>
+            It's both the classic piece set AND the middle ground between tactical and startegical play. It has both end and early game mechanics.
+        </p>
+        <div class="piece">
+            <img src="/static/lg/blackPawn.png" alt=""> 
+            <p>
+                The Pawn is the basic piece of the Classic fraction.
+                <br>
+                It takes by one square diagonally infront of itself and  it moves  only forward. <br>
+                If it never moved and it isn't blocked it can  move forward by two squares. If it gets to the end it promotes to Queen.
+            </p>
+        </div> 
+        <div class="piece">
+            <img src="/static/lg/whiteKnight.png" alt=""> 
+            <p>
+                The Knight may move two squares vertically and one square horizontally, or two squares horizontally and one square vertically
+                    (with both forming the shape of an L). While moving, the knight can jump over pieces to reach its destination.
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/lg/blackBishop.png" alt=""> 
+            <p>
+                The bishop moves and takes diagonally until it is blocked
+            </p>
+        </div> 
+        
+        <div class="piece">
+            <img src="/static/lg/whiteRook.png" alt=""> 
+            <p>
+                The Rook moves and takes vertically and horizontally until it is blocked.
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/lg/blackQueen.png" alt=""> 
+            <p>
+                The Queen is the second most powerful piece in the game.
+
+                <br> <br>
+                It can move and take diagonally, vertically and horizontally until it is blocked.
+            </p>
+        </div> 
+
+        <div class="piece">
+            <img src="/static/lg/whiteKing.png" alt=""> 
+            <p>
+                The King moves and takes one square in each direction.
+                <br>
+                The King can't finish its turn on an attacked square. <br>
+                If such an event is inescapable you lose.
+
+                <br>
+                CHESS 2 removed the Draw option.
+                <br>
+                <br>
+                There is no middle ground.
+                <br><br>
+                You win or You lose
+            </p>
+        </div> 
+    </div>
+</body>
+</html>

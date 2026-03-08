@@ -1,109 +1,356 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Map List</title>
-  <style>
-    body {
-      text-align: center;
-      margin: 0;
-      padding: 0;
-    }
-    h1 {
-      margin-bottom: 20px;
-    }
-    .map-list {
-      list-style: none;
-      padding: 0;
-    }
-    .map-list li {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-    }
-    .map-list li a {
-      color: #007bff;
-      text-decoration: none;
-      padding: 5px;
-    }
-    .pagination {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    .pagination button {
-      border: 1px solid #007bff;
-      border-radius: 5px;
-      padding: 5px 10px;
-      margin: 5px;
-      background-color: #fff;
-      cursor: pointer;
-    }
-    .pagination button:hover {
-      background-color: #007bff;
-      color: #fff;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess 2 - Custom Maps</title>
+    <link rel="stylesheet" href="/src/main.css">
+    <style>
+        /* Chess-inspired variables */
+        :root {
+            --board-light: #f0d9b5;
+            --board-dark: #b58863;
+            --piece-white: #ffffff;
+            --piece-black: #2e2e2e;
+            --highlight: #829769;
+            --threat: #e53e3e;
+            --selected: #f7e98e;
+        }
+
+        body {
+            background: linear-gradient(45deg, var(--board-dark) 25%, var(--board-light) 25%, var(--board-light) 75%, var(--board-dark) 75%);
+            background-size: 80px 80px;
+            color: var(--piece-black);
+            font-family: 'Georgia', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* Chess board pattern overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(0,0,0,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 75% 75%, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Navigation - Chess piece inspired */
+        nav {
+            width: 100%;
+            background: linear-gradient(135deg, var(--piece-black) 0%, #1a1a1a 100%);
+            padding: 12px 0;
+            display: flex;
+            justify-content: center;
+            border-bottom: 4px solid var(--board-dark);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        nav a {
+            color: var(--board-light);
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            padding: 6px 12px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        nav a:hover {
+            color: var(--selected);
+            background: rgba(240, 217, 181, 0.1);
+            border-color: var(--board-light);
+            transform: translateY(-2px);
+        }
+        nav a.active {
+            color: var(--selected);
+            background: rgba(247, 233, 142, 0.2);
+            border-color: var(--selected);
+            box-shadow: 0 0 10px rgba(247, 233, 142, 0.5);
+        }
+        
+        .icon {
+            height: 24px;
+            width: auto;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin-top: 30px;
+            background: rgba(240, 217, 181, 0.95);
+            border: 8px solid var(--piece-black);
+            border-radius: 12px;
+            box-shadow: 
+                0 0 0 4px var(--board-dark),
+                0 15px 40px rgba(0,0,0,0.4);
+            padding: 30px;
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--piece-black);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .map-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            gap: 15px;
+        }
+
+        .map-item {
+            background: linear-gradient(135deg, var(--board-light) 0%, #e8d4a0 100%);
+            border: 2px solid var(--piece-black);
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+        }
+
+        .map-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+            border-color: var(--highlight);
+        }
+
+        .map-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--piece-black);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .play-button {
+            display: inline-block;
+            padding: 8px 20px;
+            background: linear-gradient(135deg, var(--piece-black) 0%, #2a2a2a 100%);
+            color: var(--board-light);
+            text-decoration: none;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 2px solid var(--board-dark);
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .play-button:hover {
+            background: linear-gradient(135deg, #2a2a2a 0%, var(--piece-black) 100%);
+            color: var(--selected);
+            border-color: var(--selected);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 30px;
+        }
+
+        .pagination button {
+            background: var(--piece-white);
+            color: var(--piece-black);
+            border: 2px solid var(--board-dark);
+            padding: 8px 16px;
+            cursor: pointer;
+            font-family: 'Georgia', serif;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+
+        .pagination button:hover {
+            background: var(--board-light);
+            border-color: var(--highlight);
+            transform: translateY(-2px);
+        }
+
+        .pagination button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            border-color: #ccc;
+            transform: none;
+        }
+
+        .page-info {
+            display: flex;
+            align-items: center;
+            font-weight: bold;
+            color: var(--piece-black);
+            background: rgba(255,255,255,0.5);
+            padding: 0 15px;
+            border-radius: 4px;
+            border: 1px solid var(--board-dark);
+        }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 15px;
+                margin-top: 15px;
+                border-width: 4px;
+            }
+            
+            h1 {
+                font-size: 22px;
+                margin-bottom: 20px;
+            }
+
+            .map-item {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+                padding: 12px;
+            }
+
+            .map-name {
+                font-size: 16px;
+                justify-content: center;
+            }
+
+            .play-button {
+                text-align: center;
+                width: 100%;
+                box-sizing: border-box;
+            }
+
+            nav {
+                padding: 8px 0;
+                justify-content: flex-start;
+            }
+            nav a {
+                margin: 0 5px;
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+            
+            .icon {
+                height: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-  <h1>Map List</h1>
-  <ul id="mapList" class="map-list"></ul>
+    <nav>
+        <a href="/"><img src="/static/lg/whiteKing.png" class="icon"> Lobby</a>
+        <a href="/hotseat-menu"><img src="/static/lg/whiteRicar.png" class="icon"> Hotseat</a>
+        <a href="/campaign"><img src="/static/lg/whiteHorse.png" class="icon"> Campaign</a>
+        <a href="/pieces"><img src="/static/lg/whitePikeman.png" class="icon"> Pieces</a>
+        <a href="/customMaps" class="active"><img src="/static/lg/whiteShroom.png" class="icon"> Custom Maps</a>
+        <a href="/create-board"><img src="/static/lg/whiteNorthernKing.png" class="icon"> Board Editor</a>
+    </nav>
 
-  <script>
-    // Replace 'http://localhost:3000/maps' with your actual Express server URL
-    const apiUrl = '/maps';
+    <div class="container">
+        <h1><img src="/static/lg/whiteShroom.png" class="icon"> Custom Maps <img src="/static/lg/blackShroom.png" class="icon"></h1>
+        <ul id="mapList" class="map-list">
+            <!-- Maps will be loaded here -->
+            <li style="text-align:center; font-style: italic;">Loading maps...</li>
+        </ul>
+        <div id="pagination" class="pagination"></div>
+    </div>
 
-    fetch(apiUrl)
-      .then(response => response.json())
-      .then(data => {
-        const { maps, pageSize, pageNumber, pageCount, totalMapCount } = data;
-        const mapList = document.querySelector('.map-list');
-        
-        maps.forEach(map => {
-          const listItem = document.createElement('li');
-          const mapLink = document.createElement('a');
-          mapLink.textContent = map.name;
-          mapLink.href = `/hotseat?gameType=customMap&customGameId=${map._id}`;
-          listItem.appendChild(mapLink);
-          mapList.appendChild(listItem);
-        });
+    <script>
+        const apiUrl = '/maps';
 
-        // Display pagination details
-        const paginationContainer = document.createElement('div');
-        paginationContainer.classList.add('pagination');
-        if (pageNumber > 1) { 
-            const prevPageBtn = document.createElement('button');
-            prevPageBtn.textContent = 'Previous';       
-            prevPageBtn.onclick = () => fetchMaps(pageNumber - 1);
-            paginationContainer.appendChild(prevPageBtn);
-        } 
-        
-        paginationContainer.appendChild(document.createTextNode(` Page ${pageNumber} of ${pageCount} `));
- 
-       if (pageNumber < pageCount) {  const nextPageBtn = document.createElement('button');
-        nextPageBtn.textContent = 'Next';
-        nextPageBtn.onclick = () => fetchMaps(pageNumber + 1);
-        paginationContainer.appendChild(nextPageBtn);  } 
+        function fetchMaps(page = 1) {
+            fetch(`${apiUrl}?page=${page}`)
+                .then(response => response.json())
+                .then(data => {
+                    const { maps, pageSize, pageNumber, pageCount, totalMapCount } = data;
+                    const mapList = document.getElementById('mapList');
+                    mapList.innerHTML = '';
+                    
+                    if (maps.length === 0) {
+                        mapList.innerHTML = '<li style="text-align:center; padding: 20px;">No custom maps found. Create one in the Board Editor!</li>';
+                        return;
+                    }
 
-        document.body.appendChild(paginationContainer);
-      })
-      .catch(error => {
-        console.error('Error fetching maps:', error);
-        document.body.innerHTML = '<h2>Failed to Fetch Maps. Please try again later</h2>';
-      });
+                    maps.forEach(map => {
+                        const listItem = document.createElement('li');
+                        listItem.className = 'map-item';
+                        
+                        listItem.innerHTML = `
+                            <span class="map-name"><img src="/static/lg/whitePawn.png" style="height:20px;"> ${map.name}</span>
+                            <a href="/hotseat?gameType=customMap&customGameId=${map._id}" class="play-button">Play Map</a>
+                        `;
+                        
+                        mapList.appendChild(listItem);
+                    });
 
+                    // Pagination
+                    const paginationContainer = document.getElementById('pagination');
+                    paginationContainer.innerHTML = '';
 
- function fetchMaps(page) {
-    const url = `${apiUrl}?page=${page}`;
-    fetch(url)
-    .then(response => response.json())
-    .then(data)
-    .catch(error => console.error('Error fetching maps:', error));
-} 
-  </script>
+                    if (pageNumber > 1) {
+                        const prevBtn = document.createElement('button');
+                        prevBtn.textContent = 'Previous';
+                        prevBtn.onclick = () => fetchMaps(pageNumber - 1);
+                        paginationContainer.appendChild(prevBtn);
+                    }
+
+                    if (pageCount > 1) {
+                        const pageInfo = document.createElement('span');
+                        pageInfo.className = 'page-info';
+                        pageInfo.textContent = `Page ${pageNumber} of ${pageCount}`;
+                        paginationContainer.appendChild(pageInfo);
+                    }
+
+                    if (pageNumber < pageCount) {
+                        const nextBtn = document.createElement('button');
+                        nextBtn.textContent = 'Next';
+                        nextBtn.onclick = () => fetchMaps(pageNumber + 1);
+                        paginationContainer.appendChild(nextBtn);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching maps:', error);
+                    document.getElementById('mapList').innerHTML = '<li style="text-align:center; color: var(--threat); padding: 20px;">Failed to load maps</li>';
+                });
+        }
+
+        // Initial load
+        fetchMaps(1);
+    </script>
 </body>
 </html>

@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess 2 - Campaign</title>
+    <link rel="stylesheet" href="/src/main.css">
+    <style>
+        /* Chess-inspired variables */
+        :root {
+            --board-light: #f0d9b5;
+            --board-dark: #b58863;
+            --piece-white: #ffffff;
+            --piece-black: #2e2e2e;
+            --highlight: #829769;
+            --threat: #e53e3e;
+            --selected: #f7e98e;
+        }
+
+        body {
+            background: linear-gradient(45deg, var(--board-dark) 25%, var(--board-light) 25%, var(--board-light) 75%, var(--board-dark) 75%);
+            background-size: 80px 80px;
+            color: var(--piece-black);
+            font-family: 'Georgia', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* Chess board pattern overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(0,0,0,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 75% 75%, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Navigation - Chess piece inspired */
+        nav {
+            width: 100%;
+            background: linear-gradient(135deg, var(--piece-black) 0%, #1a1a1a 100%);
+            padding: 12px 0;
+            display: flex;
+            justify-content: center;
+            border-bottom: 4px solid var(--board-dark);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        nav a {
+            color: var(--board-light);
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            padding: 6px 12px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        nav a:hover {
+            color: var(--selected);
+            background: rgba(240, 217, 181, 0.1);
+            border-color: var(--board-light);
+            transform: translateY(-2px);
+        }
+        nav a.active {
+            color: var(--selected);
+            background: rgba(247, 233, 142, 0.2);
+            border-color: var(--selected);
+            box-shadow: 0 0 10px rgba(247, 233, 142, 0.5);
+        }
+        
+        .icon {
+            height: 24px;
+            width: auto;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        .campaign {
+            width: 90%;
+            max-width: 800px;
+            margin-top: 30px;
+            background: rgba(240, 217, 181, 0.95);
+            border: 8px solid var(--piece-black);
+            border-radius: 12px;
+            box-shadow: 
+                0 0 0 4px var(--board-dark),
+                0 15px 40px rgba(0,0,0,0.4);
+            padding: 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            color: var(--piece-black);
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 15px;
+            font-size: 24px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            width: 100%;
+            border-bottom: 2px solid var(--board-dark);
+            padding-bottom: 10px;
+        }
+
+        .row-wrap {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .campaign a {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: var(--piece-black);
+            text-decoration: none;
+            margin: 5px;
+            padding: 15px;
+            border: 2px solid var(--board-dark);
+            background: rgba(255,255,255,0.5);
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            width: 80px;
+        }
+        .campaign a:hover {
+            border-color: var(--highlight);
+            transform: translateY(-3px);
+            background: white;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .campaign img {
+            width: 50px;
+            height: 50px;
+            margin-top: 5px;
+        }
+        .campaign span {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            .campaign {
+                width: 95%;
+                padding: 15px;
+                margin-top: 15px;
+                border-width: 4px;
+            }
+            
+            nav {
+                padding: 8px 0;
+                justify-content: flex-start;
+            }
+            nav a {
+                margin: 0 5px;
+                font-size: 12px;
+                padding: 4px 8px;
+            }
+            
+            .icon {
+                height: 20px;
+            }
+
+            h2 {
+                font-size: 20px;
+                margin-top: 15px;
+            }
+
+            .campaign a {
+                width: 70px;
+                padding: 10px;
+            }
+            
+            .campaign img {
+                width: 40px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="/"><img src="/static/lg/whiteKing.png" class="icon"> Lobby</a>
+        <a href="/hotseat-menu"><img src="/static/lg/whiteRicar.png" class="icon"> Hotseat</a>
+        <a href="/campaign" class="active"><img src="/static/lg/whiteHorse.png" class="icon"> Campaign</a>
+        <a href="/pieces"><img src="/static/lg/whitePikeman.png" class="icon"> Pieces</a>
+        <a href="/customMaps"><img src="/static/lg/whiteShroom.png" class="icon"> Custom Maps</a>
+        <a href="/create-board"><img src="/static/lg/whiteNorthernKing.png" class="icon"> Board Editor</a>
+    </nav>
+
+    <div class="campaign">
+        <h2>Lost in the Dark Forest</h2>
+        <div class="row-wrap">
+            <a href="/hotseat?gameType=missionClassicMedievalOne&AIColor=white">
+                <span>Ch 1</span>
+                <img src="/static/lg/blackGhost.png" alt="">
+            </a>
+            <a href="/hotseat?gameType=missionClassicMedievalTwo&AIColor=white">
+                <span>Ch 2</span>
+                <img src="/static/lg/blackHorse.png" alt="">
+            </a>
+            <a href="/hotseat?gameType=missionClassicMedievalThree&AIColor=white">
+                <span>Ch 3</span>
+                <img src="/static/lg/blackClown.png" alt="">
+            </a>
+            <a href="/hotseat?gameType=missionClassicMedievalFour&AIColor=white">
+                <span>Ch 3</span>
+                <img src="/static/lg/blackRicar.png" alt="">
+            </a>
+            <a href="/hotseat?gameType=missionClassicMedievalFive&AIColor=white">
+                <span>Ch 3</span>
+                <img src="/static/lg/blackPig.png" alt="">
+            </a>
+            <a href="/hotseat?gameType=missionClassicMedievalSix&AIColor=white">
+                <span>Ch 3</span>
+                <img src="/static/lg/blackRicar.png" alt="">
+            </a>
+            <a href="/hotseat?gameType=missionClassicMedievalSeven&AIColor=white">
+                <span>Ch 3</span>
+                <img src="/static/lg/blackHat.png" alt="">
+            </a>
+        </div>
+
+        <h2>The wrath of the swarm</h2>
+        <div class="row-wrap">
+            <a href="/hotseat?gameType=missionClassicBugsOne&AIColor=white">
+                <span>Ch 1</span>
+                <img src="/static/lg/blackQueenBug.png" alt="">
+            </a>
+            
+            <a href="/hotseat?gameType=missionClassicBugsTwo&AIColor=white">
+                <span>Ch 2</span>
+                <img src="/static/lg/blackSpider.png" alt="">
+            </a>
+
+            <a href="/hotseat?gameType=missionClassicBugsThree&AIColor=white">
+                <span>Ch 3</span>
+                <img src="/static/lg/blackGoliathBug.png" alt="">
+            </a>
+            <a href="/hotseat?gameType=missionClassicBugsFour&AIColor=white">
+                <span>Ch 4</span>
+                <img src="/static/lg/blackLadyBug.png" alt="">
+            </a>
+            <a href="/hotseat?gameType=missionClassicBugsFive&AIColor=white">
+                <span>Ch 5</span>
+                <img src="/static/lg/blackGoliathBug.png" alt="">
+            </a>
+            <a href="/hotseat?gameType=missionClassicBugsSix&AIColor=white">
+                <span>Ch 6</span>
+                <img src="/static/lg/blackShroom.png" alt="">
+            </a>
+        </div>
+
+
+        <h2>Civil War</h2>
+        <div class="row-wrap">
+            <a href="/hotseat?gameType=missionClassicPromotersOne&AIColor=white">
+                <span>Ch 1</span>
+                <img src="/static/lg/blackSwordsmen.png" alt="">
+            </a>
+            <a href="/hotseat?gameType=missionClassicPromotersTwo&AIColor=white">
+                <span>Ch 2</span>
+                <img src="/static/lg/blackPikeman.png" alt="">
+            </a>
+            <a href="/hotseat?gameType=missionClassicPromotersThree&AIColor=white">
+                <span>Ch 3</span>
+                <img src="/static/lg/blackShield.png" alt="">
+            </a>
+            <a href="/hotseat?gameType=missionClassicPromotersFour&AIColor=white">
+                <span>Ch 4</span>
+                <img src="/static/lg/blackNorthernKing.png" alt="">
+            </a>
+        </div>
+    </div>
+</body>
+</html>

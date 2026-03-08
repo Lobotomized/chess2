@@ -22,6 +22,39 @@ try{
 
 catch(err){
 }
+function buildModal(arr){
+    modal.innerHTML = ``;
+    arr.forEach((el) => {
+        if(el.type === 'quote'){
+            modal.innerHTML += 
+            `
+            <div class="row-hotseat ${el.classes}">
+                <img src="/static/${el.icon}" alt=""> <span> ${el.text} </span>
+            </div>
+            `            
+        }
+        else if(el.type === `objectives`){
+            modal.innerHTML +=  `<div class="row-hotseat">
+                <h4>Objectives:</h4>
+                <p>${el.text}</p>
+            </div>`
+        }
+        else if(el.type === `link`){
+            modal.innerHTML += `
+
+            <div style="flex-direction:column;" class="row-hotseat">
+                <h2 style="margin-left:auto; margin-right:auto;">${el.text}</h2>
+
+                <a style="text-decoration:none;" href="${el.link}">${el.linkText}</a>
+
+            </div>
+            `
+        }
+    })
+
+    modal.classList.remove('displayNone')
+}
+
 
 function prohodBoard(board){
     board.length = 0;

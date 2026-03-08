@@ -928,6 +928,7 @@ function copyLinkToClipboard(){
     navigator.clipboard.writeText(window.location)
 }
 
+
 try{
     module.exports = {
         findCopyPieceByXY,

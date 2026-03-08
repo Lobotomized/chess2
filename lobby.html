@@ -3,17 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess 2 -  Lobby</title>
+    <title>Chess 2 - Lobby</title>
     <script src="/src/variables.js"></script>
-    <script src="/src/components/piecesComponent.js"></script>
-
-    <script src="/src/components/galleryComponent.js"></script>
-
     <script src="/socket.io/socket.io.js"></script>
-
     <link rel="stylesheet" href="/src/main.css">
 
-    <!-- Hotjar Tracking Code for https://chesstwo.io/ -->
+    <!-- Hotjar Tracking Code -->
     <script>
         (function(h,o,t,j,a,r){
             h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
@@ -22,101 +17,521 @@
             r=o.createElement('script');r.async=1;
             r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
             a.appendChild(r);
-        })(window,document,'https://static/lg.hotjar.com/c/hotjar-','.js?sv=');
+        })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
     </script>
-    <script>
-        let raceWhite = 'classic';
-        let raceBlack = 'classic';
-        const cleanSelect = function(selected,removedClass, race){
-            var elems = document.querySelectorAll("."+removedClass);
-            [].forEach.call(elems, function(el) {
-                el.classList.remove(removedClass);
-            });
-            selected.classList.add(removedClass)
 
-            if(removedClass === 'racePickImageSelectedWhite'){
-                raceWhite = race;
+    <style>
+        /* Chess-inspired variables */
+        :root {
+            --board-light: #f0d9b5;
+            --board-dark: #b58863;
+            --piece-white: #ffffff;
+            --piece-black: #2e2e2e;
+            --highlight: #829769;
+            --threat: #e53e3e;
+            --selected: #f7e98e;
+        }
+
+        body {
+            background: linear-gradient(45deg, var(--board-dark) 25%, var(--board-light) 25%, var(--board-light) 75%, var(--board-dark) 75%);
+            background-size: 80px 80px;
+            color: var(--piece-black);
+            font-family: 'Georgia', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        /* Chess board pattern overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(0,0,0,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 75% 75%, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Navigation - Chess piece inspired */
+        nav {
+            width: 100%;
+            background: linear-gradient(135deg, var(--piece-black) 0%, #1a1a1a 100%);
+            padding: 12px 0;
+            display: flex;
+            justify-content: center;
+            border-bottom: 4px solid var(--board-dark);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        
+        nav a {
+            color: var(--board-light);
+            text-decoration: none;
+            margin: 0 10px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            padding: 6px 12px;
+            border: 2px solid transparent;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+        nav a:hover {
+            color: var(--selected);
+            background: rgba(240, 217, 181, 0.1);
+            border-color: var(--board-light);
+            transform: translateY(-2px);
+        }
+        nav a.active {
+            color: var(--selected);
+            background: rgba(247, 233, 142, 0.2);
+            border-color: var(--selected);
+            box-shadow: 0 0 10px rgba(247, 233, 142, 0.5);
+        }
+        
+        .icon {
+            height: 24px;
+            width: auto;
+            vertical-align: middle;
+            margin-right: 8px;
+        }
+
+        /* Lobby Container - Chess board frame */
+        .container {
+            width: 90%;
+            max-width: 1000px;
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            background: rgba(240, 217, 181, 0.95);
+            border: 8px solid var(--piece-black);
+            border-radius: 12px;
+            box-shadow: 
+                0 0 0 4px var(--board-dark),
+                0 15px 40px rgba(0,0,0,0.4);
+            padding: 30px;
+            position: relative;
+        }
+
+        /* Create Game Section - Chess piece styling */
+        .create-game {
+            background: linear-gradient(135deg, var(--board-light) 0%, #e8d4a0 100%);
+            padding: 25px;
+            border-radius: 8px;
+            box-sizing: border-box;
+            border: 3px solid var(--board-dark);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+        .create-game h2 {
+            color: var(--piece-black);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+        .create-game input, .create-game select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            background: var(--piece-white);
+            border: 2px solid var(--board-dark);
+            color: var(--piece-black);
+            font-family: 'Georgia', serif;
+            font-size: 16px;
+            box-sizing: border-box;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+        }
+        .create-game input:focus, .create-game select:focus {
+            outline: none;
+            border-color: var(--highlight);
+            box-shadow: 0 0 8px rgba(130, 151, 105, 0.5);
+        }
+        .create-game label {
+            color: var(--piece-black);
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 16px;
+        }
+        .createButton {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--piece-black) 0%, #2a2a2a 100%);
+            color: var(--board-light);
+            font-weight: bold;
+            cursor: pointer;
+            border: 3px solid var(--board-dark);
+            font-size: 18px;
+            box-sizing: border-box;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .createButton:hover {
+            background: linear-gradient(135deg, #2a2a2a 0%, var(--piece-black) 100%);
+            color: var(--selected);
+            border-color: var(--selected);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        /* Games List Section - Chess board squares */
+        .games-list {
+            background: linear-gradient(135deg, var(--board-dark) 0%, #a67c52 100%);
+            padding: 25px;
+            border-radius: 8px;
+            min-height: 300px;
+            border: 3px solid var(--piece-black);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
+        }
+        .games-list h2 {
+            color: var(--board-light);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+        }
+        .lobbyGame {
+            background: linear-gradient(45deg, var(--board-light) 50%, #e8d4a0 50%);
+            background-size: 20px 20px;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 2px solid var(--piece-black);
+            border-radius: 6px;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        .lobbyGame:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+            border-color: var(--highlight);
+        }
+        
+        .linkHeader {
+            font-size: 20px;
+            color: var(--piece-black);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        .linkHeader:hover {
+            color: var(--highlight);
+        }
+        .span {
+            display: block;
+            color: #5d4e37;
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+        .startGame {
+            display: inline-block;
+            padding: 8px 20px;
+            background: var(--piece-black);
+            color: var(--board-light);
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 2px solid var(--board-dark);
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+        .startGame:hover {
+            background: var(--highlight);
+            color: var(--piece-white);
+            border-color: var(--piece-black);
+        }
+
+        /* Mobile styles - Chess responsive */
+        @media (max-width: 768px) {
+            body {
+                background-size: 60px 60px;
             }
-            else{
-                raceBlack = race;
+            nav {
+                padding: 12px 0;
+            }
+            nav a {
+                font-size: 12px;
+                margin: 0 8px;
+                padding: 5px 10px;
+            }
+            nav::after {
+                display: none;
+            }
+            .container {
+                grid-template-columns: 1fr;
+                gap: 25px;
+                margin-top: 20px;
+                width: 95%;
+                padding: 20px;
+            }
+            .container::before {
+                font-size: 24px;
+                top: -20px;
+            }
+            .create-game, .games-list {
+                padding: 20px;
+            }
+            .linkHeader {
+                font-size: 18px;
+            }
+            .span {
+                font-size: 14px;
+            }
+            .startGame {
+                padding: 6px 16px;
+                font-size: 14px;
+            }
+            h2 {
+                font-size: 22px;
+            }
+            .createButton {
+                font-size: 16px;
+                padding: 12px;
+            }
+            .createButton::before,
+            .createButton::after {
+                font-size: 20px;
             }
         }
 
-        const hotseatGameStart = function(){
-            let ifWhiteAI = document.querySelector('#whitePlayerSelect').value
-            let ifBlackAI = document.querySelector('#blackPlayerSelect').value;
-
-            let whoStartsFirst = document.querySelector('#whoStartsFirst').value;
-
-            let ifAllAI =  ifWhiteAI != '' && ifBlackAI != '';
-
-            let gameType = document.querySelector('#gameType')?.value;
-            gameType = gameType ? `&gameType=${gameType}` : ''
-            let aiColor = '&AIColor=';
-            let aiPower = ''
-
-            let startMoveString = `&starts=${whoStartsFirst}`
-
-            
-
-            if(ifAllAI){
-                aiColor+='all'
-                aiPower += `&AIPowerWhite=${ifWhiteAI}&AIPowerBlack=${ifBlackAI}`
+        @media (max-width: 480px) {
+            nav a {
+                font-size: 11px;
+                margin: 0 5px;
+                padding: 4px 8px;
             }
-            else if(ifWhiteAI){
-                aiColor += 'white'
-                aiPower += `&AIPowerWhite=${ifWhiteAI}`
+            .container {
+                gap: 20px;
+                padding: 15px;
             }
-            else if(ifBlackAI){
-                aiColor += 'black'
-                aiPower += `&AIPowerBlack=${ifBlackAI}`
+            .create-game, .games-list {
+                padding: 15px;
             }
-
-
-            
-            window.location.href = `/hotseat?whiteRace=${raceWhite}&blackRace=${raceBlack}${aiColor}${gameType}${aiPower}${startMoveString}`
+            .lobbyGame {
+                padding: 12px;
+                margin-bottom: 15px;
+            }
+            .lobbyGame::before {
+                font-size: 24px;
+            }
+            .linkHeader,
+            .span,
+            .startGame {
+                margin-left: 35px;
+            }
+            h2 {
+                font-size: 20px;
+            }
         }
-    </script>
 
+        /* Ultra small screens */
+        @media (max-width: 360px) {
+            nav {
+                flex-wrap: wrap;
+                padding: 8px 0;
+            }
+            nav a {
+                font-size: 10px;
+                margin: 2px 4px;
+                padding: 3px 6px;
+            }
+            .container {
+                width: 98%;
+                padding: 10px;
+                margin-top: 15px;
+            }
+            .container::before {
+                font-size: 20px;
+                top: -18px;
+                padding: 0 15px;
+            }
+            .create-game, .games-list {
+                padding: 12px;
+            }
+            .create-game h2, .games-list h2 {
+                font-size: 18px;
+                margin-bottom: 15px;
+            }
+            .create-game input, .create-game select {
+                padding: 10px;
+                font-size: 14px;
+                margin-bottom: 15px;
+            }
+            .createButton {
+                font-size: 14px;
+                padding: 10px;
+            }
+            .createButton::before,
+            .createButton::after {
+                font-size: 18px;
+            }
+            .lobbyGame {
+                padding: 10px;
+                margin-bottom: 12px;
+            }
+            .lobbyGame::before {
+                font-size: 20px;
+            }
+            .linkHeader {
+                font-size: 16px;
+                margin-left: 30px;
+            }
+            .span {
+                font-size: 12px;
+                margin-left: 30px;
+                margin-bottom: 8px;
+            }
+            .startGame {
+                font-size: 12px;
+                padding: 5px 12px;
+                margin-left: 30px;
+            }
+        }
 
-<!-- istinski kod-->
+        /* Tablet landscape adjustments */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                max-width: 900px;
+                gap: 30px;
+                padding: 25px;
+            }
+        }
+
+        /* Large screens */
+        @media (min-width: 1200px) {
+            .container {
+                max-width: 1200px;
+                gap: 50px;
+                padding: 40px;
+            }
+            .container::before {
+                font-size: 36px;
+                top: -30px;
+            }
+        }
+
+        /* Ensure touch-friendly targets on mobile */
+        @media (hover: none) and (pointer: coarse) {
+            nav a {
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+            }
+            .createButton,
+            .startGame {
+                min-height: 44px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+        }
+
+        /* Reduced motion preference */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+                animation: none !important;
+            }
+        }
+
+        /* High contrast mode support */
+        @media (prefers-contrast: high) {
+            :root {
+                --board-light: #ffffff;
+                --board-dark: #000000;
+                --piece-white: #ffffff;
+                --piece-black: #000000;
+                --highlight: #ffff00;
+                --threat: #ff0000;
+                --selected: #ffff00;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+            body::before,
+            .container::before,
+            nav::after,
+            .lobbyGame::before,
+            .createButton::before,
+            .createButton::after {
+                display: none;
+            }
+            nav {
+                background: white;
+                border: 1px solid black;
+            }
+            .container {
+                box-shadow: none;
+                border: 1px solid black;
+            }
+            .create-game,
+            .games-list {
+                background: white;
+                border: 1px solid black;
+            }
+        }
+    </style>
+
     <script>
         const socket = io();
         
-        let gameMode = 'raceChoiceChess'
+        // Removed selectMode function as we use standard select element now
 
-        function selectMode(el,mode){
-            gameMode = mode;
-            let elems = document.querySelectorAll(".gameModeSelected");
-            
-            elems.forEach(function(el) {
-                el.classList.remove("gameModeSelected");
-                el.classList.add('gameMode')
-            });
-            el.classList.remove("gameMode");
-
-            el.classList.add('gameModeSelected')
-        }   
         socket.on('rooms', (data)=>{
                 let gamesHTML = document.getElementById('games');
                 gamesHTML.innerHTML = ``
                 data.forEach((el,index) => {
                     gamesHTML.innerHTML += `
-                    <div class="lobbyGame"> <a class="linkHeader"  href="/play?roomId=${el.roomId}">${el.roomId}</a>
-                            <div class="row">
-                                <span class="span"> ${el.players.length} / 2 players</span>
-                            </div>
-                            <div class="row"> 
-                            <a class="startGame" href="/play?roomId=${el.roomId}">Start Game</a>
-                            </div>
-                        
-                    </div>
-                            `
+                    <div class="lobbyGame"> 
+                        <a class="linkHeader" href="/play?roomId=${el.roomId}"><img src="/static/lg/whiteKnight.png" class="icon"> ${el.roomId}</a>
+                        <div class="row">
+                            <span class="span"> ${el.players.length} / 2 players</span>
+                        </div>
+                        <div class="row"> 
+                            <a class="startGame" href="/play?roomId=${el.roomId}"><img src="/static/lg/whitePawn.png" class="icon"> Join Game</a>
+                        </div>
+                    </div>`
                 })
                 if(data.length == 0){
-                    gamesHTML.innerHTML = `<h1>No Games Available</h1>`
+                    gamesHTML.innerHTML = `<h3 style="color: var(--board-light); text-align: center; margin-top: 50px;"><img src="/static/lg/whiteKing.png" class="icon"> No Games Available <img src="/static/lg/blackKing.png" class="icon"></h3>`
                 }
-
         })
 
         fetch('/allgames').then((data) => {
@@ -125,36 +540,31 @@
                 data.json().then((data) => {
                     data.forEach((el,index) => {
                     gamesHTML.innerHTML += `
-                    <div class="lobbyGame"> <a class="linkHeader"  href="/play?roomId=${el.roomId}">${el.roomId}</a>
-                            <div class="row">
-                                <span class="span"> ${el.players.length} / 2 players</span>
-                            </div>
-                            <div class="row"> 
-                            <a class="startGame" href="/play?roomId=${el.roomId}">Start Game</a>
-                            </div>
-                        
-                    </div>
-                            `
+                    <div class="lobbyGame"> 
+                        <a class="linkHeader" href="/play?roomId=${el.roomId}"><img src="/static/lg/whiteKnight.png" class="icon"> ${el.roomId}</a>
+                        <div class="row">
+                            <span class="span"> ${el.players.length} / 2 players</span>
+                        </div>
+                        <div class="row"> 
+                            <a class="startGame" href="/play?roomId=${el.roomId}"><img src="/static/lg/whitePawn.png" class="icon"> Join Game</a>
+                        </div>
+                    </div>`
                     })
                     if(data.length == 0){
-                        gamesHTML.innerHTML = `<h1>No Games Available</h1>`
+                        gamesHTML.innerHTML = `<h3 style="color: var(--board-light); text-align: center; margin-top: 50px;"><img src="/static/lg/whiteKing.png" class="icon"> No Games Available <img src="/static/lg/blackKing.png" class="icon"></h3>`
                     }
                 })
-                    
-                // console.log(data.json())
-
         })
-        let wsc = whiteSquareColor
-        // console.log(wsc)
 
         let startNewGame = function(){
-            let gameName = document.getElementById('gameName').value
+            let gameName = document.getElementById('gameName').value;
+            if(!gameName) {
+                alert("Please enter a game name");
+                return;
+            }
             let gameType = document.querySelector('#selectMode')?.value;
-
             window.location.replace(`/play?roomId=${gameName}&mode=${gameType}`)
         }
-
-
     </script>
 </head>
 
@@ -164,242 +574,32 @@
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-
   gtag('config', 'G-2R833VKB2F');
 </script>
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=AW-11259951906">
-</script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'AW-11259951906');
-</script>
-
-<!-- Event snippet for Page view conversion page -->
-<script>
-    gtag('event', 'conversion', {'send_to': 'AW-11259951906/j3kDCKSz8bsYEKL2lPkp'});
-  </script>
-
 <body>
-<div class="topMenu">
-        <gallery-game buttonText="Back"  hideOnClick="true"  headings='["Multiplayer","Single Player",  "Pieces"]'>
+    <nav>
+        <a href="/lobby" class="active"><img src="/static/lg/whiteKing.png" class="icon"> Lobby</a>
+        <a href="/hotseat-menu"><img src="/static/lg/whiteRicar.png" class="icon"> Hotseat</a>
+        <a href="/campaign"><img src="/static/lg/whiteHorse.png" class="icon"> Campaign</a>
+        <a href="/pieces"><img src="/static/lg/whitePikeman.png" class="icon"> Pieces</a>
+        <a href="/customMaps"><img src="/static/lg/whiteShroom.png" class="icon"> Custom Maps</a>
+        <a href="/create-board"><img src="/static/lg/whiteNorthernKing.png" class="icon"> Board Editor</a>
+    </nav>
 
-        <gallery-game hideBackButton="true" hideOnClick="true" headings='["Create Game", "Join Game"]'> 
-            <div>
-                <div class="column">
-                    <input type="text" id="gameName" placeholder="Game Name">
-                    <!-- <h3 class="cWhite">Game Mode</h3> -->
-                    <!-- <div><h1 id="raceChoiceChess" onclick="selectMode(this,'raceChoiceChess')" class="gameModeSelected">Chess 2</h1></div>
-                    <div><h1 id="minichess" onclick="selectMode(this,'minichess')" class="gameMode">Minichess</h1></div>
-                    <div><h1 id="mongolianChess" onclick="selectMode(this,'mongolianChess')" class="gameMode">Mongolian Chess</h1></div>
-                    <div><h1 id="randomchess" onclick="selectMode(this,'randomchess')" class="gameMode">Randomized Mini Chess</h1></div> -->
-                    <button class="createButton" onclick="startNewGame()">Start</button>
-                    
-                    <div class="mode-row">
-                        <label for="">Mode : </label>
-                        <select name="" id="selectMode">
-                            <option value="raceChoiceChess">Chess 2</option>
-                            <option value="minichess">Mini chess</option>
-                            <option value="mongolianChess">Mongolian chess</option>
-                            <option value="randomChess">Random chess</option>
-                            <option value="morphingRaceChoiceChess">Morphing Chess 2</option>
+    <div class="container">
+        <div class="create-game">
+            <h2><img src="/static/lg/whiteKing.png" class="icon"> Create Game <img src="/static/lg/blackKing.png" class="icon"></h2>
+            <input type="text" id="gameName" placeholder="Enter your game name...">
+            
+            <label for="selectMode"><img src="/static/lg/whiteQueen.png" class="icon"> Game Mode:</label>
+            <select name="" id="selectMode">
+                <option value="raceChoiceChess">Chess 2</option>
+                <option value="minichess">Mini chess</option>
+                <option value="mongolianChess">Mongolian chess</option>
+                <option value="randomChess">Random chess</option>
+                <option value="morphingRaceChoiceChess">Morphing Chess 2</option>
+            </select>
 
-                        </select>
-                    </div>
-
-                </div>
-            </div>
-
-            <div id="games" class="games">
-
-            </div>
-        </gallery-game>
-
-        <gallery-game hideBackButton="true" hideOnClick="true" headings='["Hotseat", "Campaign"]'>
-            <div class="hotseat">
-                <h1 style="text-align:center;">Pick White Race</h1>
-                <div class="row">
-                    <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'medieval')" src="/static/lg/whiteClown.png" alt="">
-                    <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'bug')" src="/static/lg/whiteAnt.png" alt="">
-                    <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'classic')" src="/static/lg/whiteKing.png" alt="">
-                    <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'cyborgs')" src="/static/lg/whiteCrystal.png" alt="">
-                    <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'promoters')" src="/static/lg/whiteNorthernKing.png" alt="">
-                    <select name="" id="whitePlayerSelect">
-                        <option value="">Human Player</option>
-                        <option value="101">Weak AI</option>
-                        <option value="102">Medium AI</option>
-                        <option value="103">Strong AI</option>
-                        <option value="104">Slow thinker AI</option>
-                    </select>
-                </div>
-
-                <h1 style="text-align:center;">Pick Black Race</h1>
-                <div class="row">
-                    <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'medieval')" src="/static/lg/blackClown.png" alt="">
-                    <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'bug')" src="/static/lg/blackAnt.png" alt="">
-                    <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'classic')" src="/static/lg/blackKing.png" alt="">
-                    <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'cyborgs')" src="/static/lg/blackCrystal.png" alt="">
-                    <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'promoters')" src="/static/lg/blackNorthernKing.png" alt="">
-                    <select  name="" id="blackPlayerSelect">
-                        <option value="">Human Player</option>
-                        <option value="101" selected="selected">Weak AI</option>
-                        <option value="102" >Medium AI</option>
-                        <option value="103">Strong AI</option>
-                        <option value="104">Slow thinker AI</option>
-                    </select>
-                </div>
-
-                <div class="row movesFirstRow">
-                    <select id="whoStartsFirst">
-                        <option value="whiteStarts">White Moves First</option>
-                        <option value="blackStarts">Black Moves First</option>
-                    </select>
-
-                </div>
-
-                
-
-                
-                <div class="marginMedium">
-                    <a class="startGame column" onclick="hotseatGameStart()">Start Game</a> 
-
-                    <label for="">Mode</label>
-                    <select name="" id="gameType">
-                        <option value="raceChoiceChess">Chess 2</option>
-                        <option value="classicChess">Chess 1</option>
-                        <option value="miniChess">Minichess</option>
-                        <option value="morphingRaceChoiceChess">Morphing Chess 2</option>
-                        <option value="mongolianChess">Mongolian Chess</option>
-                        <option value="randomChess">Random Chess</option>
-                        <option value="hugeRandomChess">9 x 9 Random Chess</option>
-                        <option value="grandRandomChess">11 x 11 random Chess</option>
-
-                    </select>
-                </div>
-
-            </div>
-
-            <div class="campaign">
-                <h2>Lost in the Dark Forest</h2>
-                <a href="/hotseat?gameType=missionClassicMedievalOne&AIColor=white">
-                    <span>Ch 1</span>
-                    <img src="/static/lg/whiteGhost.png" alt="">
-                </a>
-                <a href="/hotseat?gameType=missionClassicMedievalTwo&AIColor=white">
-                    <span>Ch 2</span>
-                    <img src="/static/lg/whiteHorse.png" alt="">
-                </a>
-                <a href="/hotseat?gameType=missionClassicMedievalThree&AIColor=white">
-                    <span>Ch 3</span>
-                    <img src="/static/lg/whiteClown.png" alt="">
-                </a>
-                <a href="/hotseat?gameType=missionClassicMedievalFour&AIColor=white">
-                    <span>Ch 3</span>
-                    <img src="/static/lg/whiteRicar.png" alt="">
-                </a>
-                <a href="/hotseat?gameType=missionClassicMedievalFive&AIColor=white">
-                    <span>Ch 3</span>
-                    <img src="/static/lg/whitePig.png" alt="">
-
-                </a>
-                <a href="/hotseat?gameType=missionClassicMedievalSix&AIColor=white">
-                    <span>Ch 3</span>
-                    <img src="/static/lg/whiteRicar.png" alt="">
-                </a>
-                <a href="/hotseat?gameType=missionClassicMedievalSeven&AIColor=white">
-                    <span>Ch 3</span>
-                    <img src="/static/lg/whiteHat.png" alt="">
-                </a>
-
-                <h2>The wrath of the swarm</h2>
-                <a href="/hotseat?gameType=missionClassicBugsOne&AIColor=white">
-                    <span>Ch 1</span>
-                    <img src="/static/lg/whiteQueenBug.png" alt="">
-                </a>
-                
-                <a href="/hotseat?gameType=missionClassicBugsTwo&AIColor=white">
-                    <span>Ch 2</span>
-                    <img src="/static/lg/whiteSpider.png" alt="">
-                </a>
-
-                <a href="/hotseat?gameType=missionClassicBugsThree&AIColor=white">
-                    <span>Ch 3</span>
-                    <img src="/static/lg/whiteGoliathBug.png" alt="">
-                </a>
-                <a href="/hotseat?gameType=missionClassicBugsFour&AIColor=white">
-                    <span>Ch 4</span>
-                    <img src="/static/lg/whiteLadyBug.png" alt="">
-                </a>
-                <a href="/hotseat?gameType=missionClassicBugsFive&AIColor=white">
-                    <span>Ch 5</span>
-                    <img src="/static/lg/whiteGoliathBug.png" alt="">
-                </a>
-                <a href="/hotseat?gameType=missionClassicBugsSix&AIColor=white">
-                    <span>Ch 6</span>
-                    <img src="/static/lg/whiteShroom.png" alt="">
-
-                </a>
-
-
-                <h2>Civil War</h2>
-                <a href="/hotseat?gameType=missionClassicPromotersOne&AIColor=white">
-                    <span>Ch 1</span>
-                    <img src="/static/lg/whiteSwordsmen.png" alt="">
-                </a>
-                <a href="/hotseat?gameType=missionClassicPromotersTwo&AIColor=white">
-                    <span>Ch 2</span>
-                    <img src="/static/lg/whitePikeman.png" alt="">
-
-                </a>
-                <a href="/hotseat?gameType=missionClassicPromotersThree&AIColor=white">
-                    <span>Ch 3</span>
-                    <img src="/static/lg/whiteShield.png" alt="">
-                </a>
-                <a href="/hotseat?gameType=missionClassicPromotersFour&AIColor=white">
-                    <span>Ch 4</span>
-                    <img src="/static/lg/whiteNorthernKing.png" alt="">
-                </a>
-
-
-            </div>
-        </gallery-game>
-
-
-        <div class="pieces" >
-            <pieces-game></pieces-game>
+            <button class="createButton" onclick="startNewGame()"><img src="/static/lg/whiteKing.png" class="icon"> Start Game <img src="/static/lg/blackKing.png" class="icon"></button>
         </div>
-
-        </gallery-game>
-</div>
-
-      
-      <!-- <div class="text"><h1>After a Millenium of suspense, the second version of everyones favourite Game is here. </h1>
-    
-                        <h1 style="font-size:5vh; text-align:center;">CHESS 2</h1>
-            </div> -->
-
-
-              <!-- Meta Pixel Code -->
-<script>
-    !function(f,b,e,v,n,t,s)
-    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-    n.queue=[];t=b.createElement(e);t.async=!0;
-    t.src=v;s=b.getElementsByTagName(e)[0];
-    s.parentNode.insertBefore(t,s)}(window, document,'script',
-    'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '1000462291303057');
-    fbq('track', 'PageView');
-    </script>
-    <noscript><img height="1" width="1" style="display:none"
-    src="https://www.facebook.com/tr?id=1000462291303057&ev=PageView&noscript=1"
-    /></noscript>
-    <!-- End Meta Pixel Code -->
-
-</body>
-</html>

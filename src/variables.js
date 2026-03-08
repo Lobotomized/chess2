@@ -41,7 +41,7 @@
 // const lightedSquareColor = '#B0A875';
 // const blockedSquareColor = '#CF6A4E';
 // const availableSquareColor = '#787F42';
-// const backgroundColor = '#674F21';
+const backgroundColor = '#674F21';
 
 // const oldMoveSquareColor = '#AF8964';
 
@@ -52,7 +52,7 @@ let dangerSquareColor = '#E7907F';
 let lightedSquareColor = '#B0A875';
 let blockedSquareColor = '#CF6A4E';
 let availableSquareColor = '#787F42';
-let backgroundColor = 'black';
+//let backgroundColor = 'black';
 
 let oldMoveSquareColor = '#D59148';
 

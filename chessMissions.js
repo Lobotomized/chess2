@@ -390,6 +390,17 @@ app.get('/customMaps', function(req,res){
     return res.status(200).sendFile(__dirname + '/customMaps.html');
 })
 
+app.get('/hotseat-menu', function(req,res){
+    return res.status(200).sendFile(__dirname + '/hotseat-menu.html');
+})
+
+app.get('/campaign', function(req,res){
+    return res.status(200).sendFile(__dirname + '/campaign.html');
+})
+
+app.get('/pieces', function(req,res){
+    return res.status(200).sendFile(__dirname + '/pieces.html');
+})
 
 app.get('/hotseat', function(req,res){
     return res.status(200).sendFile(__dirname + '/hotseat.html');
