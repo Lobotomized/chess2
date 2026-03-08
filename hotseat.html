@@ -21,6 +21,7 @@
 
         <script src="/src/globby.js"></script>
         <script src="/helperFunctions.js"></script>
+        
         <!-- <script src="/src/AI.js"></script> -->
         <link rel="stylesheet" href="/src/main.css">
         
@@ -47,27 +48,7 @@
                 height:5vw;
             }
 
-            .row-hotseat{
-                display:flex;
-                flex-direction: row;
-                justify-content: flex-start;
-                align-items: center;
-                margin-top:20px;
-                padding:20px;
-                line-height:2ch;
-                background:#F7DFDA;
-                border:solid black;
-            }
 
-            .row-hotseat > img{
-                max-width:50px;
-                margin-left:20px;
-            }
-
-            .row-hotseat > h4{
-                margin-left:20px;
-                margin-right:20px;
-            }
 
 
             .reverse{
@@ -107,6 +88,10 @@
 
 
 <body>
+    <div id="loadingScreen">
+        <div class="spinner"></div>
+        Loading Assets...
+    </div>
     <div class="container">
         <canvas id="canvas" width="500" height="500"></canvas>
 
@@ -166,7 +151,7 @@ const closeMenuDialog = function(){
 
 
 
-const buildPieceModal = function(arr){
+const buildPieceModal = function(state, arr){
     let theString;
     let widthOrHeight = screen.width < screen.height? screen.width : screen.height;
     let magicNumber = widthOrHeight > 800 ? squareLength/1.5 : squareLength/2

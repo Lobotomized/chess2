@@ -28,8 +28,8 @@ Object.keys(pieceDefinitions).forEach(key => {
     }
 });
 const {lightBoardFE, checkRemi, getColorPieces} = require('./helperFunctions.js');
-app.use('/static', express.static('public'))
-app.use('/src', express.static('src'))
+app.use('/static', express.static('public', { maxAge: '1d' }))
+app.use('/src', express.static('src', { maxAge: '1d' }))
 
 
 

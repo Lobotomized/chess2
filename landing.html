@@ -94,6 +94,16 @@
     }
 </style>
 <body>
+    <div id="loadingScreen">
+        <div class="spinner"></div>
+        Loading Assets...
+    </div>
+    <script>
+        window.addEventListener('load', function() {
+            const screen = document.getElementById('loadingScreen');
+            if(screen) screen.style.display = 'none';
+        });
+    </script>
     <div class="white">
         <h2 class="textHeader">The Millenium of Suspense is Over</h2>
     </div>

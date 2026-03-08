@@ -613,3 +613,13 @@ function drawPiece(x, y, img, size) {
     break;
     }
 }
+
+const allGameImages = [bBishop, wBishop, bKnight, wKnight, bRook, wRook, bKing, wKing, bPawn, wPawn, bQueen, wQueen, bPig, wPig, wClown, bClown, wHat, bHat, bHorse, wHorse, wGhost, bGhost, wRicar, bRicar, bLadyBug, bSpider, bGoliathBug, bShroom, bAnt, bQueenBug, bBrainBug, wLadyBug, wSpider, wGoliathBug, wShroom, wAnt, wBrainBug, wQueenBug, wSwordsmen, bSwordsmen, wPlagueDoctor, bPlagueDoctor, wGeneral, bGeneral, wStarMan, bStarMan, bFencer, wFencer, wKolba, bKolba, wGargoyle, bGargoyle, wNorthernKing, bNorthernKing, wShield, bShield, wPikeman, bPikeman, wDragon, bDragon, wSleepingDragon, bSleepingDragon, wCyborg, bCyborg, wBootvessel, bBootvessel, wCrystal, bCrystal, wCrystalEmpowered, bCrystalEmpowered, wExecutor, bExecutor, bJuggernaut, wJuggernaut, bBlindCat, wBlindCat, bCuteCat, wCuteCat, bElectricCat, wElectricCat, bFatCat, wFatCat, bLongCat, wLongCat, bScaryCat, wScaryCat];
+
+window.imagesLoaded = Promise.all(allGameImages.map(img => {
+    if (img.complete) return Promise.resolve();
+    return new Promise(resolve => {
+        img.onload = resolve;
+        img.onerror = resolve; // Resolve on error too so we don't hang
+    });
+}));

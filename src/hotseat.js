@@ -59,21 +59,41 @@ if(comingGameType){
 
 
 
-if(hotseatGame.state.gameType){
-    if(hotseatGame.state.gameType === 'customMap'){
-        window[hotseatGame.state.gameType](hotseatGame.state,hotseatGame.state.whiteRace,hotseatGame.state.blackRace).then(() => {
-            setInterval(ani, 100)
-        })
+const startAni = () => {
+    const loadingScreen = document.getElementById('loadingScreen');
+    if(loadingScreen) loadingScreen.style.display = 'none';
+    setInterval(ani, 100);
+}
+
+const startGameLoop = () => {
+    if(hotseatGame.state.gameType){
+        if(hotseatGame.state.gameType === 'customMap'){
+            window[hotseatGame.state.gameType](hotseatGame.state,hotseatGame.state.whiteRace,hotseatGame.state.blackRace).then(() => {
+                startAni();
+            })
+        }
+        else{
+            window[hotseatGame.state.gameType](hotseatGame.state,hotseatGame.state.whiteRace,hotseatGame.state.blackRace)
+            startAni();
+
+        }
     }
     else{
-        window[hotseatGame.state.gameType](hotseatGame.state,hotseatGame.state.whiteRace,hotseatGame.state.blackRace)
-        setInterval(ani, 100)
-
+        startAni();
     }
 }
-else{
-    setInterval(ani, 100)
+
+const waitForImages = async () => {
+    if (document.readyState !== 'complete') {
+         await new Promise(resolve => window.addEventListener('load', resolve));
+    }
+    if(window.imagesLoaded){
+        await window.imagesLoaded;
+    }
+    startGameLoop();
 }
+
+waitForImages();
 
 
 const AIProps = {

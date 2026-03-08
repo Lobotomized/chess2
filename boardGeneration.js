@@ -18,11 +18,29 @@ try{
         
     
     } = require('./pieceDefinitions')
+    var {lightBoardFE}  = require('./helperFunctions.js');
+
+if (typeof window === 'undefined') {
+    if(typeof buildPieceModal === 'undefined'){
+        global.buildPieceModal = function(state, arr){
+            if(state) state.pieceModalMessages = arr;
+        }
+    }
+}
+
 }
 
 catch(err){
 }
-function buildModal(arr){
+function buildModal(state, arr, theModal){
+    console.log(theModal)
+    if(theModal){
+        modal = theModal
+    }
+    if(state) state.modalMessages = arr;
+    if (typeof modal === 'undefined') {
+        return;
+    }
     modal.innerHTML = ``;
     arr.forEach((el) => {
         if(el.type === 'quote'){
@@ -245,7 +263,7 @@ function morphingRaceChoiceChess(state,raceWhite,raceBlack){
     raceChoiceChess(state,raceWhite,raceBlack);
 
     try{
-        buildModal([
+        buildModal(state, [
             {type:'objectives', classes:"",text:`After every move one of your pieces mutates to another one.`}
          ])
     }
@@ -411,9 +429,10 @@ function mongolianChess(state){
     board = state.board;
     pieces.length = 0;
     board.length = 0;
-    buildModal([
+    buildModal(state, [
         {type:'objectives', classes:"",text:`Whoever manages to step on the purple square and than step out of it wins the game.`}
      ])
+ 
     for (let x = 1; x <= 9; x++) {
         for (let y = 1; y <= 9; y++) {
             if(x == 5 && y == 5){
@@ -971,14 +990,14 @@ function missionClassicBugsOne(state){
 
     let queenBug = queenbugFactory('white',4,4)
     lightBoardFE(queenBug,{board:miniBoard, pieces:[queenBug],turn:"white"},'lighted')
-    buildModal([
+    buildModal(state, [
         {type:'quote', classes:"",text:`There is an infestation here! There is no time to notify the others. <br/>
                                         <b>I have to save the village myself</b>.`,icon:"/blackKnight.png"},
         
         {type:'objectives', classes:"",text:`Leave no brood mothers on the board.`}
     ])
 
-    buildPieceModal([
+    buildPieceModal(state, [
         {
             type:'piece',
             classes:"",
@@ -1001,7 +1020,7 @@ function missionClassicBugsOne(state){
                 if(!queenBug){
                     state.won = 'black'
                     state.message='You won'
-                    buildModal([
+                    buildModal(state, [
                         {type:'link', classes:"", text:'You won!',linkText:'Go to next level', link:`/hotseat?gameType=missionClassicBugsTwo&AIColor=white`}
                         
                     ])
@@ -1015,7 +1034,7 @@ function missionClassicBugsOne(state){
                 if(!blackPiece){
                     state.won = 'white'
                     state.message='You lost'
-                    buildModal([
+                    buildModal(state, [
                         {type:'link', classes:"", text:'You lost!',linkText:'Restart', link:`/hotseat?gameType=missionClassicBugsOne&AIColor=white`}
                         
                     ])
@@ -1044,7 +1063,7 @@ function missionClassicBugsTwo(state){
     pieces.length = 0;
     // aiPowers['white']=5;
 
-    buildModal([
+    buildModal(state, [
         {type:'quote', classes:"",text:`My lord we are under attack. We might lose the battle. <br/><br/> We should evacuate you from here.`,icon:"/blackKnight.png"},
         {type:'objectives', text:`
             Get the prince to the end of the board or take all spiders. <br/><br/>
@@ -1058,7 +1077,7 @@ function missionClassicBugsTwo(state){
 
     lightBoardFE(spider,{board:miniBord, pieces:[spider],turn:"white"},'lighted')
     
-    buildPieceModal([
+    buildPieceModal(state, [
         {
             type:'piece',
             classes:"",
@@ -1085,7 +1104,7 @@ function missionClassicBugsTwo(state){
                 if(!whitePiece || endOfLine){
                     state.won = 'black';
 
-                    buildModal([
+                    buildModal(state, [
                         {type:'link', classes:"", text:'The prince is safe!',linkText:'Go to next level', link:`/hotseat?gameType=missionClassicBugsThree&AIColor=white`}
                         
                     ])
@@ -1108,7 +1127,7 @@ function missionClassicBugsTwo(state){
         kingFactory('black',2,0, {
             gameEndedEvent:function(colorWon){
                 if(colorWon === 'white'){
-                    buildModal([
+                    buildModal(state, [
                         {type:'link', text:"Defeat!!!", linkText:"Restart the mission", link:"/hotseat?gameType=missionClassicBugsTwo&AIColor=white"}
                      ])
                 }
@@ -1144,7 +1163,7 @@ function missionClassicBugsThree(state){
 
     lightBoardFE(goliathBug,{board:miniBord, pieces:[goliathBug],turn:"white"},'lighted')
     
-    buildPieceModal([
+    buildPieceModal(state, [
         {
             type:'piece',
             classes:"",
@@ -1158,7 +1177,7 @@ function missionClassicBugsThree(state){
         }
     ])
 
-    buildModal([
+    buildModal(state, [
         {type:'quote', classes:"",text:`The Shroom is at the end of the map. We need to take it even if we have to sacrifice ourselves. <br/><br/>Otherwise the insectoids willw in.`,icon:"/blackKnight.png"},
         {type:'objectives', text:`
             Get the immovable shroom. The Goliath Bug will attempt to sabotage you.
@@ -1258,7 +1277,7 @@ function missionClassicBugsFive(parentState){
 
     parentState.countDown = 18;
 
-    buildModal([
+    buildModal(state, [
         {type:'objectives', classes:"",text:`Survive 18 turns before the cavalry arrives and than take all the remaining enemies.`}
      ])
      parentState.specialOnMoveEffects = [
@@ -1268,7 +1287,7 @@ function missionClassicBugsFive(parentState){
             }
             state.message = state.countDown +" turns till the cavalry arrives"
             if(state.won === 'white'){
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"Defeat!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicBugsFive&AIColor=white"}
                  ])
             }
@@ -1328,7 +1347,7 @@ function missionClassicBugsFive(parentState){
                 })
 
                 if(!counter){
-                    buildModal([
+                    buildModal(state, [
                         {type:'link', text:"Victory!!!", linkText:"Go to next mission", link:"/hotseat?gameType=missionClassicBugsSix&AIColor=white"}
                      ])
                 }
@@ -1352,7 +1371,7 @@ function missionClassicBugsFive(parentState){
         kingFactory('black',4,0, {
             gameEndedEvent:function(colorWon){
                 if(colorWon === 'white'){
-                    buildModal([
+                    buildModal(state, [
                         {type:'link', text:"Defeat!!!", linkText:"Restart the mission", link:"/hotseat?gameType=missionClassicBugsFive&AIColor=white"}
                      ])
                 }
@@ -1392,7 +1411,7 @@ function missionClassicBugsFour(state){
 
 
 
-    buildModal([
+    buildModal(state, [
         {type:'quote', classes:"",text:`Your majesties! The insectoids have found us unprepared. <br/><br/> We need to escape from here! `,icon:"/blackKing.png"},
         {type:'objectives', classes:"",text:`Reach the last row with your two kings. <br/><br/>Pawns cannot be  promoted.`}
      ])
@@ -1400,7 +1419,7 @@ function missionClassicBugsFour(state){
      let miniBord = xyBoard(8,8,[]);
      let ladybug = strongLadyBugFactory('white',4,4)
      lightBoardFE(ladybug,{board:miniBord, pieces:[ladybug],turn:"white"},'lighted')
-     buildPieceModal([
+     buildPieceModal(state, [
         {
             type:'piece',
             classes:"",
@@ -1429,7 +1448,7 @@ function missionClassicBugsFour(state){
         kingFactory('black',4,3, {
             gameEndedEvent:function(colorWon){
                 if(colorWon === 'white'){
-                    buildModal([
+                    buildModal(state, [
                         {type:'link', text:"Defeat!!!", linkText:"Restart the mission", link:"/hotseat?gameType=missionClassicBugsFour&AIColor=white"}
                      ])
                 }
@@ -1438,7 +1457,7 @@ function missionClassicBugsFour(state){
         kingFactory('black',3,3, {
             gameEndedEvent:function(colorWon){
                 if(colorWon === 'white'){
-                    buildModal([
+                    buildModal(state, [
                         {type:'link', text:"Defeat!!!", linkText:"Restart the mission", link:"/hotseat?gameType=missionClassicBugsFour&AIColor=white"}
                      ])
                 }
@@ -1472,7 +1491,7 @@ function missionClassicMedievalSeven(state){
 
     aiPowers['white'] = 2;
     AICharacter = 'positionalOffensiveCharacter'
-    buildModal([
+    buildModal(state, [
         {type:'quote', classes:"",text:`The tree gods have crossed too many lines.</b> Peace is what we seek and peace is what we will get once we <b>KILL THEM</b>. `,icon:"/blackKing.png"},
         {type:'objectives', classes:"",text:`Take at least one of the magical hats and the forest will lose it's magic.`}
      ])
@@ -1480,7 +1499,7 @@ function missionClassicMedievalSeven(state){
      let miniBord = xyBoard(8,8,[]);
      let hat = hatFactory('white',4,4)
      lightBoardFE(hat,{board:miniBord, pieces:[hat],turn:"white"},'lighted')
-     buildPieceModal([
+     buildPieceModal(state, [
         {
             type:'piece',
             classes:"",
@@ -1543,7 +1562,7 @@ function missionClassicMedievalSix(state){
     }
     try{
 
-        buildModal([
+        buildModal(state, [
            {type:'quote', classes:"",text:`Sire, traitors have joined our enemy. <b>They ambushed us!</b>`,icon:"/blackRook.png"},
            {type:'quote', classes:"",text:`Destroy them all!!!`,icon:"/blackKing.png"},
            {type:'objectives', text:`Leave no enemy Knights or Crusaders on the field`},
@@ -1572,7 +1591,7 @@ function missionClassicMedievalSix(state){
                 state.won = 'black';
                 state.message='You won!'
 
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"Victory!!!", linkText:"Go to next mission", link:"/hotseat?gameType=missionClassicMedievalSeven&AIColor=white"}
                 ])
             }
@@ -1601,7 +1620,7 @@ function missionClassicMedievalFive(state){
 
             if(findAllPieces.length < 5){
                 state.won = 'white';
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"Defeat!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicMedievalFive&AIColor=white"}
                 ])
             }
@@ -1612,7 +1631,7 @@ function missionClassicMedievalFive(state){
 
             if(haveAllPigsFinished.length ===3){
                 state.won = 'black';
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"Victory!!!", linkText:"Go to next mission", link:"/hotseat?gameType=missionClassicMedievalSix&AIColor=white"}
                 ])
             }
@@ -1635,7 +1654,7 @@ function missionClassicMedievalFive(state){
                 availableSquareColor = '#787F42';
                 backgroundColor = '#2E4F4F';
                 oldMoveSquareColor = '#D59148';
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"We were too late", linkText:"Restart", link:"/hotseat?gameType=missionClassicMedievalFive&AIColor=white"}
                 ])
             }
@@ -1646,7 +1665,7 @@ function missionClassicMedievalFive(state){
         let miniBord = xyBoard(8,8,[]);
         let pig = pigFactory('white',4,7)
         lightBoardFE(pig,{board:miniBord, pieces:[pig],turn:"white"},'lighted')
-        buildModal([
+        buildModal(state, [
             {type:'quote', classes:"reverse",text:`The animals have gone insane. We have to herd them back before we lose some..</b>`,icon:"/blackBishop.png"},
             {type:'quote', classes:"",text:`Why are they acting so strange? `,icon:"/blackKnight.png"},
             {type:'quote', classes:"reverse",text:`I have no idea but be very careful. There might be intruders.</b>`,icon:"/blackBishop.png"},
@@ -1664,7 +1683,7 @@ function missionClassicMedievalFive(state){
             }
         ])
         
-        buildPieceModal([
+        buildPieceModal(state, [
             {
                 type:'piece',
                 classes:"",
@@ -1716,8 +1735,7 @@ function missionClassicMedievalFour(state){
             if(whitePieces < 1){
                 state.won = 'black';
                 state.message = "You won";
-                buildModal(
-                    [
+                buildModal(state, [
                         {type:'link', text:"Victory!!!", linkText:"Go to the next mission", link:"/hotseat?gameType=missionClassicMedievalFive&AIColor=white"}
                     ]
                 )
@@ -1727,8 +1745,7 @@ function missionClassicMedievalFour(state){
                 state.won = 'white';
                 state.message = "You lost"
                 
-                buildModal(
-                    [
+                buildModal(state, [
                         {type:'link', text:"Defeat!!!", linkText:"Repeat the mission", link:"/hotseat?gameType=missionClassicMedievalFour&AIColor=white"}
                     ]
                 )
@@ -1736,14 +1753,14 @@ function missionClassicMedievalFour(state){
         }
     ]
 
-    buildModal([
+    buildModal(state, [
         {type:'quote', classes:"",text:`Why are you standing against us brother?`,icon:"/blackRook.png"},
         {type:'quote', classes:"reverse",text:`You have desecrated the forests.`,icon:"/whiteRicar.png"},
         {type:'quote', classes:"",text:`So you betray your own?`,icon:"/blackRook.png"},
         {type:'quote', classes:"reverse",text:`I was never on your side to betray you.`,icon:"/whiteRicar.png"},
         {type:'objectives', text:"There should be no white pieces left on the board. <br/> Don't lose a piece."}
     ])
-    buildPieceModal([
+    buildPieceModal(state, [
         {
             type:'piece',
             classes:"",
@@ -1817,7 +1834,7 @@ function missionClassicMedievalThree(state){
                 if(!findOne || state.won === 'black'){
                     state.message = 'You won'
                     state.won = 'black';
-                    buildModal([
+                    buildModal(state, [
                         {type:'link', text:"Victory!!!", linkText:"Go to the next mission", link:"/hotseat?gameType=missionClassicMedievalFour&AIColor=white"}
                     ])
                 }
@@ -1836,7 +1853,7 @@ function missionClassicMedievalThree(state){
                     state.won = 'white'
                     state.message = 'You lost'
 
-                    buildModal([
+                    buildModal(state, [
                         {type:'link', text:"Defeat!!!", linkText:"Repeat the mission", link:"/hotseat?gameType=missionClassicMedievalThree&AIColor=white"}
                     ])
                 }
@@ -1846,12 +1863,12 @@ function missionClassicMedievalThree(state){
             }
         ]
 
-        buildModal([
+        buildModal(state, [
             {type:'quote', classes:"",text:`I will use the night to steal the Wood Gods potion and bring it to the king.</b>`,icon:"/blackRook.png"},
             {type:'objectives', text:"Take the immovable potion or all the clowns before the night is over."}
 
         ])
-        buildPieceModal([
+        buildPieceModal(state, [
             {
                 type:'piece',
                 classes:"",
@@ -1893,14 +1910,14 @@ function missionClassicMedievalTwo(state){
         let horse = horseFactory('white',4,4);
 
         lightBoardFE(horse,{board:miniBord, pieces:[horse],turn:"white"},'lighted')
-        buildModal([
+        buildModal(state, [
             {type:'quote', classes:"",text:`Today we are going to catch a <b>hornless unicorn</b>.`,icon:"/blackBishop.png"},
             {type:'quote', classes:"reverse",text:`You mean... like a horse?`,icon:"/blackPawn.png"},
             {type:'quote', classes:"",text:`No, you fool. Like an unicorn without a horn.`,icon:"/blackBishop.png"},
             {type:'objectives', classes:"",text:`Catch the unicorn. (Pawns can't be promoted without a king on the board)`},
         ])
 
-        buildPieceModal([
+        buildPieceModal(state, [
             {
                 type:'piece',
                 classes:"",
@@ -1925,7 +1942,7 @@ function missionClassicMedievalTwo(state){
             })
             if(!findWhitePiece){
                 state.won = 'black';
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"Victory!!!", linkText:"Go to the next mission", link:"/hotseat?gameType=missionClassicMedievalThree&AIColor=white"}
                 ])
             }
@@ -1957,7 +1974,7 @@ function missionClassicMedievalOne(state){
     board.length = 0;
     xyBoard(6,6,board);
     try{
-        buildModal([
+        buildModal(state, [
             {type:'quote', classes:"",text:`The forest is haunted. <br>Spending the night here will surely mean most of us will die.`,icon:"/blackBishop.png"},
             {type:'quote', classes:"reverse",text:`Can we not do it?`,icon:"/blackPawn.png"},
             {type:'quote', classes:"",text:`No. I really want to piss of the wood gods. <br> Don't worry about me. I will be save behind you.`,icon:"/blackBishop.png"},
@@ -1967,7 +1984,7 @@ function missionClassicMedievalOne(state){
         let miniBord = xyBoard(8,8,[]);
         let ghost = ghostFactory('white',4,4)
         lightBoardFE(ghost,{board:miniBord, pieces:[ghost],turn:"white"},'lighted')
-        buildPieceModal([
+        buildPieceModal(state, [
             {
                 type:'piece',
                 classes:"",
@@ -2020,7 +2037,7 @@ function missionClassicMedievalOne(state){
                 backgroundColor = '#675442';
                 oldMoveSquareColor = '#D59148';
                 state.won = 'black';
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"Victory!!!", linkText:"Go to the next mission", link:"/hotseat?gameType=missionClassicMedievalTwo&AIColor=white"}
                 ])
             }
@@ -2031,7 +2048,7 @@ function missionClassicMedievalOne(state){
 
             if(bishop === undefined){
                 state.won = 'white';
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"Defeat!!!", linkText:"Repeat the mission", link:"/hotseat?gameType=missionClassicMedievalOne&AIColor=white"}
                 ])
             }
@@ -2070,8 +2087,7 @@ function missionClassicPromotersFive(state){
     //AICharacter = 'offensiveCharacter'
 
 
-    buildModal(
-        [{type:'quote', text:`One of the false kings loyal to the usurper is trying to stage a coup at the capitol. <br/><br/>
+    buildModal(state, [{type:'quote', text:`One of the false kings loyal to the usurper is trying to stage a coup at the capitol. <br/><br/>
                              The militia should stop him. 
         
         `,  icon:"blackPawn.png"},
@@ -2088,7 +2104,7 @@ function missionClassicPromotersFive(state){
     
 
     lightBoardFE(wFencer,{board:miniBord, pieces:[wFencer],turn:"white"},'lighted')
-    buildPieceModal([
+    buildPieceModal(state, [
         {
             type:'piece',
             classes:"",
@@ -2111,12 +2127,12 @@ function missionClassicPromotersFive(state){
             })
 
             if(!nKing){
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"You Won!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicPromotersFive&AIColor=white"}
                 ])
             }
             else if(nKing.y === 0){
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"You Lost!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicPromotersFour&AIColor=white"}
                 ])
             }
@@ -2151,8 +2167,7 @@ function missionClassicPromotersFour(state){
     //AICharacter = 'offensiveCharacter'
 
 
-    buildModal(
-        [{type:'quote', text:`One of the false kings loyal to the usurper is trying to stage a coup at the capitol. <br/><br/>
+    buildModal(state, [{type:'quote', text:`One of the false kings loyal to the usurper is trying to stage a coup at the capitol. <br/><br/>
                              The militia should stop him. 
         
         `,  icon:"blackPawn.png"},
@@ -2168,7 +2183,7 @@ function missionClassicPromotersFour(state){
 
 
     lightBoardFE(nKing,{board:miniBord, pieces:[nKing],turn:"white"},'lighted')
-    buildPieceModal([
+    buildPieceModal(state, [
         {
             type:'piece',
             classes:"",
@@ -2195,12 +2210,12 @@ function missionClassicPromotersFour(state){
             })
 
             if(!nKing){
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"You Won!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicPromotersFive&AIColor=white"}
                 ])
             }
             else if(nKing.y === 0){
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"You Lost!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicPromotersFour&AIColor=white"}
                 ])
             }
@@ -2251,7 +2266,7 @@ function missionClassicPromotersThree(state){
         }
     })
 
-    buildModal([
+    buildModal(state, [
         {type:'quote', text:`If we don't kill  the rebelion quickly it might get worse. We need to be swift. 
         
         `,  icon:"blackPawn.png"},
@@ -2266,7 +2281,7 @@ function missionClassicPromotersThree(state){
     let miniBord = xyBoard(8,8,[]);
     let theShield = shield('white',4,4)
     lightBoardFE(theShield,{board:miniBord, pieces:[theShield],turn:"white"},'lighted')
-    buildPieceModal([
+    buildPieceModal(state, [
         {
             type:'piece',
             classes:"",
@@ -2290,7 +2305,7 @@ function missionClassicPromotersThree(state){
                 state.message= state.countDown + " turns to pacify the rebels"
             }
             else if(state.countDown === 0){
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"Defeat!!!", linkText:"Restart", link:"/hotseat?gameType=missionClassicPromotersThree&AIColor=white"}
                 ])
 
@@ -2314,7 +2329,7 @@ function missionClassicPromotersThree(state){
             if(youWin){
                 state.won = 'black';
                 state.message = "You won!"
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"You Won!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicPromotersFour&AIColor=white"}
                 ])
             }
@@ -2356,7 +2371,7 @@ function missionClassicPromotersTwo(state){
     let ghost = pikeman('white',4,4)
     lightBoardFE(ghost,{board:miniBord, pieces:[ghost],turn:"white"},'lighted','blocked')
 
-    buildModal([
+    buildModal(state, [
         {type:'quote', text:`Surrender now usurper and your blood shall be spared.
         
         `,  icon:"blackRook.png"},
@@ -2366,7 +2381,7 @@ function missionClassicPromotersTwo(state){
             Mate the enemy king.
         `}
     ])
-    buildPieceModal([
+    buildPieceModal(state, [
         {
             type:'piece',
             classes:"",
@@ -2399,7 +2414,7 @@ function missionClassicPromotersTwo(state){
         kingFactory('white',0,7,{
             gameEndedEvent:function(colorWon){
                 if(colorWon === 'black'){
-                    buildModal([
+                    buildModal(state, [
                         {type:'link', text:"Victory!!!", linkText:"You Won!", link:"/hotseat?gameType=missionClassicPromotersThree&AIColor=white"}
                      ]) 
                 }
@@ -2429,7 +2444,7 @@ function missionClassicPromotersOne (state){
         unpromotablePawn('black',0,0) ,unpromotablePawn('black',1,0), unpromotablePawn('black',2,0),unpromotablePawn('black',3,0), unpromotablePawn('black',4,0),unpromotablePawn('black',5,0),
 
     )
-    buildModal([
+    buildModal(state, [
         {type:'quote', text:`The King gave an order that anyone who fought in the Northern wars should leave their weapons and go back to the capitol.
                             </br> Come on men. Let's not turn this into a theater.
         
@@ -2450,7 +2465,7 @@ function missionClassicPromotersOne (state){
     let miniBord = xyBoard(8,8,[]);
     let sMen = swordsMen('white',4,4)
     lightBoardFE(sMen,{board:miniBord, pieces:[sMen],turn:"white"},'lighted')
-    buildPieceModal([
+    buildPieceModal(state, [
         {
             type:'piece',
             classes:"",
@@ -2488,7 +2503,7 @@ function missionClassicPromotersOne (state){
             }
             if(youWin){
                 state.won = 'black';
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"You Won!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicPromotersTwo&AIColor=white"}
                 ])
             }
@@ -2506,7 +2521,7 @@ function missionClassicCyborgsOne (state){
         unpromotablePawn('black',4,1),unpromotablePawn('black',5,1),unpromotablePawn('black',3,1),
         juggernautFactory('white',0,4)
     )
-    buildModal([
+    buildModal(state, [
         {type:'quote', text:`Your majesty be careful! We have never seen a beast like this!`,  icon:"blackPawn.png"},
         {type:'quote', classes:'reverse', text:"What is this abomination!?!",  icon:"blackKing.png"},
 
@@ -2523,12 +2538,12 @@ function missionClassicCyborgsOne (state){
         function(state){
             if(king.y === 5){
                 state.won='black'
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"Victory!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicCyborgsOne&AIColor=white"}
                 ])
             }
             if(state.won === 'white'){
-                buildModal([
+                buildModal(state, [
                     {type:'link', classes:"", text:'Defeat!!!',linkText:'Restart the mission', link:`/hotseat?gameType=missionClassicCyborgsOne&AIColor=white`}
                     
                 ])
@@ -2540,7 +2555,7 @@ function missionClassicCyborgsOne (state){
     let miniBord = xyBoard(8,8,[]);
     let jugg = juggernautFactory('white',4,4)
     lightBoardFE(jugg,{board:miniBord, pieces:[jugg],turn:"white"},'lighted')
-    buildPieceModal([
+    buildPieceModal(state, [
         {
             type:'piece',
             classes:"",
@@ -2568,7 +2583,7 @@ function missionClassicCyborgsTwo (state){
         cyborgFactory('white',6,5),
         cyborgFactory('white',5,5)
     )
-    buildModal([
+    buildModal(state, [
         {type:'quote', text:`The aliens are attacking! We have to stop them!`,  icon:"blackKnight.png"},
         {type:'objectives', text:`
             Take all the cyborgs.<br/>
@@ -2580,7 +2595,7 @@ function missionClassicCyborgsTwo (state){
     state.specialOnDrawEffects =  [
         function(){
             state.won = "black";
-            buildModal([
+            buildModal(state, [
                 {type:'link', classes:"", text:'Defeat!!!',linkText:'Restart the mission', link:`/hotseat?gameType=missionClassicCyborgsTwo&AIColor=white`}
             ])
             return;
@@ -2594,7 +2609,7 @@ function missionClassicCyborgsTwo (state){
 
             if(!thePiece){
                 state.won = "black"
-                buildModal([
+                buildModal(state, [
                     {type:'link', text:"Victory!!!", linkText:"Go to the next adventure", link:"/hotseat?gameType=missionClassicCyborgsThree&AIColor=white"}
                 ])
                 return;
@@ -2606,7 +2621,7 @@ function missionClassicCyborgsTwo (state){
 
             if(!theKnight){
                 state.won = "white";
-                buildModal([
+                buildModal(state, [
                     {type:'link', classes:"", text:'Defeat!!!',linkText:'Restart the mission', link:`/hotseat?gameType=missionClassicCyborgsTwo&AIColor=white`}
                     
                 ])
@@ -2619,7 +2634,7 @@ function missionClassicCyborgsTwo (state){
     let miniBord = xyBoard(8,8,[]);
     let cyborg = cyborgFactory('white',4,4)
     lightBoardFE(cyborg,{board:miniBord, pieces:[cyborg],turn:"white"},'lighted')
-    buildPieceModal([
+    buildPieceModal(state, [
         {
             type:'piece',
             classes:"",
@@ -2648,7 +2663,7 @@ function missionClassicCyborgsThree (state){
         juggernautFactory('white',7,7),
         king
     )
-    buildModal([
+    buildModal(state, [
         {type:'quote', text:`The aliens are attacking! We have to stop them!`,  icon:"blackKnight.png"},
         {type:'objectives', text:`
             Take all the cyborgs.<br/>
@@ -2666,7 +2681,7 @@ function missionClassicCyborgsThree (state){
     let miniBord = xyBoard(8,8,[]);
     let bootVessel = bootvesselFactory('white',4,4)
     lightBoardFE(bootVessel,{board:miniBord, pieces:[bootVessel],turn:"white"},'lighted')
-    buildPieceModal([
+    buildPieceModal(state, [
         {
             type:'piece',
             classes:"",

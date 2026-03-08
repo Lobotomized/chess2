@@ -9,7 +9,10 @@
 
 <script src="/helperFunctions.js"></script>
 
-
+<script>
+    let modalAdded = false;
+    let pieceModalAdded = false;
+</script>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -59,9 +62,9 @@
     gtag('event', 'conversion', {'send_to': 'AW-11259951906/j3kDCKSz8bsYEKL2lPkp'});
   </script>
 
-  
 
 
+<script src="/boardGeneration.js"></script>
 
 <body>
     <div class="container">
@@ -81,6 +84,20 @@
 
     </div>
 
+
+        <dialog id="menuDialog">
+        <div class="dialogContent">
+            <button class="dialogButton" onclick="closeMenuDialog()">Return to game</button>
+            <a class="dialogButton" href="/">Go to Start</a>
+        </div>
+    </dialog>
+    <div onclick="closeModal('modal')" class="modal displayNone">
+
+    </div>
+
+    <div onclick="closeModal('pieceModal')" class="pieceModal displayNone">
+        
+    </div>
 
 </body>
 
@@ -109,7 +126,13 @@
     })
     socket.on('rooms', (data) => {
     })
-    socket.on('returnState', (secretState) => {
+    socket.on('returnState', async (secretState) => {
+        if (document.readyState !== 'complete') {
+             await new Promise(resolve => window.addEventListener('load', resolve));
+        }
+        if (window.imagesLoaded) {
+            await window.imagesLoaded;
+        }
         //Draw the game
 
         const myTurnH1 = document.getElementById('turn');
@@ -117,6 +140,16 @@
         canvas.width = squareLength * boardWidth + squareLength;
         canvas.height = squareLength * boardWidth + squareLength;
         state = secretState;
+
+        if(state.modalMessages && !modalAdded){
+            buildModal(state, state.modalMessages, modal);
+        }
+        if(state.pieceModalMessages && typeof buildPieceModal !== 'undefined' && !pieceModalAdded){
+            console.log('here?')
+            buildPieceModal(state, state.pieceModalMessages, pieceModal);
+        }
+        modalAdded = true;
+        pieceModalAdded = true;
         if(hoveredPiece){
             if(hoveredPiece.color != IAM && IAM != undefined){
                 lightBoardFE(hoveredPiece,state,'red','grey')
@@ -435,5 +468,27 @@
     src="https://www.facebook.com/tr?id=1000462291303057&ev=PageView&noscript=1"
     /></noscript>
     <!-- End Meta Pixel Code -->
+  
+<script>
+        let modal = document.querySelector('.modal');
+        let pieceModal = document.querySelector('.pieceModal');
+        let closeModal = function(which){
+            if(which === 'modal'){
+                modal.classList.add("displayNone")
+            }
+            else if(which === 'pieceModal'){
+                pieceModal.classList.add("displayNone")
+                modal.classList.remove('displayNone');
+            }
+        }
 
+        
+        const openMenuDialog = function(){
+            document.getElementById("menuDialog").showModal();
+        }
+
+        const closeMenuDialog = function(){
+            document.getElementById("menuDialog").close();
+        }
+</script>
 </html>

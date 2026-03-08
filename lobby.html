@@ -578,6 +578,16 @@
 </script>
 
 <body>
+    <div id="loadingScreen">
+        <div class="spinner"></div>
+        Loading Assets...
+    </div>
+    <script>
+        window.addEventListener('load', function() {
+            const screen = document.getElementById('loadingScreen');
+            if(screen) screen.style.display = 'none';
+        });
+    </script>
     <nav>
         <a href="/lobby" class="active"><img src="/static/lg/whiteKing.png" class="icon"> Lobby</a>
         <a href="/hotseat-menu"><img src="/static/lg/whiteRicar.png" class="icon"> Hotseat</a>
