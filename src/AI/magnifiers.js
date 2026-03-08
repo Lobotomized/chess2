@@ -373,18 +373,18 @@ function positionalCharacter(weight){
 }
 
 function defaultCharacter(weight){
-
+    
     switch(weight){
         default:
         case 0:
             return [
                 {method:evaluationMagnifierMaxOptions,options:{posValue:0.1}},
-                {method:evaluationMagnifierPiece, options:{pieceValue:1 }}
+                {method:evaluationMagnifierPiece, options:{pieceValue:1.5 }}
             ]
         case 1:
             return [
                 {method:evaluationMagnifierMaxOptions,options:{posValue:0.1}},
-                {method:evaluationMagnifierPiece, options:{pieceValue:1.1 }},
+                {method:evaluationMagnifierPiece, options:{pieceValue:1.5 }},
                 {method:evaluationMagnifierPieceDefended, options:{relativeValue:0.1}}
             ]
         case 2:

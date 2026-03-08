@@ -3487,7 +3487,6 @@ async function customMap(state){
     }
     const thePieces = json.pieces.map((piece) => {
         let pieceString = piece.pieceType.slice(0,-4).toLowerCase() + 'Factory'
-        console.log(pieceString , ' wtf?')
         return window[pieceString](piece.color,piece.x,piece.y)
     })
     state.board = json.squares;

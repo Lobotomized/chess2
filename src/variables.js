@@ -41,9 +41,9 @@
 // const lightedSquareColor = '#B0A875';
 // const blockedSquareColor = '#CF6A4E';
 // const availableSquareColor = '#787F42';
-const backgroundColor = '#674F21';
+let backgroundColor = '#674F21';
 
-// const oldMoveSquareColor = '#AF8964';
+// const oldMoveSquareColor = '#040302ff';
 
 //Deni Novi Novi
 let blackSquareColor = '#7D6650';

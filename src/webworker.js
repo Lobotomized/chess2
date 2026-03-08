@@ -10,7 +10,7 @@ importScripts('/src/AI/filters.js')
 importScripts('/src/jsonfn.js')
 
 
-
+console.log("What is happening?2")
 function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters){
     state.id = crypto.randomUUID()
     let enemy = getEnemy(maximizer);
@@ -62,6 +62,7 @@ function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters){
 
 self.addEventListener("message", function(e) {
     let obj = JSON.parse(e.data)
+
     if(!obj.state.won){
 
             let move;
@@ -195,9 +196,9 @@ self.addEventListener("message", function(e) {
                 )
             }
 
-
             if(obj.AIPower === 101){
-                console.time('101')
+                console.log('here?!!! ', obj)
+                console.time('101 ')
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
                     methods[obj.AICharacter](0),
                     [
