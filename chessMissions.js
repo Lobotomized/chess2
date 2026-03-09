@@ -7,6 +7,7 @@ app.use('/pieceDefinitions.js', express.static('./pieceDefinitions.js'))
 app.use('/pieces', express.static('./pieces'))
 app.use('/helperFunctions.js', express.static('./helperFunctions.js'))
 app.use('/moveMethods.js', express.static('./moveMethods.js'))
+app.use('/rogueLike.js', express.static('./rogueLike.js'))
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const newG = require('./globby').newIOServerV2;
@@ -405,6 +406,10 @@ app.get('/pieces', function(req,res){
 
 app.get('/hotseat', function(req,res){
     return res.status(200).sendFile(__dirname + '/hotseat.html');
+})
+
+app.get('/rogueLike.html', function(req,res){
+    return res.status(200).sendFile(__dirname + '/rogueLike.html');
 })
 
 app.get('/create-board', function(req,res){

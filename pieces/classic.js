@@ -244,15 +244,15 @@ function simpleKingFactory(color, x, y){
         ],
         afterPlayerMove: function (state,move,prevMove){
             if(this.color==='white'){
-                
-                if(this.y === 4){
+                console.log('vliza v won')
+                if(this.y === 0){
                     this.value = 2000
                     state.won = this.color
                 }
             }
             else{
 
-                if(this.y === 0){
+                if(this.y === 7){
                     this.value = 2000
                     state.won = this.color
                 }

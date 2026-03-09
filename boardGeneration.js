@@ -26,12 +26,135 @@ if (typeof window === 'undefined') {
             if(state) state.pieceModalMessages = arr;
         }
     }
-}
+} else {
 
+}
 }
 
 catch(err){
 }
+
+// Define buildPieceModal for browser environment (outside try-catch so it runs even if require fails)
+if (typeof window !== 'undefined') {
+    window.buildPieceModal = function(state, arr){
+        const pieceModal = document.querySelector('.pieceModal');
+        if (!pieceModal) return;
+        
+        let theString;
+        let widthOrHeight = screen.width < screen.height? screen.width : screen.height;
+        let sqLength;
+        if (typeof squareLength !== 'undefined') {
+            sqLength = squareLength;
+        } else {
+            sqLength = widthOrHeight > 800 ? parseInt(widthOrHeight/16) : parseInt(widthOrHeight/12);
+        }
+        
+        let magicNumber = widthOrHeight > 800 ? sqLength/1.5 : sqLength/2
+        arr.forEach((el) => {
+            // Main content wrapper - removed event.stopPropagation() so clicks bubble up to backdrop which closes it
+            // Removed white background/padding/shadow to show only the miniboard as requested
+            theString  = `<div style="position:relative; width:${magicNumber * (Math.sqrt(el.board.length))}px;height:${magicNumber * Math.sqrt(el.board.length)}px;">`
+            
+
+            el.board.forEach((square) => {
+                if(square.lighted){
+                    theString += `<div style=" z-index:500; background:${availableSquareColor};width:${magicNumber}px;height:${magicNumber}px;border:solid black 1px; position:absolute; left:${(square.x)*magicNumber}px;top:${(square.y)*magicNumber}px;"></div>`;
+                }
+                else if(square.blocked){
+                    theString += `<div style=" z-index:500; background:${blockedSquareColor};width:${magicNumber}px;height:${magicNumber}px;border:solid black 1px; position:absolute; left:${(square.x)*magicNumber}px;top:${(square.y)*magicNumber}px;"></div>`;
+                }
+                else{
+                    theString += `<div style="z-index:500; background:${backgroundColor};width:${magicNumber}px;height:${magicNumber}px;border:solid black 1px; position:absolute; left:${square.x*magicNumber}px;top:${(square.y)*magicNumber}px;"></div>`;
+                }
+
+                if(square.x ===el.pieceX && square.y === el.pieceY){
+                    theString += `<img style="z-index:500;position:absolute; width:${magicNumber}px;height:${magicNumber}px; left:${square.x*magicNumber}px;top:${(square.y)*magicNumber}px;" src="/static/${el.icon}"></img>`
+                }
+            })
+            theString += `  <p style=" z-index:501; padding:5px; position:absolute; color:#ffffff; background:${backgroundColor}; top:${magicNumber * Math.sqrt(el.board.length)}px;">${el.description}</p>`
+        })
+
+        // Removed close button generation as per user request
+
+        theString += `</div>` // Close main content wrapper
+
+        pieceModal.innerHTML = theString
+        pieceModal.classList.remove('displayNone')
+        
+        // Handle dialog logic for top layer
+        if (pieceModal.tagName === 'DIALOG' && typeof pieceModal.showModal === 'function') {
+            pieceModal.style.padding = '0';
+            pieceModal.style.border = 'none';
+            pieceModal.style.background = 'transparent';
+            pieceModal.style.width = 'auto';
+            pieceModal.style.height = 'auto';
+            pieceModal.style.maxWidth = '100%';
+            pieceModal.style.maxHeight = '100%';
+            pieceModal.style.overflow = 'hidden';
+            pieceModal.style.boxShadow = 'none'; // Remove any default or CSS shadows
+            
+            // Use flexbox for centering inside the dialog (dialog itself centers by default but we want full control or consistent look)
+            // Actually dialog::backdrop handles the background, we just need to ensure the content is centered.
+            // The browser centers dialog by default.
+            
+            // Open as modal to sit on top layer
+            if (!pieceModal.open) {
+                pieceModal.showModal();
+            }
+            
+            // Override backdrop style if needed via inline styles? No, use CSS class or just let default be.
+            // We can set the background of the dialog itself to transparent so only content shows.
+        } else {
+            // Fallback for div
+            // Ensure styling for visibility, centering, and backdrop
+            pieceModal.style.display = 'flex'; // Use flexbox for centering
+            pieceModal.style.justifyContent = 'center';
+            pieceModal.style.alignItems = 'center';
+            pieceModal.style.zIndex = '999999'; // Extremely high z-index to be on top of everything
+            pieceModal.style.position = 'fixed';
+            pieceModal.style.top = '0';
+            pieceModal.style.left = '0';
+            pieceModal.style.width = '100%';
+            pieceModal.style.height = '100%';
+            pieceModal.style.backgroundColor = 'rgba(0,0,0,0.5)'; // Backdrop
+            pieceModal.style.padding = '0';
+            pieceModal.style.border = 'none';
+            pieceModal.style.borderRadius = '0';
+            pieceModal.style.boxShadow = 'none';
+            pieceModal.style.transform = 'none'; // Reset transform as flex handles centering
+        }
+        
+        // Add click listener to modal container (backdrop) to close modal
+        pieceModal.onclick = function(e) {
+            // Check if click is on the backdrop (the element itself)
+            if (e.target === pieceModal) {
+                if (typeof closeModal === 'function') {
+                    closeModal('pieceModal');
+                } else {
+                    if (pieceModal.tagName === 'DIALOG' && typeof pieceModal.close === 'function') {
+                        pieceModal.close();
+                    } else {
+                        this.style.display = 'none';
+                    }
+                }
+                
+                // Clear content to prevent ghosting
+                pieceModal.innerHTML = '';
+                
+                // Re-enable clicks on other dialogs
+                const startDialog = document.getElementById('startDialog');
+                const rewardDialog = document.getElementById('rewardDialog');
+                if(startDialog) startDialog.style.pointerEvents = 'auto';
+                if(rewardDialog) rewardDialog.style.pointerEvents = 'auto';
+            }
+        };
+        
+        if (typeof closeModal === 'function') {
+             closeModal('modal')
+        }
+    };
+}
+
 function buildModal(state, arr, theModal){
     
     if(theModal){
