@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Map = require('./models/map'); // Import the Map model
 app.use('/boardGeneration.js', express.static('./boardGeneration.js'))
 app.use('/pieceDefinitions.js', express.static('./pieceDefinitions.js'))
+app.use('/pieces', express.static('./pieces'))
 app.use('/helperFunctions.js', express.static('./helperFunctions.js'))
 app.use('/moveMethods.js', express.static('./moveMethods.js'))
 const http = require('http').createServer(app);
@@ -578,8 +579,9 @@ http.listen(8080, function () {
          }
          piecesCounter++
      }
+
      if(movesAndPieces.length  === 0 && filters && filters.length > 0){
-        return generateMovesFromPieces(state,color)
+        return generateMovesFromPieces(state,color,filters,enemy)
      }
      return movesAndPieces
  }

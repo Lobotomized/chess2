@@ -43,6 +43,64 @@ function pigFactory(color,x,y){
     }
 }
 
+
+function ricarFactory(color,x,y){
+    let direction = 1;
+    if(color == 'black'){
+        direction = -1;
+    }
+
+    return {
+        icon: color + 'Ricar.png',
+        moves: [{ type: 'absolute', x: 0, y: -2 }, { type: 'absolute', x: 0, y: 2 },
+        { type: 'absolute', x: -2, y: 0 }, { type: 'absolute', x: 2, y: 0 },
+        { type: 'absolute', x: -2, y: -2 }, { type: 'absolute', x: 2, y: 2 },
+        { type: 'absolute', x: -2, y: 2 }, { type: 'absolute', x: 2, y: -2 }],
+        color:color,
+        x:x,
+        y:y,
+        value:2.5,
+        posValue:posValue[3],
+        afterPlayerMove:function(state){
+            color = this.color;
+            if(color == 'black'){
+                direction = -1;
+            }
+            else{
+                direction = 1;
+            }
+            const copy = findCopyPieceByXY(state.pieces,this.x,this.y + direction);
+            const squareCheck = state.board.find((sq) => {
+                return sq.x == this.x && sq.y == this.y + direction;
+            })
+            if(copy || squareCheck != undefined){
+                this.value = 4;
+            }
+            else{
+                this.value = 2.5;
+            }
+        },
+        
+        afterThisPieceTaken:function(state){
+            color = this.color;
+            if(color == 'black'){
+                direction = -1;
+            }
+            else{
+                direction = 1;
+            }
+            const copy = findCopyPieceByXY(state.pieces,this.x,this.y + direction);
+            const squareCheck = state.board.find((sq) => {
+                return sq.x == this.x && sq.y == this.y + direction;
+            })
+            if(!copy && squareCheck != undefined){
+                state.pieces.push(ghostFactory(color,this.x,this.y + direction));
+            }
+        }
+    }
+
+}
+
 function horseFactory(color,x,y){
     const moves = [{ type: 'blockable', repeat: true, x: 0, y: -1, limit:3 }, { type: 'blockable', repeat: true, x: 0, y: 1,limit:3 },
     { type: 'blockable', repeat: true, x: -1, y: 0 ,limit:3}, { type: 'blockable', repeat: true, x: 1, y: 0 ,limit:3},
@@ -97,7 +155,8 @@ try{
         horseFactory,
         dragonFactory,
         sleepingDragon,
-        ghostFactory
+        ghostFactory,
+        ricarFactory
     }
 }
 catch(err){

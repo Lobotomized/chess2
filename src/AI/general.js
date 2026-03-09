@@ -1,37 +1,34 @@
 
 
 
-function evaluateBoard(colorPerspective, pieces, board,magnifierMethods){
-    let counter = 0;
-    let valueTransformer = 1;
+ function evaluateBoard(colorPerspective, pieces, board, magnifierMethods) {
     let valueCounter = 0;
-    while(pieces.length > counter){
-        const piece = pieces[counter]
-        if(colorPerspective === piece.color){
-            let magnifier = 0;
-            magnifierMethods.forEach((magnifierObject) => {
-
-                if(!magnifierObject.onlyForEnemy){
-
-                    magnifier += magnifierObject.method(piece,pieces,board,piece.color,magnifierObject.options);
+    const len = pieces.length;
+    const magLen = magnifierMethods.length;
+    
+    for (let i = 0; i < len; i++) {
+        const piece = pieces[i];
+        let magnifier = 0;
+        
+        // Unroll/Optimize loop over magnifiers
+        for (let j = 0; j < magLen; j++) {
+            const magObj = magnifierMethods[j];
+            if (colorPerspective === piece.color) {
+                if (!magObj.onlyForEnemy) {
+                    magnifier += magObj.method(piece, pieces, board, piece.color, magObj.options);
                 }
-            })
-
-            valueTransformer = magnifier;
-        }
-        else{
-            let magnifier = 0;
-
-            magnifierMethods.forEach((magnifierObject) => {
-                if(!magnifierObject.onlyForMe){
-                    magnifier += magnifierObject.method(piece,pieces,board,piece.color,magnifierObject.options);
+            } else {
+                if (!magObj.onlyForMe) {
+                    magnifier += magObj.method(piece, pieces, board, piece.color, magObj.options);
                 }
-            })
-
-            valueTransformer = magnifier*-1;
+            }
         }
-        valueCounter += valueTransformer;
-        counter++;
+
+        if (colorPerspective === piece.color) {
+            valueCounter += magnifier;
+        } else {
+            valueCounter -= magnifier;
+        }
     }
     return valueCounter;
 }
@@ -43,40 +40,65 @@ function evaluateBoard(colorPerspective, pieces, board,magnifierMethods){
         filters = [];
     }
      const movesAndPieces = []
-     let piecesCounter = 0;
-     const myPieces = getColorPieces(state.pieces,color) 
      
+     // Removed redundant getColorPieces call since we iterate directly now
+     let piecesCounter = 0;
+     for(let i = 0; i < state.pieces.length; i++){
+         let piece = state.pieces[i];
+         if(piece.color !== color) continue;
 
-     while(myPieces.length > piecesCounter){
-         let movesCounter = 0;
-         let piece = myPieces[piecesCounter]
          lightBoardFE(piece,{pieces:state.pieces, board:state.board,turn:state.turn},'allowedMove',undefined,true)
          let allowedMoves = state.board.filter((square) => {
              return square.allowedMove;
          })
-         filters.forEach((filter) => {
-            if(!enemy || filter.allowEnemy){
-                allowedMoves = filter.method({
-                    state,allowedMoves,myPieces,piecesCounter,piece,color,...filter.options
-                })
-            }
-         })
-         while(allowedMoves.length > movesCounter){
-             const newPieces = JSONfn.parse(JSONfn.stringify(state.pieces))
-             let newMyPieces = getColorPieces(newPieces, color)
-             piece = newMyPieces[piecesCounter];
- 
- 
+         
+         // Using for loop for speed
+         for(let movesCounter = 0; movesCounter < allowedMoves.length; movesCounter++){
+             const newPieces = new Array(state.pieces.length);
+             for(let k=0; k<state.pieces.length; k++){
+                let p = state.pieces[k];
+                let moves = p.moves;
+                let weakMoves = p.weakMoves;
+                
+                // Optimized copy of moves
+                if(moves){
+                    let newMoves = new Array(moves.length);
+                    for(let m=0; m<moves.length; m++){
+                        let move = moves[m];
+                        if(typeof move === 'object' && move !== null){
+                             newMoves[m] = {...move};
+                        } else {
+                            newMoves[m] = move;
+                        }
+                    }
+                    moves = newMoves;
+                }
+                
+                if(weakMoves){
+                    let newWeakMoves = new Array(weakMoves.length);
+                    for(let m=0; m<weakMoves.length; m++){
+                        let move = weakMoves[m];
+                        if(typeof move === 'object' && move !== null){
+                             newWeakMoves[m] = {...move};
+                        } else {
+                            newWeakMoves[m] = move;
+                        }
+                    }
+                    weakMoves = newWeakMoves;
+                }
+                newPieces[k] = {...p, moves:moves, weakMoves:weakMoves};
+             }
+
+             let newPiece = newPieces[i];
              const square = allowedMoves[movesCounter]
-             playerMove({x:square.x, y:square.y},{board:state.board, pieces:newPieces, pieceSelected:piece , turn:color},true, undefined, 'allowedMove')
- 
- 
-             if( square && square.allowedMove){
+             
+             // We use state.board directly (no clone) as playerMove cleans up lights anyway
+             // and we reconstruct the state wrapper for each move
+             if(playerMove({x:square.x, y:square.y},{board:state.board, pieces:newPieces, pieceSelected:newPiece , turn:color},true, undefined, 'allowedMove')){
                  movesAndPieces.push({pieceCounter:piecesCounter,pieces:newPieces, xClicked:square.x, yClicked:square.y, parent:state.id, id:crypto.randomUUID()})
              }
-             movesCounter++
          }
-         piecesCounter++
+         piecesCounter++;
      }
      if(movesAndPieces.length  === 0 && filters && filters.length > 0){
         return generateMovesFromPieces(state,color)
@@ -100,28 +122,45 @@ function evaluateBoard(colorPerspective, pieces, board,magnifierMethods){
     })
  }
 
- function evalParents(parentArray,childArray, weakest){
-    parentArray.forEach((parentMove) => {
+ function evalParents(parentArray, childArray, weakest) {
+    // Optimization: Pre-group child moves by parent ID to avoid nested loops (O(N*M) -> O(N+M))
+    const childrenByParent = new Map();
+    const cLen = childArray.length;
+    for(let i = 0; i < cLen; i++) {
+        const child = childArray[i];
+        // Optimized Map access: get array directly or create
+        let arr = childrenByParent.get(child.parent);
+        if (!arr) {
+            arr = [];
+            childrenByParent.set(child.parent, arr);
+        }
+        arr.push(child);
+    }
 
-        childArray.forEach((chMove) => {
-            if(chMove.parent === parentMove.id){
-                if(parentMove.value === undefined || 
-                    (parentMove.value < chMove.value && !weakest)   ||
-                    (parentMove.value > chMove.value && weakest)  
-                ){
+    const pLen = parentArray.length;
+    for(let i = 0; i < pLen; i++) {
+        const parentMove = parentArray[i];
+        const children = childrenByParent.get(parentMove.id);
+
+        if (children) {
+            const chLen = children.length;
+            for(let j = 0; j < chLen; j++) {
+                const chMove = children[j];
+                // Simplified comparison logic
+                if (parentMove.value === undefined) {
+                    parentMove.value = chMove.value;
+                } else if (!weakest && chMove.value > parentMove.value) {
+                    parentMove.value = chMove.value;
+                } else if (weakest && chMove.value < parentMove.value) {
                     parentMove.value = chMove.value;
                 }
             }
-        })
-        if(parentMove.value === undefined && !weakest){
-            parentMove.value = -9999999999999999999;
-        }
-        else if(parentMove.value === undefined && weakest){
-
-            parentMove.value = 9999999999999999999;
         }
         
-    })
+        if (parentMove.value === undefined) {
+             parentMove.value = weakest ? 9999999999999999999 : -9999999999999999999;
+        }
+    }
  }
 
  function getMoveByValue(moves,weakest){

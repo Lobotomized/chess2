@@ -3,34 +3,18 @@ let memoizedPieces = {};
 
 
 function findSquareByXY(board,x,y){
-    //If in browser memo
-    let square =  board.find((square) => {
-        return square.x == x && square.y == y;
-    })
-    return square
-    // Object.keys(memoizedSquares).length;
-    // if(typeof window === 'undefined'){
-    //     if(memoizedSquares["X:"+x+"Y:"+y]){
-    //         return memoizedSquares["X:"+x+"Y:"+y]
-    //     }
-    //     else{
-    //         let square =  board.find((square) => {
-    //             return square.x == x && square.y == y;
-    //         })
-    //         memoizedSquares["X:"+x+"Y:"+y] = square;
-    //         return square
-    //     }
-
-    // }
-    // else{
-    //     let square =  board.find((square) => {
-    //         return square.x == x && square.y == y;
-    //     })
-    //     return square
-    // }
-
+    // Optimized search for typical 8x8 or similar board
+    // Assuming board is somewhat ordered or small enough, but simple loop is O(N)
+    // Board is usually 64 elements, so native .find is fast, but we can try to be faster if we know the structure.
+    // However, the current bottleneck is likely the repeated calls to .find() in loops.
+    // If the board array is fixed, we can just index it if it was a 2D array or 1D mapped array.
+    // But since it's an array of objects with x,y properties, we have to search.
     
-
+    // Fast path for standard loop
+    for (let i = 0; i < board.length; i++) {
+        if (board[i].x === x && board[i].y === y) return board[i];
+    }
+    return undefined;
  }
 
 
@@ -96,7 +80,7 @@ function areYouChecked (state,enemyColor,me){
         if (piece.conditionalMoves) {
             if(typeof piece.conditionalMoves === 'string'){
                 let midObj = {conditionalMoves:piece.conditionalMoves}
-               piece.conditionalMoves = JSONfn.parse(JSONfn.stringify(midObj)).conditionalMoves;
+               piece.conditionalMoves = JSONfnHelper.parse(JSONfnHelper.stringify(midObj)).conditionalMoves;
             }
     
             tempMoves = piece.conditionalMoves(state);
@@ -676,21 +660,37 @@ function lightBoardFE(piece, state, flag,blockedFlag, minimal) {
     if (!piece) {
         return;
     }
-    let tempMoves = [];
+    let tempMoves = null;
     
     if (piece.conditionalMoves) {
         if(typeof piece.conditionalMoves === 'string'){
             let midObj = {conditionalMoves:piece.conditionalMoves}
-           piece.conditionalMoves = JSONfn.parse(JSONfn.stringify(midObj)).conditionalMoves;
+           piece.conditionalMoves = JSONfnHelper.parse(JSONfnHelper.stringify(midObj)).conditionalMoves;
         }
 
         tempMoves = piece.conditionalMoves(state);
     }
-    [...piece.moves, ...tempMoves].forEach((move) => {
-        if (move.type == 'absolute') {
-            const square = state.board.find((el) => {
-                return el.x === piece.x + move.x && el.y === piece.y + move.y
-            })
+    
+    const moves = piece.moves;
+    const movesLen = moves.length;
+    
+    // Process regular moves
+    for (let i = 0; i < movesLen; i++) {
+        processMove(moves[i], piece, state, flag, blockedFlag, minimal);
+    }
+    
+    // Process conditional moves if any
+    if (tempMoves) {
+        const tempLen = tempMoves.length;
+        for (let i = 0; i < tempLen; i++) {
+            processMove(tempMoves[i], piece, state, flag, blockedFlag, minimal);
+        }
+    }
+}
+
+function processMove(move, piece, state, flag, blockedFlag, minimal) {
+    if (move.type == 'absolute') {
+            const square = findSquareByXY(state.board, piece.x + move.x, piece.y + move.y);
             if (square) {
                 const innerPiece = pieceFromSquare(square, state.pieces)
                 if (innerPiece) {
@@ -711,19 +711,19 @@ function lightBoardFE(piece, state, flag,blockedFlag, minimal) {
             }
         }
         else if (move.type == 'allMine') {
-            state.board.forEach((square) => {
+            const boardLen = state.board.length;
+            for (let i = 0; i < boardLen; i++) {
+                const square = state.board[i];
                 const innerPiece = pieceFromSquare(square, state.pieces);
                 if (innerPiece) {
                     if (innerPiece.color == piece.color && innerPiece.icon != piece.icon) {
                         square[flag] = true;
                     }
                 }
-            })
+            }
         }
         else if (move.type == 'takeMove') {
-            const square = state.board.find((el) => {
-                return el.x === piece.x + move.x && el.y === piece.y + move.y
-            })
+            const square = findSquareByXY(state.board, piece.x + move.x, piece.y + move.y);
             if (square) {
                 const innerPiece = pieceFromSquare(square, state.pieces)
 
@@ -765,7 +765,6 @@ function lightBoardFE(piece, state, flag,blockedFlag, minimal) {
                 blockableSpecialFunction(properties);
             }
         }
-    })
 }
 
 function blockableSpecialFunction(properties) {
@@ -928,9 +927,118 @@ function copyLinkToClipboard(){
     navigator.clipboard.writeText(window.location)
 }
 
+function returnPieceWithColor(x,y,color,state){
+    return state.pieces.find((el) => {
+        return el.x === x && el.y === y && el.color === color;
+    })
+}
+
+function conditionalSplice(array,index){
+    if(index> -1){
+        array.splice(index,1)
+    }
+}
+
+function conditionalSpliceWithBonus(state,index,color){
+
+    if(index> -1){
+        if(state.pieces[index].afterThisPieceTaken){
+            state.pieces[index].afterThisPieceTaken(state);
+        }
+        if(state.pieces[index].color != color || !color){
+            state.pieces.splice(index,1)
+        }
+    }
+}
+
+function pieceAroundMe(state,aroundWhat,pieceTypeIcon){
+    let gore =  state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y+1)]?.icon?.includes(pieceTypeIcon) && aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y+1)]?.color;
+    let dolu = state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y-1)]?.icon?.includes(pieceTypeIcon) && aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x,aroundWhat.y-1)]?.color;
+    let lqvo = state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y)]?.color;
+    let dqsno = state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y)]?.icon?.includes(pieceTypeIcon) && aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y)]?.color;;
+    let lqvoGore = state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y+1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y+1)]?.color;;
+    let dqsnoGore = state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y+1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y+1)]?.color;
+    let lqvoDolu = state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y-1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x+1,aroundWhat.y-1)]?.color;;
+    let dqsnoDolu = state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y-1)]?.icon?.includes(pieceTypeIcon)&& aroundWhat.color === state.pieces[findPieceByXY(state.pieces,aroundWhat.x-1,aroundWhat.y-1)]?.color;;
+    
+    return gore || dolu || lqvo || dqsno || lqvoGore || dqsnoGore || lqvoDolu || dqsnoDolu;
+}
+
+function cyborgTeleport(state,me,toReturn){
+    let piece = returnPieceWithColor(me.x+0,me.y-1,me.color,state);
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: 0, y: -1, friendlyPieces:true })
+    }
+    piece = returnPieceWithColor(me.x+0,me.y+1,me.color,state)
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: 0, y: 1, friendlyPieces:true })
+    }
+    piece = returnPieceWithColor(me.x+1,me.y-1,me.color,state)
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: 1, y: -1, friendlyPieces:true })
+    }
+    piece = returnPieceWithColor(me.x+1,me.y+1,me.color,state)
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: 1, y: 1, friendlyPieces:true })
+    }
+    piece = returnPieceWithColor(me.x+1,me.y+0,me.color,state)
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: 1, y: 0, friendlyPieces:true })
+    }
+    piece = returnPieceWithColor(me.x-1,me.y+0,me.color,state)
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: -1, y: 0, friendlyPieces:true })
+    }
+    piece = returnPieceWithColor(me.x-1,me.y-1,me.color,state)
+
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: -1, y:-1, friendlyPieces:true })
+    }
+    piece = returnPieceWithColor(me.x-1,me.y+1,me.color,state)
+
+    if(piece && piece?.icon != me.icon){
+        toReturn.push({ type: 'takeMove', x: -1, y: 1, friendlyPieces:true })
+    }
+}
+
+function getRndInteger(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+var posValue = [
+    0.1,
+    0.5,
+    1,
+    2,
+    3,
+    4
+]
+
+var JSONfnHelper = (typeof JSONfn !== 'undefined') ? JSONfn : {};
+
+JSONfnHelper.stringify = function(obj) {
+    return JSON.stringify(obj,function(key, value){
+            return (typeof value === 'function' ) ? value.toString() : value;
+        });
+}
+
+JSONfnHelper.parse = function(str) {
+    return JSON.parse(str,function(key, value){
+        if(typeof value != 'string') return value;
+        return ( value.substring(0,8) == 'function') ? eval('('+value+')') : value;
+    });
+}
 
 try{
     module.exports = {
+        JSONfn: JSONfnHelper,
+        returnPieceWithColor,
+        conditionalSplice,
+        conditionalSpliceWithBonus,
+        pieceAroundMe,
+        cyborgTeleport,
+        getRndInteger,
+        posValue,
         findCopyPieceByXY,
         findPieceByXY,
         findSquareByXY,

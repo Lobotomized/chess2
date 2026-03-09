@@ -88,7 +88,7 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
     operatedPiece.x = x;
     operatedPiece.y = y;
 
-    let oldState = JSON.parse(JSON.stringify(state));
+    // let oldState = JSON.parse(JSON.stringify(state));
     let continueTurn = true;
 
     for (let i = state.pieces.length - 1; i >= 0; i--) {
@@ -108,7 +108,7 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
         }    
     }
     if(!continueTurn){
-        state = oldState;
+        // state = oldState;
         if(friendlyPiece){
             friendlyPiece.x = friendlyPieceOldX;
             friendlyPiece.y = friendlyPieceOldY;

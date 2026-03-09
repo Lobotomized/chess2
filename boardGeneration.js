@@ -33,7 +33,7 @@ if (typeof window === 'undefined') {
 catch(err){
 }
 function buildModal(state, arr, theModal){
-    console.log(theModal)
+    
     if(theModal){
         modal = theModal
     }
@@ -1196,7 +1196,7 @@ function missionClassicBugsThree(state){
             })
             if(!shrooms.length || !goliathBugs.length){
                 state.won = 'black';
-                buildModal({type:'link', classes:"", text:'Mission accomplished!',linkText:'Go to next level', link:`/hotseat?gameType=missionClassicBugsFour&AIColor=white`})
+                buildModal(state , [{type:'link', classes:"", text:'Mission accomplished!',linkText:'Go to next level', link:`/hotseat?gameType=missionClassicBugsFour&AIColor=white`}])
             }
 
             let knights = state.pieces.filter((piece) => {
@@ -1204,7 +1204,7 @@ function missionClassicBugsThree(state){
             })
 
             if(!knights.length){
-                buildModal({type:'link', classes:"", text:'Mission failed',linkText:'Restart', link:`/hotseat?gameType=missionClassicBugsThree&AIColor=white`})
+                buildModal(state,[{type:'link', classes:"", text:'Mission failed',linkText:'Restart', link:`/hotseat?gameType=missionClassicBugsThree&AIColor=white`}])
 
             }
             

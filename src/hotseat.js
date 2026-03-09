@@ -300,6 +300,7 @@ canvas.addEventListener('click', (e) => {
         hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
         state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
         if(state.turn === AIColor){
+            console.log("here?")
             w.postMessage(JSONfn.stringify({state:state, color:AIColor, AIPower:aiPowers[state.turn]}));
 
             w.onmessage = function(event){

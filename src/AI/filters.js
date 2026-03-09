@@ -4,12 +4,10 @@ function randomlyRemove1NthFilter(options) {
       return allowedMoves;
     }
     const halfLength = Math.floor(allowedMoves.length / n); // calculate the half length of the array
-    
     for (let i = 0; i < halfLength; i++) {
       const randomIndex = Math.floor(Math.random() * allowedMoves.length); // generate a random index within the remaining length of the array
       allowedMoves.splice(randomIndex, 1); // remove the element at the random index from the array
     }
-
     return allowedMoves
   }
 

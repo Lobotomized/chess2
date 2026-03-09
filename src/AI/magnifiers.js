@@ -139,8 +139,12 @@ function evaluationMagnifierMaxOptions(piece,pieces,board,colorPerspective,optio
 }
 
 function evaluationMagnifierPiece(piece,pieces,board,colorPerspective,options){
-    let myPieces;
+    // Fast path for most common case
+    if (!options.whoHasMorePieces && !options.threshold) {
+        return piece.value * options.pieceValue;
+    }
 
+    let myPieces;
     if(options.whoHasMorePieces || options.threshold){
         myPieces = pieces.filter((piece) => {
             return piece.color === colorPerspective;

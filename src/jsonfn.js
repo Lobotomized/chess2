@@ -1,4 +1,4 @@
-let JSONfn;
+var JSONfn;
 if (!JSONfn) {
     JSONfn = {};
 }

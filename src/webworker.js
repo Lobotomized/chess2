@@ -1,17 +1,23 @@
-importScripts('/pieceDefinitions.js')
+importScripts('/src/jsonfn.js')
 importScripts('/helperFunctions.js')
 importScripts('/moveMethods.js')
+
+importScripts('/pieces/classic.js')
+importScripts('/pieces/bugs.js')
+importScripts('/pieces/animals.js')
+importScripts('/pieces/cats.js')
+importScripts('/pieces/medieval.js')
+importScripts('/pieces/machines.js')
+importScripts('/pieces/misc.js')
+
 importScripts('/src/AI/general.js')
 
 importScripts('/src/AI/magnifiers.js')
 importScripts('/src/AI/filters.js')
 
 
-importScripts('/src/jsonfn.js')
-
-
-console.log("What is happening?2")
 function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters){
+
     state.id = crypto.randomUUID()
     let enemy = getEnemy(maximizer);
     let firstGen = generateMovesFromPieces(state,maximizer,filters);
@@ -59,9 +65,8 @@ function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters){
     }
 }
 
-
 self.addEventListener("message", function(e) {
-    let obj = JSON.parse(e.data)
+    let obj = JSONfn.parse(e.data)
 
     if(!obj.state.won){
 
@@ -97,7 +102,7 @@ self.addEventListener("message", function(e) {
                     [
                         {method:removeNonAttackingMovesFilter, options:{maxPieceValue:2,
                         exceptions:[randomException,pieceValueMustBeSmallerThanException]}},
-                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:20, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
+                        {method:randomlyRemove1NthFilter,options:{n:1.2,maxPieceValue:20, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
                     ]
                 )
             }
@@ -108,7 +113,7 @@ self.addEventListener("message", function(e) {
                     [
                         {method:removeNonAttackingMovesFilter, options:{minPieceValue:20,
                         exceptions:[randomException, pieceValueMustBeSmallerThanException]}},
-                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:20, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
+                        {method:randomlyRemove1NthFilter,options:{n:1.2,maxPieceValue:20, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
                     ]
                 )
 
@@ -143,9 +148,9 @@ self.addEventListener("message", function(e) {
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
                     methods[obj.AICharacter](0),
                     [
-                        {method:removeNonAttackingMovesFilter, options:{maximum:2,minPieceValue:2,randomException:0.3, filterDepth:1,
+                        {method:removeNonAttackingMovesFilter, options:{maximum:2,maxPieceValue:2,randomException:0.3, filterDepth:1,
                         exceptions:[pieceValueMustBeSmallerThanException,randomException]}},
-                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
+                        {method:randomlyRemove1NthFilter,options:{n:1.2,maxPieceValue:4, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
                     ]
                 )
             }
@@ -154,9 +159,9 @@ self.addEventListener("message", function(e) {
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
                     methods[obj.AICharacter](1),
                     [
-                        {method:removeNonAttackingMovesFilter, options:{maximum:2,minPieceValue:2,randomException:0.3, 
+                        {method:removeNonAttackingMovesFilter, options:{maximum:2,maxPieceValue:2,randomException:0.3, 
                         exceptions:[pieceValueMustBeSmallerThanException,randomException]}},
-                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
+                        {method:randomlyRemove1NthFilter,options:{n:1.2,maxPieceValue:4, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
                     ]
                 )
 
@@ -197,49 +202,43 @@ self.addEventListener("message", function(e) {
             }
 
             if(obj.AIPower === 101){
-                console.log('here?!!! ', obj)
-                console.time('101 ')
+
+                console.time('101')
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
                     methods[obj.AICharacter](0),
                     [
-                        {method:removeNonAttackingMovesFilter, options:{maximum:2,minPieceValue:2,randomException:0.3, filterDepth:1,
+                        {method:removeNonAttackingMovesFilter, options:{maximum:2,maxPieceValue:2,randomException:0.3, filterDepth:1,
                         exceptions:[pieceValueMustBeSmallerThanException,randomException]}},
-                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
+                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeBiggerThanException, pieceAttackedException]}}
                     ]
                 )
                 console.timeEnd('101')
             }
 
             else if(obj.AIPower === 102){
-                move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
-                    methods[obj.AICharacter](0),
-                    [
-                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
-                    ]
-                )
-            }
-            else if(obj.AIPower === 103){
-                move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
-                    methods[obj.AICharacter](0),
-                    [
-                    ]
-                )
-            }
-            else if(obj.AIPower === 104){
-                console.time('104')
+                console.time('102')
                 move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns,
                     methods[obj.AICharacter](0),
                     [
-                        {method:removeNonAttackingMovesFilter, options:{randomException:0.8, 
-                        exceptions:[pieceAttackedException,randomException]}},
-                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeSmallerThanException, pieceAttackedException]}}
+                        {method:removeNonAttackingMovesFilter, options:{maximum:2,maxPieceValue:2,randomException:0.3, filterDepth:1,
+                        exceptions:[pieceValueMustBeSmallerThanException,randomException]}},
+                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeBiggerThanException, pieceAttackedException]}}
                     ]
                 )
-
-                console.timeEnd('104')
+                console.timeEnd('102')
             }
+            else if(obj.AIPower === 103){
+                console.time('103')
+                move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns,
+                    methods[obj.AICharacter](0),
+                    [
+                    ]
+                )
+                console.timeEnd('103')
+            }
+
             move.removedTurns = obj.removedTurns;
-            postMessage(JSONfn.stringify(move))
+            postMessage(JSONfn.stringify(move));
 
     }
 })
