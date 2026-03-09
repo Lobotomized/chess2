@@ -253,7 +253,17 @@ function raceChoiceChess(state,raceWhite,raceBlack){
             crystalFactory('black', 0, 4)
             ,swordsMen('black', 6, 4),longCatFactory('white', 2, 7),cuteCatFactory('white', 3, 7)
              )
-    }
+    } 
+
+    state.specialOnMoveEffects = [
+        function(state){
+            if(state.won === 'black' || state.won === 'white'){
+                buildModal(state, 
+                    [{type:'link', classes:"", text:`${state.won.charAt(0).toUpperCase() + state.won.slice(1)} Won`,linkText:'Play Again', link:`/hotseat-menu`}]
+                    )
+            }
+        }
+    ]
 
 
 }
