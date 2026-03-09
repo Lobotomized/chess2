@@ -127,26 +127,25 @@ if (typeof window !== 'undefined') {
         // Add click listener to modal container (backdrop) to close modal
         pieceModal.onclick = function(e) {
             // Check if click is on the backdrop (the element itself)
-            if (e.target === pieceModal) {
-                if (typeof closeModal === 'function') {
-                    closeModal('pieceModal');
+            // Removed restriction: if (e.target === pieceModal)
+            if (typeof closeModal === 'function') {
+                closeModal('pieceModal');
+            } else {
+                if (pieceModal.tagName === 'DIALOG' && typeof pieceModal.close === 'function') {
+                    pieceModal.close();
                 } else {
-                    if (pieceModal.tagName === 'DIALOG' && typeof pieceModal.close === 'function') {
-                        pieceModal.close();
-                    } else {
-                        this.style.display = 'none';
-                    }
+                    this.style.display = 'none';
                 }
-                
-                // Clear content to prevent ghosting
-                pieceModal.innerHTML = '';
-                
-                // Re-enable clicks on other dialogs
-                const startDialog = document.getElementById('startDialog');
-                const rewardDialog = document.getElementById('rewardDialog');
-                if(startDialog) startDialog.style.pointerEvents = 'auto';
-                if(rewardDialog) rewardDialog.style.pointerEvents = 'auto';
             }
+            
+            // Clear content to prevent ghosting
+            pieceModal.innerHTML = '';
+            
+            // Re-enable clicks on other dialogs
+            const startDialog = document.getElementById('startDialog');
+            const rewardDialog = document.getElementById('rewardDialog');
+            if(startDialog) startDialog.style.pointerEvents = 'auto';
+            if(rewardDialog) rewardDialog.style.pointerEvents = 'auto';
         };
         
         if (typeof closeModal === 'function') {

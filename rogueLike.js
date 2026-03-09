@@ -195,8 +195,16 @@ function showArmyInfo(army) {
             
             // Get description from the new descriptions file if available, otherwise fallback
             let description = "A new unit has been discovered.";
+            let displayName = factoryName.replace('Factory','');
+
             if (window.pieceDescriptions && window.pieceDescriptions[factoryName]) {
-                description = window.pieceDescriptions[factoryName];
+                const descEntry = window.pieceDescriptions[factoryName];
+                if (typeof descEntry === 'object' && descEntry.description) {
+                     description = descEntry.description;
+                     displayName = descEntry.name || displayName;
+                } else {
+                     description = descEntry;
+                }
             } else if (dummyPiece.description) {
                 description = dummyPiece.description;
             }
@@ -223,7 +231,7 @@ function showArmyInfo(army) {
                 icon: dummyPiece.icon,
                 pieceX: 3,
                 pieceY: 3,
-                description: `<b>${factoryName.replace('Factory','')}</b><br>${description}<br><br><button id="nextPieceBtn" style="padding:5px 10px; cursor:pointer;">${btnText}</button>`
+                description: `<b>${displayName}</b><br>${description}<br><br><button id="nextPieceBtn" style="padding:5px 10px; cursor:pointer;">${btnText}</button>`
             }]);
             
             // Attach listener
@@ -300,8 +308,16 @@ function showPieceDiscoveryModal(factoryName) {
     
     // Get description from the new descriptions file if available, otherwise fallback
     let description = "A new unit has been discovered.";
+    let displayName = factoryName.replace('Factory','');
+
     if (window.pieceDescriptions && window.pieceDescriptions[factoryName]) {
-        description = window.pieceDescriptions[factoryName];
+        const descEntry = window.pieceDescriptions[factoryName];
+        if (typeof descEntry === 'object' && descEntry.description) {
+             description = descEntry.description;
+             displayName = descEntry.name || displayName;
+        } else {
+             description = descEntry;
+        }
     } else if (dummyPiece.description) {
         description = dummyPiece.description;
     }
@@ -322,7 +338,7 @@ function showPieceDiscoveryModal(factoryName) {
             icon: dummyPiece.icon,
             pieceX: 3,
             pieceY: 3,
-            description: `<b>${factoryName.replace('Factory','')}</b><br>${description}`
+            description: `<b>${displayName}</b><br>${description}`
         }]);
     }
 }
