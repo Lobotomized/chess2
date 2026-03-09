@@ -55,38 +55,81 @@
          // Using for loop for speed
          for(let movesCounter = 0; movesCounter < allowedMoves.length; movesCounter++){
              const newPieces = new Array(state.pieces.length);
-             for(let k=0; k<state.pieces.length; k++){
+             // Optimization: Use a shared prototype object or reusable structure to avoid allocations?
+             // No, that's too complex.
+             // But we can optimize the inner loop by checking if moves/weakMoves even exist before entering blocks.
+             // And we can optimize the deep copy by only doing it if we detect mutable properties? No, unsafe.
+             
+             // NEW OPTIMIZATION:
+             // Only deeply clone the piece that is MOVING (index 'i').
+             // All other pieces: Shallow clone initially.
+             // BUT, we must be careful: if 'playerMove' modifies another piece (e.g. capture), we must ensure that modification doesn't leak.
+             // JS objects are references. If we shallow copy piece B, and playerMove modifies piece B's properties (like x, y), 
+             // it modifies the object in 'newPieces', which is fine because 'newPieces' is a new array and 'newP' is a shallow copy.
+             // The DANGER is if it modifies NESTED objects like 'moves' array of piece B.
+             // Does 'playerMove' modify other pieces' moves arrays?
+             // Yes, 'Bugs' race and 'Machines' (Cyborg) might.
+             // However, that is RARE.
+             // We can optimize for the 90% case: Deep copy ONLY the moving piece, and shallow copy the rest.
+             // IF a piece is interacting (captured or special effect), we might need to deep copy it then.
+             // But 'playerMove' logic is complex.
+             
+             // Safer Optimization:
+             // Clone the array structure, but ONLY clone the move objects if they are NOT the standard prototype moves.
+             // Most moves are static. But here they are on the instance.
+             
+             // Let's stick to the array loop but optimize the property access.
+             const pLen = state.pieces.length;
+             for(let k=0; k<pLen; k++){
                 let p = state.pieces[k];
-                let moves = p.moves;
-                let weakMoves = p.weakMoves;
-                
-                // Optimized copy of moves
-                if(moves){
-                    let newMoves = new Array(moves.length);
-                    for(let m=0; m<moves.length; m++){
-                        let move = moves[m];
-                        if(typeof move === 'object' && move !== null){
-                             newMoves[m] = {...move};
-                        } else {
-                            newMoves[m] = move;
-                        }
+                // Shallow copy piece object
+                // Using Object.assign or spread is similar speed, spread is cleaner.
+                // Manual property copy is fastest but fragile.
+                let newP = {
+                    icon: p.icon,
+                    moves: p.moves, // Reference for now
+                    weakMoves: p.weakMoves, // Reference for now
+                    x: p.x,
+                    y: p.y,
+                    color: p.color,
+                    value: p.value,
+                    posValue: p.posValue,
+                    // Copy other props if they exist
+                    moved: p.moved,
+                    enPassantMove: p.enPassantMove,
+                    direction: p.direction,
+                    // Copy methods (references)
+                    conditionalMoves: p.conditionalMoves,
+                    afterPieceMove: p.afterPieceMove,
+                    afterThisPieceTaken: p.afterThisPieceTaken,
+                    friendlyPieceInteraction: p.friendlyPieceInteraction,
+                    afterEnemyPieceTaken: p.afterEnemyPieceTaken,
+                    afterPlayerMove: p.afterPlayerMove,
+                    afterEnemyPlayerMove: p.afterEnemyPlayerMove
+                };
+
+                // Deep copy moves/weakMoves arrays to prevent mutation leaks
+                // This is the most expensive part but necessary for correctness with complex pieces
+                if(p.moves){
+                    const mLen = p.moves.length;
+                    const newMoves = new Array(mLen);
+                    for(let m=0; m<mLen; m++){
+                        const move = p.moves[m];
+                        newMoves[m] = (move && typeof move === 'object') ? {...move} : move;
                     }
-                    moves = newMoves;
+                    newP.moves = newMoves;
                 }
                 
-                if(weakMoves){
-                    let newWeakMoves = new Array(weakMoves.length);
-                    for(let m=0; m<weakMoves.length; m++){
-                        let move = weakMoves[m];
-                        if(typeof move === 'object' && move !== null){
-                             newWeakMoves[m] = {...move};
-                        } else {
-                            newWeakMoves[m] = move;
-                        }
+                if(p.weakMoves){
+                    const wLen = p.weakMoves.length;
+                    const newWeakMoves = new Array(wLen);
+                    for(let m=0; m<wLen; m++){
+                        const move = p.weakMoves[m];
+                        newWeakMoves[m] = (move && typeof move === 'object') ? {...move} : move;
                     }
-                    weakMoves = newWeakMoves;
+                    newP.weakMoves = newWeakMoves;
                 }
-                newPieces[k] = {...p, moves:moves, weakMoves:weakMoves};
+                newPieces[k] = newP;
              }
 
              let newPiece = newPieces[i];
