@@ -57,6 +57,72 @@
                 background:#F7DFDA;
                 flex-direction: row-reverse !important;
             }
+
+            /* Mobile responsiveness */
+            @media (max-width: 600px) {
+                body, html {
+                    min-width: 100vw;
+                    overflow-x: hidden;
+                    padding: 0;
+                    margin: 0;
+                }
+
+                .container {
+                    width: 100%;
+                    max-width: 100%;
+                    padding: 10px;
+                    box-sizing: border-box;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                #canvas {
+                    max-width: 100%;
+                    height: auto;
+                }
+
+                .times {
+                    width: 100%;
+                    flex-direction: row; /* Keep row for clocks/button */
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-top: 10px;
+                    gap: 10px;
+                }
+
+                .clock {
+                    font-size: 14px;
+                    margin: 0;
+                }
+
+                .exitButton {
+                    padding: 5px 10px;
+                    font-size: 14px;
+                }
+
+                .exitButton img {
+                    width: 30px !important;
+                    height: 30px !important;
+                }
+                
+                .forfeitText {
+                    font-size: 14px;
+                    margin-right: 5px;
+                }
+                
+                .message h3 {
+                    font-size: 18px;
+                    margin: 10px 0;
+                }
+
+                #menuDialog {
+                    width: 90%;
+                    max-width: 90%;
+                    padding: 15px;
+                    border: 2px solid #000;
+                }
+            }
         </style>
 </head>
 

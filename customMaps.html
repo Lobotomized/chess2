@@ -50,14 +50,37 @@
         nav {
             width: 100%;
             background: linear-gradient(135deg, var(--piece-black) 0%, #1a1a1a 100%);
-            padding: 12px 0;
+            padding: 0;
             display: flex;
-            justify-content: center;
+            flex-direction: column;
             border-bottom: 4px solid var(--board-dark);
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             position: relative;
-            overflow-x: auto;
-            white-space: nowrap;
+            z-index: 100;
+        }
+
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            padding: 12px 0;
+            width: 100%;
+        }
+        
+        .hamburger-menu {
+            display: none;
+            cursor: pointer;
+            padding: 15px;
+            align-self: flex-end;
+        }
+        
+        .hamburger-menu span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background-color: var(--board-light);
+            margin: 5px 0;
+            transition: 0.4s;
         }
         
         nav a {
@@ -225,10 +248,59 @@
 
         /* Mobile styles */
         @media (max-width: 768px) {
+            html, body {
+                min-width: 0;
+                width: 100%;
+                overflow-x: hidden;
+                margin: 0;
+                padding: 0;
+            }
+            
+            body {
+                background-size: 60px 60px;
+            }
+            
+            nav {
+                padding: 0;
+                width: 100%;
+                overflow: visible;
+            }
+            
+            .hamburger-menu {
+                display: block;
+            }
+            
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                padding: 0;
+            }
+            
+            .nav-links.active {
+                display: flex;
+            }
+            
+            nav a {
+                font-size: 16px;
+                margin: 0;
+                padding: 15px;
+                white-space: normal;
+                width: 100%;
+                box-sizing: border-box;
+                border-top: 1px solid rgba(255,255,255,0.1);
+                justify-content: flex-start;
+            }
+            
+            nav::after {
+                display: none;
+            }
+            
             .container {
-                width: 95%;
+                width: 92%;
+                max-width: 92%;
                 padding: 15px;
                 margin-top: 15px;
+                box-sizing: border-box;
                 border-width: 4px;
             }
             
@@ -242,27 +314,22 @@
                 align-items: stretch;
                 gap: 10px;
                 padding: 12px;
+                width: 100%;
+                box-sizing: border-box;
+                min-width: 0;
             }
 
             .map-name {
                 font-size: 16px;
                 justify-content: center;
+                word-break: break-all;
             }
 
             .play-button {
                 text-align: center;
                 width: 100%;
                 box-sizing: border-box;
-            }
-
-            nav {
-                padding: 8px 0;
-                justify-content: flex-start;
-            }
-            nav a {
-                margin: 0 5px;
-                font-size: 12px;
-                padding: 4px 8px;
+                padding: 12px;
             }
             
             .icon {
@@ -283,13 +350,26 @@
         });
     </script>
     <nav>
-        <a href="/"><img src="/static/lg/whiteKing.png" class="icon"> Lobby</a>
-        <a href="/hotseat-menu"><img src="/static/lg/whiteRicar.png" class="icon"> Hotseat</a>
-        <a href="/campaign"><img src="/static/lg/whiteHorse.png" class="icon"> Campaign</a>
-        <a href="/pieces"><img src="/static/lg/whitePikeman.png" class="icon"> Pieces</a>
-        <a href="/customMaps" class="active"><img src="/static/lg/whiteShroom.png" class="icon"> Custom Maps</a>
-        <a href="/create-board"><img src="/static/lg/whiteNorthernKing.png" class="icon"> Board Editor</a>
+        <div class="hamburger-menu" onclick="toggleMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+        <div class="nav-links" id="navLinks">
+            <a href="/"><img src="/static/lg/whiteKing.png" class="icon"> Lobby</a>
+            <a href="/hotseat-menu"><img src="/static/lg/whiteRicar.png" class="icon"> Hotseat</a>
+            <a href="/rogueLike.html"><img src="/static/lg/whiteGeneral.png" class="icon"> Rogue Like</a>
+            <a href="/campaign"><img src="/static/lg/whiteHorse.png" class="icon"> Campaign</a>
+            <a href="/pieces"><img src="/static/lg/whitePikeman.png" class="icon"> Pieces</a>
+            <a href="/customMaps" class="active"><img src="/static/lg/whiteShroom.png" class="icon"> Custom Maps</a>
+            <a href="/create-board"><img src="/static/lg/whiteNorthernKing.png" class="icon"> Board Editor</a>
+        </div>
     </nav>
+    <script>
+        function toggleMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
+        }
+    </script>
 
     <div class="container">
         <h1><img src="/static/lg/whiteShroom.png" class="icon"> Custom Maps <img src="/static/lg/blackShroom.png" class="icon"></h1>

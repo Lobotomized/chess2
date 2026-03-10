@@ -18,6 +18,7 @@
         <script src="/pieces/cats.js"></script>
         <script src="/pieces/medieval.js"></script>
         <script src="/pieces/machines.js"></script>
+        <script src="/pieces/rogueLike.js"></script>
         <script src="/pieces/misc.js"></script>
         <!-- <script src="/pieceDefinitions.js"></script> -->
         <script src="/boardGeneration.js"></script>
@@ -197,6 +198,27 @@
             font-size: 14px;
             letter-spacing: 0.5px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        /* Mobile responsiveness for top bar */
+        @media (max-width: 600px) {
+            .top-bar {
+                flex-direction: column;
+                gap: 10px;
+                padding: 10px;
+                height: auto;
+            }
+            
+            #levelDisplay, #turn {
+                font-size: 16px;
+                text-align: center;
+            }
+            
+            .general-btn {
+                width: 100%;
+                font-size: 12px;
+                padding: 10px;
+            }
         }
         </style>
 </head>

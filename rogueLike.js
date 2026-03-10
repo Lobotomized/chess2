@@ -5,6 +5,8 @@
 const availablePieceFactories = [
     // Classic
     'pawnFactory', 'rookFactory', 'knightFactory', 'bishopFactory', 'queenFactory', 'simpleKingFactory',
+    'ghostFactory', 'horseFactory', "swordsMen", 
+    "clownRoguelikeFactory",
     // Animals
     // 'horseFactory', 'pigFactory', 'ghostFactory', 'spiderFactory', 
     // 'ladyBugFactory', 'goliathBugFactory', 'antFactory',
@@ -344,50 +346,116 @@ function showPieceDiscoveryModal(factoryName) {
 }
 
 function generateRewardOptions() {
-    // Generate 3 options. Each option is a group of pieces.
-    // Prompt says: "pick one of 3 different pieces or combination of pieces... each should have equal or +-1 value combined"
-    // I'll aim for a value of around 2-4 per reward.
-    const options = [];
-    for (let i = 0; i < 3; i++) {
-        const { army } = generateRandomArmy(Math.floor(Math.random() * 2) + 2, false); // Value 2-3
-        options.push(army);
-        
-        // Check for new pieces in this option
-        army.forEach(name => {
-             // We don't show modal immediately here, maybe just mark them?
-             // Or show a "info" button?
-             // Prompt: "generate buildPieceModal screen for every piece ... that you see for the first time in the Options menu"
-             // Implies automatic popup or ability to see it.
-             // If I pop it up automatically, it might be annoying if 3 new pieces appear.
-             // But "Options menu" usually implies the selection screen.
-             // Let's add an "Info" button to the card.
-        });
+    // Mission Types: Easy, Dangerous, Impossible
+    // Easy: Enemy = 5 + Level*2, Reward <= 3
+    // Dangerous: Enemy = 5 + Level*3, Reward <= 6
+    // Impossible: Enemy = 8 + Level*4, Reward <= 9
+    
+    // Check player roster limits
+    // Need to access frontLineFactories from setupBoard? 
+    // It's local to setupBoard. I should move it to global or duplicate it.
+    const frontLineFactories = ['pawnFactory', 'swordsMen','ghostFactory'];
+    let frontCount = 0;
+    let backCount = 0;
+    rogueState.playerRoster.forEach(u => {
+        if(frontLineFactories.includes(u)) frontCount++;
+        else backCount++;
+    });
+    
+    const maxFront = 8;
+    const maxBack = 8;
+    
+    let allowedFactories = [...availablePieceFactories];
+    
+    if (frontCount >= maxFront) {
+        allowedFactories = allowedFactories.filter(f => !frontLineFactories.includes(f));
     }
+    
+    if (backCount >= maxBack) {
+        allowedFactories = allowedFactories.filter(f => frontLineFactories.includes(f));
+    }
+    
+    // If both full, allowedFactories will be empty (intersection of !front and front is empty)
+    // Actually:
+    // If front full: exclude front.
+    // If back full: exclude back.
+    // If both full: exclude both -> empty.
+    
+    const missionTypes = ['Easy', 'Dangerous', 'Impossible'];
+    const options = [];
+    
+    // Generate 3 random mission types
+    const selectedTypes = [];
+    for(let i=0; i<3; i++) {
+        selectedTypes.push(missionTypes[Math.floor(Math.random() * missionTypes.length)]);
+    }
+    
+    selectedTypes.forEach(type => {
+        let rewardCap = 3;
+        if(type === 'Dangerous') rewardCap = 6;
+        if(type === 'Impossible') rewardCap = 9;
+        
+        let army = [];
+        let value = 0;
+        
+        if (allowedFactories.length > 0) {
+            // Custom generateRandomArmy using allowedFactories
+             let currentValue = 0;
+             let iterations = 0;
+             // Calculate target reward value
+             const targetValue = Math.max(1, rewardCap - Math.random() * 2);
+             
+             while (currentValue < targetValue && iterations < 100) {
+                iterations++;
+                const randomFactory = allowedFactories[Math.floor(Math.random() * allowedFactories.length)];
+                const val = getPieceValue(randomFactory);
+                
+                if (currentValue + val <= targetValue + 1) {
+                    army.push(randomFactory);
+                    currentValue += val;
+                }
+            }
+            value = currentValue;
+        } else {
+            // Army full, no reward
+            value = 0;
+        }
+        
+        options.push({
+            type: type,
+            army: army,
+            value: value
+        });
+    });
+    
     return options;
 }
 
 // --- Level Management ---
 
-function startLevel(level) {
+function startLevel(level, difficultyType = 'Easy') {
     rogueState.level = level;
-    document.getElementById('levelDisplay').innerText = `Level: ${level}`;
+    document.getElementById('levelDisplay').innerText = `Level: ${level} (${difficultyType})`;
     
-    // Generate Enemy Army
-    // Value = PlayerArmyValue + Level * 2
-    const playerValue = rogueState.playerRoster.reduce((acc, name) => {
-        // Exclude King value from scaling calculation
-        if (name === 'simpleKingFactory' || name === 'kingFactory' || name === 'northernKing') {
-            return acc;
-        }
-        return acc + getPieceValue(name);
-    }, 0);
+    // Generate Enemy Army based on difficulty
+    // Easy: 5 + Level*2
+    // Dangerous: 5 + Level*3
+    // Impossible: 8 + Level*4
     
-    const targetEnemyValue = playerValue - 2 + (level - 1);
+    let targetEnemyValue = 5 + level * 2;
+    if (difficultyType === 'Dangerous') targetEnemyValue = 5 + level * 3;
+    if (difficultyType === 'Impossible') targetEnemyValue = 8 + level * 4;
+    
+    // Adjust for player strength? 
+    // The previous formula was: PlayerValue - 2 + (level - 1)
+    // The user instruction overrides this with specific formulas.
+    // "If you take 'Easy Mission' the enemy should have army of value 5 + the level *2"
+    // This seems to ignore player strength, which is interesting for a rogue-like (you can outscale or fall behind).
     
     const { army: enemyArmy } = generateRandomArmy(targetEnemyValue, true);
     rogueState.enemyRoster = enemyArmy;
     
-    // Save state whenever a new level starts
+    // Save state
     saveProgress();
     
     // Setup Board
@@ -421,13 +489,23 @@ function setupBoard() {
     
     // Helper to split army
     // "Infront" means closer to the enemy.
-    const frontLineFactories = ['pawnFactory'];
+    const frontLineFactories = ['pawnFactory', 'swordsMen','ghostFactory'];
     
     const splitArmy = (roster) => {
         const front = roster.filter(u => frontLineFactories.includes(u));
         const back = roster.filter(u => !frontLineFactories.includes(u));
         return { front, back };
     };
+
+    function countFrontBack(roster) {
+        let front = 0;
+        let back = 0;
+        roster.forEach(u => {
+            if(frontLineFactories.includes(u)) front++;
+            else back++;
+        });
+        return {front, back};
+    }
 
     // Place Player Army (White)
     // Front Line: Row 6 (Pawns)
@@ -556,13 +634,16 @@ function showRewardModal() {
     
     const rewards = generateRewardOptions();
     
-    rewards.forEach((army, i) => {
+    rewards.forEach((option, i) => {
         // Removed markPieceAsSeen to stop auto-popup
+        const army = option.army;
+        const type = option.type;
+        const val = option.value;
 
         const div = document.createElement('div');
         div.className = 'army-option';
-        const val = army.reduce((acc, name) => acc + getPieceValue(name), 0);
-        div.innerHTML = `<h3>Reward ${i+1}</h3><p>Value: ${val.toFixed(1)}</p>`;
+        // const val = army.reduce((acc, name) => acc + getPieceValue(name), 0);
+        div.innerHTML = `<h3>${type} Mission</h3><p>Reward Value: ${val.toFixed(1)}</p>`;
         
         // Info Button
         const infoBtn = document.createElement('button');
@@ -595,7 +676,7 @@ function showRewardModal() {
             rogueState.playerRoster.push(...army);
             modal.close();
             saveProgress();
-            startLevel(rogueState.level + 1);
+            startLevel(rogueState.level + 1, type);
         };
         
         container.appendChild(div);
@@ -872,8 +953,33 @@ function animate(secretState){
         else if (sq.light) drawLightedSquare(x * squareLength, y * squareLength, squareLength);
         else if(sq.red) drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength);
         else if(sq.grey) drawColoredSquare(x*squareLength, y * squareLength, blockedSquareColor, squareLength);
-        else if(sq.special) drawColoredSquare(x*squareLength, y * squareLength, specialSquareColor, squareLength);
-    });
+        else if(sq.special){
+                drawColoredSquare(x*squareLength, y * squareLength, specialSquareColor, squareLength)
+            }
+        })
+        if(state.oldMove){
+            const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);
+            const newSquare = findSquareByXY(state.board,state.oldMove.currentX, state.oldMove.currentY);
+
+            if(hotseatGame.state.turn === 'black'){
+                if(oldSquare && !oldSquare.light){
+                    drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
+                }
+                if(newSquare && !newSquare.light){
+                    drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
+                }
+            }
+            else if(hotseatGame.state.turn === 'white'){
+
+                if(oldSquare && !oldSquare.light){
+                    drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
+                }
+                if(newSquare && !newSquare.light){
+                    drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
+                }
+            }
+
+        }
 
     // Draw Pieces
     state.pieces.forEach((piece) => {
