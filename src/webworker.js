@@ -35,15 +35,15 @@ function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters){
         const secondGen = generateMovesFromMoves(firstGen, enemy,state.board,filters, true);
     
         evalMoves(secondGen,maximizer,state.board,magnifiers);
-        evalParents(firstGen,secondGen,true);
+        evalParents(firstGen,secondGen,true, maximizer);
         return getMoveByValue(firstGen)
     }
     else if(depth === 3){
         const secondGen = generateMovesFromMoves(firstGen, enemy,state.board,filters, true);
         const thirdGen = generateMovesFromMoves(secondGen, maximizer,state.board,filters);
         evalMoves(thirdGen,maximizer,state.board,magnifiers);
-        evalParents(secondGen,thirdGen);
-        evalParents(firstGen,secondGen, true);
+        evalParents(secondGen,thirdGen, false, maximizer);
+        evalParents(firstGen,secondGen, true, maximizer);
 
         return getMoveByValue(firstGen)
 
@@ -55,13 +55,23 @@ function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters){
         const fourthGen = generateMovesFromMoves(thirdGen, enemy,state.board, filters, true);
         
         evalMoves(fourthGen,maximizer,state.board,defaultCharacter(0));
-        evalParents(thirdGen, fourthGen,true);
-        evalParents(secondGen, thirdGen,false);
-        evalParents(firstGen,secondGen,true);
+        evalParents(thirdGen, fourthGen,true, maximizer);
+        evalParents(secondGen, thirdGen,false, maximizer);
+        evalParents(firstGen,secondGen,true, maximizer);
     
         return getMoveByValue(firstGen)
     }
     else{
+        evalMoves(firstGen,maximizer,state.board,magnifiers);
+        firstGen.forEach(move => {
+            if(move.won){
+                if(move.won === maximizer){
+                    move.value = 9999999999999999999;
+                } else {
+                    move.value = -9999999999999999999;
+                }
+            }
+        });
         return getMoveByValue(firstGen)
     }
 }

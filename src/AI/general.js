@@ -135,10 +135,10 @@
              let newPiece = newPieces[i];
              const square = allowedMoves[movesCounter]
              
-             // We use state.board directly (no clone) as playerMove cleans up lights anyway
-             // and we reconstruct the state wrapper for each move
-             if(playerMove({x:square.x, y:square.y},{board:state.board, pieces:newPieces, pieceSelected:newPiece , turn:color},true, undefined, 'allowedMove')){
-                 movesAndPieces.push({pieceCounter:piecesCounter,pieces:newPieces, xClicked:square.x, yClicked:square.y, parent:state.id, id:crypto.randomUUID()})
+             let tempState = {board:state.board, pieces:newPieces, pieceSelected:newPiece , turn:color};
+             if(playerMove({x:square.x, y:square.y},tempState,true, undefined, 'allowedMove')){
+                 let won = tempState.won;
+                 movesAndPieces.push({pieceCounter:piecesCounter,pieces:newPieces, xClicked:square.x, yClicked:square.y, parent:state.id, id:crypto.randomUUID(), won:won})
              }
          }
          piecesCounter++;
@@ -153,6 +153,9 @@
  function generateMovesFromMoves(moves, color,board,filters,enemy){
     let childMoves = [];
     moves.forEach((move) => {
+        if(move.won){
+            return;
+        }
         childMoves.push(...generateMovesFromPieces({pieces:move.pieces,board,turn:color, id:move.id},color,filters,enemy))
     })
     return childMoves
@@ -165,7 +168,7 @@
     })
  }
 
- function evalParents(parentArray, childArray, weakest) {
+ function evalParents(parentArray, childArray, weakest, maximizerColor) {
     // Optimization: Pre-group child moves by parent ID to avoid nested loops (O(N*M) -> O(N+M))
     const childrenByParent = new Map();
     const cLen = childArray.length;
@@ -183,6 +186,17 @@
     const pLen = parentArray.length;
     for(let i = 0; i < pLen; i++) {
         const parentMove = parentArray[i];
+        
+        if(parentMove.won){
+            if(parentMove.won === maximizerColor){
+                parentMove.value = 9999999999999999999;
+            }
+            else{
+                parentMove.value = -9999999999999999999;
+            }
+            continue;
+        }
+
         const children = childrenByParent.get(parentMove.id);
 
         if (children) {
