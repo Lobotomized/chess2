@@ -84,12 +84,17 @@ function initRogueGame() {
             // Restore level
             document.getElementById('levelDisplay').innerText = `Level: ${rogueState.level}`;
             
-            // Re-setup board with saved rosters
-            setupBoard();
+            if (rogueState.savedBoard && rogueState.savedBoard.pieces && rogueState.savedBoard.pieces.length > 0) {
+                restoreBoard(rogueState.savedBoard);
+            } else {
+                // Re-setup board with saved rosters
+                setupBoard();
+            }
+
             rogueState.gameActive = true;
-            hotseatGame.state.turn = 'white'; // Reset turn to player on load for simplicity
-            hotseatGame.state.won = null;
-            hotseatGame.state.message = 'Game Restored';
+            // hotseatGame.state.turn = 'white'; // Reset turn to player on load for simplicity - NO, restore turn!
+            // hotseatGame.state.won = null;
+            // hotseatGame.state.message = 'Game Restored';
             
         } catch (e) {
             console.error("Failed to load save:", e);
@@ -102,7 +107,119 @@ function initRogueGame() {
 }
 
 function saveProgress() {
+    if(hotseatGame && hotseatGame.state) {
+        rogueState.savedBoard = {
+            pieces: hotseatGame.state.pieces.map(p => {
+                // Determine factory name if possible, or save essential props
+                // Since we don't store factoryName on piece, we rely on icon mapping or properties
+                return {
+                    icon: p.icon,
+                    x: p.x,
+                    y: p.y,
+                    color: p.color,
+                    moved: p.moved,
+                    value: p.value,
+                    // Save other properties that might be important
+                    // E.g. specific counters for some pieces?
+                };
+            }),
+            turn: hotseatGame.state.turn,
+            won: hotseatGame.state.won,
+            message: hotseatGame.state.message
+        };
+    }
     localStorage.setItem('rogueState', JSON.stringify(rogueState));
+}
+
+function restoreBoard(savedBoard) {
+    hotseatGame.state.pieces = [];
+    hotseatGame.state.board = [];
+    
+    // Create Board Grid
+    for (let x = 0; x <= 7; x++) {
+        for (let y = 0; y <= 7; y++) {
+            hotseatGame.state.board.push({ light: false, x: x, y: y });
+        }
+    }
+
+    // Restore Pieces
+    savedBoard.pieces.forEach(pData => {
+        const factory = findFactoryForIcon(pData.icon);
+        if (factory) {
+            const newPiece = factory(pData.color, pData.x, pData.y);
+            newPiece.moved = pData.moved;
+            newPiece.value = pData.value;
+            // Ensure icon matches (e.g. if factory is generic)
+            if (newPiece.icon !== pData.icon) {
+                 // Warn? Or override?
+                 // If it's a promoted piece (e.g. Queen from Pawn), factory might be 'rogueLikePawnFactory' if we guessed wrong?
+                 // But findFactoryForIcon uses icon to find factory.
+                 // So if icon is 'whiteQueen.png', it should find 'queenFactory'.
+            }
+            hotseatGame.state.pieces.push(newPiece);
+        } else {
+            console.warn("Could not find factory for piece:", pData.icon);
+            // Fallback: create generic piece?
+        }
+    });
+
+    hotseatGame.state.turn = savedBoard.turn || 'white';
+    hotseatGame.state.won = savedBoard.won;
+    hotseatGame.state.message = savedBoard.message;
+    
+    // Update UI
+    const turnDisplay = document.getElementById('turn');
+    if(turnDisplay) {
+        if(hotseatGame.state.turn === 'white') {
+            turnDisplay.innerText = "Your Turn";
+            turnDisplay.style.color = 'var(--board-light)';
+        } else {
+            turnDisplay.innerText = "Enemy Turn";
+            turnDisplay.style.color = '#ff6b6b';
+            
+            // If it's enemy turn, trigger AI
+            if (!hotseatGame.state.won) {
+                setTimeout(triggerAI, 1000); // Small delay for visual clarity
+            }
+        }
+    }
+}
+
+function findFactoryForIcon(icon) {
+    if (!window.iconToFactoryMap) {
+        window.iconToFactoryMap = {};
+        // Scan all available factories
+        availablePieceFactories.forEach(fName => {
+            if (typeof window[fName] === 'function') {
+                try {
+                    const p = window[fName]('white', 0, 0);
+                    window.iconToFactoryMap[p.icon] = window[fName];
+                    // Also map black version
+                    const pBlack = window[fName]('black', 0, 0);
+                    window.iconToFactoryMap[pBlack.icon] = window[fName];
+                } catch(e) {}
+            }
+        });
+        
+        // Manual overrides for known issues or missing factories in the list
+        // e.g. 'swordsMen' -> 'whiteSwordsmen.png' (capitalization might differ)
+    }
+    
+    if (window.iconToFactoryMap[icon]) return window.iconToFactoryMap[icon];
+    
+    // Fuzzy search
+    // icon: 'whitePikeman.png' -> 'pikeman'
+    let cleanName = icon.replace('white', '').replace('black', '').replace('.png', '');
+    // Try exact match in window
+    if (typeof window[cleanName] === 'function') return window[cleanName];
+    // Try lowercase first char
+    let lowerFirst = cleanName.charAt(0).toLowerCase() + cleanName.slice(1);
+    if (typeof window[lowerFirst] === 'function') return window[lowerFirst];
+    // Try adding 'Factory'
+    if (typeof window[lowerFirst + 'Factory'] === 'function') return window[lowerFirst + 'Factory'];
+    if (typeof window[cleanName + 'Factory'] === 'function') return window[cleanName + 'Factory'];
+    
+    return null;
 }
 
 function clearProgress() {
@@ -639,6 +756,12 @@ function showStartModal() {
 }
 
 function showRewardModal() {
+    // Reset overlay
+    const overlay = document.getElementById('deathOverlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+    }
+
     const modal = document.getElementById('rewardDialog');
     const container = document.getElementById('rewardOptions');
     container.innerHTML = '';
@@ -740,7 +863,19 @@ function checkGameOver(state) {
         rogueState.gameActive = false;
         if (state.won === 'white') {
             // Player Won
-            setTimeout(showRewardModal, 1000);
+            // Fade to black
+            const overlay = document.getElementById('deathOverlay');
+            if (overlay) {
+                overlay.style.opacity = '1';
+                // Ensure it's on top of everything except modals
+                overlay.style.zIndex = '900'; 
+            }
+            
+            setTimeout(() => {
+                const modal = document.getElementById('gameWonDialog');
+                if(modal) modal.showModal();
+            }, 2000);
+            
         } else if (state.won === 'black') {
             // Player Lost
             clearProgress(); // Wipe save on death  
@@ -825,6 +960,9 @@ canvas.addEventListener('click', (e) => {
 
     hotseatGame.move('white', { x, y });
     
+    // Save progress after player move
+    saveProgress();
+    
     // Update Turn Display
     const turnDisplay = document.getElementById('turn');
     if(turnDisplay) {
@@ -861,6 +999,9 @@ function triggerAI() {
     w.onmessage = function(event) {
         let move = JSONfn.parse(event.data);
         AIMove(move.pieceCounter, move.xClicked, move.yClicked, 'black');
+        
+        // Save progress after AI move
+        saveProgress();
         
         // Update Turn Display
         const turnDisplay = document.getElementById('turn');

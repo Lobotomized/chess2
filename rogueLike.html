@@ -267,6 +267,14 @@
         <button onclick="location.reload()" style="padding: 10px 20px; cursor: pointer;">Try Again</button>
     </dialog>
 
+    <!-- Game Won Modal -->
+    <dialog id="gameWonDialog">
+        <h2>Victory!</h2>
+        <img src="/static/youWin.jpg" alt="You Win" style="max-width: 100%; height: auto; margin-bottom: 15px; border-radius: 8px;">
+        <p>Your army is victorious.</p>
+        <button onclick="document.getElementById('gameWonDialog').close(); showRewardModal();" style="padding: 10px 20px; cursor: pointer;">Continue</button>
+    </dialog>
+
     <dialog class="pieceModal displayNone"></dialog>
 
     <script src="/rogueLike.js"></script>
