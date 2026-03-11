@@ -243,21 +243,26 @@ function simpleKingFactory(color, x, y){
             { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }
         ],
         afterPlayerMove: function (state,move,prevMove){
-            if(this.color==='white'){
-                console.log('vliza v won')
+            let baseValue = 1000;
+            
+            // Add positional bonus based on progress towards opponent's side
+            if (this.color === 'white') {
+                // White wins at y=0
+                this.value = baseValue + (7 - this.y) *  1.5;
+                
                 if(this.y === 0){
-                    this.value = 2000
-                    state.won = this.color
+                    this.value = 20000;
+                    state.won = this.color;
                 }
-            }
-            else{
-
+            } else {
+                // Black wins at y=7
+                this.value = baseValue + this.y * 1.5;
+                
                 if(this.y === 7){
-                    this.value = 2000
-                    state.won = this.color
+                    this.value = 20000;
+                    state.won = this.color;
                 }
             }
-
         },
         afterThisPieceTaken: function (state) {
             if (this.color == 'white') {

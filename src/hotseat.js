@@ -11,7 +11,7 @@ let aiPowers = {
 }
 
 let ani = function(){
-    animate(hotseatGame.returnState())
+    animate(hotseatGame.state)
 }
 
 const startHotseat = function(){
@@ -62,7 +62,13 @@ if(comingGameType){
 const startAni = () => {
     const loadingScreen = document.getElementById('loadingScreen');
     if(loadingScreen) loadingScreen.style.display = 'none';
-    setInterval(ani, 100);
+    // Use requestAnimationFrame instead of setInterval for smoother animation
+    requestAnimationFrame(loop);
+}
+
+function loop() {
+    ani();
+    requestAnimationFrame(loop);
 }
 
 const startGameLoop = () => {
@@ -125,9 +131,16 @@ function animate(secretState){
     canvas.height = squareLength * boardHeight + squareLength;
     state = secretState;
     if(hoveredPiece){
+        // Clear threat highlights
+        closeLights(state.board, 'red');
+        closeLights(state.board, 'grey');
+        
         if(hoveredPiece.color != hotseatGame.state.turn && hotseatGame.state.turn != undefined){
             lightBoardFE(hoveredPiece,state,'red','grey')
         }
+    } else {
+        closeLights(state.board, 'red');
+        closeLights(state.board, 'grey');
     }
     if (state.pieces) {
         if(exitButton.hasAttribute('style')){
@@ -244,7 +257,22 @@ function animate(secretState){
 
         //Draw Pieces
         state.pieces.forEach((piece) => {
-            drawPiece(piece.x, piece.y, piece.icon, squareLength)
+            // Animation logic
+            if (typeof piece.currentX === 'undefined') {
+                piece.currentX = piece.x;
+                piece.currentY = piece.y;
+            }
+            
+            // Interpolate towards target (0.2 speed for smooth movement)
+            const speed = 0.2;
+            piece.currentX += (piece.x - piece.currentX) * speed;
+            piece.currentY += (piece.y - piece.currentY) * speed;
+            
+            // Snap if close enough
+            if (Math.abs(piece.x - piece.currentX) < 0.01) piece.currentX = piece.x;
+            if (Math.abs(piece.y - piece.currentY) < 0.01) piece.currentY = piece.y;
+            
+            drawPiece(piece.currentX, piece.currentY, piece.icon, squareLength)
         })
         if (state.won) {
             if (state.won == 'black') {
@@ -298,9 +326,19 @@ canvas.addEventListener('click', (e) => {
         my = e.pageY - offsetY;
 
         hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
+        
+        // After move (or selection), we need to ensure the lights are drawn.
+        // The 'move' function might select a piece and set 'light' flags on the board.
+        // However, 'animate' loop runs constantly.
+        // The issue might be that 'animate' clears the lights implicitly or explicitly?
+        // No, 'animate' just draws squares based on flags.
+        
+        // Wait, previously we added logic in 'animate' to clear lights if no hoveredPiece.
+        // If hoveredPiece is null (mouse not moving or on empty square), we clear ALL lights including selection lights?
+        // Let's check the 'animate' function again.
+        
         state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
         if(state.turn === AIColor){
-            console.log("here?")
             w.postMessage(JSONfn.stringify({state:state, color:AIColor, AIPower:aiPowers[state.turn]}));
 
             w.onmessage = function(event){

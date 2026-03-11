@@ -506,7 +506,6 @@ function getSinglePlayerGame() {
                 state.white = playerRef;
             }
             else if (!state.black) {
-                console.log(state)
                 state.black = playerRef;
                 if(roomData.mode == 'minichess'){
                     state.gameType = 'minichess'

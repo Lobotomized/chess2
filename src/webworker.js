@@ -44,6 +44,7 @@ function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters){
         evalMoves(thirdGen,maximizer,state.board,magnifiers);
         evalParents(secondGen,thirdGen);
         evalParents(firstGen,secondGen, true);
+
         return getMoveByValue(firstGen)
 
     }
@@ -200,7 +201,6 @@ self.addEventListener("message", function(e) {
                     ]
                 )
             }
-
             if(obj.AIPower === 101){
 
                 console.time('101')
@@ -236,7 +236,22 @@ self.addEventListener("message", function(e) {
                 )
                 console.timeEnd('103')
             }
+            else if(obj.AIPower === 104){
+                console.time('104')
+                let depth = 2;
+                if(obj.state.pieces.length < 8){
+                    depth = 4;
+                }
+                else if(obj.state.pieces.length < 16){
+                    depth = 3;
+                }
 
+                move = minimaxDeep(obj.state,obj.color,depth, obj.removedTurns,
+                    methods[obj.AICharacter](0),
+                    []
+                )
+                console.timeEnd('104')
+            }
             move.removedTurns = obj.removedTurns;
             postMessage(JSONfn.stringify(move));
 

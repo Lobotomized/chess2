@@ -4,9 +4,8 @@
 // List of available piece factories for random generation
 const availablePieceFactories = [
     // Classic
-    'pawnFactory', 'rookFactory', 'knightFactory', 'bishopFactory', 'queenFactory', 'simpleKingFactory',
+    'rogueLikePawnFactory', 'rookFactory', 'knightFactory', 'bishopFactory', 'queenFactory', 'simpleKingFactory',
     'ghostFactory', 'horseFactory', "swordsMen", 
-    "clownRoguelikeFactory",
     // Animals
     // 'horseFactory', 'pigFactory', 'ghostFactory', 'spiderFactory', 
     // 'ladyBugFactory', 'goliathBugFactory', 'antFactory',
@@ -68,7 +67,8 @@ function initRogueGame() {
     hotseatGame.join('black', 'black');
     
     // Start Animation Loop
-    setInterval(ani, 100);
+    // Use requestAnimationFrame for smooth animation
+    requestAnimationFrame(aniLoop);
     
     // Check for saved game
     const savedState = localStorage.getItem('rogueState');
@@ -106,9 +106,15 @@ function clearProgress() {
 }
 
 // Animation Loop
+function aniLoop() {
+    ani();
+    requestAnimationFrame(aniLoop);
+}
+
 function ani() {
     if (!hotseatGame) return;
-    animate(hotseatGame.returnState());
+    // Use direct state reference to persist animation properties
+    animate(hotseatGame.state);
 }
 
 // --- Army Generation ---
@@ -328,7 +334,6 @@ function showPieceDiscoveryModal(factoryName) {
     // Wait, buildPieceModal injects HTML into .pieceModal div and shows it.
     // We need to ensure that function is available or replicate it.
     // It is in boardGeneration.js which is loaded.
-    console.log('buildPieceModal:', buildPieceModal);
     if (typeof buildPieceModal === 'function') {
         // Close any existing modals first?
         const existingModal = document.querySelector('.pieceModal');
@@ -354,7 +359,7 @@ function generateRewardOptions() {
     // Check player roster limits
     // Need to access frontLineFactories from setupBoard? 
     // It's local to setupBoard. I should move it to global or duplicate it.
-    const frontLineFactories = ['pawnFactory', 'swordsMen','ghostFactory'];
+    const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory'];
     let frontCount = 0;
     let backCount = 0;
     rogueState.playerRoster.forEach(u => {
@@ -392,8 +397,8 @@ function generateRewardOptions() {
     
     selectedTypes.forEach(type => {
         let rewardCap = 3;
-        if(type === 'Dangerous') rewardCap = 6;
-        if(type === 'Impossible') rewardCap = 9;
+        if(type === 'Dangerous') rewardCap = 8;
+        if(type === 'Impossible') rewardCap = 12;
         
         let army = [];
         let value = 0;
@@ -443,8 +448,8 @@ function startLevel(level, difficultyType = 'Easy') {
     // Impossible: 8 + Level*4
     
     let targetEnemyValue = 5 + level * 2;
-    if (difficultyType === 'Dangerous') targetEnemyValue = 5 + level * 3;
-    if (difficultyType === 'Impossible') targetEnemyValue = 8 + level * 4;
+    if (difficultyType === 'Dangerous') targetEnemyValue = 8 + level * 3;
+    if (difficultyType === 'Impossible') targetEnemyValue = 12 + level * 4;
     
     // Adjust for player strength? 
     // The previous formula was: PlayerValue - 2 + (level - 1)
@@ -489,7 +494,7 @@ function setupBoard() {
     
     // Helper to split army
     // "Infront" means closer to the enemy.
-    const frontLineFactories = ['pawnFactory', 'swordsMen','ghostFactory'];
+    const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory'];
     
     const splitArmy = (roster) => {
         const front = roster.filter(u => frontLineFactories.includes(u));
@@ -583,7 +588,7 @@ function showStartModal() {
 
         const div = document.createElement('div');
         div.className = 'army-option';
-        div.innerHTML = `<h3>Option ${i+1}</h3><p>Value: ${value.toFixed(1)}</p>`;
+        // div.innerHTML = `<h3>Option ${i+1}</h3><p>Value: ${value.toFixed(1)}</p>`;
         
         // Info Button
         const infoBtn = document.createElement('button');
@@ -688,7 +693,6 @@ function showRewardModal() {
 // --- Win Condition Helper ---
 function checkWinCondition(state) {
 
-    console.log(state)
     if (state.won) return; // Already won
 
     const currentTurn = state.turn;
@@ -733,8 +737,23 @@ function checkGameOver(state) {
             setTimeout(showRewardModal, 1000);
         } else if (state.won === 'black') {
             // Player Lost
-            clearProgress(); // Wipe save on death
-            document.getElementById('gameOverDialog').showModal();
+            clearProgress(); // Wipe save on death  
+            
+            // Fade to black
+            const overlay = document.getElementById('deathOverlay');
+            if (overlay) {
+                overlay.style.opacity = '1';
+            }
+            
+            setTimeout(() => {
+                const modal = document.getElementById('gameOverDialog');
+                modal.showModal();
+                if (overlay) {
+                     // Ensure overlay stays but is behind modal
+                     overlay.style.zIndex = '900'; // Keep it high but below modal if possible
+                     // Dialogs are in top layer, so they should be above z-index 900
+                }
+            }, 2000);
         } else {
              // Tie - maybe restart level?
              alert("Draw! Restarting level...");
@@ -830,7 +849,7 @@ function triggerAI() {
     w.postMessage(JSONfn.stringify({
         state: state,
         color: 'black',
-        AIPower: 3 // Fixed power or scaled? Prompt said "Level*2" for army value, maybe AI power stays constant or increases?
+        AIPower: 103 // Fixed power or scaled? Prompt said "Level*2" for army value, maybe AI power stays constant or increases?
     }));
 
     w.onmessage = function(event) {
@@ -851,22 +870,6 @@ function triggerAI() {
         
         // Check game over again after AI move
         checkGameOver(hotseatGame.state);
-        
-        // If AI made a move that allows another turn (e.g. multi-move), handle it?
-        // For simplicity, assume AI makes one full turn move.
-        // If turn is still black, AI needs to go again?
-        if (hotseatGame.state.turn === 'black' && !hotseatGame.state.won) {
-             // Basic recursion for multi-move pieces
-             // triggerAI(); // Be careful of infinite loops
-             // The original hotseat.js handles "removedTurns" for complex moves.
-             // I'll stick to simple AI trigger for now.
-             w.postMessage(JSONfn.stringify({
-                 state: hotseatGame.state,
-                 color: 'black',
-                 AIPower: 3,
-                 removedTurns: move.removedTurns ? [{...move}, ...move.removedTurns] : [{...move}]
-             }));
-        }
     };
 }
 
@@ -917,9 +920,16 @@ function animate(secretState){
     
     const state = secretState;
     if(hoveredPiece){
+        // Clear threat highlights
+        closeLights(state.board, 'red');
+        closeLights(state.board, 'grey');
+        
         if(hoveredPiece.color != hotseatGame.state.turn && hotseatGame.state.turn != undefined){
             lightBoardFE(hoveredPiece,state,'red','grey')
         }
+    } else {
+        closeLights(state.board, 'red');
+        closeLights(state.board, 'grey');
     }
 
     // Background
@@ -983,7 +993,22 @@ function animate(secretState){
 
     // Draw Pieces
     state.pieces.forEach((piece) => {
-        drawPiece(piece.x, piece.y, piece.icon, squareLength);
+        // Animation logic
+        if (typeof piece.currentX === 'undefined') {
+            piece.currentX = piece.x;
+            piece.currentY = piece.y;
+        }
+        
+        // Interpolate towards target (0.1 speed)
+        const speed = 0.1;
+        piece.currentX += (piece.x - piece.currentX) * speed;
+        piece.currentY += (piece.y - piece.currentY) * speed;
+        
+        // Snap if close enough
+        if (Math.abs(piece.x - piece.currentX) < 0.01) piece.currentX = piece.x;
+        if (Math.abs(piece.y - piece.currentY) < 0.01) piece.currentY = piece.y;
+        
+        drawPiece(piece.currentX, piece.currentY, piece.icon, squareLength);
     });
     
     // Status Text

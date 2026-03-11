@@ -126,6 +126,8 @@
     })
     socket.on('rooms', (data) => {
     })
+    let lastState = null;
+
     socket.on('returnState', async (secretState) => {
         if (document.readyState !== 'complete') {
              await new Promise(resolve => window.addEventListener('load', resolve));
@@ -133,6 +135,19 @@
         if (window.imagesLoaded) {
             await window.imagesLoaded;
         }
+        
+        // Preserve animation state from previous state
+        if (lastState && lastState.pieces) {
+             secretState.pieces.forEach(newP => {
+                 // Match piece by position and type
+                 const oldP = lastState.pieces.find(p => p.x === newP.x && p.y === newP.y && p.icon === newP.icon);
+                 if (oldP && oldP.animX !== undefined) {
+                     newP.animX = oldP.animX;
+                     newP.animY = oldP.animY;
+                 }
+             });
+        }
+        
         //Draw the game
 
         const myTurnH1 = document.getElementById('turn');
@@ -141,11 +156,31 @@
         canvas.height = squareLength * boardWidth + squareLength;
         state = secretState;
 
+        // Initialize animation for moving piece
+        if (state.oldMove) {
+             const isSameMove = lastState && lastState.oldMove &&
+                                lastState.oldMove.oldX === state.oldMove.oldX && 
+                                lastState.oldMove.oldY === state.oldMove.oldY && 
+                                lastState.oldMove.currentX === state.oldMove.currentX && 
+                                lastState.oldMove.currentY === state.oldMove.currentY;
+             
+             if (!isSameMove) {
+                 // Find piece that moved
+                 const movedPiece = state.pieces.find(p => p.x === state.oldMove.currentX && p.y === state.oldMove.currentY);
+                 
+                 if (movedPiece) {
+                      movedPiece.animX = state.oldMove.oldX;
+                      movedPiece.animY = state.oldMove.oldY;
+                 }
+             }
+        }
+        
+        lastState = state;
+
         if(state.modalMessages && !modalAdded){
             buildModal(state, state.modalMessages, modal);
         }
         if(state.pieceModalMessages && typeof buildPieceModal !== 'undefined' && !pieceModalAdded){
-            console.log('here?')
             buildPieceModal(state, state.pieceModalMessages, pieceModal);
         }
         modalAdded = true;
@@ -331,6 +366,12 @@
                     drawPiece(piece.x, piece.y, piece.icon, squareLength)
                 }
             })
+            // Start Loop if not started
+            if (!window.drawLoopStarted) {
+                window.drawLoopStarted = true;
+                requestAnimationFrame(drawLoop);
+            }
+
             if (state.won) {
                 if (state.won == 'black') {
                     if(IAM == 'black'){
@@ -441,6 +482,359 @@
         socket.emit('joinRoom',{roomId:getParams(window.location.href).roomId, mode:getParams(window.location.href).mode, id:localStorage.getItem('me')});
 
     }
+    
+    function drawLoop() {
+        if (!state) {
+            requestAnimationFrame(drawLoop);
+            return;
+        }
+        
+        // Clear canvas
+        canvas.width = squareLength * boardWidth + squareLength; // This clears it
+        canvas.height = squareLength * boardHeight + squareLength;
+        
+        // Re-draw board (reusing logic from socket callback is hard without refactoring)
+        // Ideally we should move the drawing logic to a separate function `drawGame()`.
+        // But the socket callback also updates DOM text (clocks, messages).
+        // Let's assume the socket callback sets up the state and `drawLoop` handles the continuous rendering of pieces?
+        // No, if we clear canvas, we lose the board.
+        // So we MUST redraw the board in the loop.
+        
+        // Copying the drawing logic here is duplicated code but necessary given the structure.
+        // Or we define `drawGame` and call it from both places (or just from loop).
+        
+        // Let's implement `drawGame` function that takes `state` and draws everything.
+        // And replace the drawing block in socket callback with `drawGame(state)`.
+        
+        drawGame(state);
+        
+        requestAnimationFrame(drawLoop);
+    }
+    
+    function drawGame(state) {
+        if (!state || !state.board) return;
+        
+        const me = document.getElementById('blackClock');
+        const enemy = document.getElementById('whiteClock');
+        const body = document.getElementsByTagName('body')[0];
+        const forfeitTextButton = document.getElementById('forfeitText');
+        
+        // DOM updates (can be optimized but fine for now)
+        if(state.turn != 'menu' && !state.won){
+             if(state.turn == 'white' && state.yourTurn || state.turn == 'black' && !state.yourTurn){
+                  me.innerText = 'My time '+state.whiteClock;
+                  enemy.innerText = 'Enemy time '+state.blackClock;
+             }
+        } else {
+             me.innerText = 'My Time ' +state.blackClock;
+             enemy.innerText = 'Enemy Time ' +state.whiteClock
+        }
+
+        if (state.turn == 'black') {
+            body.style.background = blackSquareColor
+            me.style.color = whiteSquareColor;
+            enemy.style.color = whiteSquareColor;
+        }
+        else {
+            me.style.color = blackSquareColor;
+            enemy.style.color = blackSquareColor;
+            body.style.background = whiteSquareColor
+        }
+        
+        state.board.forEach((sq,index) => {
+            let y = sq.y;
+            let x = sq.x;
+            if(IAM == 'black'){
+                y = reverseNumber(y,boardHeight);
+            }
+
+            let orderFirst = true;
+            if(y%2 != 0){
+                orderFirst = false;
+            }
+            if (!sq.light && !sq.special) {
+                    if(IAM == 'white'){
+                        if(orderFirst){
+                            if(x % 2 != 0){
+                                drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+                            }
+                            else{
+                                drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+                            }
+                        }
+                        else{
+                            if(x % 2 != 0){
+                                drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+                            }
+                            else{
+                                drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+                            }
+                        }
+                        if(state.pieceSelected){
+                            if(x == state.pieceSelected.x && y == state.pieceSelected.y){
+                                drawColoredSquare(x*squareLength, y*squareLength,availableSquareColor, squareLength)
+                            }
+                        }
+                    }
+                    else{
+                        if(orderFirst){
+                            if(x % 2 != 0){
+                                drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+                            }
+                            else{
+                                drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+                            }
+                        }
+                        else{
+                            if(x % 2 != 0){
+                                drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+                            }
+                            else{
+                                drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+                            }
+                        }
+                        if(state.pieceSelected){
+                            if(x == state.pieceSelected.x && y == state.pieceSelected.y){
+                                drawColoredSquare(x*squareLength, reverseNumber(y, boardHeight)*squareLength,availableSquareColor, squareLength)
+                            }
+                        }
+                    }
+            }
+            else if(sq.special){
+                drawColoredSquare(x*squareLength, y * squareLength, specialSquareColor, squareLength)
+            }
+            else {
+                drawLightedSquare(x * squareLength, y * squareLength, squareLength);
+            }
+
+            if(sq.red){
+                drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength)
+            }
+            else if(sq.grey){
+                drawColoredSquare(x*squareLength, y * squareLength, blockedSquareColor, squareLength)
+            }
+            
+        })
+        
+        if(state.oldMove){
+            const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);
+            const newSquare = findSquareByXY(state.board,state.oldMove.currentX, state.oldMove.currentY);
+            if(IAM === 'black'){
+                if(!oldSquare.light && !oldSquare.red){
+                    drawColoredSquare(state.oldMove.oldX*squareLength, reverseNumber(state.oldMove.oldY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
+                }
+                if(!newSquare.light){
+                    drawColoredSquare(state.oldMove.currentX*squareLength, reverseNumber(state.oldMove.currentY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
+                }
+            }
+            else if(IAM === 'white'){
+                if(!oldSquare.light && !oldSquare.red){
+                    drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
+                }
+                if(!newSquare.light){
+                    drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
+                }
+            }
+        }
+
+        // Draw Pieces with Animation
+        state.pieces.forEach((piece) => {
+            if(IAM == 'black'){
+                let drawX = piece.animX !== undefined ? piece.animX : piece.x;
+                let drawY = piece.animY !== undefined ? piece.animY : piece.y;
+                drawPiece(drawX, reverseNumber(drawY,boardHeight), piece.icon, squareLength)
+            }
+            else{
+                let drawX = piece.animX !== undefined ? piece.animX : piece.x;
+                let drawY = piece.animY !== undefined ? piece.animY : piece.y;
+                drawPiece(drawX, drawY, piece.icon, squareLength)
+            }
+        })
+    }
+
+    // Animation Loop
+    function drawLoop() {
+        if (!state) {
+            requestAnimationFrame(drawLoop);
+            return;
+        }
+        
+        // Update Animation State
+         if (state.pieces) {
+              const speed = 0.1;
+              state.pieces.forEach(p => {
+                 if (p.animX !== undefined) {
+                     p.animX += (p.x - p.animX) * speed;
+                     p.animY += (p.y - p.animY) * speed;
+                     if (Math.abs(p.x - p.animX) < 0.01 && Math.abs(p.y - p.animY) < 0.01) {
+                         p.animX = undefined;
+                         p.animY = undefined;
+                     }
+                 }
+             });
+        }
+        
+        drawGame(state);
+        requestAnimationFrame(drawLoop);
+    }
+    
+    // Extract draw logic
+    function drawGame(state) {
+        if(!state || !state.board) return;
+        
+        // Clear?
+        // ctx.clearRect(0,0,canvas.width,canvas.height); // Not needed if we draw full board squares
+        
+        // ... (Drawing Logic) ...
+        // Wait, the drawing logic is huge and depends on local vars like 'IAM', 'boardHeight', 'boardWidth', 'playerRef'.
+        // These are global variables in the script scope, so we can access them.
+        
+        // Copy-paste logic from socket callback or call a shared function?
+        // I should refactor the socket callback to call 'drawGame(state)'.
+        
+        // Since I cannot easily move code blocks with search/replace without providing full context, 
+        // I will just redefine the drawing logic here.
+        
+        // --- Drawing Logic (Adapted) ---
+            const me = document.getElementById('blackClock');
+            const enemy = document.getElementById('whiteClock');
+            const body = document.getElementsByTagName('body')[0];
+            const forfeitTextButton = document.getElementById('forfeitText');
+            // me.innerText = 'My Time ' +state.blackClock; // Don't update DOM every frame if not needed?
+            // Actually DOM updates are expensive. Maybe skip text updates in loop?
+            // Or just do it.
+            
+            if (state.turn == 'black') {
+                body.style.background = blackSquareColor
+                me.style.color = whiteSquareColor;
+                enemy.style.color = whiteSquareColor;
+            }
+            else {
+                me.style.color = blackSquareColor;
+                enemy.style.color = blackSquareColor;
+                body.style.background = whiteSquareColor
+            }
+            
+            state.board.forEach((sq,index) => {
+                let y = sq.y;
+                let x = sq.x;
+                if(IAM == 'black'){
+                    y = reverseNumber(y,boardHeight);
+                }
+
+                let orderFirst = true;
+                if(y%2 != 0){
+                    orderFirst = false;
+                }
+                if (!sq.light && !sq.special) {
+                        if(IAM == 'white'){
+                            if(orderFirst){
+                                if(x % 2 != 0){
+                                    drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                                else{
+                                    drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                            }
+                            else{
+                                if(x % 2 != 0){
+                                    drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                                else{
+                                    drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                            }
+                            if(state.pieceSelected){
+                                if(x == state.pieceSelected.x && y == state.pieceSelected.y){
+                                    drawColoredSquare(x*squareLength, y*squareLength,availableSquareColor, squareLength)
+                                }
+                            }
+                        }
+                        else{
+                            if(orderFirst){
+                                if(x % 2 != 0){
+                                    drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                                else{
+                                    drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                            }
+                            else{
+                                if(x % 2 != 0){
+                                    drawBlackSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                                else{
+                                    drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
+                                }
+                            }
+                            if(state.pieceSelected){
+                                if(x == state.pieceSelected.x && y == state.pieceSelected.y){
+                                    drawColoredSquare(x*squareLength, reverseNumber(y, boardHeight)*squareLength,availableSquareColor, squareLength)
+                                }
+                            }
+                        }
+                }
+                else if(sq.special){
+                    drawColoredSquare(x*squareLength, y * squareLength, specialSquareColor, squareLength)
+                }
+                else {
+                    drawLightedSquare(x * squareLength, y * squareLength, squareLength);
+                }
+
+                if(sq.red){
+                    drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength)
+                }
+                else if(sq.grey){
+                    drawColoredSquare(x*squareLength, y * squareLength, blockedSquareColor, squareLength)
+                }
+                
+            })
+            
+            // Draw Old Move Highlights
+            if(state.oldMove){
+                const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);
+                const newSquare = findSquareByXY(state.board,state.oldMove.currentX, state.oldMove.currentY);
+                if(IAM === 'black'){
+                    if(oldSquare && !oldSquare.light && !oldSquare.red){
+                        drawColoredSquare(state.oldMove.oldX*squareLength, reverseNumber(state.oldMove.oldY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
+                    }
+                    if(newSquare && !newSquare.light){
+                        drawColoredSquare(state.oldMove.currentX*squareLength, reverseNumber(state.oldMove.currentY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
+                    }
+                }
+                else if(IAM === 'white'){
+                    if(oldSquare && !oldSquare.light && !oldSquare.red){
+                        drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
+                    }
+                    if(newSquare && !newSquare.light){
+                        drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
+                    }
+                }
+            }
+
+            // Draw Pieces with Animation
+            state.pieces.forEach((piece) => {
+                // Determine coordinates
+                let drawX = piece.x;
+                let drawY = piece.y;
+                
+                // Use animated coordinates if available
+                if (piece.animX !== undefined) {
+                    drawX = piece.animX;
+                    drawY = piece.animY;
+                }
+                
+                if(IAM == 'black'){
+                    drawPiece(drawX, reverseNumber(drawY,boardHeight), piece.icon, squareLength)
+                }
+                else{
+                    drawPiece(drawX, drawY, piece.icon, squareLength)
+                }
+            })
+    }
+    
+    // Start Loop
+    requestAnimationFrame(drawLoop);
 
 
     
