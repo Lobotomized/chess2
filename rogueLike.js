@@ -5,7 +5,11 @@
 const availablePieceFactories = [
     // Classic
     'rogueLikePawnFactory', 'rookFactory', 'knightFactory', 'bishopFactory', 'queenFactory', 'simpleKingFactory',
-    'ghostFactory', 'horseFactory', "swordsMen", 
+    'ghostFactory', 'horseFactory', "swordsMen",  
+    
+    "pikeman", "juggernautFactory", "ricarFactory",
+    "pigFactory", "shield", "executorFactory",
+    "antFactory", "spiderFactory", 'goliathBugFactory', "bootvesselFactory"
     // Animals
     // 'horseFactory', 'pigFactory', 'ghostFactory', 'spiderFactory', 
     // 'ladyBugFactory', 'goliathBugFactory', 'antFactory',
@@ -226,9 +230,10 @@ function showArmyInfo(army) {
             
             const tempState = {
                 board: miniBoard,
-                pieces: [dummyPiece]
+                pieces: [dummyPiece],
+                turn:"white"
             };
-            lightBoardFE(dummyPiece, tempState, 'lighted');
+            lightBoardFE(dummyPiece, tempState, 'lighted','blocked');
             
             const isLast = currentIndex >= uniqueFactories.length;
             const btnText = isLast ? "Close" : "Next Piece";
@@ -306,9 +311,10 @@ function showPieceDiscoveryModal(factoryName) {
     // Light up moves
     const tempState = {
         board: miniBoard,
-        pieces: [dummyPiece]
+        pieces: [dummyPiece],
+        turn:"white"
     };
-    lightBoardFE(dummyPiece, tempState, 'lighted');
+    lightBoardFE(dummyPiece, tempState, 'lighted','blocked');
     
     // Description - We might not have descriptions for all pieces automatically.
     // If we want descriptions, we'd need a map or property on the factory/piece.
@@ -359,7 +365,7 @@ function generateRewardOptions() {
     // Check player roster limits
     // Need to access frontLineFactories from setupBoard? 
     // It's local to setupBoard. I should move it to global or duplicate it.
-    const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory'];
+    const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'antFactory'];
     let frontCount = 0;
     let backCount = 0;
     rogueState.playerRoster.forEach(u => {
@@ -494,7 +500,7 @@ function setupBoard() {
     
     // Helper to split army
     // "Infront" means closer to the enemy.
-    const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory'];
+    const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'antFactory'];
     
     const splitArmy = (roster) => {
         const front = roster.filter(u => frontLineFactories.includes(u));
