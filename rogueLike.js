@@ -8,8 +8,8 @@ const availablePieceFactories = [
     'ghostFactory', 'horseFactory', "swordsMen",  
     
     "pikeman", "juggernautFactory", "ricarFactory",
-    "pigFactory", "shield", "executorFactory",
-    "antFactory", "spiderFactory", 'goliathBugFactory', "bootvesselFactory"
+    "pigFactory", "shield", "executorFactory", 'roguelikeQueenbugFactory',
+    "roguelikeAntFactory", "spiderFactory", 'goliathBugFactory', "bootvesselFactory"
     // Animals
     // 'horseFactory', 'pigFactory', 'ghostFactory', 'spiderFactory', 
     // 'ladyBugFactory', 'goliathBugFactory', 'antFactory',
@@ -20,8 +20,19 @@ const availablePieceFactories = [
     // Cats
 ];
 
+const adjustedValues = [
+
+    {name: 'ricarFactory', value: 4.5},
+    {name: 'pigFactory', value: 1.5},
+];
+
 // Helper to get piece value
 function getPieceValue(factoryName) {
+    const adjusted = adjustedValues.find(p => p.name === factoryName);
+    if(adjusted){
+        return adjusted.value;
+    }
+
     if (typeof window[factoryName] === 'function') {
         // Instantiate a dummy piece to check value
         try {
@@ -40,7 +51,8 @@ const rogueState = {
     level: 1,
     playerRoster: [], // Array of factory names
     enemyRoster: [],
-    gameActive: false
+    gameActive: false,
+    pendingReward: []
 };
 
 // --- Hotseat Game Setup (Copied/Adapted from hotseat.js) ---
@@ -128,6 +140,7 @@ function saveProgress() {
             message: hotseatGame.state.message
         };
     }
+    // rogueState also includes pendingReward now
     localStorage.setItem('rogueState', JSON.stringify(rogueState));
 }
 
@@ -482,7 +495,7 @@ function generateRewardOptions() {
     // Check player roster limits
     // Need to access frontLineFactories from setupBoard? 
     // It's local to setupBoard. I should move it to global or duplicate it.
-    const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'antFactory'];
+    const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'roguelikeAntFactory', 'roguelikeQueenbugFactory'];
     let frontCount = 0;
     let backCount = 0;
     rogueState.playerRoster.forEach(u => {
@@ -521,7 +534,7 @@ function generateRewardOptions() {
     selectedTypes.forEach(type => {
         let rewardCap = 3;
         if(type === 'Dangerous') rewardCap = 8;
-        if(type === 'Impossible') rewardCap = 12;
+        if(type === 'Impossible') rewardCap = 16;
         
         let army = [];
         let value = 0;
@@ -617,7 +630,7 @@ function setupBoard() {
     
     // Helper to split army
     // "Infront" means closer to the enemy.
-    const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'antFactory'];
+    const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'roguelikeAntFactory', 'roguelikeQueenbugFactory'];
     
     const splitArmy = (roster) => {
         const front = roster.filter(u => frontLineFactories.includes(u));
@@ -777,7 +790,7 @@ function showRewardModal() {
         const div = document.createElement('div');
         div.className = 'army-option';
         // const val = army.reduce((acc, name) => acc + getPieceValue(name), 0);
-        div.innerHTML = `<h3>${type} Mission</h3><p>Reward Value: ${val.toFixed(1)}</p>`;
+        div.innerHTML = `<h3>${type} Mission</h3><p>Potential Reward: ${val.toFixed(1)}</p>`;
         
         // Info Button
         const infoBtn = document.createElement('button');
@@ -807,7 +820,7 @@ function showRewardModal() {
         div.appendChild(preview);
         
         div.onclick = () => {
-            rogueState.playerRoster.push(...army);
+            rogueState.pendingReward = army;
             modal.close();
             saveProgress();
             startLevel(rogueState.level + 1, type);
@@ -871,6 +884,28 @@ function checkGameOver(state) {
                 overlay.style.zIndex = '900'; 
             }
             
+            // Process Pending Rewards
+            let earnedHTML = '';
+            if (rogueState.pendingReward && rogueState.pendingReward.length > 0) {
+                rogueState.playerRoster.push(...rogueState.pendingReward);
+                
+                // Create preview for dialog
+                rogueState.pendingReward.forEach(name => {
+                     if (typeof window[name] === 'function') {
+                        const p = window[name]('white', 0, 0);
+                        earnedHTML += `<img src="/static/${p.icon}" title="${name}" style="width:40px;height:40px;margin:5px;">`;
+                     }
+                });
+                
+                rogueState.pendingReward = []; // Clear pending
+                saveProgress();
+            } else {
+                earnedHTML = '<span>No reinforcement for this mission.</span>';
+            }
+
+            const rewardsContainer = document.getElementById('earnedRewards');
+            if (rewardsContainer) rewardsContainer.innerHTML = earnedHTML;
+
             setTimeout(() => {
                 const modal = document.getElementById('gameWonDialog');
                 if(modal) modal.showModal();

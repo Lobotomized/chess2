@@ -160,6 +160,29 @@ function rogueLikePawnFactory(color, x, y) {
     }
 }
 
+function roguelikeQueenbugFactory(color,x,y){
+    return {
+        icon: color+'QueenBug.png',
+        moves: [{ type: 'absolute', x: 0, y: -1, impotent:true }, { type: 'absolute', x: 0, y: 1 , impotent:true},
+        { type: 'absolute', x: -1, y: 0, impotent:true }, { type: 'absolute', x: 1, y: 0, impotent:true }],
+        color:color,
+        x:x,
+        y:y,
+        value:2.5,
+        posValue:posValue[2],
+        afterPieceMove:function(state, move, prevMove) {
+            let color = this.color;
+            const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
+            this.x = prevMove.x;
+            this.y = prevMove.y;
+            const ant = roguelikeAntFactory(color,move.x,move.y,direction)
+            state.pieces.push(ant);
+            return true;
+        }
+    }
+}
+
+
 function clownRoguelikeFactory(color,x,y){
     const moves= [{ type: 'blockable', repeat: true, x: 0, y: -1, impotent:true }, { type: 'blockable', repeat: true, x: 0, y: 1, impotent:true },
     { type: 'blockable', repeat: true, x: -1, y: 0, impotent:true }, { type: 'blockable', repeat: true, x: 1, y: 0, impotent:true },
@@ -193,10 +216,65 @@ function clownRoguelikeFactory(color,x,y){
     }
 }
 
+function roguelikeAntFactory(color,x,y, direction){
+    if(!direction){
+        direction =  color
+    }
+    let moves = [{ type: 'blockable', repeat:true,limit:2, y: -1, x: 0 }]
+
+    if (direction == 'black') {
+        moves = [{ type: 'blockable', repeat:true, limit:2, y: 1, x: 0 }]
+    }
+    let weakMoves = [{ type: 'blockable', repeat:true, limit:1, y: -1, x: 0 }]
+
+    if (direction == 'black') {
+        weakMoves = [{ type: 'blockable', repeat:true, limit:1, y: 1, x: 0 }]
+    }
+    return {
+        icon: color+'Ant.png',
+        moves:moves,
+        weakMoves: weakMoves,
+        color:color,
+        x:x,
+        y:y,
+        value:0.6,
+        posValue:posValue[2],
+        direction:direction,
+        afterPieceMove: function(state,move,prevMove) {
+            let color = this.color;
+            if(!this.direction){
+                this.direction =  color
+            }
+           let checkForLastRow = state.board.find((square) => {
+            return square.x === move.x && square.y > move.y;
+           })
+           let isItLast = false;
+           if(!checkForLastRow){
+            isItLast = true;
+           }
+
+            if(this.direction == 'white' && move.y == 0 || this.direction == 'black' && isItLast)
+            {
+                const me = state.pieces.find((piece) => {
+                    return piece.x == move.x && piece.y == move.y
+                })
+                state.pieces.splice(state.pieces.indexOf(me),1);
+                state.pieces.push(roguelikeQueenbugFactory(this.color,move.x,move.y));
+                return true;
+            }
+            return true;
+        }
+    }
+}
+
+
+
 try{
     module.exports = {
         clownRoguelikeFactory,
-        rogueLikePawnFactory
+        rogueLikePawnFactory,
+        roguelikeAntFactory,
+        roguelikeQueenbugFactory
     }
 }
 catch(err){
