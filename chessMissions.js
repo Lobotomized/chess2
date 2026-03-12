@@ -8,6 +8,8 @@ app.use('/pieces', express.static('./pieces'))
 app.use('/helperFunctions.js', express.static('./helperFunctions.js'))
 app.use('/moveMethods.js', express.static('./moveMethods.js'))
 app.use('/rogueLike.js', express.static('./rogueLike.js'))
+app.use('/rogueLikeDifficulties.js', express.static('./rogueLikeDifficulties.js'))
+app.use('/rogueLikeDetails.js', express.static('./rogueLikeDetails.js'))
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const newG = require('./globby').newIOServerV2;
@@ -391,6 +393,7 @@ app.get('/play', function(req,res){
 app.get('/customMaps', function(req,res){
     return res.status(200).sendFile(__dirname + '/customMaps.html');
 })
+
 
 app.get('/hotseat-menu', function(req,res){
     return res.status(200).sendFile(__dirname + '/hotseat-menu.html');

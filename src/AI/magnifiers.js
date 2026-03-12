@@ -1,4 +1,3 @@
-
 //Options to change AI behavior
 let positionMaskDefault = {
     'whitePawn.png':1,
@@ -136,6 +135,59 @@ function evaluationMagnifierMaxOptions(piece,pieces,board,colorPerspective,optio
         piecePosValue = options.mask[piece.icon]
     }
     return filtered.length * options.posValue*piecePosValue;
+}
+
+
+function evaluationMagnifierKingVulnerability(piece,pieces,board,colorPerspective,options){
+    /*
+        Rewards moves that put the enemy king in check or attack squares around it.
+        options - 
+        attackValue - Value for attacking the king directly (check)
+        proximityValue - Value for attacking squares adjacent to the king
+    */
+    
+    // We only care about our pieces attacking the enemy king
+    if(piece.color !== colorPerspective){
+        return 0;
+    }
+
+    // Find the enemy king
+    let enemyKing = pieces.find(p => p.color !== colorPerspective && (p.icon.includes('King') || p.value > 500));
+    
+    if(!enemyKing){
+        return 0;
+    }
+
+    // Generate moves for the current piece
+    lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true);
+    
+    // Check if any allowed move attacks the king or squares around it
+    let score = 0;
+    
+    // Check for direct check (attacking king's position)
+    let attacksKing = board.find(square => square.x === enemyKing.x && square.y === enemyKing.y && square.allowedMove);
+    if(attacksKing){
+        score += options.attackValue || 0;
+    }
+
+    // Check for attacking squares around the king (vulnerability)
+    if(options.proximityValue){
+        for(let dx = -1; dx <= 1; dx++){
+            for(let dy = -1; dy <= 1; dy++){
+                if(dx === 0 && dy === 0) continue; // Skip king's own square (handled above)
+                
+                let targetX = enemyKing.x + dx;
+                let targetY = enemyKing.y + dy;
+                
+                let attacksProximity = board.find(square => square.x === targetX && square.y === targetY && square.allowedMove);
+                if(attacksProximity){
+                    score += options.proximityValue;
+                }
+            }
+        }
+    }
+
+    return score;
 }
 
 function evaluationMagnifierPiece(piece,pieces,board,colorPerspective,options){
@@ -418,6 +470,19 @@ function maskedDefaultCharacter(weight){
             return [
                 {method:evaluationMagnifierMaxOptions,options:{posValue:0.1,mask:positionMaskDefault}},
                 {method:evaluationMagnifierPiece, options:{pieceValue:1 }}
+            ]
+    }
+}
+
+function rogueLikeCharacter(weight){
+    switch(weight){
+        default:
+        case 0:
+            return [
+                {method:evaluationMagnifierMaxOptions,options:{posValue:0.1}},
+                {method:evaluationMagnifierPiece, options:{pieceValue:1.5 }},
+                {method:evaluationMagnifierKingVulnerability, options:{attackValue:2, proximityValue:0.3}}
+
             ]
     }
 }

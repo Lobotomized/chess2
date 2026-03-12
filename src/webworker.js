@@ -79,7 +79,7 @@ function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters){
 
 self.addEventListener("message", function(e) {
     let obj = JSONfn.parse(e.data)
-
+    console.log('obj', obj.AICharacter)
     if(!obj.state.won){
 
             let move;
@@ -262,6 +262,27 @@ self.addEventListener("message", function(e) {
                     []
                 )
                 console.timeEnd('104')
+            }
+
+            else if(obj.AIPower === 105){
+                console.time('105')
+                let character = methods[obj.AICharacter];
+                if(!obj.AICharacter){
+                    character = rogueLikeCharacter;
+                }
+                let depth = 2;
+                 if(obj.state.pieces.length < 8){
+                    depth = 4;
+                }
+                else if(obj.state.pieces.length < 16){
+                    depth = 3;
+                }
+                move = minimaxDeep(obj.state,obj.color,depth, obj.removedTurns,
+                    character(0),
+                    [
+                    ]
+                )
+                console.timeEnd('105')
             }
             move.removedTurns = obj.removedTurns;
             postMessage(JSONfn.stringify(move));

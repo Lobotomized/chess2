@@ -123,6 +123,12 @@ const pieceDescriptions = {
             It can also swap places with all friendly pieces around it.
         `
     },
+    "roguelikeQueenbugFactory":{
+        name: "Queenbug",
+        description: `
+            The Queenbug can't move. But it can spawn ants infront, behind or to the left or right of it.
+        `
+    },
 
 };
 

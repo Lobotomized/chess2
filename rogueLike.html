@@ -21,10 +21,12 @@
         <script src="/pieces/rogueLike.js"></script>
         <script src="/pieces/misc.js"></script>
         <!-- <script src="/pieceDefinitions.js"></script> -->
+        <script src="/rogueLikeDifficulties.js"></script>
         <script src="/boardGeneration.js"></script>
         <script src="/src/globby.js"></script>
         <script src="/helperFunctions.js"></script>
         <script src="/src/rogueLikePieceDescriptions.js"></script>
+        <script src="/rogueLikeDetails.js"></script>
         
         <link rel="stylesheet" href="/src/main.css">
         
@@ -113,6 +115,16 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
+        .woods-option {
+            background: linear-gradient(135deg, #deb887 0%, #8fbc8f 100%) !important;
+            border-color: #556b2f !important;
+        }
+        
+        .woods-option:hover {
+            border-color: #228b22 !important;
+            box-shadow: 0 5px 15px rgba(0,100,0,0.3) !important;
+        }
+        
         .army-option h3 {
             margin-top: 0;
             color: var(--piece-black);
@@ -186,6 +198,12 @@
             font-size: 20px;
             margin: 0;
             text-shadow: 1px 1px 0 #000;
+            min-width: 150px;  /* Fixed width to prevent jumping */
+            text-align: right;
+        }
+
+        #levelDisplay {
+            text-align: left;
         }
 
         #turn {
@@ -254,8 +272,8 @@
 
     <!-- Reward Modal -->
     <dialog id="rewardDialog">
-        <h2>Level Complete!</h2>
-        <p>Choose reinforcements for your army.</p>
+        <h2>Choose Your Next Mission</h2>
+        <p>Select your next challenge.</p>
         <div id="rewardOptions" class="army-choice"></div>
     </dialog>
 
@@ -272,8 +290,18 @@
         <h2>Victory!</h2>
         <img src="/static/youWin.jpg" alt="You Win" style="max-width: 100%; height: auto; margin-bottom: 15px; border-radius: 8px;">
         <p>Your army is victorious.</p>
-        <div id="earnedRewards" class="army-preview" style="margin-bottom: 20px;"></div>
-        <button onclick="document.getElementById('gameWonDialog').close(); showRewardModal();" style="padding: 10px 20px; cursor: pointer;">Continue</button>
+        <p id="goldEarnedText" style="font-weight:bold; color:#e5b53e; font-size:24px; text-shadow: 1px 1px 0 #000;"></p>
+        <button onclick="document.getElementById('gameWonDialog').close(); showShopModal();" style="padding: 10px 20px; cursor: pointer;">Go to Market</button>
+    </dialog>
+
+    <!-- Shop Modal -->
+    <dialog id="shopDialog">
+        <h2>Mercenary Market</h2>
+        <p>Current Gold: <span id="playerGold" style="color:#e5b53e; font-weight:bold;">0</span></p>
+        <div id="shopOptions" class="army-choice"></div>
+        <div style="margin-top:20px;">
+            <button onclick="document.getElementById('shopDialog').close(); showRewardModal();">Next Battle</button>
+        </div>
     </dialog>
 
     <dialog class="pieceModal displayNone"></dialog>

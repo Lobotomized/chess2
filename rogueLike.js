@@ -20,9 +20,22 @@ const availablePieceFactories = [
     // Cats
 ];
 
+// List of pieces available in the market
+const marketPieceFactories = [
+    'rogueLikePawnFactory', 'rookFactory', 'knightFactory', 'bishopFactory', 'queenFactory',
+    'ghostFactory',  "swordsMen", "pikeman", 
+    "juggernautFactory", "ricarFactory",
+     "shield", "executorFactory",  "bootvesselFactory"
+];
+
+const winnablePieceFactories = [
+    'horseFactory','roguelikeQueenbugFactory',
+    "roguelikeAntFactory", "spiderFactory", 'goliathBugFactory',"pigFactory",
+];
+
 const adjustedValues = [
 
-    {name: 'ricarFactory', value: 4.5},
+    {name: 'ricarFactory', value: 3},
     {name: 'pigFactory', value: 1.5},
 ];
 
@@ -52,7 +65,9 @@ const rogueState = {
     playerRoster: [], // Array of factory names
     enemyRoster: [],
     gameActive: false,
-    pendingReward: []
+    gold: 0,
+    shopOptions: [],
+    showWinScreen: false // New flag to persist win screen
 };
 
 // --- Hotseat Game Setup (Copied/Adapted from hotseat.js) ---
@@ -65,9 +80,29 @@ let aiPowers = {
     black: 3
 };
 
-let squareLength = screen.width < screen.height ? parseInt(screen.width / 8) : parseInt(screen.height / 12);
+let squareLength;
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
+
+function updateSquareLength() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    // We need space for 8 squares + 1 extra for margins/padding as per original code
+    // Original code used 8 squares for width calc, but canvas width was 9 squares.
+    // To fit on screen, we must divide by 9.
+    
+    const availableWidth = width * 0.95; // 95% of screen width
+    const availableHeight = height * 0.75; // 75% of screen height (leave room for UI)
+    
+    squareLength = Math.min(availableWidth / 9, availableHeight / 9);
+    
+    // Ensure integer to avoid blurry lines? Canvas handles floats but integers are sharper.
+    squareLength = Math.floor(squareLength);
+}
+
+updateSquareLength();
+window.addEventListener('resize', updateSquareLength);
 const forfeitTextButton = document.getElementById('forfeitText');
 let hotseatGame;
 let mouseX;
@@ -93,20 +128,43 @@ function initRogueGame() {
             const parsed = JSON.parse(savedState);
             Object.assign(rogueState, parsed);
             
+            // Ensure gold is loaded
+            rogueState.gold = parsed.gold || 0;
+            
             // Restore level
             document.getElementById('levelDisplay').innerText = `Level: ${rogueState.level}`;
             
-            if (rogueState.savedBoard && rogueState.savedBoard.pieces && rogueState.savedBoard.pieces.length > 0) {
+            // Check if shop was active
+            if (rogueState.shopOptions && rogueState.shopOptions.length > 0) {
+                 // Shop was open or pending
+                 // We should reopen the shop
+                 showShopModal(true); // Pass true to indicate restoring
+            } else if (rogueState.showWinScreen) {
+                 // Show win screen if it was active
+                 // We need to recalculate gold earned for display? Or store it?
+                 // Let's assume standard calculation or generic message.
+                 // "Your army is victorious."
+                 const goldEarned = Math.floor(10 + rogueState.level * 2); // Re-calc for display
+                 const goldText = document.getElementById('goldEarnedText');
+                 if(goldText) goldText.innerText = `+${goldEarned} Gold`;
+                 
+                 const modal = document.getElementById('gameWonDialog');
+                 if(modal) modal.showModal();
+                 
+                 // Also restore board in background
+                 if (rogueState.savedBoard && rogueState.savedBoard.pieces && rogueState.savedBoard.pieces.length > 0) {
+                    restoreBoard(rogueState.savedBoard);
+                 }
+            } else if (rogueState.savedBoard && rogueState.savedBoard.pieces && rogueState.savedBoard.pieces.length > 0) {
                 restoreBoard(rogueState.savedBoard);
+                rogueState.gameActive = true;
             } else {
                 // Re-setup board with saved rosters
                 setupBoard();
+                rogueState.gameActive = true;
             }
 
-            rogueState.gameActive = true;
-            // hotseatGame.state.turn = 'white'; // Reset turn to player on load for simplicity - NO, restore turn!
-            // hotseatGame.state.won = null;
-            // hotseatGame.state.message = 'Game Restored';
+            // rogueState.gameActive = true; // Moved inside conditions
             
         } catch (e) {
             console.error("Failed to load save:", e);
@@ -119,6 +177,9 @@ function initRogueGame() {
 }
 
 function saveProgress() {
+    // Ensure rogueState.gold is a number
+    if (typeof rogueState.gold !== 'number') rogueState.gold = 0;
+    
     if(hotseatGame && hotseatGame.state) {
         rogueState.savedBoard = {
             pieces: hotseatGame.state.pieces.map(p => {
@@ -140,7 +201,13 @@ function saveProgress() {
             message: hotseatGame.state.message
         };
     }
-    // rogueState also includes pendingReward now
+    
+    // Explicitly include gold in the object being saved (though it's in rogueState already)
+    // The issue might be that rogueState is not updated with gold when we save?
+    // No, rogueState.gold is updated in checkGameOver.
+    // However, when we reload, we do Object.assign(rogueState, parsed).
+    // Let's ensure gold is preserved.
+    
     localStorage.setItem('rogueState', JSON.stringify(rogueState));
 }
 
@@ -148,11 +215,13 @@ function restoreBoard(savedBoard) {
     hotseatGame.state.pieces = [];
     hotseatGame.state.board = [];
     
-    // Create Board Grid
-    for (let x = 0; x <= 7; x++) {
-        for (let y = 0; y <= 7; y++) {
-            hotseatGame.state.board.push({ light: false, x: x, y: y });
-        }
+    // Create Board Grid based on saved shape
+    const shapeName = rogueState.boardShape || 'Standard';
+    
+    if (boardShapes[shapeName]) {
+        boardShapes[shapeName](hotseatGame.state.board);
+    } else {
+        boardShapes['Standard'](hotseatGame.state.board);
     }
 
     // Restore Pieces
@@ -180,12 +249,12 @@ function restoreBoard(savedBoard) {
     hotseatGame.state.won = savedBoard.won;
     hotseatGame.state.message = savedBoard.message;
     
-    // Update UI
+    // Update Turn Display
     const turnDisplay = document.getElementById('turn');
     if(turnDisplay) {
         if(hotseatGame.state.turn === 'white') {
             turnDisplay.innerText = "Your Turn";
-            turnDisplay.style.color = 'var(--board-light)';
+            turnDisplay.style.color = 'var(--selected)';
         } else {
             turnDisplay.innerText = "Enemy Turn";
             turnDisplay.style.color = '#ff6b6b';
@@ -522,85 +591,214 @@ function generateRewardOptions() {
     // If back full: exclude back.
     // If both full: exclude both -> empty.
     
-    const missionTypes = ['Easy', 'Dangerous', 'Impossible'];
     const options = [];
     
-    // Generate 3 random mission types
-    const selectedTypes = [];
-    for(let i=0; i<3; i++) {
-        selectedTypes.push(missionTypes[Math.floor(Math.random() * missionTypes.length)]);
-    }
-    
-    selectedTypes.forEach(type => {
-        let rewardCap = 3;
-        if(type === 'Dangerous') rewardCap = 8;
-        if(type === 'Impossible') rewardCap = 16;
+    if(window.difficulties) {
+        // Select 3 random difficulties based on level
+        let baseIndex = rogueState.level; // If level is 1, baseIndex is 1.
         
-        let army = [];
-        let value = 0;
+        let d1 = Math.min(baseIndex, window.difficulties.length - 1);
+        let d2 = Math.min(baseIndex + 1, window.difficulties.length - 1);
+        let d3 = Math.min(baseIndex + 2, window.difficulties.length - 1);
         
-        if (allowedFactories.length > 0) {
-            // Custom generateRandomArmy using allowedFactories
-             let currentValue = 0;
-             let iterations = 0;
-             // Calculate target reward value
-             const targetValue = Math.max(1, rewardCap - Math.random() * 2);
-             
-             while (currentValue < targetValue && iterations < 100) {
-                iterations++;
-                const randomFactory = allowedFactories[Math.floor(Math.random() * allowedFactories.length)];
-                const val = getPieceValue(randomFactory);
-                
-                if (currentValue + val <= targetValue + 1) {
-                    army.push(randomFactory);
-                    currentValue += val;
-                }
+        // Ensure we always have 3 options if possible, even if duplicates
+        // But duplicates are boring.
+        // If we are at the end, maybe show the same difficulty 3 times?
+        // Or show difficulty -1?
+        
+        // Let's try to get 3 unique indices around the baseIndex if possible.
+        // If baseIndex is max, we can't go higher.
+        
+        const maxIdx = window.difficulties.length - 1;
+        
+        // Adjusted logic to always get 3 options
+        // If we are at max, show max-2, max-1, max
+        
+        if (baseIndex >= maxIdx) {
+            d1 = maxIdx;
+            d2 = maxIdx; // Duplicate allowed? User said "3 different options".
+            d3 = maxIdx;
+            // If they want 3 different options, we need 3 different difficulties.
+            // But we only have 20.
+            // Maybe we can vary the enemyValue slightly for the same difficulty?
+            // For now, let's just ensure we pick valid indices.
+            if (maxIdx >= 2) {
+                 d1 = maxIdx - 2;
+                 d2 = maxIdx - 1;
+                 d3 = maxIdx;
             }
-            value = currentValue;
-        } else {
-            // Army full, no reward
-            value = 0;
+        } else if (baseIndex >= maxIdx - 1) {
+             if (maxIdx >= 2) {
+                 d1 = maxIdx - 2;
+                 d2 = maxIdx - 1;
+                 d3 = maxIdx;
+             }
         }
         
-        options.push({
-            type: type,
-            army: army,
-            value: value
+        const diffs = [window.difficulties[d1], window.difficulties[d2], window.difficulties[d3]];
+        const uniqueDiffs = [...new Set(diffs.filter(d => d !== undefined))];
+        
+        // If uniqueDiffs < 3, fill with random other difficulties or just duplicate?
+        // "I want to have 3 different options"
+        // If we are at level 1, we have diffs[1], diffs[2], diffs[3]. Distinct.
+        
+        uniqueDiffs.forEach(diff => {
+             const option = {
+                type: diff.name,
+                description: diff.description,
+                rewardCap: diff.rewardCap, // Used for gold calc?
+                enemyValue: diff.enemyValue,
+                difficultyIndex: window.difficulties.indexOf(diff)
+             };
+
+             // Chance for special map
+             if (Math.random() < 0.3) {
+                 option.boardShape = 'Woods';
+                 option.description += " (Woods Map)";
+             } else {
+                 option.boardShape = 'Standard';
+             }
+
+             options.push(option);
         });
-    });
+        
+        // Fallback if we have fewer than 3 options (e.g. at end of game)
+        while (options.length < 3 && window.difficulties.length > 3) {
+             // Add a random lower difficulty
+             const randomIdx = Math.floor(Math.random() * baseIndex);
+             const diff = window.difficulties[randomIdx];
+             if (diff && !options.find(o => o.type === diff.name)) {
+                 const opt = {
+                    type: diff.name,
+                    description: diff.description,
+                    rewardCap: diff.rewardCap,
+                    enemyValue: diff.enemyValue,
+                    difficultyIndex: window.difficulties.indexOf(diff),
+                    boardShape: 'Standard'
+                 };
+                 
+                 if (Math.random() < 0.3) {
+                     opt.boardShape = 'Woods';
+                     opt.description += " (Woods Map)";
+                 }
+                 
+                 options.push(opt);
+             } else {
+                 break; // Avoid infinite loop if can't find unique
+             }
+        }
+        
+        // Sort by difficulty index
+        options.sort((a,b) => a.difficultyIndex - b.difficultyIndex);
+        
+        // Randomly assign piece rewards
+        options.forEach(opt => {
+            // 30% chance for a piece reward
+            if (Math.random() < 0.3) {
+                const maxPieceValue = opt.enemyValue / 2;
+                
+                // Use winnablePieceFactories if available, otherwise fallback
+                const sourceList = (typeof winnablePieceFactories !== 'undefined' && winnablePieceFactories.length > 0) 
+                                   ? winnablePieceFactories 
+                                   : availablePieceFactories;
+                                   
+                const eligiblePieces = sourceList.filter(f => {
+                    return getPieceValue(f) <= maxPieceValue && getPieceValue(f) >= maxPieceValue - 3;
+                });
+                
+                if (eligiblePieces.length > 0) {
+                    const randomPiece = eligiblePieces[Math.floor(Math.random() * eligiblePieces.length)];
+                    opt.rewardType = 'piece';
+                    opt.rewardContent = randomPiece;
+                    opt.rewardValue = getPieceValue(randomPiece); // Store value for reference
+                } else {
+                    opt.rewardType = 'gold';
+                    opt.rewardContent = opt.rewardCap;
+                }
+            } else {
+                opt.rewardType = 'gold';
+                opt.rewardContent = opt.rewardCap;
+            }
+        });
+        
+    } else {
+        // Fallback
+        options.push({type: 'Standard Battle', enemyValue: 5 + rogueState.level * 2});
+    }
     
+    // We don't generate reward armies anymore, just missions.
     return options;
 }
 
 // --- Level Management ---
 
-function startLevel(level, difficultyType = 'Easy') {
+function startLevel(level, difficultyOption) {
     rogueState.level = level;
-    document.getElementById('levelDisplay').innerText = `Level: ${level} (${difficultyType})`;
     
-    // Generate Enemy Army based on difficulty
-    // Easy: 5 + Level*2
-    // Dangerous: 5 + Level*3
-    // Impossible: 8 + Level*4
+    let difficultyName = 'Unknown';
+    let enemyValue = 5;
+    let rewardCap = 0;
+    let boardShape = 'Standard';
+
+    if (difficultyOption && typeof difficultyOption === 'object') {
+        difficultyName = difficultyOption.type || 'Custom';
+        enemyValue = difficultyOption.enemyValue || (5 + level * 2);
+        rewardCap = difficultyOption.rewardCap || (10 + level * 2);
+        boardShape = difficultyOption.boardShape || 'Standard';
+        
+        // Pass through reward type/content
+        rogueState.currentRewardType = difficultyOption.rewardType || 'gold';
+        rogueState.currentRewardContent = difficultyOption.rewardContent || rewardCap;
+        
+    } else if (typeof difficultyOption === 'string') {
+        difficultyName = difficultyOption;
+        
+        // Try to find the difficulty in the list
+        const found = window.difficulties ? window.difficulties.find(d => d.name === difficultyOption) : null;
+        if (found) {
+            enemyValue = found.enemyValue;
+            rewardCap = found.rewardCap;
+            boardShape = found.boardShape || 'Standard';
+        } else {
+            enemyValue = 5 + level * 2;
+            rewardCap = 10 + level * 2;
+        }
+        
+        rogueState.currentRewardType = 'gold';
+        rogueState.currentRewardContent = rewardCap;
+        
+    } else {
+        // Fallback or Initial Start
+        if (window.difficulties && window.difficulties[0]) {
+            difficultyName = window.difficulties[0].name;
+            enemyValue = window.difficulties[0].enemyValue;
+            rewardCap = window.difficulties[0].rewardCap;
+            boardShape = window.difficulties[0].boardShape || 'Standard';
+        } else {
+             rewardCap = 10 + level * 2;
+        }
+        
+        rogueState.currentRewardType = 'gold';
+        rogueState.currentRewardContent = rewardCap;
+    }
+
+    rogueState.currentReward = rewardCap; // Keep for legacy or display?
+
+
+    document.getElementById('levelDisplay').innerText = `Level: ${level} - ${difficultyName}`;
+    if (boardShape !== 'Standard') {
+        document.getElementById('levelDisplay').innerText += ` [${boardShape}]`;
+    }
     
-    let targetEnemyValue = 5 + level * 2;
-    if (difficultyType === 'Dangerous') targetEnemyValue = 8 + level * 3;
-    if (difficultyType === 'Impossible') targetEnemyValue = 12 + level * 4;
-    
-    // Adjust for player strength? 
-    // The previous formula was: PlayerValue - 2 + (level - 1)
-    // The user instruction overrides this with specific formulas.
-    // "If you take 'Easy Mission' the enemy should have army of value 5 + the level *2"
-    // This seems to ignore player strength, which is interesting for a rogue-like (you can outscale or fall behind).
-    
-    const { army: enemyArmy } = generateRandomArmy(targetEnemyValue, true);
+    const { army: enemyArmy } = generateRandomArmy(enemyValue, true);
     rogueState.enemyRoster = enemyArmy;
+    rogueState.boardShape = boardShape;
     
     // Save state
     saveProgress();
     
     // Setup Board
-    setupBoard();
+    setupBoard(boardShape);
     
     // Reset Game State
     hotseatGame.state.turn = 'white';
@@ -611,21 +809,43 @@ function startLevel(level, difficultyType = 'Easy') {
     const turnDisplay = document.getElementById('turn');
     if(turnDisplay) {
         turnDisplay.innerText = "Your Turn";
-        turnDisplay.style.color = 'var(--board-light)';
+        turnDisplay.style.color = 'var(--selected)';
     }
     
     rogueState.gameActive = true;
 }
 
-function setupBoard() {
+// Board Shapes
+const boardShapes = {
+    'Standard': (board) => {
+        for (let x = 0; x <= 7; x++) {
+            for (let y = 0; y <= 7; y++) {
+                board.push({ light: false, x: x, y: y });
+            }
+        }
+    },
+    'Woods': (board) => {
+        for (let x = 0; x <= 7; x++) {
+            for (let y = 0; y <= 7; y++) {
+                // Zig-zag missing squares in the middle: y=5 and y=4 alternate
+                if ((y === 4 && x % 2 === 1) || (y === 3 && x % 2 === 0)) {
+                    continue;
+                }
+                board.push({ light: false, x: x, y: y });
+            }
+        }
+    }
+};
+
+function setupBoard(shapeName = 'Standard') {
     hotseatGame.state.pieces = [];
     hotseatGame.state.board = [];
     
-    // Create Board Grid
-    for (let x = 0; x <= 7; x++) {
-        for (let y = 0; y <= 7; y++) {
-            hotseatGame.state.board.push({ light: false, x: x, y: y });
-        }
+    // Create Board Grid based on shape
+    if (boardShapes[shapeName]) {
+        boardShapes[shapeName](hotseatGame.state.board);
+    } else {
+        boardShapes['Standard'](hotseatGame.state.board);
     }
     
     // Helper to split army
@@ -670,41 +890,53 @@ function placeArmy(roster, color, rows) {
     
     let x = 0;
     let y = rows[currentRowIndex];
-    let placedCount = 0;
-    const maxPieces = rows.length * 8;
     
-    roster.forEach(factoryName => {
-        if (placedCount >= maxPieces) {
-             // Stop placing if board area is full
-             return;
+    // Helper to check if square exists
+    const isValidSquare = (bx, by) => {
+        // Use global findSquareByXY if available, otherwise simple check
+        if (typeof findSquareByXY === 'function') {
+            return findSquareByXY(hotseatGame.state.board, bx, by) !== undefined;
         }
+        return hotseatGame.state.board.some(sq => sq.x === bx && sq.y === by);
+    };
+
+    // Helper to advance position
+    const advance = () => {
+        x++;
+        if (x > 7) {
+            x = 0;
+            // Move to next row
+            if (color === 'white') {
+                currentRowIndex--;
+                if (currentRowIndex < 0) return false; // End of rows
+                y = rows[currentRowIndex];
+            } else {
+                currentRowIndex++;
+                if (currentRowIndex >= rows.length) return false; // End of rows
+                y = rows[currentRowIndex];
+            }
+        }
+        return true;
+    };
+
+    roster.forEach(factoryName => {
+        // Find next valid square
+        // Safety break to prevent infinite loop if board is weirdly empty
+        let attempts = 0;
+        while (!isValidSquare(x, y) && attempts < 100) {
+            if (!advance()) return; // No more rows
+            attempts++;
+        }
+        
+        if (attempts >= 100) return; // Should not happen
 
         if (typeof window[factoryName] === 'function') {
             const piece = window[factoryName](color, x, y);
             
-            
             hotseatGame.state.pieces.push(piece);
-            placedCount++;
             
-            // Advance position
-            x++;
-            if (x > 7) {
-                x = 0;
-                // Move to next row
-                if (color === 'white') {
-                    currentRowIndex--;
-                    if (currentRowIndex < 0) {
-                         // Should not happen due to maxPieces check, but safety break
-                         currentRowIndex = rows.length - 1; 
-                    }
-                } else {
-                    currentRowIndex++;
-                    if (currentRowIndex >= rows.length) {
-                        currentRowIndex = 0;
-                    }
-                }
-                y = rows[currentRowIndex];
-            }
+            // Advance position for next unit
+            advance();
         }
     });
 }
@@ -759,7 +991,9 @@ function showStartModal() {
         div.onclick = () => {
             rogueState.playerRoster = army;
             modal.close();
-            startLevel(1);
+            // Start level 1 with the easiest difficulty
+            const difficulty = window.difficulties ? window.difficulties[0] : { enemyValue: 3 };
+            startLevel(1, difficulty);
         };
         
         container.appendChild(div);
@@ -768,13 +1002,144 @@ function showStartModal() {
     modal.showModal();
 }
 
-function showRewardModal() {
+function showShopModal(restore = false) {
     // Reset overlay
     const overlay = document.getElementById('deathOverlay');
     if (overlay) {
         overlay.style.opacity = '0';
     }
+    
+    // Clear win screen flag since we moved to shop
+    rogueState.showWinScreen = false;
+    // Don't save yet, we save when generating/restoring shop options below
 
+    const modal = document.getElementById('shopDialog');
+    const container = document.getElementById('shopOptions');
+    container.innerHTML = '';
+    
+    const goldDisplay = document.getElementById('playerGold');
+    if (goldDisplay) goldDisplay.innerText = rogueState.gold;
+
+    // Use existing shop options if restoring, else generate new
+    let shopItems = [];
+    if (restore && rogueState.shopOptions && rogueState.shopOptions.length > 0) {
+        shopItems = rogueState.shopOptions;
+    } else {
+        // Generate 6 random units to buy (as requested)
+        for(let i=0; i<6; i++) {
+            const randomFactory = marketPieceFactories[Math.floor(Math.random() * marketPieceFactories.length)];
+            const val = getPieceValue(randomFactory);
+            const cost =  Math.floor(val * 5);
+            shopItems.push({factory: randomFactory, cost: cost, value: val, bought: false});
+        }
+        rogueState.shopOptions = shopItems;
+        saveProgress();
+    }
+
+    const updateAllButtons = () => {
+        const buttons = container.querySelectorAll('.buy-btn');
+        buttons.forEach(btn => {
+            const index = btn.dataset.index;
+            const item = shopItems[index];
+            if (item.bought) return; // Already bought state handled
+
+            if (rogueState.gold < item.cost) {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+            } else {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            }
+        });
+    };
+
+    shopItems.forEach((item, index) => {
+        const div = document.createElement('div');
+        div.className = 'army-option';
+        
+        let icon = '';
+        if (typeof window[item.factory] === 'function') {
+             const p = window[item.factory]('white', 0, 0);
+             icon = `<img src="/static/${p.icon}" style="width:50px;height:50px;display:block;margin:0 auto 10px;cursor:help" title="Click for info">`;
+             
+             // Add click handler to icon for info
+             setTimeout(() => {
+                 const img = div.querySelector('img');
+                 if(img) {
+                     img.onclick = (e) => {
+                         e.stopPropagation();
+                         showPieceDiscoveryModal(item.factory);
+                     };
+                 }
+             }, 0);
+        }
+        
+        div.innerHTML = `
+            ${icon}
+            <h3>${item.factory.replace('Factory','').replace('rogueLike','')}</h3>
+            <p>Power: ${item.value}</p>
+            <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost}g</p>
+        `;
+        
+        // Info Button
+        const infoBtn = document.createElement('button');
+        infoBtn.innerText = 'Info';
+        infoBtn.style.width = '100%';
+        infoBtn.style.marginBottom = '5px';
+        infoBtn.style.fontSize = '12px';
+        infoBtn.onclick = (e) => {
+            e.stopPropagation();
+            showPieceDiscoveryModal(item.factory);
+        };
+        div.appendChild(infoBtn);
+
+        // Buy Button
+        const buyBtn = document.createElement('button');
+        buyBtn.innerText = item.bought ? 'Bought' : 'Buy';
+        buyBtn.className = 'buy-btn';
+        buyBtn.dataset.index = index;
+        buyBtn.style.width = '100%';
+        
+        if (item.bought) {
+            buyBtn.disabled = true;
+            div.style.opacity = '0.5';
+        }
+        
+        buyBtn.onclick = (e) => {
+            e.stopPropagation();
+            if (rogueState.gold >= item.cost && !item.bought) {
+                rogueState.gold -= item.cost;
+                rogueState.playerRoster.push(item.factory);
+                item.bought = true;
+                
+                if (document.getElementById('playerGold')) {
+                    document.getElementById('playerGold').innerText = rogueState.gold;
+                }
+                saveProgress();
+                
+                // Update UI
+                buyBtn.innerText = 'Bought';
+                buyBtn.disabled = true;
+                div.style.opacity = '0.5';
+                
+                // Refresh all buttons
+                updateAllButtons();
+            }
+        };
+        
+        div.appendChild(buyBtn);
+        container.appendChild(div);
+    });
+    
+    // Initial update
+    updateAllButtons();
+
+    modal.showModal();
+}
+
+function showRewardModal() {
     const modal = document.getElementById('rewardDialog');
     const container = document.getElementById('rewardOptions');
     container.innerHTML = '';
@@ -782,17 +1147,61 @@ function showRewardModal() {
     const rewards = generateRewardOptions();
     
     rewards.forEach((option, i) => {
-        // Removed markPieceAsSeen to stop auto-popup
         const army = option.army;
-        const type = option.type;
         const val = option.value;
 
         const div = document.createElement('div');
         div.className = 'army-option';
-        // const val = army.reduce((acc, name) => acc + getPieceValue(name), 0);
-        div.innerHTML = `<h3>${type} Mission</h3><p>Potential Reward: ${val.toFixed(1)}</p>`;
+        if (option.boardShape === 'Woods') {
+            div.classList.add('woods-option');
+        }
+        
+        let rewardText = "";
+        let rewardIcon = "";
+
+        if (option.rewardType === 'piece') {
+            const pieceFactory = option.rewardContent;
+            let iconSrc = "";
+            if (typeof window[pieceFactory] === 'function') {
+                 const p = window[pieceFactory]('white', 0, 0);
+                 iconSrc = `/static/${p.icon}`;
+            }
+            
+            // Just the icon, clickable
+            // We need to attach the click handler after inserting HTML
+            rewardText = `<div class="reward-icon-container" style="cursor:help; display:inline-block; vertical-align:middle;">
+                             <img src="${iconSrc}" class="reward-icon" data-factory="${pieceFactory}" style="width:40px; height:40px; filter:drop-shadow(2px 2px 2px rgba(0,0,0,0.3)); transition:transform 0.2s;">
+                          </div>`;
+        } else {
+            rewardText = `${option.rewardCap || '?'} Gold`;
+        }
+        
+        div.innerHTML = `<h3>${option.type}</h3>
+                         <p style="font-size:14px;">${option.description || ''}</p>
+                         <p>Enemy Power: ${option.enemyValue || '?'}</p>
+                         <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
+                            <span>Reward:</span>
+                            ${rewardText}
+                         </div>`;
+        
+        // Add click listener for the reward icon
+        if (option.rewardType === 'piece') {
+            setTimeout(() => {
+                const img = div.querySelector('.reward-icon');
+                if(img) {
+                    img.onclick = (e) => {
+                        e.stopPropagation(); // Prevent starting the level
+                        showPieceDiscoveryModal(option.rewardContent);
+                    };
+                    img.onmouseenter = () => img.style.transform = 'scale(1.2)';
+                    img.onmouseleave = () => img.style.transform = 'scale(1)';
+                }
+            }, 0);
+        }
         
         // Info Button
+        // Removed as per request "Also I want the "Info" button removed from the battle options"
+        /*
         const infoBtn = document.createElement('button');
         infoBtn.innerText = 'Info';
         infoBtn.style.marginBottom = '5px';
@@ -801,29 +1210,13 @@ function showRewardModal() {
             showArmyInfo(army);
         };
         div.appendChild(infoBtn);
-
-        const preview = document.createElement('div');
-        preview.className = 'army-preview';
-        army.forEach(name => {
-            if (typeof window[name] === 'function') {
-                const p = window[name]('white', 0, 0);
-                const img = document.createElement('img');
-                img.src = `/static/${p.icon}`;
-                img.title = name;
-                img.onclick = (e) => {
-                    e.stopPropagation();
-                    showPieceDiscoveryModal(name);
-                };
-                preview.appendChild(img);
-            }
-        });
-        div.appendChild(preview);
+        */
         
         div.onclick = () => {
-            rogueState.pendingReward = army;
+            // rogueState.pendingReward = army; // No longer needed
             modal.close();
             saveProgress();
-            startLevel(rogueState.level + 1, type);
+            startLevel(rogueState.level + 1, option);
         };
         
         container.appendChild(div);
@@ -837,35 +1230,20 @@ function checkWinCondition(state) {
 
     if (state.won) return; // Already won
 
-    const currentTurn = state.turn;
-    const opponent = currentTurn === 'white' ? 'black' : 'white';
+    // Check if King Captured (Regicide)
+    const whiteKing = state.pieces.find(p => (p.icon.includes('King') || p.icon.includes('king')) && p.color === 'white');
+    const blackKing = state.pieces.find(p => (p.icon.includes('King') || p.icon.includes('king')) && p.color === 'black');
     
-    // Check if current player has no moves (Stalemate or Checkmate)
-    // checkRemi returns true if NO moves are available for the current turn player
-    // But helperFunctions.js checkRemi might be buggy or simple.
-    // Let's rely on it for "no moves".
-    if (checkRemi(state)) {
-        // No moves left.
-        // Check if King is under attack
-        const king = state.pieces.find(p => (p.icon.includes('King') || p.icon.includes('king')) && p.color === currentTurn);
-        let isCheck = false;
-        
-        if (king) {
-            // Use helper's isPositionAttacked
-            if (isPositionAttacked(state, currentTurn, king.x, king.y)) {
-                isCheck = true;
-            }
-        }
-        
-        if (isCheck) {
-            // Checkmate: Opponent wins
-            state.won = opponent;
-            state.message = `Checkmate! ${opponent.charAt(0).toUpperCase() + opponent.slice(1)} wins!`;
-        } else {
-            // Stalemate
-            state.won = 'tie';
-            state.message = "Stalemate!";
-        }
+    if (!whiteKing) {
+        state.won = 'black';
+        state.message = "White King Fallen!";
+        return;
+    }
+    
+    if (!blackKing) {
+        state.won = 'white';
+        state.message = "Black King Fallen!";
+        return;
     }
 }
 
@@ -884,27 +1262,35 @@ function checkGameOver(state) {
                 overlay.style.zIndex = '900'; 
             }
             
-            // Process Pending Rewards
-            let earnedHTML = '';
-            if (rogueState.pendingReward && rogueState.pendingReward.length > 0) {
-                rogueState.playerRoster.push(...rogueState.pendingReward);
+            // Earn Gold or Piece
+            let winText = "";
+            
+            if (rogueState.currentRewardType === 'piece') {
+                const pieceFactory = rogueState.currentRewardContent;
+                rogueState.playerRoster.push(pieceFactory);
                 
-                // Create preview for dialog
-                rogueState.pendingReward.forEach(name => {
-                     if (typeof window[name] === 'function') {
-                        const p = window[name]('white', 0, 0);
-                        earnedHTML += `<img src="/static/${p.icon}" title="${name}" style="width:40px;height:40px;margin:5px;">`;
-                     }
-                });
+                // Show what piece was won
+                let pieceName = pieceFactory.replace('Factory','').replace('rogueLike','');
+                winText = `Won Unit: ${pieceName}`;
                 
-                rogueState.pendingReward = []; // Clear pending
-                saveProgress();
+                
             } else {
-                earnedHTML = '<span>No reinforcement for this mission.</span>';
+                // Gold comes from difficulty now
+                const goldEarned = Math.floor(rogueState.currentReward || (10 + rogueState.level * 2));
+                rogueState.gold = (rogueState.gold || 0) + goldEarned;
+                winText = `+${goldEarned} Gold`;
             }
+            
+            // Clear pending rewards (shop replaces direct rewards)
+            rogueState.pendingReward = []; 
+            
+            // Mark win screen as active
+            rogueState.showWinScreen = true;
+            
+            saveProgress();
 
-            const rewardsContainer = document.getElementById('earnedRewards');
-            if (rewardsContainer) rewardsContainer.innerHTML = earnedHTML;
+            const goldText = document.getElementById('goldEarnedText');
+            if(goldText) goldText.innerText = winText;
 
             setTimeout(() => {
                 const modal = document.getElementById('gameWonDialog');
@@ -930,11 +1316,7 @@ function checkGameOver(state) {
                      // Dialogs are in top layer, so they should be above z-index 900
                 }
             }, 2000);
-        } else {
-             // Tie - maybe restart level?
-             alert("Draw! Restarting level...");
-             startLevel(rogueState.level);
-        }
+        } 
     }
 }
 
@@ -1003,7 +1385,7 @@ canvas.addEventListener('click', (e) => {
     if(turnDisplay) {
         if(state.turn === 'white') {
             turnDisplay.innerText = "Your Turn";
-            turnDisplay.style.color = 'var(--board-light)';
+            turnDisplay.style.color = 'var(--selected)';
         } else {
             turnDisplay.innerText = "Enemy Turn";
             turnDisplay.style.color = '#ff6b6b';
@@ -1018,7 +1400,8 @@ canvas.addEventListener('click', (e) => {
     }
 });
 
-function triggerAI() {
+function triggerAI(color) {
+    if(!color) color = 'black';
     if (!w) w = new Worker("src/webworker.js");
     const state = hotseatGame.state;
     
@@ -1027,8 +1410,8 @@ function triggerAI() {
     
     w.postMessage(JSONfn.stringify({
         state: state,
-        color: 'black',
-        AIPower: 103 // Fixed power or scaled? Prompt said "Level*2" for army value, maybe AI power stays constant or increases?
+        color: color,
+        AIPower: 105 // Fixed power or scaled? Prompt said "Level*2" for army value, maybe AI power stays constant or increases?
     }));
 
     w.onmessage = function(event) {
@@ -1043,7 +1426,7 @@ function triggerAI() {
         if(turnDisplay) {
             if(hotseatGame.state.turn === 'white') {
                 turnDisplay.innerText = "Your Turn";
-                turnDisplay.style.color = 'var(--board-light)';
+                turnDisplay.style.color = 'var(--selected)';
             } else {
                 turnDisplay.innerText = "Enemy Turn";
                 turnDisplay.style.color = '#ff6b6b';
@@ -1115,16 +1498,18 @@ function animate(secretState){
     }
 
     // Background
-    document.body.style.background = backgroundColor; // from variables.js
+    if (rogueState.boardShape === 'Woods') {
+        // Deep forest green gradient for woods theme
+        document.body.style.background = 'radial-gradient(circle, #556b2f 0%, #1a2f16 100%)';
+    } else {
+        document.body.style.background = backgroundColor; // from variables.js
+    }
 
     // Draw Board
     state.board.forEach((sq) => {
         let y = sq.y;
         let x = sq.x;
-        let orderFirst = (y % 2 === 0); // Logic fix: y%2!=0 was orderFirst=false in hotseat.js
-        
-        // hotseat.js logic:
-        // if(y%2 != 0){ orderFirst = false; }
+        let orderFirst = (y % 2 === 0); 
         
         let isBlack = false;
         if(y % 2 !== 0) { // Odd row
@@ -1133,10 +1518,19 @@ function animate(secretState){
              if(x % 2 !== 0) isBlack = true;
         }
         
+        // Custom Colors for Woods
+        let currentWhiteColor = whiteSquareColor;
+        let currentBlackColor = blackSquareColor;
+        
+        if (rogueState.boardShape === 'Woods') {
+            currentWhiteColor = '#8fbc8f'; // DarkSeaGreen
+            currentBlackColor = '#556b2f'; // DarkOliveGreen
+        }
+        
         // Simplified drawing
         if (!sq.light && !sq.special && !sq.red && !sq.grey) {
-            if (isBlack) drawBlackSquare(x * squareLength, y * squareLength, squareLength);
-            else drawWhiteSquare(x * squareLength, y * squareLength, squareLength);
+            if (isBlack) drawColoredSquare(x * squareLength, y * squareLength, currentBlackColor, squareLength);
+            else drawColoredSquare(x * squareLength, y * squareLength, currentWhiteColor, squareLength);
             
             if(state.pieceSelected && x === state.pieceSelected.x && y === state.pieceSelected.y){
                 drawColoredSquare(x*squareLength, y*squareLength, availableSquareColor, squareLength);
@@ -1148,8 +1542,24 @@ function animate(secretState){
         else if(sq.special){
                 drawColoredSquare(x*squareLength, y * squareLength, specialSquareColor, squareLength)
             }
-        })
-        if(state.oldMove){
+    });
+
+    // Draw Trees in Empty Spaces for Woods Map
+    if (rogueState.boardShape === 'Woods') {
+        // Draw internal void bushes
+        for(let tx=0; tx<8; tx++){
+            for(let ty=0; ty<8; ty++){
+                const exists = state.board.find(s => s.x === tx && s.y === ty);
+                if(!exists){
+                    if (typeof drawBush === 'function') {
+                        drawBush(ctx, tx, ty, squareLength);
+                    }
+                }
+            }
+        }
+    }
+
+    if(state.oldMove){
             const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);
             const newSquare = findSquareByXY(state.board,state.oldMove.currentX, state.oldMove.currentY);
 
@@ -1197,6 +1607,7 @@ function animate(secretState){
     const turnText = document.getElementById('turn');
     if (turnText) {
         turnText.innerText = state.turn === 'white' ? "Your Turn" : "Enemy Turn";
-        turnText.style.color = state.turn === 'white' ? "var(--board-light)" : "var(--board-dark)";
+        // Always use same color for consistency, or ensure same style
+        turnText.style.color = state.turn === 'white' ? "var(--selected)" : "#ff6b6b";
     }
 }
