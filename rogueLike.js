@@ -33,6 +33,8 @@ const winnablePieceFactories = [
     "roguelikeAntFactory", "spiderFactory", 'goliathBugFactory',"pigFactory",
 ];
 
+const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'roguelikeAntFactory', 'roguelikeQueenbugFactory'];
+
 const adjustedValues = [
 
     {name: 'ricarFactory', value: 3},
@@ -439,6 +441,22 @@ function generateRandomArmy(targetValue, includeKing = false) {
         // We'll treat it as 0 cost since both sides get one.
         currentValue += 0;
     }
+
+    // Ensure at least 3 frontline pieces
+    let frontlineCount = 0;
+    let attempts = 0;
+    while (frontlineCount < 3 && attempts < 50 && currentValue < targetValue) {
+        attempts++;
+        const randomFrontline = frontLineFactories[Math.floor(Math.random() * frontLineFactories.length)];
+        const val = getPieceValue(randomFrontline);
+        
+        // Add if it doesn't overshoot too much (allow +1 overshoot)
+        if (currentValue + val <= targetValue + 1) {
+            army.push(randomFrontline);
+            currentValue += val;
+            frontlineCount++;
+        }
+    }
     
     // Safety break
     let iterations = 0;
@@ -669,7 +687,6 @@ function generateRewardOptions() {
     // Check player roster limits
     // Need to access frontLineFactories from setupBoard? 
     // It's local to setupBoard. I should move it to global or duplicate it.
-    const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'roguelikeAntFactory', 'roguelikeQueenbugFactory'];
     let frontCount = 0;
     let backCount = 0;
     rogueState.playerRoster.forEach(u => {
@@ -1057,22 +1074,56 @@ const boardShapes = {
         }
     },
     'Woods': (board) => {
+        // Use mapSeed to determine pattern
+        // We want bushes on rows 3 and 4 (middle) but with varied parity
+        const seed = rogueState.mapSeed || Math.random();
+        
         for (let x = 0; x <= 7; x++) {
             for (let y = 0; y <= 7; y++) {
-                // Zig-zag missing squares in the middle: y=5 and y=4 alternate
-                if ((y === 4 && x % 2 === 1) || (y === 3 && x % 2 === 0)) {
-                    continue;
+                // Determine if this is a candidate row
+                if (y === 3 || y === 4) {
+                     // Generate a pseudo-random value for this position
+                     const localSeed = (x * 123) + (y * 456) + seed;
+                     const rand = Math.sin(localSeed) * 10000;
+                     const val = rand - Math.floor(rand);
+                     
+                     // 50% chance to target White squares, 50% for Black
+                     // But we want "bushes to take" -> "missing squares"
+                     
+                     // Check square color
+                     let isBlack = false;
+                     if (y % 2 !== 0) { // Odd row (3)
+                         if (x % 2 === 0) isBlack = true;
+                     } else { // Even row (4)
+                         if (x % 2 !== 0) isBlack = true;
+                     }
+                     
+                     // Logic:
+                     // If val > 0.5, we remove Black squares here.
+                     // If val < 0.5, we remove White squares here.
+                     // But we want it to be somewhat consistent patches, not total noise.
+                     // Let's use a lower frequency noise for "Pattern Preference"
+                     
+                     const regionVal = Math.sin(x * 0.5 + seed) * 0.5 + 0.5; // Smooth-ish transition along X
+                     
+                     let removeBlack = (regionVal > 0.5);
+                     
+                     if (removeBlack && isBlack) continue;
+                     if (!removeBlack && !isBlack) continue;
                 }
+                
                 board.push({ light: false, x: x, y: y });
             }
         }
     },
     'Fountain': (board) => {
         const fx = (rogueState.fountainX !== undefined) ? rogueState.fountainX : 3;
+        const fy = (rogueState.fountainY !== undefined) ? rogueState.fountainY : 3;
+        
         for (let x = 0; x <= 7; x++) {
             for (let y = 0; y <= 7; y++) {
-                // 4 squares in the center are missing
-                if ((x === fx || x === fx + 1) && (y === 3 || y === 4)) {
+                // 4 squares are missing
+                if ((x === fx || x === fx + 1) && (y === fy || y === fy + 1)) {
                     continue;
                 }
                 board.push({ light: false, x: x, y: y });
@@ -1094,7 +1145,6 @@ function setupBoard(shapeName = 'Standard') {
     
     // Helper to split army
     // "Infront" means closer to the enemy.
-    const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'roguelikeAntFactory', 'roguelikeQueenbugFactory'];
     
     const splitArmy = (roster) => {
         const front = roster.filter(u => frontLineFactories.includes(u));
@@ -1192,9 +1242,9 @@ function showStartModal() {
     const container = document.getElementById('startOptions');
     container.innerHTML = '';
     
-    // Generate 4 starting armies (Value 5-7)
+    // Generate 4 starting armies (Value ~25)
     for (let i = 0; i < 4; i++) {
-        const { army, value } = generateRandomArmy(6, true);
+        const { army, value } = generateRandomArmy(20, true);
         
         // Removed markPieceAsSeen(name) call to stop auto-popup
 
@@ -1912,7 +1962,21 @@ function animate(secretState){
          // Draw large fountain in the center (covering 4 squares)
          if (typeof drawFountain === 'function') {
              const fx = (rogueState.fountainX !== undefined) ? rogueState.fountainX : 3;
-             drawFountain(ctx, fx + 0.5, 3.5, squareLength, rogueState.mapSeed, 1);
+             const fy = (rogueState.fountainY !== undefined) ? rogueState.fountainY : 3;
+             // Calculate center of the 2x2 area
+             // If fx=0, it covers x=0 and x=1. Center is 1.0? 
+             // drawFountain expects tx, ty.
+             // Original call: drawFountain(ctx, fx + 0.5, 3.5, ...);
+             // Center of x=0 and x=1 is 1 * squareLength / 2 ? No.
+             // If x=0, cx = 0 + 0.5 = 0.5 squares.
+             // If x=1, cx = 1 + 0.5 = 1.5 squares.
+             // Center of 2x2 block starting at x,y is (x+1) * squareLength.
+             // Wait, drawFountain logic:
+             // const cx = tx * squareLength + squareLength / 2;
+             // So tx is expected to be in grid units.
+             // If we pass fx + 0.5, cx = (fx + 0.5) * sq + sq/2 = fx*sq + sq/2 + sq/2 = (fx+1)*sq.
+             // This is indeed the border between fx and fx+1. Correct.
+             drawFountain(ctx, fx + 0.5, fy + 0.5, squareLength, rogueState.mapSeed, 1);
          }
      }
 
