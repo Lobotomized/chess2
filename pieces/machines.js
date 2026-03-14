@@ -345,7 +345,7 @@ function executorFactory(color,x,y){
         x: x,
         y: y,
         color: color,
-        value:3,
+        value:2.5,
         posValue:posValue[3],
         conditionalMoves: function(state){
             let toReturn = [];

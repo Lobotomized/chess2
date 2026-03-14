@@ -22,11 +22,13 @@
         <script src="/pieces/misc.js"></script>
         <!-- <script src="/pieceDefinitions.js"></script> -->
         <script src="/rogueLikeDifficulties.js"></script>
+        <script src="/grandMap.js"></script>
         <script src="/boardGeneration.js"></script>
         <script src="/src/globby.js"></script>
         <script src="/helperFunctions.js"></script>
         <script src="/src/rogueLikePieceDescriptions.js"></script>
         <script src="/rogueLikeDetails.js"></script>
+        <script src="/mapVisuals.js"></script>
         
         <link rel="stylesheet" href="/src/main.css">
         
@@ -89,11 +91,17 @@
         }
 
         .army-choice {
-            display: flex;
-            flex-wrap: wrap;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Default 2 columns */
             gap: 20px;
             justify-content: center;
             margin-top: 20px;
+        }
+        
+        @media (max-width: 600px) {
+            .army-choice {
+                grid-template-columns: 1fr; /* Stack on mobile */
+            }
         }
         
         .army-option {
@@ -103,8 +111,7 @@
             cursor: pointer;
             border-radius: 8px;
             transition: all 0.3s ease;
-            flex: 1;
-            min-width: 200px;
+            min-width: 0; /* Fix grid overflow issues */
             box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
             position: relative;
         }
@@ -123,6 +130,16 @@
         .woods-option:hover {
             border-color: #228b22 !important;
             box-shadow: 0 5px 15px rgba(0,100,0,0.3) !important;
+        }
+
+        .fountain-option {
+            background: linear-gradient(135deg, #4fc3f7 0%, #0288d1 100%) !important;
+            border-color: #01579b !important;
+        }
+
+        .fountain-option:hover {
+            border-color: #0277bd !important;
+            box-shadow: 0 5px 15px rgba(0,100,200,0.3) !important;
         }
         
         .army-option h3 {
@@ -238,6 +255,177 @@
                 padding: 10px;
             }
         }
+
+        /* Map Styles */
+        .map-modal-content {
+            width: 100%;
+            height: 60vh;
+            overflow: auto;
+            border: 4px solid #5d4037;
+            background: #fdf6e3; /* Parchment color */
+            position: relative;
+            cursor: grab;
+            user-select: none;
+            touch-action: none;
+            border-radius: 8px;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.1);
+            background-image: 
+                linear-gradient(rgba(200, 180, 140, 0.3) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(200, 180, 140, 0.3) 1px, transparent 1px);
+            background-size: 50px 50px;
+            
+            /* Scrollbar Styling */
+            scrollbar-width: thin;
+            scrollbar-color: #5d4037 #e6d5ac;
+        }
+
+        .map-modal-content::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        .map-modal-content::-webkit-scrollbar-track {
+            background: #e6d5ac;
+            border-radius: 4px;
+        }
+
+        .map-modal-content::-webkit-scrollbar-thumb {
+            background: #5d4037;
+            border-radius: 4px;
+            border: 2px solid #e6d5ac;
+        }
+
+        .map-modal-content::-webkit-scrollbar-corner {
+            background: transparent;
+        }
+        
+        .map-modal-content.active {
+            cursor: grabbing;
+        }
+
+        .map-grid {
+            display: grid;
+            gap: 0; /* Seamless tiles */
+            background: transparent;
+            padding: 20px;
+            width: max-content;
+            margin: auto;
+            /* Grid columns set dynamically */
+        }
+
+        .map-cell {
+            width: 50px;
+            height: 50px;
+            background: #e6d5ac; /* Default Terrain */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            position: relative;
+            border: 1px solid rgba(139, 69, 19, 0.1);
+            color: #4e342e;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .map-cell:hover {
+            transform: scale(1.15);
+            z-index: 100;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            border-color: #8d6e63;
+        }
+        
+        .map-cell.current {
+            border: 2px solid #d32f2f;
+            box-shadow: 0 0 15px rgba(211, 47, 47, 0.6);
+            z-index: 10;
+            background: #ffebee;
+            animation: pulse-border 2s infinite;
+        }
+        
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
+            70% { box-shadow: 0 0 0 6px rgba(211, 47, 47, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+        }
+
+        .map-cell.cleared {
+            background: #d7ccc8; /* Visited/Cleared terrain */
+            opacity: 0.9;
+        }
+        
+        .map-cell.cleared::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.05);
+            pointer-events: none;
+        }
+
+        .map-cell.woods {
+            background: #a5d6a7; 
+            color: #1b5e20;
+        }
+        
+        /* Forest Texture Pattern */
+        .map-cell.woods::before {
+            content: '🌲';
+            font-size: 12px;
+            opacity: 0.3;
+            position: absolute;
+            top: 2px; right: 2px;
+        }
+
+        .map-cell.standard::before {
+            content: '🌱';
+            font-size: 10px;
+            opacity: 0.2;
+            position: absolute;
+            top: 2px; right: 2px;
+        }
+
+        .map-cell.fountain {
+            background: #81d4fa;
+            color: #01579b;
+        }
+        
+        /* Water Texture Pattern */
+        .map-cell.fountain::before {
+            content: '💧';
+            font-size: 10px;
+            opacity: 0.4;
+            position: absolute;
+            bottom: 2px; right: 2px;
+        }
+
+        .map-cell.market {
+            background: #ffe082;
+            color: #ff6f00;
+        }
+
+        .map-cell.market::before {
+            content: '🛒';
+            font-size: 10px;
+            opacity: 0.4;
+            position: absolute;
+            bottom: 2px; right: 2px;
+        }
+        
+        .map-cell-icon {
+            font-size: 24px;
+            margin-bottom: -2px;
+            filter: drop-shadow(1px 1px 0 rgba(255,255,255,0.5));
+        }
+        
+        .map-cell-level {
+            font-weight: bold;
+            background: rgba(255,255,255,0.6);
+            padding: 0 4px;
+            border-radius: 4px;
+            font-size: 9px;
+            margin-top: -4px;
+        }
         </style>
 </head>
 
@@ -252,7 +440,9 @@
     <div class="container">
         <div class="top-bar">
             <h1 id="levelDisplay">Level: 1</h1>
-            <button class="general-btn" onclick="showEnemyInfo()">Ask General for the enemy army</button>
+            <div id="goldDisplay" style="color: #e5b53e; font-weight: bold; font-size: 20px; text-shadow: 1px 1px 0 #000; margin: 0 15px;">🪙 <span id="goldValue">0</span></div>
+            <div id="foodDisplay" style="color: #f7e98e; font-weight: bold; font-size: 20px; text-shadow: 1px 1px 0 #000; margin: 0 15px;">🍖 <span id="foodValue">0</span></div>
+            <button class="general-btn" onclick="showEnemyInfo()">Learn about the enemy</button>
             <span id="turn"></span>
         </div>
         
@@ -262,6 +452,15 @@
             <h1 id="forfeitText"></h1>
         </div>
     </div>
+
+    <!-- Main Menu Modal -->
+    <dialog id="mainMenuDialog" style="text-align: center;">
+        <h2>Chess 2: Rogue Like</h2>
+        <div style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
+            <button id="btnLoadGame" onclick="loadGame()" style="width: 200px;">Continue Journey</button>
+            <button onclick="confirmNewGame()" style="width: 200px;">New Campaign</button>
+        </div>
+    </dialog>
 
     <!-- Start Game Modal -->
     <dialog id="startDialog">
@@ -275,6 +474,19 @@
         <h2>Choose Your Next Mission</h2>
         <p>Select your next challenge.</p>
         <div id="rewardOptions" class="army-choice"></div>
+        <button onclick="showMapModal()" style="margin-top: 15px;">View Map</button>
+    </dialog>
+
+    <!-- Map Modal -->
+    <dialog id="mapDialog" style="max-width: 90vw; width: 90vw;">
+        <h2>World Map</h2>
+        <p>Drag to scroll</p>
+        <div id="mapContainer" class="map-modal-content">
+            <div id="mapGrid" class="map-grid"></div>
+        </div>
+        <div style="margin-top: 10px;">
+            <button onclick="document.getElementById('mapDialog').close()">Close Map</button>
+        </div>
     </dialog>
 
     <!-- Game Over Modal -->
@@ -291,13 +503,13 @@
         <img src="/static/youWin.jpg" alt="You Win" style="max-width: 100%; height: auto; margin-bottom: 15px; border-radius: 8px;">
         <p>Your army is victorious.</p>
         <p id="goldEarnedText" style="font-weight:bold; color:#e5b53e; font-size:24px; text-shadow: 1px 1px 0 #000;"></p>
-        <button onclick="document.getElementById('gameWonDialog').close(); showShopModal();" style="padding: 10px 20px; cursor: pointer;">Go to Market</button>
+        <button onclick="document.getElementById('gameWonDialog').close(); showRewardModal();" style="padding: 10px 20px; cursor: pointer;">Return to Map</button>
     </dialog>
 
     <!-- Shop Modal -->
     <dialog id="shopDialog">
         <h2>Mercenary Market</h2>
-        <p>Current Gold: <span id="playerGold" style="color:#e5b53e; font-weight:bold;">0</span></p>
+        <p>Current 🪙: <span id="playerGold" style="color:#e5b53e; font-weight:bold;">0</span></p>
         <div id="shopOptions" class="army-choice"></div>
         <div style="margin-top:20px;">
             <button onclick="document.getElementById('shopDialog').close(); showRewardModal();">Next Battle</button>

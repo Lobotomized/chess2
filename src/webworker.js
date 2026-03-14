@@ -79,7 +79,6 @@ function minimaxDeep(state,maximizer, depth, removedTurns,magnifiers,filters){
 
 self.addEventListener("message", function(e) {
     let obj = JSONfn.parse(e.data)
-    console.log('obj', obj.AICharacter)
     if(!obj.state.won){
 
             let move;

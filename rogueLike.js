@@ -66,6 +66,7 @@ const rogueState = {
     enemyRoster: [],
     gameActive: false,
     gold: 0,
+    food: 50, // Initial food
     shopOptions: [],
     showWinScreen: false // New flag to persist win screen
 };
@@ -111,6 +112,27 @@ let w; // Web Worker
 let hoveredPiece;
 let boardWidth, boardHeight;
 
+function updateGoldDisplay() {
+    const goldValue = document.getElementById('goldValue');
+    const foodValue = document.getElementById('foodValue');
+    
+    // Fallback if spans are missing
+    const goldDisplay = document.getElementById('goldDisplay');
+    const foodDisplay = document.getElementById('foodDisplay');
+
+    if (goldValue) {
+        goldValue.innerText = rogueState.gold || 0;
+    } else if (goldDisplay) {
+        goldDisplay.innerText = `Gold: ${rogueState.gold || 0}`;
+    }
+
+    if (foodValue) {
+        foodValue.innerText = rogueState.food || 0;
+    } else if (foodDisplay) {
+        foodDisplay.innerText = `Food: ${rogueState.food || 0}`;
+    }
+}
+
 // Initialize Game
 function initRogueGame() {
     hotseatGame = getSinglePlayerGame();
@@ -121,15 +143,57 @@ function initRogueGame() {
     // Use requestAnimationFrame for smooth animation
     requestAnimationFrame(aniLoop);
     
-    // Check for saved game
+    // Show Main Menu instead of auto-loading
+    showMainMenu();
+}
+
+function showMainMenu() {
+    const modal = document.getElementById('mainMenuDialog');
+    const btnLoad = document.getElementById('btnLoadGame');
+    
+    const savedState = localStorage.getItem('rogueState');
+    if (savedState) {
+        let level = '?';
+        try {
+            const parsed = JSON.parse(savedState);
+            level = parsed.level || '?';
+        } catch(e){}
+        
+        btnLoad.disabled = false;
+        btnLoad.style.opacity = '1';
+        btnLoad.style.cursor = 'pointer';
+        btnLoad.innerText = "Continue Journey (Lvl " + level + ")";
+        btnLoad.onclick = loadGame;
+    } else {
+        btnLoad.disabled = true;
+        btnLoad.style.opacity = '0.5';
+        btnLoad.style.cursor = 'not-allowed';
+        btnLoad.innerText = "No Save Found";
+    }
+    
+    // Ensure modal exists before showing
+    if(modal) modal.showModal();
+}
+
+function loadGame() {
+    const modal = document.getElementById('mainMenuDialog');
+    if(modal) modal.close();
+    
     const savedState = localStorage.getItem('rogueState');
     if (savedState) {
         try {
             const parsed = JSON.parse(savedState);
             Object.assign(rogueState, parsed);
             
-            // Ensure gold is loaded
+            // Initialize Grand Map
+            if (typeof grandMap !== 'undefined') {
+                grandMap.init(rogueState.grandMap);
+            }
+
+            // Ensure gold and food is loaded
             rogueState.gold = parsed.gold || 0;
+            rogueState.food = (typeof parsed.food === 'number') ? parsed.food : 20;
+            updateGoldDisplay();
             
             // Restore level
             document.getElementById('levelDisplay').innerText = `Level: ${rogueState.level}`;
@@ -168,17 +232,57 @@ function initRogueGame() {
             
         } catch (e) {
             console.error("Failed to load save:", e);
-            showStartModal();
+            alert("Save file corrupted. Starting new game.");
+            startNewGame();
         }
-    } else {
-        // Show Start Modal
-        showStartModal();
     }
 }
 
+function confirmNewGame() {
+    const savedState = localStorage.getItem('rogueState');
+    if (savedState) {
+        if (confirm("Starting a new game will overwrite your existing save. Are you sure?")) {
+            startNewGame();
+        }
+    } else {
+        startNewGame();
+    }
+}
+
+function startNewGame() {
+    const modal = document.getElementById('mainMenuDialog');
+    if(modal) modal.close();
+    
+    // Clear State
+    localStorage.removeItem('rogueState');
+    
+    // Reset rogueState object
+    rogueState.level = 1;
+    rogueState.playerRoster = [];
+    rogueState.enemyRoster = [];
+    rogueState.gameActive = false;
+    rogueState.gameOverSequenceStarted = false; // Reset
+    rogueState.gold = 0;
+    rogueState.food = 50;
+    rogueState.shopOptions = [];
+    rogueState.showWinScreen = false;
+    rogueState.grandMap = undefined; // Reset grand map state
+    
+    updateGoldDisplay();
+    document.getElementById('levelDisplay').innerText = "Level: 1";
+    
+    // Initialize Grand Map
+    if (typeof grandMap !== 'undefined') {
+        grandMap.init();
+    }
+    
+    showStartModal();
+}
+
 function saveProgress() {
-    // Ensure rogueState.gold is a number
+    // Ensure rogueState.gold and food is a number
     if (typeof rogueState.gold !== 'number') rogueState.gold = 0;
+    if (typeof rogueState.food !== 'number') rogueState.food = 20;
     
     if(hotseatGame && hotseatGame.state) {
         rogueState.savedBoard = {
@@ -202,12 +306,13 @@ function saveProgress() {
         };
     }
     
-    // Explicitly include gold in the object being saved (though it's in rogueState already)
-    // The issue might be that rogueState is not updated with gold when we save?
-    // No, rogueState.gold is updated in checkGameOver.
-    // However, when we reload, we do Object.assign(rogueState, parsed).
-    // Let's ensure gold is preserved.
+    // Explicitly include gold and food in the object being saved
     
+    // Save Grand Map State
+    if (typeof grandMap !== 'undefined') {
+        rogueState.grandMap = grandMap.getState();
+    }
+
     localStorage.setItem('rogueState', JSON.stringify(rogueState));
 }
 
@@ -594,99 +699,109 @@ function generateRewardOptions() {
     const options = [];
     
     if(window.difficulties) {
-        // Select 3 random difficulties based on level
-        let baseIndex = rogueState.level; // If level is 1, baseIndex is 1.
+        if (typeof grandMap !== 'undefined') {
+             // Grand Map Logic
+        const moves = grandMap.getAvailableMoves();
+        
+        moves.forEach(move => {
+            const node = move.node;
+            
+            // Handle Market
+            if (node.board === 'Market') {
+                options.push({
+                    type: "Visit Market",
+                    direction: move.direction,
+                    node: node,
+                    description: "A safe place to buy units.",
+                    rewardCap: 0,
+                    enemyValue: 0,
+                    difficultyIndex: -1, // Sort first?
+                    boardShape: 'Market',
+                    army: [],
+                    rewardType: 'none'
+                });
+                return;
+            }
+            
+            // Ensure army is pre-generated for accurate power display
+            ensureNodeArmy(node);
+
+            const diff = node.difficulty || { name: "Unknown", description: "Unknown Region" };
+
+            const option = {
+                type: `${move.direction}: ${diff.name}`,
+                direction: move.direction,
+                node: node,
+                description: diff.description,
+                rewardCap: node.rewardCap,
+                enemyValue: node.actualEnemyValue || node.enemyPower, // Use actual value
+                difficultyIndex: window.difficulties.indexOf(diff),
+                boardShape: node.board || 'Standard',
+                army: node.army // Pass army to option
+            };
+            
+            if (node.board === 'Woods') option.description += " (Woods Map)";
+            if (node.board === 'Fountain') option.description += " (Fountain Map)";
+
+            options.push(option);
+        });
+    } else {
+        // Fallback: Select 3 random difficulties based on level
+        let baseIndex = rogueState.level;
         
         let d1 = Math.min(baseIndex, window.difficulties.length - 1);
         let d2 = Math.min(baseIndex + 1, window.difficulties.length - 1);
         let d3 = Math.min(baseIndex + 2, window.difficulties.length - 1);
         
-        // Ensure we always have 3 options if possible, even if duplicates
-        // But duplicates are boring.
-        // If we are at the end, maybe show the same difficulty 3 times?
-        // Or show difficulty -1?
-        
-        // Let's try to get 3 unique indices around the baseIndex if possible.
-        // If baseIndex is max, we can't go higher.
-        
         const maxIdx = window.difficulties.length - 1;
-        
-        // Adjusted logic to always get 3 options
-        // If we are at max, show max-2, max-1, max
         
         if (baseIndex >= maxIdx) {
             d1 = maxIdx;
-            d2 = maxIdx; // Duplicate allowed? User said "3 different options".
+            d2 = maxIdx;
             d3 = maxIdx;
-            // If they want 3 different options, we need 3 different difficulties.
-            // But we only have 20.
-            // Maybe we can vary the enemyValue slightly for the same difficulty?
-            // For now, let's just ensure we pick valid indices.
             if (maxIdx >= 2) {
-                 d1 = maxIdx - 2;
-                 d2 = maxIdx - 1;
-                 d3 = maxIdx;
+                d1 = maxIdx - 2;
+                d2 = maxIdx - 1;
+                d3 = maxIdx;
             }
         } else if (baseIndex >= maxIdx - 1) {
-             if (maxIdx >= 2) {
-                 d1 = maxIdx - 2;
-                 d2 = maxIdx - 1;
-                 d3 = maxIdx;
-             }
+                if (maxIdx >= 2) {
+                    d1 = maxIdx - 2;
+                    d2 = maxIdx - 1;
+                    d3 = maxIdx;
+                }
         }
         
         const diffs = [window.difficulties[d1], window.difficulties[d2], window.difficulties[d3]];
         const uniqueDiffs = [...new Set(diffs.filter(d => d !== undefined))];
         
-        // If uniqueDiffs < 3, fill with random other difficulties or just duplicate?
-        // "I want to have 3 different options"
-        // If we are at level 1, we have diffs[1], diffs[2], diffs[3]. Distinct.
-        
         uniqueDiffs.forEach(diff => {
-             const option = {
+            // Generate army immediately
+            const { army, value } = generateRandomArmy(diff.enemyValue, true);
+            
+            const option = {
                 type: diff.name,
                 description: diff.description,
-                rewardCap: diff.rewardCap, // Used for gold calc?
-                enemyValue: diff.enemyValue,
-                difficultyIndex: window.difficulties.indexOf(diff)
-             };
+                rewardCap: diff.rewardCap,
+                enemyValue: value, // Use actual value
+                difficultyIndex: window.difficulties.indexOf(diff),
+                army: army // Store generated army
+            };
 
-             // Chance for special map
-             if (Math.random() < 0.3) {
-                 option.boardShape = 'Woods';
-                 option.description += " (Woods Map)";
-             } else {
-                 option.boardShape = 'Standard';
-             }
+            const mapChance = Math.random();
+            if (mapChance < 0.1) {
+                option.boardShape = 'Woods';
+                option.description += " (Woods Map)";
+            } else if (mapChance < 0.2) {
+                option.boardShape = 'Fountain';
+                option.description += " (Fountain Map)";
+            } else {
+                option.boardShape = 'Standard';
+            }
 
-             options.push(option);
+            options.push(option);
         });
-        
-        // Fallback if we have fewer than 3 options (e.g. at end of game)
-        while (options.length < 3 && window.difficulties.length > 3) {
-             // Add a random lower difficulty
-             const randomIdx = Math.floor(Math.random() * baseIndex);
-             const diff = window.difficulties[randomIdx];
-             if (diff && !options.find(o => o.type === diff.name)) {
-                 const opt = {
-                    type: diff.name,
-                    description: diff.description,
-                    rewardCap: diff.rewardCap,
-                    enemyValue: diff.enemyValue,
-                    difficultyIndex: window.difficulties.indexOf(diff),
-                    boardShape: 'Standard'
-                 };
-                 
-                 if (Math.random() < 0.3) {
-                     opt.boardShape = 'Woods';
-                     opt.description += " (Woods Map)";
-                 }
-                 
-                 options.push(opt);
-             } else {
-                 break; // Avoid infinite loop if can't find unique
-             }
-        }
+    }
         
         // Sort by difficulty index
         options.sort((a,b) => a.difficultyIndex - b.difficultyIndex);
@@ -711,19 +826,68 @@ function generateRewardOptions() {
                     opt.rewardType = 'piece';
                     opt.rewardContent = randomPiece;
                     opt.rewardValue = getPieceValue(randomPiece); // Store value for reference
+                    
+                    // Piece Food Reward: "If the reward type is a piece all the difference between the rewardValue and the randomPiece should be spent on food. The food should be 10*piece value missed"
+                    // Assume rewardValue is based on opt.rewardCap (which is in Gold usually, or "Value Points").
+                    // If enemyValue ~ 30, maxPieceValue ~ 15.
+                    // rewardCap ~ 36.
+                    // Piece Value ~ 15.
+                    // Difference = rewardCap - PieceValue? Or maxPieceValue - PieceValue?
+                    // User says: "difference between the rewardValue and the randomPiece".
+                    // I'll assume rewardValue here means the 'rewardCap' (total budget).
+                    
+                    const budget = opt.rewardCap;
+                    const pieceVal = getPieceValue(randomPiece);
+                    const diff = Math.max(0, budget - pieceVal);
+                    opt.foodReward = Math.floor(diff * 5);
+                    
                 } else {
                     opt.rewardType = 'gold';
                     opt.rewardContent = opt.rewardCap;
+                    // Will calculate split later or now?
+                    // Let's do it now.
+                    // "Food/gold should be in random proportions for every mission."
+                    // 2 food = 1 gold.
+                    
+                    const budget = opt.rewardCap;
+                    // Random split: 10% to 90% gold?
+                    const goldRatio = 0.1 + Math.random() * 0.8;
+                    const goldAmount = Math.floor(budget * goldRatio);
+                    const remainingBudget = budget - goldAmount;
+                    const foodAmount = Math.floor(remainingBudget * 2);
+                    
+                    opt.rewardContent = goldAmount; // Gold amount
+                    opt.foodReward = foodAmount;
                 }
             } else {
                 opt.rewardType = 'gold';
-                opt.rewardContent = opt.rewardCap;
+                // Same logic for Gold Split
+                const budget = opt.rewardCap;
+                const goldRatio = 0.1 + Math.random() * 0.8;
+                const goldAmount = Math.floor(budget * goldRatio);
+                const remainingBudget = budget - goldAmount;
+                const foodAmount = Math.floor(remainingBudget * 2);
+                
+                opt.rewardContent = goldAmount;
+                opt.foodReward = foodAmount;
             }
         });
         
     } else {
         // Fallback
-        options.push({type: 'Standard Battle', enemyValue: 5 + rogueState.level * 2});
+        const defaultCap = 10 + rogueState.level * 2;
+        const goldRatio = 0.5;
+        const goldAmount = Math.floor(defaultCap * goldRatio);
+        const foodAmount = Math.floor((defaultCap - goldAmount) * 2);
+        
+        options.push({
+            type: 'Standard Battle', 
+            enemyValue: 5 + rogueState.level * 2,
+            rewardType: 'gold',
+            rewardContent: goldAmount,
+            foodReward: foodAmount,
+            rewardCap: defaultCap
+        });
     }
     
     // We don't generate reward armies anymore, just missions.
@@ -732,8 +896,40 @@ function generateRewardOptions() {
 
 // --- Level Management ---
 
+function ensureNodeArmy(node) {
+    if (!node.army) {
+        const { army, value } = generateRandomArmy(node.enemyPower, true);
+        node.army = army;
+        node.actualEnemyValue = value;
+    }
+}
+
 function startLevel(level, difficultyOption) {
+    const overlay = document.getElementById('deathOverlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+    }
     rogueState.level = level;
+    rogueState.mapSeed = Math.random() * 10000;
+    rogueState.shopOptions = []; // Clear shop options to prevent reopening shop on refresh
+    rogueState.showWinScreen = false; // Ensure win screen is cleared
+    rogueState.gameOverSequenceStarted = false; // Reset flag for new level
+    updateGoldDisplay();
+
+    // Check if it's a market visit
+    if (difficultyOption && difficultyOption.boardShape === 'Market') {
+        // Move on map
+        if (difficultyOption.node && typeof grandMap !== 'undefined') {
+            grandMap.moveTo(difficultyOption.node.x, difficultyOption.node.y);
+        }
+        
+        // Save state (position updated)
+        saveProgress();
+        
+        // Show Shop
+        showShopModal();
+        return;
+    }
     
     let difficultyName = 'Unknown';
     let enemyValue = 5;
@@ -749,6 +945,12 @@ function startLevel(level, difficultyOption) {
         // Pass through reward type/content
         rogueState.currentRewardType = difficultyOption.rewardType || 'gold';
         rogueState.currentRewardContent = difficultyOption.rewardContent || rewardCap;
+        rogueState.currentFoodReward = difficultyOption.foodReward || 0;
+
+        // Grand Map Movement
+        if (difficultyOption.node && typeof grandMap !== 'undefined') {
+            grandMap.moveTo(difficultyOption.node.x, difficultyOption.node.y);
+        }
         
     } else if (typeof difficultyOption === 'string') {
         difficultyName = difficultyOption;
@@ -766,6 +968,11 @@ function startLevel(level, difficultyOption) {
         
         rogueState.currentRewardType = 'gold';
         rogueState.currentRewardContent = rewardCap;
+        // Fallback food for string call?
+        // 50% split assumption
+        const goldAmt = Math.floor(rewardCap * 0.5);
+        rogueState.currentRewardContent = goldAmt;
+        rogueState.currentFoodReward = (rewardCap - goldAmt) * 2;
         
     } else {
         // Fallback or Initial Start
@@ -779,23 +986,45 @@ function startLevel(level, difficultyOption) {
         }
         
         rogueState.currentRewardType = 'gold';
-        rogueState.currentRewardContent = rewardCap;
+        const goldAmt = Math.floor(rewardCap * 0.5);
+        rogueState.currentRewardContent = goldAmt;
+        rogueState.currentFoodReward = (rewardCap - goldAmt) * 2;
     }
 
     rogueState.currentReward = rewardCap; // Keep for legacy or display?
 
 
-    document.getElementById('levelDisplay').innerText = `Level: ${level} - ${difficultyName}`;
+    document.getElementById('levelDisplay').innerText = `Level: ${level}`;
     if (boardShape !== 'Standard') {
         document.getElementById('levelDisplay').innerText += ` [${boardShape}]`;
     }
     
-    const { army: enemyArmy } = generateRandomArmy(enemyValue, true);
+    let enemyArmy;
+    if (difficultyOption && difficultyOption.army) {
+        // Use pre-generated army
+        enemyArmy = difficultyOption.army;
+        // If it was a node, update the node's cleared status later? No, that's done in win condition.
+    } else if (difficultyOption && difficultyOption.node && difficultyOption.node.army) {
+         enemyArmy = difficultyOption.node.army;
+    } else {
+        // Fallback generation
+        const result = generateRandomArmy(enemyValue, true);
+        enemyArmy = result.army;
+    }
+    
     rogueState.enemyRoster = enemyArmy;
     rogueState.boardShape = boardShape;
-    
-    // Save state
-    saveProgress();
+
+    if (boardShape === 'Fountain') {
+        if (difficultyOption && difficultyOption.node && typeof difficultyOption.node.fountainX !== 'undefined') {
+            rogueState.fountainX = difficultyOption.node.fountainX;
+        } else if (difficultyOption && typeof difficultyOption.fountainX !== 'undefined') {
+            rogueState.fountainX = difficultyOption.fountainX;
+        } else {
+             // Fallback for non-map or legacy
+             rogueState.fountainX = Math.floor(Math.random() * 7);
+        }
+    }
     
     // Setup Board
     setupBoard(boardShape);
@@ -813,6 +1042,9 @@ function startLevel(level, difficultyOption) {
     }
     
     rogueState.gameActive = true;
+
+    // Save state after setup to ensure new board is saved
+    saveProgress();
 }
 
 // Board Shapes
@@ -829,6 +1061,18 @@ const boardShapes = {
             for (let y = 0; y <= 7; y++) {
                 // Zig-zag missing squares in the middle: y=5 and y=4 alternate
                 if ((y === 4 && x % 2 === 1) || (y === 3 && x % 2 === 0)) {
+                    continue;
+                }
+                board.push({ light: false, x: x, y: y });
+            }
+        }
+    },
+    'Fountain': (board) => {
+        const fx = (rogueState.fountainX !== undefined) ? rogueState.fountainX : 3;
+        for (let x = 0; x <= 7; x++) {
+            for (let y = 0; y <= 7; y++) {
+                // 4 squares in the center are missing
+                if ((x === fx || x === fx + 1) && (y === 3 || y === 4)) {
                     continue;
                 }
                 board.push({ light: false, x: x, y: y });
@@ -948,8 +1192,8 @@ function showStartModal() {
     const container = document.getElementById('startOptions');
     container.innerHTML = '';
     
-    // Generate 3 starting armies (Value 5-7)
-    for (let i = 0; i < 3; i++) {
+    // Generate 4 starting armies (Value 5-7)
+    for (let i = 0; i < 4; i++) {
         const { army, value } = generateRandomArmy(6, true);
         
         // Removed markPieceAsSeen(name) call to stop auto-popup
@@ -1000,6 +1244,15 @@ function showStartModal() {
     }
     
     modal.showModal();
+    
+    // Show Current Coordinates if available
+    if (typeof grandMap !== 'undefined') {
+        const coords = grandMap.getState();
+        const header = modal.querySelector('h2');
+        if (header) {
+            header.innerText = `Choose Your Next Mission (Position: ${coords.currentX}, ${coords.currentY})`;
+        }
+    }
 }
 
 function showShopModal(restore = false) {
@@ -1080,7 +1333,7 @@ function showShopModal(restore = false) {
             ${icon}
             <h3>${item.factory.replace('Factory','').replace('rogueLike','')}</h3>
             <p>Power: ${item.value}</p>
-            <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost}g</p>
+            <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} 🪙</p>
         `;
         
         // Info Button
@@ -1117,6 +1370,7 @@ function showShopModal(restore = false) {
                 if (document.getElementById('playerGold')) {
                     document.getElementById('playerGold').innerText = rogueState.gold;
                 }
+                updateGoldDisplay();
                 saveProgress();
                 
                 // Update UI
@@ -1144,6 +1398,15 @@ function showRewardModal() {
     const container = document.getElementById('rewardOptions');
     container.innerHTML = '';
     
+    // Show Current Coordinates if available
+    if (typeof grandMap !== 'undefined') {
+        const coords = grandMap.getState();
+        const header = modal.querySelector('h2');
+        if (header) {
+            header.innerText = `Choose Your Next Mission (Position: ${coords.currentX}, ${coords.currentY})`;
+        }
+    }
+    
     const rewards = generateRewardOptions();
     
     rewards.forEach((option, i) => {
@@ -1152,8 +1415,28 @@ function showRewardModal() {
 
         const div = document.createElement('div');
         div.className = 'army-option';
+        
         if (option.boardShape === 'Woods') {
             div.classList.add('woods-option');
+        } else if (option.boardShape === 'Fountain') {
+            div.classList.add('fountain-option');
+        } else if (option.boardShape === 'Market') {
+            // Market styling
+            div.style.background = 'linear-gradient(135deg, #fff9c4 0%, #ffecb3 100%)';
+            div.style.borderColor = '#ffa000';
+            div.innerHTML = `<h3>${option.type}</h3>
+                             <p style="font-size:14px;">${option.description || ''}</p>
+                             <div style="text-align:center; font-size: 40px; margin: 10px 0;">🛒</div>
+                             <p style="text-align:center;">Safe Zone</p>`;
+                             
+            div.onclick = () => {
+                 modal.close();
+                 saveProgress();
+                 // Market counts as a level/stage visit
+                 startLevel(rogueState.level + 1, option);
+             };
+             container.appendChild(div);
+             return; // Skip standard rendering
         }
         
         let rewardText = "";
@@ -1172,8 +1455,15 @@ function showRewardModal() {
             rewardText = `<div class="reward-icon-container" style="cursor:help; display:inline-block; vertical-align:middle;">
                              <img src="${iconSrc}" class="reward-icon" data-factory="${pieceFactory}" style="width:40px; height:40px; filter:drop-shadow(2px 2px 2px rgba(0,0,0,0.3)); transition:transform 0.2s;">
                           </div>`;
+            
+            if (option.foodReward > 0) {
+                 rewardText += ` + ${option.foodReward} 🍖`;
+            }
         } else {
-            rewardText = `${option.rewardCap || '?'} Gold`;
+            rewardText = `${option.rewardContent || '?'} 🪙`;
+            if (option.foodReward > 0) {
+                 rewardText += ` + ${option.foodReward} 🍖`;
+            }
         }
         
         div.innerHTML = `<h3>${option.type}</h3>
@@ -1231,12 +1521,18 @@ function checkWinCondition(state) {
     if (state.won) return; // Already won
 
     // Check if King Captured (Regicide)
-    const whiteKing = state.pieces.find(p => (p.icon.includes('King') || p.icon.includes('king')) && p.color === 'white');
-    const blackKing = state.pieces.find(p => (p.icon.includes('King') || p.icon.includes('king')) && p.color === 'black');
+    const whiteKing = state.pieces.find(p => (p.icon.includes('King') || p.icon.includes('king') || p.icon.includes('SimpleKing')) && p.color === 'white');
+    const blackKing = state.pieces.find(p => (p.icon.includes('King') || p.icon.includes('king') || p.icon.includes('SimpleKing')) && p.color === 'black');
     
     if (!whiteKing) {
         state.won = 'black';
         state.message = "White King Fallen!";
+        return;
+    }
+
+    if (rogueState.food <= 0) {
+        state.won = 'black';
+        state.message = "Starvation!";
         return;
     }
     
@@ -1248,10 +1544,14 @@ function checkWinCondition(state) {
 }
 
 function checkGameOver(state) {
+    if (rogueState.gameOverSequenceStarted) return; // Prevent multiple executions
+
     checkWinCondition(state);
     
     if (state.won) {
         rogueState.gameActive = false;
+        rogueState.gameOverSequenceStarted = true; // Mark as started
+
         if (state.won === 'white') {
             // Player Won
             // Fade to black
@@ -1262,32 +1562,53 @@ function checkGameOver(state) {
                 overlay.style.zIndex = '900'; 
             }
             
-            // Earn Gold or Piece
-            let winText = "";
+            let winText = "Victory!";
             
-            if (rogueState.currentRewardType === 'piece') {
-                const pieceFactory = rogueState.currentRewardContent;
-                rogueState.playerRoster.push(pieceFactory);
+            try {
+                // Earn Gold or Piece
+                let foodEarned = rogueState.currentFoodReward || 0;
                 
-                // Show what piece was won
-                let pieceName = pieceFactory.replace('Factory','').replace('rogueLike','');
-                winText = `Won Unit: ${pieceName}`;
+                if (rogueState.currentRewardType === 'piece') {
+                    const pieceFactory = rogueState.currentRewardContent;
+                    if (pieceFactory) {
+                        rogueState.playerRoster.push(pieceFactory);
+                        
+                        // Show what piece was won
+                        let pieceName = pieceFactory.replace('Factory','').replace('rogueLike','');
+                        winText = `Won Unit: ${pieceName}`;
+                    } else {
+                        winText = "Won a new unit!";
+                    }
+                    
+                    // Food for piece reward was calculated in generateRewardOptions and stored in currentFoodReward
+                    if (foodEarned > 0) {
+                         winText += ` + ${foodEarned} 🍖`;
+                    }
+                    
+                } else {
+                    // Gold comes from currentRewardContent
+                    const goldEarned = rogueState.currentRewardContent || 0;
+                    rogueState.gold = (rogueState.gold || 0) + goldEarned;
+                    winText = `+${goldEarned} 🪙`;
+                    if (foodEarned > 0) {
+                         winText += ` + ${foodEarned} 🍖`;
+                    }
+                }
                 
+                rogueState.food = (rogueState.food || 0) + foodEarned;
+                updateGoldDisplay();
                 
-            } else {
-                // Gold comes from difficulty now
-                const goldEarned = Math.floor(rogueState.currentReward || (10 + rogueState.level * 2));
-                rogueState.gold = (rogueState.gold || 0) + goldEarned;
-                winText = `+${goldEarned} Gold`;
+                // Clear pending rewards (shop replaces direct rewards)
+                rogueState.pendingReward = []; 
+                
+                // Mark win screen as active
+                rogueState.showWinScreen = true;
+                
+                saveProgress();
+            } catch (e) {
+                console.error("Error processing reward:", e);
+                winText = "Victory!";
             }
-            
-            // Clear pending rewards (shop replaces direct rewards)
-            rogueState.pendingReward = []; 
-            
-            // Mark win screen as active
-            rogueState.showWinScreen = true;
-            
-            saveProgress();
 
             const goldText = document.getElementById('goldEarnedText');
             if(goldText) goldText.innerText = winText;
@@ -1375,8 +1696,20 @@ canvas.addEventListener('click', (e) => {
     const x = parseInt(mx / squareLength);
     const y = parseInt(my / squareLength);
 
+    const previousTurn = hotseatGame.state.turn;
     hotseatGame.move('white', { x, y });
+    const currentTurn = hotseatGame.state.turn;
     
+    // Consume Food only when a move is completed (turn changes)
+    if (previousTurn === 'white' && currentTurn === 'black') {
+        if (rogueState.food > 0) {
+            rogueState.food--; // Decrement by 1 as per user request
+        } else {
+            // Starvation handled in checkGameOver
+        }
+    }
+    updateGoldDisplay();
+
     // Save progress after player move
     saveProgress();
     
@@ -1501,6 +1834,9 @@ function animate(secretState){
     if (rogueState.boardShape === 'Woods') {
         // Deep forest green gradient for woods theme
         document.body.style.background = 'radial-gradient(circle, #556b2f 0%, #1a2f16 100%)';
+    } else if (rogueState.boardShape === 'Fountain') {
+        // Watery blue gradient for fountain theme
+        document.body.style.background = 'radial-gradient(circle, #4fc3f7 0%, #01579b 100%)';
     } else {
         document.body.style.background = backgroundColor; // from variables.js
     }
@@ -1518,13 +1854,16 @@ function animate(secretState){
              if(x % 2 !== 0) isBlack = true;
         }
         
-        // Custom Colors for Woods
+        // Custom  for Woods
         let currentWhiteColor = whiteSquareColor;
         let currentBlackColor = blackSquareColor;
         
         if (rogueState.boardShape === 'Woods') {
             currentWhiteColor = '#8fbc8f'; // DarkSeaGreen
             currentBlackColor = '#556b2f'; // DarkOliveGreen
+        } else if (rogueState.boardShape === 'Fountain') {
+            currentWhiteColor = '#b3e5fc'; // Light Blue
+            currentBlackColor = '#0288d1'; // Dark Blue
         }
         
         // Simplified drawing
@@ -1533,10 +1872,22 @@ function animate(secretState){
             else drawColoredSquare(x * squareLength, y * squareLength, currentWhiteColor, squareLength);
             
             if(state.pieceSelected && x === state.pieceSelected.x && y === state.pieceSelected.y){
-                drawColoredSquare(x*squareLength, y*squareLength, availableSquareColor, squareLength);
+                if (rogueState.boardShape === 'Fountain') {
+                    // Darker blue for selected piece in fountain map
+                    drawColoredSquare(x*squareLength, y*squareLength, 'rgba(1, 87, 155, 0.7)', squareLength);
+                } else {
+                    drawColoredSquare(x*squareLength, y*squareLength, availableSquareColor, squareLength);
+                }
             }
         }
-        else if (sq.light) drawLightedSquare(x * squareLength, y * squareLength, squareLength);
+        else if (sq.light) {
+            if (rogueState.boardShape === 'Fountain') {
+                // Watery blue highlight
+                drawColoredSquare(x * squareLength, y * squareLength, 'rgba(79, 195, 247, 0.8)', squareLength);
+            } else {
+                drawLightedSquare(x * squareLength, y * squareLength, squareLength);
+            }
+        }
         else if(sq.red) drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength);
         else if(sq.grey) drawColoredSquare(x*squareLength, y * squareLength, blockedSquareColor, squareLength);
         else if(sq.special){
@@ -1552,12 +1903,18 @@ function animate(secretState){
                 const exists = state.board.find(s => s.x === tx && s.y === ty);
                 if(!exists){
                     if (typeof drawBush === 'function') {
-                        drawBush(ctx, tx, ty, squareLength);
+                        drawBush(ctx, tx, ty, squareLength, rogueState.mapSeed);
                     }
                 }
             }
         }
-    }
+    } else if (rogueState.boardShape === 'Fountain') {
+         // Draw large fountain in the center (covering 4 squares)
+         if (typeof drawFountain === 'function') {
+             const fx = (rogueState.fountainX !== undefined) ? rogueState.fountainX : 3;
+             drawFountain(ctx, fx + 0.5, 3.5, squareLength, rogueState.mapSeed, 1);
+         }
+     }
 
     if(state.oldMove){
             const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);

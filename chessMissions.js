@@ -10,6 +10,9 @@ app.use('/moveMethods.js', express.static('./moveMethods.js'))
 app.use('/rogueLike.js', express.static('./rogueLike.js'))
 app.use('/rogueLikeDifficulties.js', express.static('./rogueLikeDifficulties.js'))
 app.use('/rogueLikeDetails.js', express.static('./rogueLikeDetails.js'))
+app.use('/grandMap.js', express.static('./grandMap.js'))
+app.use('/mapVisuals.js', express.static('./mapVisuals.js'))
+
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const newG = require('./globby').newIOServerV2;

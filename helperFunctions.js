@@ -374,7 +374,7 @@ function getSinglePlayerGame() {
                             })
                         }
                         changeTurn(state)
-                        if(checkRemi(state)){
+                        if(!state.won && checkRemi(state)){
                             state.won = 'tie'
                             if(state.specialOnDrawEffects){
                                 state.specialOnDrawEffects.forEach((effect) => {

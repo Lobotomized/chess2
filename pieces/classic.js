@@ -271,6 +271,7 @@ function simpleKingFactory(color, x, y){
             else if (this.color == 'black') {
                 state.won = 'white';
             }
+            return false;
         },
     }
 }
