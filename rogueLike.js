@@ -1285,9 +1285,11 @@ function showStartModal() {
         div.onclick = () => {
             rogueState.playerRoster = army;
             modal.close();
-            // Start level 1 with the easiest difficulty
-            const difficulty = window.difficulties ? window.difficulties[0] : { enemyValue: 3 };
-            startLevel(1, difficulty);
+            showReorderModal(army, () => {
+                // Start level 1 with the easiest difficulty
+                const difficulty = window.difficulties ? window.difficulties[0] : { enemyValue: 3 };
+                startLevel(1, difficulty);
+            });
         };
         
         container.appendChild(div);
@@ -1303,6 +1305,90 @@ function showStartModal() {
             header.innerText = `Choose Your Next Mission (Position: ${coords.currentX}, ${coords.currentY})`;
         }
     }
+}
+
+function showReorderModal(army, onConfirm) {
+    const modal = document.getElementById('reorderDialog');
+    const frontContainer = document.getElementById('reorderFrontline');
+    const backContainer = document.getElementById('reorderBackline');
+    const confirmBtn = document.getElementById('confirmReorderBtn');
+    
+    frontContainer.innerHTML = '';
+    backContainer.innerHTML = '';
+    
+    // Use the global frontLineFactories
+    const frontPieces = army.filter(u => frontLineFactories.includes(u));
+    const backPieces = army.filter(u => !frontLineFactories.includes(u));
+
+    let selectedElement = null;
+
+    function renderPieces(container, piecesArray) {
+        container.innerHTML = '';
+        piecesArray.forEach((factoryName, index) => {
+            const div = document.createElement('div');
+            div.className = 'reorder-piece';
+            div.style.width = '60px';
+            div.style.height = '60px';
+            div.style.border = '2px solid var(--board-dark)';
+            div.style.borderRadius = '8px';
+            div.style.display = 'flex';
+            div.style.justifyContent = 'center';
+            div.style.alignItems = 'center';
+            div.style.cursor = 'pointer';
+            div.style.background = 'var(--board-light)';
+            div.style.transition = 'all 0.2s';
+            
+            if (typeof window[factoryName] === 'function') {
+                const p = window[factoryName]('white', 0, 0);
+                const img = document.createElement('img');
+                img.src = `/static/${p.icon}`;
+                img.style.width = '50px';
+                img.style.height = '50px';
+                img.title = factoryName;
+                div.appendChild(img);
+            }
+            
+            div.onclick = () => {
+                if (selectedElement === null) {
+                    selectedElement = { div, container, index, piecesArray };
+                    div.style.borderColor = 'var(--selected)';
+                    div.style.boxShadow = '0 0 10px var(--selected)';
+                } else {
+                    if (selectedElement.container === container) {
+                        // Swap
+                        const temp = piecesArray[selectedElement.index];
+                        piecesArray[selectedElement.index] = piecesArray[index];
+                        piecesArray[index] = temp;
+                        
+                        // Re-render
+                        selectedElement = null;
+                        renderPieces(container, piecesArray);
+                    } else {
+                        // Deselect if clicking across lines
+                        selectedElement.div.style.borderColor = 'var(--board-dark)';
+                        selectedElement.div.style.boxShadow = 'none';
+                        selectedElement = { div, container, index, piecesArray };
+                        div.style.borderColor = 'var(--selected)';
+                        div.style.boxShadow = '0 0 10px var(--selected)';
+                    }
+                }
+            };
+            
+            container.appendChild(div);
+        });
+    }
+
+    renderPieces(frontContainer, frontPieces);
+    renderPieces(backContainer, backPieces);
+
+    confirmBtn.onclick = () => {
+        // Reconstruct the roster
+        rogueState.playerRoster = [...frontPieces, ...backPieces];
+        modal.close();
+        if (onConfirm) onConfirm();
+    };
+
+    modal.showModal();
 }
 
 function showShopModal(restore = false) {

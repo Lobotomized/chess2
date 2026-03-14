@@ -469,6 +469,21 @@
         <div id="startOptions" class="army-choice"></div>
     </dialog>
 
+    <!-- Army Reorder Modal -->
+    <dialog id="reorderDialog" style="max-width: 800px; width: 90%;">
+        <h2>Organize Your Army</h2>
+        <p>Drag and drop or click to swap pieces within their lines.</p>
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: var(--piece-black); border-bottom: 1px solid var(--board-dark); margin-bottom: 10px;">Frontline</h3>
+            <div id="reorderFrontline" style="display: flex; gap: 10px; justify-content: center; min-height: 60px; padding: 10px; background: rgba(255,255,255,0.3); border-radius: 8px;"></div>
+        </div>
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: var(--piece-black); border-bottom: 1px solid var(--board-dark); margin-bottom: 10px;">Backline</h3>
+            <div id="reorderBackline" style="display: flex; gap: 10px; justify-content: center; min-height: 60px; padding: 10px; background: rgba(255,255,255,0.3); border-radius: 8px;"></div>
+        </div>
+        <button id="confirmReorderBtn" style="padding: 10px 20px; font-size: 18px; width: 200px;">Begin Journey</button>
+    </dialog>
+
     <!-- Reward Modal -->
     <dialog id="rewardDialog">
         <h2>Choose Your Next Mission</h2>
