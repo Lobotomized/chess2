@@ -107,7 +107,6 @@ function drawTree(ctx, tx, ty, squareLength) {
 }
 
 function drawBush(ctx, tx, ty, squareLength, mapSeed) {
-    console.log(mapSeed)
      // 1. Stable Randomness based on position
      const seed = (tx * mapSeed) + (ty * mapSeed);
      const rand = (offset) => {

@@ -141,6 +141,16 @@
             border-color: #0277bd !important;
             box-shadow: 0 5px 15px rgba(0,100,200,0.3) !important;
         }
+
+        .desert-option {
+            background: linear-gradient(135deg, #f4a460 0%, #d2691e 100%) !important;
+            border-color: #8b4513 !important;
+        }
+
+        .desert-option:hover {
+            border-color: #a0522d !important;
+            box-shadow: 0 5px 15px rgba(210, 105, 30, 0.3) !important;
+        }
         
         .army-option h3 {
             margin-top: 0;
@@ -330,7 +340,6 @@
         }
         
         .map-cell:hover {
-            transform: scale(1.15);
             z-index: 100;
             box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             border-color: #8d6e63;
@@ -399,6 +408,19 @@
             bottom: 2px; right: 2px;
         }
 
+        .map-cell.desert {
+            background: #f4a460;
+            color: #8b4513;
+        }
+
+        .map-cell.desert::before {
+            content: '🌵';
+            font-size: 10px;
+            opacity: 0.4;
+            position: absolute;
+            bottom: 2px; right: 2px;
+        }
+
         .map-cell.market {
             background: #ffe082;
             color: #ff6f00;
@@ -425,6 +447,45 @@
             border-radius: 4px;
             font-size: 9px;
             margin-top: -4px;
+        }
+
+        /* Notification System */
+        .notification-toast {
+            background: rgba(46, 46, 46, 0.95);
+            color: var(--board-light);
+            padding: 15px 20px;
+            border-radius: 8px;
+            border: 2px solid var(--board-dark);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            font-family: 'Georgia', serif;
+            min-width: 250px;
+            max-width: 400px;
+            animation: slideIn 0.3s ease-out forwards;
+            position: relative;
+            pointer-events: auto;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .notification-toast.error {
+            border-color: var(--threat);
+            background: linear-gradient(135deg, rgba(80, 20, 20, 0.95) 0%, rgba(40, 10, 10, 0.95) 100%);
+        }
+
+        .notification-toast.success {
+            border-color: var(--highlight);
+            background: linear-gradient(135deg, rgba(30, 60, 30, 0.95) 0%, rgba(15, 30, 15, 0.95) 100%);
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(120%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(120%); opacity: 0; }
         }
         </style>
 </head>
@@ -470,7 +531,7 @@
     </dialog>
 
     <!-- Army Reorder Modal -->
-    <dialog id="reorderDialog" style="max-width: 800px; width: 90%;">
+    <dialog id="reorderDialog" style="max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;">
         <h2>Organize Your Army</h2>
         <p>Drag and drop or click to swap pieces within their lines.</p>
         <div style="margin-bottom: 20px;">
@@ -481,6 +542,12 @@
             <h3 style="color: var(--piece-black); border-bottom: 1px solid var(--board-dark); margin-bottom: 10px;">Backline</h3>
             <div id="reorderBackline" style="display: flex; gap: 10px; justify-content: center; min-height: 60px; padding: 10px; background: rgba(255,255,255,0.3); border-radius: 8px;"></div>
         </div>
+        <div style="margin-bottom: 20px;">
+            <h3 style="color: var(--piece-black); border-bottom: 1px solid var(--board-dark); margin-bottom: 10px;">Reserve</h3>
+            <p style="font-size: 14px; margin-bottom: 5px;">(Pieces here will not join battle. Click to select, then click 'Delete' to remove.)</p>
+            <div id="reorderReserve" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 60px; padding: 10px; background: rgba(255,255,255,0.3); border-radius: 8px;"></div>
+            <button id="deleteReserveBtn" style="display: none; background: #e53e3e; color: white; border: none; padding: 5px 10px; margin-top: 10px; cursor: pointer;">Delete Selected Piece</button>
+        </div>
         <button id="confirmReorderBtn" style="padding: 10px 20px; font-size: 18px; width: 200px;">Begin Journey</button>
     </dialog>
 
@@ -489,7 +556,10 @@
         <h2>Choose Your Next Mission</h2>
         <p>Select your next challenge.</p>
         <div id="rewardOptions" class="army-choice"></div>
-        <button onclick="showMapModal()" style="margin-top: 15px;">View Map</button>
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+            <button onclick="showMapModal()">View Map</button>
+            <button onclick="showReorderModal(rogueState.playerRoster)">Reorder Army</button>
+        </div>
     </dialog>
 
     <!-- Map Modal -->
@@ -532,6 +602,28 @@
     </dialog>
 
     <dialog class="pieceModal displayNone"></dialog>
+
+    <!-- Confirmation Modal -->
+    <dialog id="confirmationDialog" style="z-index: 2000;">
+        <h2 id="confirmTitle">Confirm Action</h2>
+        <p id="confirmMessage"></p>
+        <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+            <button id="btnConfirmYes">Yes</button>
+            <button id="btnConfirmNo" onclick="document.getElementById('confirmationDialog').close()">No</button>
+        </div>
+    </dialog>
+
+    <!-- Alert Modal -->
+    <dialog id="alertDialog" style="z-index: 2100;">
+        <h2 id="alertTitle">Notice</h2>
+        <p id="alertMessage"></p>
+        <div style="display: flex; justify-content: center; margin-top: 20px;">
+            <button onclick="document.getElementById('alertDialog').close()">OK</button>
+        </div>
+    </dialog>
+
+    <!-- Notification Container -->
+    <div id="notificationContainer" style="position: fixed; top: 80px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; pointer-events: none;"></div>
 
     <script src="/rogueLike.js"></script>
 </body>

@@ -36,15 +36,11 @@ const pieceDescriptions = {
 
     "simpleKingFactory": {
         name: "King",
-        description: `If enemy takes it YOU LOSE. Check mechanic does not exist. <br/> 
-    Whoever takes moves his king to the other end of the board wins.`
+        description: `If enemy takes it YOU LOSE. Check mechanic does not exist.`
     },
-    "clownRoguelikeFactory": {
+    "clownFactory": {
         name: "The Joker",
         description: `It can move like a Queen but it cannot take enemy pieces. Instead of that it can spend it's turn to swap places with another piece.
-            <br/>
-            <br/>
-            It cannot swap with the King.
         `
     },
     "pikeman":{
@@ -127,6 +123,12 @@ const pieceDescriptions = {
         name: "Queenbug",
         description: `
             The Queenbug can't move. But it can spawn ants infront, behind or to the left or right of it.
+        `
+    },
+    "roguelikeAntFactory":{
+        name: "Ant",
+        description: `
+            The ant moves and takes two blockable squares forward. If it gets to the last square it promotes itself to a Bug Queen.
         `
     },
 

@@ -7,8 +7,8 @@ const grandMap = {
     currentX: 0,
     currentY: 0,
     map: [], // 2D Array
-    width: 30,
-    height: 30,
+    width: 12,
+    height: 12,
     
     // Predefined Map configurations
     predefinedMaps: {
@@ -40,21 +40,22 @@ const grandMap = {
                 // Fallback if not found
                 this.currentX = 0;
                 this.currentY = 0;
-                this.width = 30;
-                this.height = 30;
+                this.width = 15;
+                this.height = 15;
                 this.generateMap();
             }
         } else if (savedState && savedState.map) {
             this.currentX = savedState.currentX || 0;
             this.currentY = savedState.currentY || 0;
             this.map = savedState.map;
-            this.width = savedState.width || 30;
-            this.height = savedState.height || 30;
+            this.width = savedState.width || 15;
+            this.height = savedState.height || 15;
+            this.seed = savedState.seed || Math.random() * 10000;
         } else {
             this.currentX = 0;
             this.currentY = 0;
-            this.width = 30;
-            this.height = 30;
+            this.width = 15;
+            this.height = 15;
             this.generateMap();
         }
     },
@@ -117,13 +118,15 @@ const grandMap = {
             currentY: this.currentY,
             map: this.map,
             width: this.width,
-            height: this.height
+            height: this.height,
+            seed: this.seed
         };
     },
 
     // Generate the full map
     generateMap() {
         this.map = [];
+        this.seed = Math.random() * 10000;
         for (let y = 0; y < this.height; y++) {
             const row = [];
             for (let x = 0; x < this.width; x++) {
@@ -140,28 +143,53 @@ const grandMap = {
 
     // Generate a node for a specific coordinate
     generateNode(x, y) {
-        // Pseudo-random number generator based on coordinates
+        // Pseudo-random number generator based on coordinates and seed
         const getDeterministicRandom = (modifier = 0) => {
-             const v = Math.sin(x * 129898 + y * 78233 + modifier) * 43758.5453123;
-             return v - Math.floor(v);
+             const seed = this.seed || 0;
+             const v = Math.sin(x * 129898 + y * 78233 + seed + modifier) * 43758.5453123;
+             return Math.abs(v - Math.floor(v));
         };
+        
+        // 1. Determine Region FIRST to influence difficulty and board type
+        // Use Perlin-like noise or Distance-based Voronoi for organic shapes
+        // Center points for regions:
+        const centers = [
+            { name: 'Classic', x: 3, y: 3 },
+            { name: 'Medieval', x: 12, y: 3 },
+            { name: 'Insect', x: 3, y: 12 },
+            { name: 'Cyborgs', x: 12, y: 12 },
+            { name: 'Promoters', x: 7, y: 7 } // Middle
+        ];
+        
+        // Add some noise to the distance check to make borders jagged
+        // Noise based on x, y
+        const noise = (getDeterministicRandom(5) * 5) - 2.5; // -2.5 to 2.5 variance
+        
+        let minDistance = Infinity;
+        let region = 'Classic';
+        
+        centers.forEach(center => {
+            // Euclidean distance with noise
+            const d = Math.sqrt(Math.pow(x - center.x, 2) + Math.pow(y - center.y, 2)) + noise;
+            if (d < minDistance) {
+                minDistance = d;
+                region = center.name;
+            }
+        });
 
         // Determine board type
-        // Adjust probabilities: Standard (40%), Woods (30%), Fountain (20%), Market (10%)
-        const boards = ['Standard', 'Woods', 'Fountain', 'Market'];
+        // Adjust probabilities: Standard (35%), Woods (25%), Fountain (20%), Desert (10%), Market (10%)
+        const boards = ['Standard', 'Woods', 'Fountain', 'Desert', 'Market'];
         let board = 'Standard';
         const rand = getDeterministicRandom(1);
-        if (rand < 0.4) board = 'Standard';
-        else if (rand < 0.7) board = 'Woods';
-        else if (rand < 0.9) board = 'Fountain';
+        if (rand < 0.35) board = 'Standard';
+        else if (rand < 0.60) board = 'Woods';
+        else if (rand < 0.80) board = 'Fountain';
+        else if (rand < 0.90) board = 'Desert';
         else board = 'Market';
         
         // Determine Difficulty based on distance from 0,0
-        // Use Manhattan distance as a base for difficulty scaling
         const distance = Math.abs(x) + Math.abs(y);
-        
-        // Calculate an "effective level" based on distance
-        const effectiveLevel = Math.max(1, distance);
 
         const difficulties = window.difficulties || [];
         let difficultyProfile = { enemyValue: 5, rewardCap: 10, name: "Unknown", description: "Unknown Region" };
@@ -174,16 +202,16 @@ const grandMap = {
                 description: "A safe haven to hire mercenaries." 
             };
         } else if (difficulties.length > 0) {
-            // Pick a difficulty roughly appropriate for the distance
-            let index = Math.min(difficulties.length - 1, Math.floor((effectiveLevel - 1) / 2));
+            // Randomize difficulty with a spread based on distance
+            // Near the start, keep difficulties low. Farther away, increase the max and min possible difficulties.
+            const maxIndex = Math.min(difficulties.length - 1, Math.floor(distance / 1.5) + 2);
+            const minIndex = Math.max(0, Math.floor(distance / 3) - 1);
             
-            // Add variance based on coordinate hash
-            const variance = getDeterministicRandom(2);
-            if (variance > 0.7 && index < difficulties.length - 1) {
-                index++;
-            } else if (variance < 0.2 && index > 0) {
-                index--;
-            }
+            const randomFactor = getDeterministicRandom(2);
+            let index = Math.floor(minIndex + randomFactor * (maxIndex - minIndex + 1));
+            
+            if (index > difficulties.length - 1) index = difficulties.length - 1;
+            if (index < 0) index = 0;
             
             difficultyProfile = difficulties[index];
         }
@@ -195,13 +223,47 @@ const grandMap = {
             board: board,
             cleared: false,
             rewardCap: difficultyProfile.rewardCap,
-            difficulty: difficultyProfile // Keep reference for details
+            difficulty: difficultyProfile, // Keep reference for details
+            region: region
         };
         
         if (board === 'Fountain') {
             const fVal = getDeterministicRandom(3); 
             node.fountainX = Math.floor(fVal * 7); // 0 to 6
         }
+
+        // Generate Rewards
+        const rewards = {
+            gold: 0,
+            food: 0,
+            pieces: []
+        };
+        
+        // Gold based on enemy power/difficulty
+        // Base: 10, plus up to 50% variance
+        const goldBase = (difficultyProfile.enemyValue || 1) * 5 + 10;
+        rewards.gold = Math.floor(goldBase + getDeterministicRandom(6) * goldBase * 0.5);
+        
+        // Food - higher chance in Woods/Fountain/Market
+        // Woods/Fountain: 60% chance. Market: 90% chance. Others: 20%
+        let foodChance = 0.2;
+        if (board === 'Woods' || board === 'Fountain') foodChance = 0.6;
+        if (board === 'Market') foodChance = 0.9;
+
+        if (getDeterministicRandom(7) < foodChance) {
+            rewards.food = Math.floor(5 + getDeterministicRandom(8) * 15);
+        }
+        
+        // Pieces - small chance
+        // Market always has a unit (Mercenary)
+        let pieceChance = 0.1;
+        if (board === 'Market') pieceChance = 1.0;
+        
+        if (getDeterministicRandom(9) < pieceChance) {
+             rewards.pieces.push("Unit");
+        }
+        
+        node.rewards = rewards;
 
         return node;
     },

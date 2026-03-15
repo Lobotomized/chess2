@@ -2,36 +2,61 @@
 // Rogue Like Game Logic
 
 // List of available piece factories for random generation
-const availablePieceFactories = [
+const loseConditionFactories = [
     // Classic
-    'rogueLikePawnFactory', 'rookFactory', 'knightFactory', 'bishopFactory', 'queenFactory', 'simpleKingFactory',
-    'ghostFactory', 'horseFactory', "swordsMen",  
-    
-    "pikeman", "juggernautFactory", "ricarFactory",
-    "pigFactory", "shield", "executorFactory", 'roguelikeQueenbugFactory',
-    "roguelikeAntFactory", "spiderFactory", 'goliathBugFactory', "bootvesselFactory"
-    // Animals
-    // 'horseFactory', 'pigFactory', 'ghostFactory', 'spiderFactory', 
-    // 'ladyBugFactory', 'goliathBugFactory', 'antFactory',
-    // // Medieval
-    // 'pikeman', 'swordsMen', 'shield', 
-    // // Machines
-    // 'cyborgFactory', 'executorFactory', 'bootvesselFactory',
-    // Cats
+    'simpleKingFactory',
 ];
+
+const cyborgsFactories = [
+     "juggernautFactory", 
+     "executorFactory", 
+     "bootvesselFactory"
+]
+
+const pomotersFactories = [
+    "shield","swordsMen","pikeman",
+]
+
+const medievalFactories = [
+    'horseFactory', 'pigFactory',"clowFactory", "ghostFactory", "ricarFactory"
+]
+
+const insectFactories = [
+    "roguelikeAntFactory", "spiderFactory", 'goliathBugFactory', "roguelikeQueenbugFactory"
+]
+
+const classicPieceFactories = [
+    'rogueLikePawnFactory', 'rookFactory', 'knightFactory', 'bishopFactory', 'queenFactory', 
+]
 
 // List of pieces available in the market
 const marketPieceFactories = [
     'rogueLikePawnFactory', 'rookFactory', 'knightFactory', 'bishopFactory', 'queenFactory',
     'ghostFactory',  "swordsMen", "pikeman", 
     "juggernautFactory", "ricarFactory",
-     "shield", "executorFactory",  "bootvesselFactory"
+     "shield", "executorFactory",  "bootvesselFactory", "clownFactory"
 ];
 
 const winnablePieceFactories = [
     'horseFactory','roguelikeQueenbugFactory',
     "roguelikeAntFactory", "spiderFactory", 'goliathBugFactory',"pigFactory",
 ];
+
+const availablePieceFactories = [
+    ...classicPieceFactories,
+    ...medievalFactories,
+    ...insectFactories,
+    ...cyborgsFactories,
+    ...pomotersFactories,
+]
+
+const regionFactories = {
+    'Classic': classicPieceFactories,
+    'Medieval': medievalFactories,
+    'Insect': insectFactories,
+    'Cyborgs': cyborgsFactories,
+    'Promoters': pomotersFactories
+};
 
 const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'roguelikeAntFactory', 'roguelikeQueenbugFactory'];
 
@@ -234,7 +259,7 @@ function loadGame() {
             
         } catch (e) {
             console.error("Failed to load save:", e);
-            alert("Save file corrupted. Starting new game.");
+            showNotification("Save file corrupted. Starting new game.", "error");
             startNewGame();
         }
     }
@@ -243,9 +268,9 @@ function loadGame() {
 function confirmNewGame() {
     const savedState = localStorage.getItem('rogueState');
     if (savedState) {
-        if (confirm("Starting a new game will overwrite your existing save. Are you sure?")) {
+        showConfirmation("Starting a new game will overwrite your existing save. Are you sure?", () => {
             startNewGame();
-        }
+        });
     } else {
         startNewGame();
     }
@@ -429,10 +454,16 @@ function ani() {
 
 // --- Army Generation ---
 
-function generateRandomArmy(targetValue, includeKing = false) {
+function generateRandomArmy(targetValue, includeKing = false, region = 'Classic') {
     const army = [];
     let currentValue = 0;
     
+    // Determine factories for this region
+    let regionList = availablePieceFactories;
+    if (region && regionFactories[region]) {
+        regionList = regionFactories[region];
+    }
+
     if (includeKing) {
         // Prefer simpleKingFactory, fallback to kingFactory
         const kingName = typeof window['simpleKingFactory'] === 'function' ? 'simpleKingFactory' : 'kingFactory';
@@ -442,33 +473,52 @@ function generateRandomArmy(targetValue, includeKing = false) {
         currentValue += 0;
     }
 
-    // Ensure at least 3 frontline pieces
+    // Determine Frontline for this region
+    let regionFrontline = frontLineFactories.filter(f => regionList.includes(f));
+    
+    // Fallback if no frontline found (e.g. Cyborgs)
+    if (regionFrontline.length === 0) {
+        regionFrontline = ['rogueLikePawnFactory']; 
+    }
+
+    // Ensure exactly 8 frontline pieces
     let frontlineCount = 0;
     let attempts = 0;
-    while (frontlineCount < 3 && attempts < 50 && currentValue < targetValue) {
+    // We want exactly 8, so we ignore targetValue constraints for the frontline if needed,
+    // or just let it overshoot to guarantee 8 pieces.
+    while (frontlineCount < 8 && attempts < 200) {
         attempts++;
-        const randomFrontline = frontLineFactories[Math.floor(Math.random() * frontLineFactories.length)];
+        const randomFrontline = regionFrontline[Math.floor(Math.random() * regionFrontline.length)];
         const val = getPieceValue(randomFrontline);
         
-        // Add if it doesn't overshoot too much (allow +1 overshoot)
-        if (currentValue + val <= targetValue + 1) {
+        // We must have 8 pieces, so we add them even if it overshoots slightly, but try to stay within limits if possible.
+        // To guarantee 8 pieces, we relax the constraint as we get closer to the limit.
+        if (currentValue + val <= targetValue + 2 || attempts > 50) {
             army.push(randomFrontline);
             currentValue += val;
             frontlineCount++;
         }
     }
     
+    // Create a list of available factories that are strictly backline pieces
+    const backlineFactories = regionList.filter(f => !frontLineFactories.includes(f));
+
     // Safety break
     let iterations = 0;
-    while (currentValue < targetValue && iterations < 100) {
+    let backlineCount = 0;
+    while (currentValue < targetValue && iterations < 100 && backlineCount < 8) {
         iterations++;
-        const randomFactory = availablePieceFactories[Math.floor(Math.random() * availablePieceFactories.length)];
+        // Only pick from backline factories so we don't exceed 8 frontline pieces
+        if (backlineFactories.length === 0) break;
+        
+        const randomFactory = backlineFactories[Math.floor(Math.random() * backlineFactories.length)];
         const val = getPieceValue(randomFactory);
         
         // Add if it doesn't overshoot too much (allow +1 overshoot)
         if (currentValue + val <= targetValue + 1) {
             army.push(randomFactory);
             currentValue += val;
+            backlineCount++;
         }
     }
     
@@ -824,9 +874,10 @@ function generateRewardOptions() {
         options.sort((a,b) => a.difficultyIndex - b.difficultyIndex);
         
         // Randomly assign piece rewards
+        const rosterFull = rogueState.playerRoster.length >= 24; // 8 Front + 8 Back + 8 Reserve
         options.forEach(opt => {
             // 30% chance for a piece reward
-            if (Math.random() < 0.3) {
+            if (Math.random() < 0.3 && !rosterFull) {
                 const maxPieceValue = opt.enemyValue / 2;
                 
                 // Use winnablePieceFactories if available, otherwise fallback
@@ -915,7 +966,7 @@ function generateRewardOptions() {
 
 function ensureNodeArmy(node) {
     if (!node.army) {
-        const { army, value } = generateRandomArmy(node.enemyPower, true);
+        const { army, value } = generateRandomArmy(node.enemyPower, true, node.region);
         node.army = army;
         node.actualEnemyValue = value;
     }
@@ -1075,44 +1126,39 @@ const boardShapes = {
     },
     'Woods': (board) => {
         // Use mapSeed to determine pattern
-        // We want bushes on rows 3 and 4 (middle) but with varied parity
         const seed = rogueState.mapSeed || Math.random();
+        
+        // Define candidate squares for bushes (rows 2, 3, 4, 5)
+        const candidateSquares = [];
+        for (let x = 0; x <= 7; x++) {
+            for (let y = 2; y <= 5; y++) {
+                candidateSquares.push({ x, y });
+            }
+        }
+
+        // Deterministic shuffle using seed
+        let currentSeed = seed;
+        const seededRandom = () => {
+            const x = Math.sin(currentSeed++) * 10000;
+            return x - Math.floor(x);
+        };
+
+        // Fisher-Yates shuffle
+        for (let i = candidateSquares.length - 1; i > 0; i--) {
+            const j = Math.floor(seededRandom() * (i + 1));
+            [candidateSquares[i], candidateSquares[j]] = [candidateSquares[j], candidateSquares[i]];
+        }
+
+        // Pick first 6 as bushes
+        const bushes = candidateSquares.slice(0, 6);
         
         for (let x = 0; x <= 7; x++) {
             for (let y = 0; y <= 7; y++) {
-                // Determine if this is a candidate row
-                if (y === 3 || y === 4) {
-                     // Generate a pseudo-random value for this position
-                     const localSeed = (x * 123) + (y * 456) + seed;
-                     const rand = Math.sin(localSeed) * 10000;
-                     const val = rand - Math.floor(rand);
-                     
-                     // 50% chance to target White squares, 50% for Black
-                     // But we want "bushes to take" -> "missing squares"
-                     
-                     // Check square color
-                     let isBlack = false;
-                     if (y % 2 !== 0) { // Odd row (3)
-                         if (x % 2 === 0) isBlack = true;
-                     } else { // Even row (4)
-                         if (x % 2 !== 0) isBlack = true;
-                     }
-                     
-                     // Logic:
-                     // If val > 0.5, we remove Black squares here.
-                     // If val < 0.5, we remove White squares here.
-                     // But we want it to be somewhat consistent patches, not total noise.
-                     // Let's use a lower frequency noise for "Pattern Preference"
-                     
-                     const regionVal = Math.sin(x * 0.5 + seed) * 0.5 + 0.5; // Smooth-ish transition along X
-                     
-                     let removeBlack = (regionVal > 0.5);
-                     
-                     if (removeBlack && isBlack) continue;
-                     if (!removeBlack && !isBlack) continue;
+                // Check if this square is a bush
+                const isBush = bushes.some(b => b.x === x && b.y === y);
+                if (!isBush) {
+                    board.push({ light: false, x: x, y: y });
                 }
-                
-                board.push({ light: false, x: x, y: y });
             }
         }
     },
@@ -1129,6 +1175,13 @@ const boardShapes = {
                 board.push({ light: false, x: x, y: y });
             }
         }
+    },
+    'Desert': (board) => {
+        for (let x = 0; x <= 8; x++) {
+            for (let y = 0; y <= 8; y++) {
+                board.push({ light: false, x: x, y: y });
+            }
+        }
     }
 };
 
@@ -1142,13 +1195,35 @@ function setupBoard(shapeName = 'Standard') {
     } else {
         boardShapes['Standard'](hotseatGame.state.board);
     }
+
+    // Determine board dimensions
+    let maxX = 7;
+    let maxY = 7;
+    if (hotseatGame.state.board.length > 0) {
+        hotseatGame.state.board.forEach(sq => {
+            if (sq.x > maxX) maxX = sq.x;
+            if (sq.y > maxY) maxY = sq.y;
+        });
+    }
     
     // Helper to split army
     // "Infront" means closer to the enemy.
     
     const splitArmy = (roster) => {
-        const front = roster.filter(u => frontLineFactories.includes(u));
-        const back = roster.filter(u => !frontLineFactories.includes(u));
+        // If the roster has nulls (from reordering), preserve them in their respective lines
+        // For simplicity in standard logic, we usually don't have nulls until after reorder
+        // But if we do, we need to handle them.
+        
+        // However, if the roster is perfectly 16 long (8 front, 8 back), we can just split it by index
+        if (roster.length === 16) {
+            return {
+                front: roster.slice(0, 8),
+                back: roster.slice(8, 16)
+            };
+        }
+        
+        const front = roster.filter(u => u && frontLineFactories.includes(u));
+        const back = roster.filter(u => u && !frontLineFactories.includes(u));
         return { front, back };
     };
 
@@ -1163,21 +1238,52 @@ function setupBoard(shapeName = 'Standard') {
     }
 
     // Place Player Army (White)
-    // Front Line: Row 6 (Pawns)
-    // Back Line: Row 7 (Rest)
+    // Front Line: Row maxY - 1 (Pawns)
+    // Back Line: Row maxY (Rest)
     const playerSplit = splitArmy(rogueState.playerRoster);
-    placeArmy(playerSplit.front, 'white', [6]); 
-    placeArmy(playerSplit.back, 'white', [7]); 
+    placeArmy(playerSplit.front, 'white', [maxY - 1], maxX); 
+    placeArmy(playerSplit.back, 'white', [maxY], maxX); 
     
     // Place Enemy Army (Black)
     // Front Line: Row 1 (Pawns)
     // Back Line: Row 0 (Rest)
     const enemySplit = splitArmy(rogueState.enemyRoster);
-    placeArmy(enemySplit.front, 'black', [1]);
-    placeArmy(enemySplit.back, 'black', [0]);
+    placeArmy(enemySplit.front, 'black', [1], maxX);
+    
+    // Randomize backline (King and elite units)
+    // Ensure King is not lost if roster exceeds available squares
+    const availableSlots = maxX + 1;
+    let backline = enemySplit.back;
+
+    // Separate King
+    const kings = backline.filter(u => u && u.toLowerCase().includes('king'));
+    const others = backline.filter(u => u && !u.toLowerCase().includes('king'));
+
+    // If total exceeds slots, prioritize Kings and trim others
+    if (kings.length + others.length > availableSlots) {
+        // Keep all kings, trim others
+        const allowedOthersCount = Math.max(0, availableSlots - kings.length);
+        // Randomly select which others to keep
+        for (let i = others.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [others[i], others[j]] = [others[j], others[i]];
+        }
+        others.splice(allowedOthersCount);
+    }
+
+    // Combine
+    backline = [...kings, ...others];
+
+    // Shuffle
+    for (let i = backline.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [backline[i], backline[j]] = [backline[j], backline[i]];
+    }
+    
+    placeArmy(backline, 'black', [0], maxX);
 }
 
-function placeArmy(roster, color, rows) {
+function placeArmy(roster, color, rows, maxX = 7) {
     // Simple placement strategy: Fill rows from left to right
     let currentRowIndex = rows.length - 1; // Start from bottom-most allowed row for white?
     if (color === 'black') currentRowIndex = 0; // Start from top for black
@@ -1197,7 +1303,7 @@ function placeArmy(roster, color, rows) {
     // Helper to advance position
     const advance = () => {
         x++;
-        if (x > 7) {
+        if (x > maxX) {
             x = 0;
             // Move to next row
             if (color === 'white') {
@@ -1213,7 +1319,7 @@ function placeArmy(roster, color, rows) {
         return true;
     };
 
-    roster.forEach(factoryName => {
+    for (const factoryName of roster) {
         // Find next valid square
         // Safety break to prevent infinite loop if board is weirdly empty
         let attempts = 0;
@@ -1224,15 +1330,15 @@ function placeArmy(roster, color, rows) {
         
         if (attempts >= 100) return; // Should not happen
 
-        if (typeof window[factoryName] === 'function') {
+        if (factoryName && typeof window[factoryName] === 'function') {
             const piece = window[factoryName](color, x, y);
             
             hotseatGame.state.pieces.push(piece);
-            
-            // Advance position for next unit
-            advance();
         }
-    });
+        
+        // Advance position for next unit even if it was an empty slot (null)
+        if (!advance()) return;
+    }
 }
 
 // --- UI / Modals ---
@@ -1242,9 +1348,11 @@ function showStartModal() {
     const container = document.getElementById('startOptions');
     container.innerHTML = '';
     
-    // Generate 4 starting armies (Value ~25)
+ 
     for (let i = 0; i < 4; i++) {
-        const { army, value } = generateRandomArmy(20, true);
+        // Increase initial targetValue slightly so it can actually afford 8 frontline pieces + some backline, 
+        // or just let it be 20 and it'll mostly just be frontline pieces.
+        const { army } = generateRandomArmy(16, true);
         
         // Removed markPieceAsSeen(name) call to stop auto-popup
 
@@ -1311,34 +1419,59 @@ function showReorderModal(army, onConfirm) {
     const modal = document.getElementById('reorderDialog');
     const frontContainer = document.getElementById('reorderFrontline');
     const backContainer = document.getElementById('reorderBackline');
+    const reserveContainer = document.getElementById('reorderReserve');
     const confirmBtn = document.getElementById('confirmReorderBtn');
+    const deleteBtn = document.getElementById('deleteReserveBtn');
+
+    if(confirmBtn) {
+        confirmBtn.innerText = onConfirm ? "Begin Journey" : "Confirm Army";
+    }
     
     frontContainer.innerHTML = '';
     backContainer.innerHTML = '';
+    if(reserveContainer) reserveContainer.innerHTML = '';
     
-    // Use the global frontLineFactories
-    const frontPieces = army.filter(u => frontLineFactories.includes(u));
-    const backPieces = army.filter(u => !frontLineFactories.includes(u));
+    let frontPieces, backPieces, reservePieces;
+    
+    // Check if army looks like a formatted roster (length >= 16 or contains nulls)
+    const isFormatted = army.length >= 16 || army.includes(null);
+    
+    if (isFormatted) {
+        frontPieces = army.slice(0, 8);
+        backPieces = army.slice(8, 16);
+        reservePieces = army.slice(16);
+    } else {
+        // Legacy or fresh generation fallback
+        frontPieces = army.filter(u => u && frontLineFactories.includes(u));
+        backPieces = army.filter(u => u && !frontLineFactories.includes(u));
+        reservePieces = [];
+    }
+
+    // Pad with nulls up to 8 for front and back
+    while(frontPieces.length < 8) frontPieces.push(null);
+    while(backPieces.length < 8) backPieces.push(null);
 
     let selectedElement = null;
 
-    function renderPieces(container, piecesArray) {
+    function renderPieces(container, piecesArray, isReserve = false) {
         container.innerHTML = '';
         piecesArray.forEach((factoryName, index) => {
             const div = document.createElement('div');
             div.className = 'reorder-piece';
             div.style.width = '60px';
             div.style.height = '60px';
-            div.style.border = '2px solid var(--board-dark)';
+            div.style.border = '2px dashed var(--board-dark)';
             div.style.borderRadius = '8px';
             div.style.display = 'flex';
             div.style.justifyContent = 'center';
             div.style.alignItems = 'center';
             div.style.cursor = 'pointer';
-            div.style.background = 'var(--board-light)';
+            div.style.background = factoryName ? 'var(--board-light)' : 'rgba(0,0,0,0.1)';
             div.style.transition = 'all 0.2s';
+            div.style.position = 'relative'; // For potential badges
             
-            if (typeof window[factoryName] === 'function') {
+            if (factoryName && typeof window[factoryName] === 'function') {
+                div.style.border = '2px solid var(--board-dark)';
                 const p = window[factoryName]('white', 0, 0);
                 const img = document.createElement('img');
                 img.src = `/static/${p.icon}`;
@@ -1350,40 +1483,135 @@ function showReorderModal(army, onConfirm) {
             
             div.onclick = () => {
                 if (selectedElement === null) {
-                    selectedElement = { div, container, index, piecesArray };
+                    if (!factoryName) return; // Don't select empty slots as the first click
+                    
+                    selectedElement = { div, container, index, piecesArray, isReserve };
                     div.style.borderColor = 'var(--selected)';
                     div.style.boxShadow = '0 0 10px var(--selected)';
+                    
+                    // Show delete button if in reserve
+                    if (isReserve && deleteBtn) {
+                        deleteBtn.style.display = 'inline-block';
+                        deleteBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            // Delete piece
+                            piecesArray.splice(index, 1);
+                            // Deselect
+                            selectedElement = null;
+                            deleteBtn.style.display = 'none';
+                            // Re-render only reserve
+                            renderPieces(container, piecesArray, true);
+                        };
+                    } else if (deleteBtn) {
+                        deleteBtn.style.display = 'none';
+                    }
+                    
                 } else {
-                    if (selectedElement.container === container) {
-                        // Swap
-                        const temp = piecesArray[selectedElement.index];
-                        piecesArray[selectedElement.index] = piecesArray[index];
-                        piecesArray[index] = temp;
-                        
-                        // Re-render
-                        selectedElement = null;
-                        renderPieces(container, piecesArray);
-                    } else {
-                        // Deselect if clicking across lines
+                    // Action Phase
+                    const sourceArray = selectedElement.piecesArray;
+                    const sourceIndex = selectedElement.index;
+                    const targetArray = piecesArray;
+                    const targetIndex = index;
+                    
+                    // Hide delete button
+                    if(deleteBtn) deleteBtn.style.display = 'none';
+                    
+                    // Check if clicking the same item (Deselect)
+                    if (sourceArray === targetArray && sourceIndex === targetIndex) {
                         selectedElement.div.style.borderColor = 'var(--board-dark)';
                         selectedElement.div.style.boxShadow = 'none';
-                        selectedElement = { div, container, index, piecesArray };
-                        div.style.borderColor = 'var(--selected)';
-                        div.style.boxShadow = '0 0 10px var(--selected)';
+                        selectedElement = null;
+                        return;
                     }
+
+                    // Perform Swap
+                    const temp = sourceArray[sourceIndex];
+                    sourceArray[sourceIndex] = targetArray[targetIndex];
+                    targetArray[targetIndex] = temp;
+                    
+                    // Post-Action Cleanup
+                    
+                    // Filter nulls from Reserve (in case we swapped a null into it)
+                    for(let i=reservePieces.length-1; i>=0; i--) {
+                        if (reservePieces[i] === null) reservePieces.splice(i, 1);
+                    }
+                    
+                    // Re-Render All
+                    selectedElement = null;
+                    renderPieces(frontContainer, frontPieces, false);
+                    renderPieces(backContainer, backPieces, false);
+                    renderPieces(reserveContainer, reservePieces, true);
                 }
             };
             
             container.appendChild(div);
         });
+        
+        // If Reserve, add an "Empty Slot" to allow un-equipping (moving from board to reserve)
+        if (isReserve) {
+            const div = document.createElement('div');
+            div.className = 'reorder-piece';
+            div.style.width = '60px';
+            div.style.height = '60px';
+            div.style.border = '2px dashed var(--board-dark)';
+            div.style.borderRadius = '8px';
+            div.style.display = 'flex';
+            div.style.justifyContent = 'center';
+            div.style.alignItems = 'center';
+            div.style.cursor = 'pointer';
+            div.style.background = 'rgba(0,0,0,0.05)';
+            div.innerHTML = '<span style="font-size:24px; color:var(--board-dark); opacity:0.5;">+</span>';
+            
+            div.onclick = () => {
+                if (selectedElement && !selectedElement.isReserve) {
+                    // Moving from Board to Reserve (Unequip)
+                    const sourceArray = selectedElement.piecesArray;
+                    const sourceIndex = selectedElement.index;
+                    
+                    // Move piece to reserve
+                    const piece = sourceArray[sourceIndex];
+                    if (piece) {
+                        reservePieces.push(piece);
+                        sourceArray[sourceIndex] = null; // Clear board slot
+                    }
+                    
+                    // Deselect and Render
+                    selectedElement = null;
+                    if(deleteBtn) deleteBtn.style.display = 'none';
+                    renderPieces(frontContainer, frontPieces, false);
+                    renderPieces(backContainer, backPieces, false);
+                    renderPieces(reserveContainer, reservePieces, true);
+                }
+            };
+            
+            container.appendChild(div);
+        }
     }
 
-    renderPieces(frontContainer, frontPieces);
-    renderPieces(backContainer, backPieces);
+    renderPieces(frontContainer, frontPieces, false);
+    renderPieces(backContainer, backPieces, false);
+    if(reserveContainer) renderPieces(reserveContainer, reservePieces, true);
 
     confirmBtn.onclick = () => {
-        // Reconstruct the roster
-        rogueState.playerRoster = [...frontPieces, ...backPieces];
+        // Validation: Ensure King is in the roster (Front or Back)
+        const frontHasKing = frontPieces.some(p => p === 'simpleKingFactory' || p === 'kingFactory');
+        const backHasKing = backPieces.some(p => p === 'simpleKingFactory' || p === 'kingFactory');
+        
+        if (!frontHasKing && !backHasKing) {
+            showNotification("The King must be in the active army (Frontline or Backline)!", "error");
+            return;
+        }
+
+        // Validation: Ensure exactly 8 frontline pieces
+        // Filter out nulls to count actual pieces
+        const frontCount = frontPieces.filter(p => p !== null).length;
+        if (frontCount < 8) {
+             showNotification("The Frontline must have exactly 8 pieces!", "error");
+             return;
+        }
+
+        // Reconstruct the roster: Front (8) + Back (8) + Reserve (...)
+        rogueState.playerRoster = [...frontPieces, ...backPieces, ...reservePieces];
         modal.close();
         if (onConfirm) onConfirm();
     };
@@ -1427,10 +1655,20 @@ function showShopModal(restore = false) {
 
     const updateAllButtons = () => {
         const buttons = container.querySelectorAll('.buy-btn');
+        const rosterFull = rogueState.playerRoster.length >= 24; // 8 Front + 8 Back + 8 Reserve
+
         buttons.forEach(btn => {
             const index = btn.dataset.index;
             const item = shopItems[index];
             if (item.bought) return; // Already bought state handled
+
+            if (rosterFull) {
+                btn.disabled = true;
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'not-allowed';
+                btn.innerText = "Reserve Full";
+                return;
+            }
 
             if (rogueState.gold < item.cost) {
                 btn.disabled = true;
@@ -1498,7 +1736,7 @@ function showShopModal(restore = false) {
         
         buyBtn.onclick = (e) => {
             e.stopPropagation();
-            if (rogueState.gold >= item.cost && !item.bought) {
+            if (rogueState.gold >= item.cost && !item.bought && rogueState.playerRoster.length < 24) {
                 rogueState.gold -= item.cost;
                 rogueState.playerRoster.push(item.factory);
                 item.bought = true;
@@ -1530,6 +1768,15 @@ function showShopModal(restore = false) {
 }
 
 function showRewardModal() {
+    // Check if we need to show reorder screen first (e.g. after winning a unit to reserve)
+    if (rogueState.pendingReorder) {
+        rogueState.pendingReorder = false;
+        showReorderModal(rogueState.playerRoster, () => {
+            showRewardModal();
+        });
+        return;
+    }
+
     const modal = document.getElementById('rewardDialog');
     const container = document.getElementById('rewardOptions');
     container.innerHTML = '';
@@ -1546,9 +1793,6 @@ function showRewardModal() {
     const rewards = generateRewardOptions();
     
     rewards.forEach((option, i) => {
-        const army = option.army;
-        const val = option.value;
-
         const div = document.createElement('div');
         div.className = 'army-option';
         
@@ -1604,7 +1848,7 @@ function showRewardModal() {
         
         div.innerHTML = `<h3>${option.type}</h3>
                          <p style="font-size:14px;">${option.description || ''}</p>
-                         <p>Enemy Power: ${option.enemyValue || '?'}</p>
+                         <p>Enemy Power: ${Math.floor(option.enemyValue) || '?'}</p>
                          <div style="display:flex; align-items:center; justify-content:center; gap:10px;">
                             <span>Reward:</span>
                             ${rewardText}
@@ -1707,11 +1951,97 @@ function checkGameOver(state) {
                 if (rogueState.currentRewardType === 'piece') {
                     const pieceFactory = rogueState.currentRewardContent;
                     if (pieceFactory) {
-                        rogueState.playerRoster.push(pieceFactory);
+                        // Check if frontline is full (8 pieces) and new unit is frontline
+                        // Count existing frontline units (ignoring nulls)
+                        const currentFrontCount = rogueState.playerRoster.filter(u => u && frontLineFactories.includes(u)).length;
+                        const isFrontlineUnit = frontLineFactories.includes(pieceFactory);
                         
-                        // Show what piece was won
-                        let pieceName = pieceFactory.replace('Factory','').replace('rogueLike','');
-                        winText = `Won Unit: ${pieceName}`;
+                        if (currentFrontCount >= 8 && isFrontlineUnit) {
+                            // Auto-place in reserve and trigger reorder
+                            
+                            // We must ensure the roster is formatted (8 Front + 8 Back + Reserve) to force reserve placement
+                            // Filter out existing units by type to "compact" them and remove holes
+                            let front = rogueState.playerRoster.filter(u => u && frontLineFactories.includes(u));
+                            let back = rogueState.playerRoster.filter(u => u && !frontLineFactories.includes(u));
+                            
+                            // Pad to 8
+                            while(front.length < 8) front.push(null);
+                            while(back.length < 8) back.push(null);
+                            
+                            // Any extra frontline units (shouldn't be possible if we just checked < 8, but if > 8 existed...)
+                            // If front.length > 8, we have a problem. 
+                            // But we just filtered. If currentFrontCount >= 8, front has >= 8 items.
+                            // We should take first 8 as front, rest as reserve?
+                            // Actually, if we have 8, we add 1 -> 9.
+                            
+                            // Correct logic:
+                            // Take all frontline units.
+                            // Take all backline units.
+                            // New unit is frontline.
+                            
+                            // Re-distribute:
+                            // Front = first 8 frontline units.
+                            // Back = first 8 backline units.
+                            // Reserve = remaining frontline + remaining backline + new unit?
+                            // Or just put new unit in reserve?
+                            
+                            // Let's stick to the request: "automatically be placed and reserve".
+                            
+                            // If we have > 8 frontline, the extras are already effectively in reserve or just not placed.
+                            // We want to ensure the new one goes to reserve.
+                            
+                            // If front has 8 items.
+                            // We add pieceFactory to reserve.
+                            
+                            const reserve = [];
+                            // If there were existing reserves? 
+                            // The current logic of "filter all front, filter all back" effectively destroys existing "Reserve" distinction if it wasn't based on type.
+                            // But `rogueState.playerRoster` is just a list.
+                            // If I have 9 pawns. 8 are front, 1 is back/reserve?
+                            // `placeArmy` puts them in rows.
+                            
+                            // Let's assume standard behavior:
+                            // Roster = [8 Front, 8 Back, ...Reserve]
+                            // If formatted, we should preserve it?
+                            
+                            if (rogueState.playerRoster.length >= 16 || rogueState.playerRoster.includes(null)) {
+                                // Already formatted.
+                                // Just push to end (Reserve).
+                                rogueState.playerRoster.push(pieceFactory);
+                            } else {
+                                // Not formatted. Format it now.
+                                // Use the same logic as above.
+                                let f = rogueState.playerRoster.filter(u => u && frontLineFactories.includes(u));
+                                let b = rogueState.playerRoster.filter(u => u && !frontLineFactories.includes(u));
+                                
+                                // Slice to ensure max 8 in main slots
+                                const safeFront = f.slice(0, 8);
+                                const safeBack = b.slice(0, 8);
+                                
+                                const overflowFront = f.slice(8);
+                                const overflowBack = b.slice(8);
+                                
+                                while(safeFront.length < 8) safeFront.push(null);
+                                while(safeBack.length < 8) safeBack.push(null);
+                                
+                                const newReserve = [...overflowFront, ...overflowBack, pieceFactory];
+                                
+                                rogueState.playerRoster = [...safeFront, ...safeBack, ...newReserve];
+                            }
+
+                            rogueState.pendingReorder = true;
+                            
+                            const pieceName = window.pieceDescriptions[pieceFactory].name;
+                            console.log(window.pieceDescriptions)
+                            winText = `Won Unit: ${pieceName} (Placed in Reserve)`;
+                            
+                        } else {
+                            rogueState.playerRoster.push(pieceFactory);
+                            
+                            // Show what piece was won
+                            const pieceName = window.pieceDescriptions[pieceFactory].name;
+                            winText = `Won Unit: ${pieceName}`;
+                        }
                     } else {
                         winText = "Won a new unit!";
                     }
@@ -1766,7 +2096,17 @@ function checkGameOver(state) {
             
             setTimeout(() => {
                 const modal = document.getElementById('gameOverDialog');
-                modal.showModal();
+                if (modal) {
+                    const gameOverText = modal.querySelector('p');
+                    if (gameOverText) {
+                        if (state.message === "Starvation!") {
+                            gameOverText.innerText = "Your food is over";
+                        } else {
+                            gameOverText.innerText = "Your army has fallen.";
+                        }
+                    }
+                    modal.showModal();
+                }
                 if (overlay) {
                      // Ensure overlay stays but is behind modal
                      overlay.style.zIndex = '900'; // Keep it high but below modal if possible
@@ -1888,7 +2228,9 @@ function triggerAI(color) {
         AIMove(move.pieceCounter, move.xClicked, move.yClicked, 'black');
         
         // Save progress after AI move
-        saveProgress();
+        if (!hotseatGame.state.won) {
+            saveProgress();
+        }
         
         // Update Turn Display
         const turnDisplay = document.getElementById('turn');
@@ -1973,6 +2315,9 @@ function animate(secretState){
     } else if (rogueState.boardShape === 'Fountain') {
         // Watery blue gradient for fountain theme
         document.body.style.background = 'radial-gradient(circle, #4fc3f7 0%, #01579b 100%)';
+    } else if (rogueState.boardShape === 'Desert') {
+        // Sandy gradient for desert theme
+        document.body.style.background = 'radial-gradient(circle, #f4a460 0%, #8b4513 100%)';
     } else {
         document.body.style.background = backgroundColor; // from variables.js
     }
@@ -2000,6 +2345,9 @@ function animate(secretState){
         } else if (rogueState.boardShape === 'Fountain') {
             currentWhiteColor = '#b3e5fc'; // Light Blue
             currentBlackColor = '#0288d1'; // Dark Blue
+        } else if (rogueState.boardShape === 'Desert') {
+            currentWhiteColor = '#ffdead'; // NavajoWhite
+            currentBlackColor = '#cd853f'; // Peru
         }
         
         // Simplified drawing
@@ -2117,4 +2465,79 @@ function animate(secretState){
         // Always use same color for consistency, or ensure same style
         turnText.style.color = state.turn === 'white' ? "var(--selected)" : "#ff6b6b";
     }
+}
+
+// --- Notification Helpers ---
+
+function showNotification(message, type = 'info') {
+    // For errors and important alerts, use the modal dialog
+    // This ensures visibility even over other modals (like the army reorder screen)
+    if (type === 'error' || type === 'alert') {
+        const dialog = document.getElementById('alertDialog');
+        const msg = document.getElementById('alertMessage');
+        const title = document.getElementById('alertTitle');
+        
+        if (dialog && msg) {
+            msg.innerText = message;
+            if(title) {
+                // Set title based on type or context
+                title.innerText = type === 'error' ? 'Warning' : 'Notice';
+                // Style title for error
+                title.style.color = type === 'error' ? 'var(--threat)' : 'var(--piece-black)';
+                title.style.borderBottomColor = type === 'error' ? 'var(--threat)' : 'var(--board-dark)';
+            }
+            dialog.showModal();
+            return;
+        }
+    }
+
+    // Toast Notification (for success/info)
+    const container = document.getElementById('notificationContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'notification-toast';
+    if (type === 'error') toast.classList.add('error');
+    if (type === 'success') toast.classList.add('success');
+    
+    // Icon based on type
+    let icon = '📜';
+    if (type === 'error') icon = '⚠️';
+    if (type === 'success') icon = '✅';
+
+    toast.innerHTML = `<div style="font-size: 24px;">${icon}</div><div>${message}</div>`;
+    
+    container.appendChild(toast);
+
+    // Remove after 3 seconds
+    setTimeout(() => {
+        toast.style.animation = 'slideOut 0.5s ease-in forwards';
+        setTimeout(() => {
+            if(toast.parentNode) toast.parentNode.removeChild(toast);
+        }, 500);
+    }, 3000);
+}
+
+function showConfirmation(message, onYes) {
+    const dialog = document.getElementById('confirmationDialog');
+    const title = document.getElementById('confirmTitle');
+    const msg = document.getElementById('confirmMessage');
+    const btnYes = document.getElementById('btnConfirmYes');
+    const btnNo = document.getElementById('btnConfirmNo');
+
+    if (!dialog || !title || !msg || !btnYes) return;
+
+    title.innerText = "Confirm Action"; // Default title
+    msg.innerText = message;
+
+    // Remove old listeners to prevent stacking
+    const newYes = btnYes.cloneNode(true);
+    btnYes.parentNode.replaceChild(newYes, btnYes);
+    
+    newYes.onclick = () => {
+        dialog.close();
+        if (onYes) onYes();
+    };
+    
+    dialog.showModal();
 }
