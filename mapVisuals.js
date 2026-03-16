@@ -312,13 +312,51 @@ function showMapModal() {
                     contentHtml += `<div class="map-cell-icon" style="position:absolute; top:8px; right:8px; width:60px; height:60px; display:flex; align-items:center; justify-content:center; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6)); z-index:10; font-size:30px;">${icon}</div>`;
                 }
                 
+                // Rewards Display
+                let rewardsHtml = '';
+                if (!node.cleared && node.rewards && node.board !== 'Market') {
+                     const r = node.rewards;
+                     let parts = [];
+                     if (r.gold > 0) parts.push(`<span title="Gold" style="display:flex; align-items:center;">💰${r.gold}</span>`);
+                     if (r.food > 0) parts.push(`<span title="Food" style="display:flex; align-items:center;">🍎${r.food}</span>`);
+                     if (r.pieces && r.pieces.length > 0) {
+                         // Check for specific piece
+                         if (r.specificPiece && typeof window[r.specificPiece] === 'function') {
+                             // Create temp piece to get icon
+                             try {
+                                 const p = window[r.specificPiece]('white', 0, 0);
+                                 const iconUrl = `/static/${p.icon}`;
+                                 
+                                 parts.push(`
+                                    <span class="reward-unit-icon" data-factory="${r.specificPiece}" title="Unit Reward: ${p.name || 'Unit'}" style="cursor:help; display:inline-flex; align-items:center; background: rgba(255,255,255,0.2); border-radius: 4px; padding: 2px;">
+                                        <img src="${iconUrl}" style="width:24px; height:24px; margin-right:2px; vertical-align:middle; filter: drop-shadow(1px 1px 2px black);">
+                                        <span style="font-size:12px; background:#222; color:#ffd700; border:1px solid #ffd700; border-radius:50%; width:16px; height:16px; display:inline-flex; align-items:center; justify-content:center; margin-left:2px; font-weight:900;">i</span>
+                                    </span>
+                                 `);
+                             } catch(e) {
+                                 parts.push(`<span title="Units">♟️${r.pieces.length}</span>`);
+                             }
+                         } else {
+                             parts.push(`<span title="Units">♟️${r.pieces.length}</span>`);
+                         }
+                     }
+                     
+                     if (parts.length > 0) {
+                         rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);">${parts.join('')}</div>`;
+                     }
+                }
+
                 // Level / Power Indicator (Badge) - Hide if current? Or show?
                 // Maybe hide level if it's the player, or show "YOU"
                 if (isCurrent) {
                      contentHtml += `<div class="map-cell-level" style="visibility:hidden;">YOU</div>`;
                 } else {
                      // Use margin-top: auto to ensure it stays at the bottom even when icon is absolute
-                     contentHtml += `<div class="map-cell-level" style="font-size:14px; font-weight:bold; background:linear-gradient(180deg, #444, #222); color:#ffd700; padding:4px 12px; border-radius:12px; margin-top:auto; border: 1px solid #666; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">Lv ${node.enemyPower || '?'}</div>`;
+                     contentHtml += `
+                     <div style="margin-top:auto; display:flex; flex-direction:column; align-items:center; width:100%; pointer-events:none;">
+                        ${rewardsHtml}
+                        <div class="map-cell-level" style="font-size:14px; font-weight:bold; background:linear-gradient(180deg, #444, #222); color:#ffd700; padding:4px 12px; border-radius:12px; border: 1px solid #666; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">Lv ${node.enemyPower || '?'}</div>
+                     </div>`;
                 }
                 
                 contentHtml += `</div>`;
@@ -326,8 +364,33 @@ function showMapModal() {
                 cell.innerHTML = contentHtml;
                                   
                 grid.appendChild(cell);
+
+                // Click Handler for Cell (Popup)
+                cell.onclick = (e) => {
+                    // Ignore clicks on info buttons
+                    if (e.target.closest('.reward-unit-icon')) return;
+                    
+                    showMapCellPopup(node, grandMap);
+                };
             });
         });
+        
+        // Add click handlers for reward icons (delegation or direct)
+        // Since we are rebuilding the grid, we can just select all .reward-unit-icon
+        setTimeout(() => {
+             const unitIcons = grid.querySelectorAll('.reward-unit-icon');
+             unitIcons.forEach(icon => {
+                 icon.onclick = (e) => {
+                     e.stopPropagation(); // Don't trigger map movement
+                     const factory = icon.getAttribute('data-factory');
+                     if (factory && typeof showPieceDiscoveryModal === 'function') {
+                         showPieceDiscoveryModal(factory);
+                     } else {
+                         console.warn("showPieceDiscoveryModal not found or factory invalid");
+                     }
+                 };
+             });
+        }, 0);
     }
     
     modal.showModal();
@@ -379,6 +442,181 @@ function showMapModal() {
     container.ontouchstart = startDrag;
     container.ontouchend = stopDrag;
     container.ontouchmove = moveDrag;
+}
+
+function showMapCellPopup(node, grandMap) {
+    // Remove existing popup if any
+    const existing = document.getElementById('mapCellPopup');
+    if (existing) existing.remove();
+
+    const popup = document.createElement('dialog');
+    popup.id = 'mapCellPopup';
+    popup.style.cssText = `
+        padding: 20px;
+        border: 2px solid #4e342e;
+        border-radius: 8px;
+        background: #2b2b2b;
+        color: white;
+        box-shadow: 0 0 20px rgba(0,0,0,0.8);
+        text-align: center;
+        min-width: 300px;
+        z-index: 1000;
+    `;
+    
+    // Check if move is valid
+    const dx = Math.abs(node.x - grandMap.currentX);
+    const dy = Math.abs(node.y - grandMap.currentY);
+    const isAdjacent = (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
+    const isCurrent = (dx === 0 && dy === 0);
+    
+    // Title
+    const diffName = node.difficulty ? node.difficulty.name : 'Unknown';
+    const region = node.region || 'Unknown Region';
+    
+    let content = `
+        <h2 style="margin-top:0; color:#ffd700;">${region}</h2>
+        <h3 style="margin:5px 0;">${diffName}</h3>
+        <p>${node.difficulty ? node.difficulty.description : ''}</p>
+        <p><strong>Power Level:</strong> ${node.enemyPower}</p>
+        <div style="margin-top:20px; display:flex; justify-content:center; gap:10px;">
+    `;
+    
+    // Actions
+    if (isCurrent) {
+        content += `<p style="color:#8bc34a;">You are here.</p>`;
+    } else if (node.cleared) {
+        content += `<p style="color:#aaa;">Area Cleared.</p>`;
+    } else {
+        // Attack Button
+        const canAttack = isAdjacent;
+        const btnStyle = `padding: 10px 20px; font-weight:bold; cursor:pointer; border:none; border-radius:4px;`;
+        
+        if (node.board === 'Market') {
+             if (canAttack) {
+                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#ffa000; color:black;">🛒 Enter Market</button>`;
+             } else {
+                 content += `<button disabled style="${btnStyle} background:#555; color:#888; cursor:not-allowed;">🛒 Enter Market (Too Far)</button>`;
+             }
+        } else {
+             if (canAttack) {
+                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#c62828; color:white;">⚔️ Attack</button>`;
+             } else {
+                 content += `<button disabled style="${btnStyle} background:#555; color:#888; cursor:not-allowed;">⚔️ Attack (Too Far)</button>`;
+             }
+        }
+    }
+    
+    // Info Button (Rewards)
+    if (node.board === 'Market') {
+         content += `<button id="popupInfoBtn" style="padding: 10px 20px; font-weight:bold; cursor:pointer; border:none; border-radius:4px; background:#ffa000; color:black;">ℹ️ Market Info</button>`;
+    } else {
+         content += `<button id="popupInfoBtn" style="padding: 10px 20px; font-weight:bold; cursor:pointer; border:none; border-radius:4px; background:#0277bd; color:white;">ℹ️ Rewards Info</button>`;
+    }
+    
+    content += `</div>
+        <div style="margin-top:15px;">
+            <button id="popupCloseBtn" style="padding: 5px 10px; background:none; border:1px solid #666; color:#ccc; border-radius:4px; cursor:pointer;">Close</button>
+        </div>
+    `;
+    
+    popup.innerHTML = content;
+    document.body.appendChild(popup);
+    popup.showModal();
+    
+    // Handlers
+    const closeBtn = document.getElementById('popupCloseBtn');
+    closeBtn.onclick = () => popup.close();
+    
+    const attackBtn = document.getElementById('popupAttackBtn');
+    if (attackBtn) {
+        attackBtn.onclick = () => {
+            popup.close();
+            // Trigger Movement/Attack logic
+            if (typeof startLevel !== 'undefined' && typeof rogueState !== 'undefined') {
+                const option = {
+                    type: `${diffName}`,
+                    node: node,
+                    description: node.difficulty.description,
+                    rewardCap: node.rewardCap,
+                    enemyValue: node.enemyPower,
+                    boardShape: node.board || 'Standard',
+                    army: node.army,
+                    difficultyIndex: 0
+                };
+                
+                 if (node.board === 'Market') {
+                     option.rewardType = 'none';
+                 } else {
+                     const rosterFull = rogueState.playerRoster.length >= 24;
+                     if (node.rewards) {
+                         const r = node.rewards;
+                         const hasPiece = r.pieces && r.pieces.length > 0;
+                         if (hasPiece && !rosterFull) {
+                              option.rewardType = 'piece';
+                              option.rewardContent = r.specificPiece;
+                              if (typeof getPieceValue === 'function') {
+                                  option.rewardValue = getPieceValue(r.specificPiece);
+                              }
+                              option.foodReward = r.food;
+                         } else {
+                              option.rewardType = 'gold';
+                              option.rewardContent = r.gold;
+                              option.foodReward = r.food;
+                         }
+                     } else {
+                         option.rewardType = 'gold';
+                         option.rewardContent = node.rewardCap;
+                     }
+                 }
+                
+                const mapDialog = document.getElementById('mapDialog');
+                if(mapDialog) mapDialog.close();
+                
+                if(typeof saveProgress === 'function') saveProgress();
+                
+                grandMap.moveTo(node.x, node.y);
+                
+                startLevel(rogueState.level + 1, option);
+            } else {
+                alert("Cannot start battle: Game state not found.");
+            }
+        };
+    }
+    
+    const infoBtn = document.getElementById('popupInfoBtn');
+    infoBtn.onclick = () => {
+        let rewardsText = `<p>No rewards info available.</p>`;
+        
+        if (node.board === 'Market') {
+            rewardsText = `
+                <div style="text-align:left; background:#333; padding:10px; border-radius:4px;">
+                    <p>This is a <strong>Mercenary Market</strong>.</p>
+                    <p>You can spend your Gold 💰 here to hire new units for your army.</p>
+                    <p>It is a safe zone (no battle).</p>
+                </div>
+            `;
+        } else if (node.rewards) {
+            const r = node.rewards;
+            rewardsText = `
+                <div style="text-align:left; background:#333; padding:10px; border-radius:4px;">
+                    <p><strong>Gold:</strong> ${r.gold} 💰</p>
+                    <p><strong>Food:</strong> ${r.food} 🍎</p>
+            `;
+            
+            if (r.pieces && r.pieces.length > 0) {
+                 rewardsText += `<p><strong>Unit:</strong> ${r.specificPiece ? r.specificPiece.replace('Factory','') : 'Unknown'} ♟️</p>`;
+            }
+            rewardsText += `</div>`;
+        }
+        
+        popup.innerHTML = `
+            <h3 style="color:${node.board === 'Market' ? '#ffa000' : '#0277bd'};">${node.board === 'Market' ? 'Market Information' : 'Reward Information'}</h3>
+            ${rewardsText}
+            <div style="margin-top:15px;">
+                <button onclick="document.getElementById('mapCellPopup').remove()" style="padding: 5px 10px; cursor:pointer;">Close</button>
+            </div>
+        `;
+    };
 }
 
 // Make sure it is globally available

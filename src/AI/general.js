@@ -55,24 +55,6 @@
          // Using for loop for speed
          for(let movesCounter = 0; movesCounter < allowedMoves.length; movesCounter++){
              const newPieces = new Array(state.pieces.length);
-             // Optimization: Use a shared prototype object or reusable structure to avoid allocations?
-             // No, that's too complex.
-             // But we can optimize the inner loop by checking if moves/weakMoves even exist before entering blocks.
-             // And we can optimize the deep copy by only doing it if we detect mutable properties? No, unsafe.
-             
-             // NEW OPTIMIZATION:
-             // Only deeply clone the piece that is MOVING (index 'i').
-             // All other pieces: Shallow clone initially.
-             // BUT, we must be careful: if 'playerMove' modifies another piece (e.g. capture), we must ensure that modification doesn't leak.
-             // JS objects are references. If we shallow copy piece B, and playerMove modifies piece B's properties (like x, y), 
-             // it modifies the object in 'newPieces', which is fine because 'newPieces' is a new array and 'newP' is a shallow copy.
-             // The DANGER is if it modifies NESTED objects like 'moves' array of piece B.
-             // Does 'playerMove' modify other pieces' moves arrays?
-             // Yes, 'Bugs' race and 'Machines' (Cyborg) might.
-             // However, that is RARE.
-             // We can optimize for the 90% case: Deep copy ONLY the moving piece, and shallow copy the rest.
-             // IF a piece is interacting (captured or special effect), we might need to deep copy it then.
-             // But 'playerMove' logic is complex.
              
              // Safer Optimization:
              // Clone the array structure, but ONLY clone the move objects if they are NOT the standard prototype moves.
@@ -83,8 +65,6 @@
              for(let k=0; k<pLen; k++){
                 let p = state.pieces[k];
                 // Shallow copy piece object
-                // Using Object.assign or spread is similar speed, spread is cleaner.
-                // Manual property copy is fastest but fragile.
                 let newP = {
                     icon: p.icon,
                     moves: p.moves, // Reference for now
@@ -108,8 +88,6 @@
                     afterEnemyPlayerMove: p.afterEnemyPlayerMove
                 };
 
-                // Deep copy moves/weakMoves arrays to prevent mutation leaks
-                // This is the most expensive part but necessary for correctness with complex pieces
                 if(p.moves){
                     const mLen = p.moves.length;
                     const newMoves = new Array(mLen);
@@ -129,6 +107,7 @@
                     }
                     newP.weakMoves = newWeakMoves;
                 }
+                
                 newPieces[k] = newP;
              }
 
@@ -143,9 +122,119 @@
          }
          piecesCounter++;
      }
+     
      if(movesAndPieces.length  === 0 && filters && filters.length > 0){
         return generateMovesFromPieces(state,color)
      }
+     
+     return movesAndPieces
+ }
+
+ function generateMovesFromPiecesAlphaBeta(state,color, filters,enemy){
+    if(!filters){
+        filters = [];
+    }
+     const movesAndPieces = []
+     
+     // Removed redundant getColorPieces call since we iterate directly now
+     let piecesCounter = 0;
+     for(let i = 0; i < state.pieces.length; i++){
+         let piece = state.pieces[i];
+         if(piece.color !== color) continue;
+
+         lightBoardFE(piece,{pieces:state.pieces, board:state.board,turn:state.turn},'allowedMove',undefined,true)
+         let allowedMoves = state.board.filter((square) => {
+             return square.allowedMove;
+         })
+         
+         // Apply filters early if possible
+         if (filters.length > 0) {
+             for (let f = 0; f < filters.length; f++) {
+                 let options = filters[f].options || {};
+                 options.allowedMoves = allowedMoves;
+                 options.piece = piece;
+                 options.color = color;
+                 options.state = state;
+                 allowedMoves = filters[f].method(options);
+             }
+         }
+         
+         // Using for loop for speed
+         for(let movesCounter = 0; movesCounter < allowedMoves.length; movesCounter++){
+             const newPieces = new Array(state.pieces.length);
+             
+             // Safer Optimization:
+             // Clone the array structure, but ONLY clone the move objects if they are NOT the standard prototype moves.
+             // Most moves are static. But here they are on the instance.
+             
+             // Let's stick to the array loop but optimize the property access.
+             const pLen = state.pieces.length;
+             for(let k=0; k<pLen; k++){
+                let p = state.pieces[k];
+                // Shallow copy piece object
+                let newP = {
+                    icon: p.icon,
+                    moves: p.moves, // Reference for now
+                    weakMoves: p.weakMoves, // Reference for now
+                    x: p.x,
+                    y: p.y,
+                    color: p.color,
+                    value: p.value,
+                    posValue: p.posValue,
+                    // Copy other props if they exist
+                    moved: p.moved,
+                    enPassantMove: p.enPassantMove,
+                    direction: p.direction,
+                    // Copy methods (references)
+                    conditionalMoves: p.conditionalMoves,
+                    afterPieceMove: p.afterPieceMove,
+                    afterThisPieceTaken: p.afterThisPieceTaken,
+                    friendlyPieceInteraction: p.friendlyPieceInteraction,
+                    afterEnemyPieceTaken: p.afterEnemyPieceTaken,
+                    afterPlayerMove: p.afterPlayerMove,
+                    afterEnemyPlayerMove: p.afterEnemyPlayerMove
+                };
+
+                // Deep copy moves/weakMoves arrays to prevent mutation leaks ONLY for the piece moving
+                // because playerMove might modify its moves (like pawns).
+                // Or if it's interacting with another piece, we might need it.
+                // Doing this for all pieces is too slow.
+                if (k === i) {
+                    if(p.moves){
+                        const mLen = p.moves.length;
+                        const newMoves = new Array(mLen);
+                        for(let m=0; m<mLen; m++){
+                            const move = p.moves[m];
+                            newMoves[m] = (move && typeof move === 'object') ? {...move} : move;
+                        }
+                        newP.moves = newMoves;
+                    }
+                    
+                    if(p.weakMoves){
+                        const wLen = p.weakMoves.length;
+                        const newWeakMoves = new Array(wLen);
+                        for(let m=0; m<wLen; m++){
+                            const move = p.weakMoves[m];
+                            newWeakMoves[m] = (move && typeof move === 'object') ? {...move} : move;
+                        }
+                        newP.weakMoves = newWeakMoves;
+                    }
+                }
+                newPieces[k] = newP;
+             }
+
+             let newPiece = newPieces[i];
+             const square = allowedMoves[movesCounter]
+             
+             let tempState = {board:state.board, pieces:newPieces, pieceSelected:newPiece , turn:color};
+             if(playerMove({x:square.x, y:square.y},tempState,true, undefined, 'allowedMove')){
+                 let won = tempState.won;
+                 movesAndPieces.push({pieceCounter:piecesCounter,pieces:newPieces, xClicked:square.x, yClicked:square.y, parent:state.id, id:crypto.randomUUID(), won:won})
+             }
+         }
+         piecesCounter++;
+     }
+     // If we applied filters early, we don't need this fallback check which calls it again without filters
      return movesAndPieces
  }
 

@@ -241,8 +241,8 @@ const grandMap = {
         
         // Gold based on enemy power/difficulty
         // Base: 10, plus up to 50% variance
-        const goldBase = (difficultyProfile.enemyValue || 1) * 5 + 10;
-        rewards.gold = Math.floor(goldBase + getDeterministicRandom(6) * goldBase * 0.5);
+        const goldBase = (difficultyProfile.enemyValue || 1);
+        rewards.gold = goldBase
         
         // Food - higher chance in Woods/Fountain/Market
         // Woods/Fountain: 60% chance. Market: 90% chance. Others: 20%
@@ -261,6 +261,35 @@ const grandMap = {
         
         if (getDeterministicRandom(9) < pieceChance) {
              rewards.pieces.push("Unit");
+             
+             // Pre-generate the specific unit to ensure consistency
+             const maxPieceValue = difficultyProfile.enemyValue / 2;
+             const sourceList = (typeof winnablePieceFactories !== 'undefined' && winnablePieceFactories.length > 0) 
+                               ? winnablePieceFactories 
+                               : (typeof availablePieceFactories !== 'undefined' ? availablePieceFactories : ['pawnFactory']);
+                               
+             // Helper to get piece value if not available globally yet (fallback)
+             const getVal = (f) => {
+                 if (typeof getPieceValue === 'function') return getPieceValue(f);
+                 return 5; // Default low value
+             };
+
+             const eligiblePieces = sourceList.filter(f => {
+                 const v = getVal(f);
+                 return v <= maxPieceValue && v >= Math.max(0, maxPieceValue - 5);
+             });
+             
+             let selectedFactory = 'pawnFactory';
+             if (eligiblePieces.length > 0) {
+                 const randIndex = Math.floor(getDeterministicRandom(10) * eligiblePieces.length);
+                 selectedFactory = eligiblePieces[randIndex];
+             } else if (sourceList.length > 0) {
+                 // Fallback to any random low value piece
+                 const randIndex = Math.floor(getDeterministicRandom(11) * sourceList.length);
+                 selectedFactory = sourceList[randIndex];
+             }
+             
+             rewards.specificPiece = selectedFactory;
         }
         
         node.rewards = rewards;

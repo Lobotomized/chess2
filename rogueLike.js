@@ -18,7 +18,7 @@ const pomotersFactories = [
 ]
 
 const medievalFactories = [
-    'horseFactory', 'pigFactory',"clowFactory", "ghostFactory", "ricarFactory"
+    'horseFactory', 'pigFactory',"clownFactory", "ghostFactory", "ricarFactory"
 ]
 
 const insectFactories = [
@@ -876,6 +876,55 @@ function generateRewardOptions() {
         // Randomly assign piece rewards
         const rosterFull = rogueState.playerRoster.length >= 24; // 8 Front + 8 Back + 8 Reserve
         options.forEach(opt => {
+            
+            // Priority: Use Node Rewards if available (Consistency with Grand Map)
+            if (opt.node && opt.node.rewards) {
+                 const r = opt.node.rewards;
+                 const hasPiece = r.pieces && r.pieces.length > 0;
+                 
+                 if (hasPiece && !rosterFull) {
+                      opt.rewardType = 'piece';
+                      
+                      if (r.specificPiece) {
+                          opt.rewardContent = r.specificPiece;
+                      } else {
+                          // Generate and Save specific piece to node so it stays consistent
+                          const maxPieceValue = opt.enemyValue / 2;
+                          const sourceList = (typeof winnablePieceFactories !== 'undefined' && winnablePieceFactories.length > 0) 
+                                           ? winnablePieceFactories 
+                                           : availablePieceFactories;
+                                           
+                          const eligiblePieces = sourceList.filter(f => {
+                                return getPieceValue(f) <= maxPieceValue && getPieceValue(f) >= maxPieceValue - 3;
+                          });
+                          
+                          if (eligiblePieces.length > 0) {
+                               const randomPiece = eligiblePieces[Math.floor(Math.random() * eligiblePieces.length)];
+                               opt.rewardContent = randomPiece;
+                               r.specificPiece = randomPiece; // Save to node
+                          } else {
+                               // Fallback if no eligible piece
+                               opt.rewardType = 'gold';
+                               opt.rewardContent = r.gold;
+                          }
+                      }
+                      
+                      if (opt.rewardType === 'piece') {
+                           opt.foodReward = r.food;
+                           opt.rewardValue = getPieceValue(opt.rewardContent);
+                      } else {
+                           opt.foodReward = r.food;
+                      }
+                      
+                 } else {
+                      // Gold Reward
+                      opt.rewardType = 'gold';
+                      opt.rewardContent = r.gold;
+                      opt.foodReward = r.food;
+                 }
+                 return; // Done with this option
+            }
+
             // 30% chance for a piece reward
             if (Math.random() < 0.3 && !rosterFull) {
                 const maxPieceValue = opt.enemyValue / 2;
@@ -1025,6 +1074,7 @@ function startLevel(level, difficultyOption) {
         
         // Try to find the difficulty in the list
         const found = window.difficulties ? window.difficulties.find(d => d.name === difficultyOption) : null;
+        console.log(found)
         if (found) {
             enemyValue = found.enemyValue;
             rewardCap = found.rewardCap;
@@ -1642,9 +1692,18 @@ function showShopModal(restore = false) {
     if (restore && rogueState.shopOptions && rogueState.shopOptions.length > 0) {
         shopItems = rogueState.shopOptions;
     } else {
+        // Determine available factories based on region
+        let factories = marketPieceFactories; // Default fallback
+        if (typeof grandMap !== 'undefined' && grandMap.map && grandMap.map[grandMap.currentY] && grandMap.map[grandMap.currentY][grandMap.currentX]) {
+             const node = grandMap.map[grandMap.currentY][grandMap.currentX];
+             if (node.region && regionFactories[node.region]) {
+                 factories = regionFactories[node.region];
+             }
+        }
+
         // Generate 6 random units to buy (as requested)
         for(let i=0; i<6; i++) {
-            const randomFactory = marketPieceFactories[Math.floor(Math.random() * marketPieceFactories.length)];
+            const randomFactory = factories[Math.floor(Math.random() * factories.length)];
             const val = getPieceValue(randomFactory);
             const cost =  Math.floor(val * 5);
             shopItems.push({factory: randomFactory, cost: cost, value: val, bought: false});

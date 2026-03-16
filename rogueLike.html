@@ -570,7 +570,7 @@
             <div id="mapGrid" class="map-grid"></div>
         </div>
         <div style="margin-top: 10px;">
-            <button onclick="document.getElementById('mapDialog').close()">Close Map</button>
+            <button id="mapReorderBtn" onclick="showReorderModal(rogueState.playerRoster)">Reorder Army</button>
         </div>
     </dialog>
 
@@ -588,7 +588,7 @@
         <img src="/static/youWin.jpg" alt="You Win" style="max-width: 100%; height: auto; margin-bottom: 15px; border-radius: 8px;">
         <p>Your army is victorious.</p>
         <p id="goldEarnedText" style="font-weight:bold; color:#e5b53e; font-size:24px; text-shadow: 1px 1px 0 #000;"></p>
-        <button onclick="document.getElementById('gameWonDialog').close(); showRewardModal();" style="padding: 10px 20px; cursor: pointer;">Return to Map</button>
+        <button onclick="document.getElementById('gameWonDialog').close(); showMapModal();" style="padding: 10px 20px; cursor: pointer;">Return to Map</button>
     </dialog>
 
     <!-- Shop Modal -->
@@ -597,7 +597,7 @@
         <p>Current 🪙: <span id="playerGold" style="color:#e5b53e; font-weight:bold;">0</span></p>
         <div id="shopOptions" class="army-choice"></div>
         <div style="margin-top:20px;">
-            <button onclick="document.getElementById('shopDialog').close(); showRewardModal();">Next Battle</button>
+            <button onclick="document.getElementById('shopDialog').close(); showMapModal();">Return to Map</button>
         </div>
     </dialog>
 
