@@ -18,10 +18,24 @@ importScripts('/src/AI/general.js')
 importScripts('/src/AI/magnifiers.js')
 importScripts('/src/AI/filters.js')
 
+importScripts('/wasm/webworker_interface.js')
 
-self.addEventListener("message", function(e) {
+self.addEventListener("message", async function(e) {
+    
     let obj = JSONfn.parse(e.data)
     if(!obj.state.won){
+            
+            // Allow bypassing to JS AI using a flag or if Wasm isn't ready
+            if (obj.useWasm) {
+                if (typeof wasmReadyPromise !== "undefined") {
+                    await wasmReadyPromise;
+                }
+                let wasmMove = callWasmAI(obj);
+                if (wasmMove) {
+                    postMessage(JSONfn.stringify(wasmMove));
+                    return;
+                }
+            }
 
             let move;
             let methods = {
