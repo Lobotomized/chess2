@@ -122,9 +122,12 @@ function callWasmAI(obj) {
         for (let i = 0; i < state.pieces.length; i++) {
             let p = state.pieces[i];
             let iconId = getIconId(p.icon);
-            let pColorId = p.color === "white" ? 0 : 1;
-            let pVal = p.value || 3.0;
-            wasmExports.aiAddPiece(iconId, pColorId, p.x, p.y, pVal, p.moved ? 1 : 0);
+            // Only add pieces that are strictly white or black to align with JS indexing
+            if (p.color === "white" || p.color === "black") {
+                let pColorId = p.color === "white" ? 0 : 1;
+                let pVal = p.value || 3.0;
+                wasmExports.aiAddPiece(iconId, pColorId, p.x, p.y, pVal, p.moved ? 1 : 0);
+            }
         }
     }
 
@@ -132,12 +135,14 @@ function callWasmAI(obj) {
     let depth = 2;
     if (AIPower === 104) depth = state.pieces.length < 8 ? 4 : 3;
     else if (AIPower === 106) depth = state.pieces.length < 8 ? 5 : (state.pieces.length < 16 ? 4 : 3);
+    else if (AIPower === 107) depth = 4//state.pieces.length < 8 ? 6 : (state.pieces.length < 16 ? 5 : 3);
     else if (AIPower >= 5) depth = 3;
 
     // Call Wasm minimax
     console.time('WasmAI');
     // console.log(`Calling aiGetBestMove with depth ${depth} and colorId ${colorId}`);
     let result = wasmExports.aiGetBestMove(depth, colorId);
+    console.log(result, '  result')
     // console.log("aiGetBestMove returned:", result);
     console.timeEnd('WasmAI');
 

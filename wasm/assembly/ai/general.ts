@@ -102,7 +102,17 @@ export function generateMovesFromPiecesAlphaBeta(state: State, color: string, fi
             let square = allowedMoves[movesCounter];
             
             let tempState = new State();
-            tempState.board = state.board;
+            // Need a new board so flags aren't shared
+            let newBoard: Square[] = [];
+            for (let b = 0; b < state.board.length; b++) {
+                let sq = state.board[b];
+                let newSq = new Square(sq.x, sq.y);
+                newSq.light = sq.light;
+                newSq.special = sq.special;
+                newSq.allowedMove = sq.allowedMove;
+                newBoard.push(newSq);
+            }
+            tempState.board = newBoard;
             tempState.pieces = newPieces;
             tempState.pieceSelected = newPiece;
             tempState.turn = color;

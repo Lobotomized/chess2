@@ -62,7 +62,7 @@ function northernKing(color, x, y, options){
                     this.value = 800 + 1*this.y;
                 }
             }
-            else if(this.color === 'white' && this.y === 0){
+            else if(this.color === 'white'){
                 if(this.y === 0){
                     this.value = 2000;
                     state.won = 'white';

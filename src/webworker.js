@@ -260,6 +260,41 @@ self.addEventListener("message", async function(e) {
                 )
                 console.timeEnd('106')
             }
+            else if(obj.AIPower === 107){
+                console.time('107')
+                
+                // Ensure WASM is ready
+                if (typeof wasmReadyPromise !== "undefined") {
+                    await wasmReadyPromise;
+                }
+                
+                let wasmMove = callWasmAI(obj);
+                console.log(wasmMove, '  the move?! ', getColorPieces(obj.state.pieces, obj.state.turn))
+               
+                if (wasmMove) {
+                    move = wasmMove;
+                } else {
+                    console.warn("WASM AI failed for difficulty 107, falling back to JS (diff 106)");
+                    // Fallback to JS AI (same logic as 106)
+                    let character = methods[obj.AICharacter];
+                    if(!obj.AICharacter){
+                        character = rogueLikeCharacter;
+                    }
+                    let depth = 3;
+                     if(obj.state.pieces.length < 16  && obj.state.pieces.length > 8){
+                        depth = 4;
+                    }
+                    else if(obj.state.pieces.length < 8){
+                        depth = 5;
+                    }
+                    move = minimaxAlphaBeta(obj.state,obj.color,depth, obj.removedTurns,
+                        character(0),
+                        [
+                        ]
+                    )
+                }
+                console.timeEnd('107')
+            }
             move.removedTurns = obj.removedTurns;
             postMessage(JSONfn.stringify(move));
     }

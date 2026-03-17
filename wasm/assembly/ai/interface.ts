@@ -114,9 +114,9 @@ export function aiGetBestMove(depth: i32, colorId: i32): i32 {
     
     let bestMove = minimaxAlphaBeta(aiState, color, depth, magnifiers, filters);
     if (bestMove == null) {
-        // console.log("bestMove is null");
+        console.log("bestMove is null");
     } else {
-        // console.log("bestMove found: pc=" + bestMove.pieceCounter.toString() + " x=" + bestMove.xClicked.toString() + " y=" + bestMove.yClicked.toString());
+        console.log("bestMove found: pc=" + bestMove.pieceCounter.toString() + " x=" + bestMove.xClicked.toString() + " y=" + bestMove.yClicked.toString());
     }
     if (bestMove != null) {
         // Pack the result into i32: 
