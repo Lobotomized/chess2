@@ -933,3 +933,126 @@ class PnsNode {
         return curr;
     }
 }
+
+function bestFirstSearch(state, maximizer, depth, removedTurns, magnifiers, filters) {
+    const maxNodes = depth * 1000; // Allow more nodes than PNS since expansion is lighter
+    
+    // Priority queue for open nodes
+    let openList = [];
+    
+    // Initial expansion
+    let root = {
+        state: state,
+        move: null,
+        score: evaluateBoardUltraFast(maximizer, state.pieces, state.board, magnifiers),
+        depth: 0,
+        id: crypto.randomUUID()
+    };
+    
+    // Generate initial moves
+    let firstMoves = generateMovesFromPiecesAlphaBeta(state, maximizer, filters);
+    
+    if (firstMoves.length === 0) return undefined;
+    
+    // Populate open list with depth 1 moves
+    for (let m of firstMoves) {
+        let score = 0;
+        if (m.won === maximizer) score = 999999;
+        else if (m.won) score = -999999;
+        else {
+            // Heuristic: Material + positional + random noise to break ties
+            score = evaluateBoardUltraFast(maximizer, m.pieces, state.board, magnifiers);
+        }
+        
+        let node = {
+            state: {
+                pieces: m.pieces,
+                board: state.board,
+                turn: getEnemy(maximizer),
+                won: m.won
+            },
+            move: m, // Store the root move that led here
+            rootMove: m, // Keep track of the first move
+            score: score,
+            depth: 1
+        };
+        openList.push(node);
+    }
+    
+    // Sort descending (higher score is better for maximizer)
+    openList.sort((a, b) => b.score - a.score);
+    
+    let nodesCount = firstMoves.length;
+    let bestMove = openList[0].rootMove;
+    let bestScore = openList[0].score;
+    
+    while (nodesCount < maxNodes && openList.length > 0) {
+        // Pop best node
+        let current = openList.shift();
+        
+        // Update best found so far
+        if (current.score > bestScore) {
+            bestScore = current.score;
+            bestMove = current.rootMove;
+        }
+        
+        // If winning node, return immediately
+        if (current.score > 900000) return current.rootMove;
+        
+        // If max depth reached, continue to next node
+        if (current.depth >= depth + 2) continue; // Allow slight extension
+        
+        let turn = current.state.turn;
+        let nextMoves = generateMovesFromPiecesAlphaBeta(current.state, turn, filters);
+        
+        if (nextMoves.length === 0) {
+            // If no moves and it's enemy turn -> we win (mate)
+            // If no moves and it's our turn -> we lose (mate)
+            // But BFS is usually greedy, so we just evaluate terminal state
+            if (turn !== maximizer) {
+                // Enemy cannot move -> Checkmate or Stalemate
+                // For simplicity assuming checkmate is good
+                return current.rootMove;
+            }
+            continue;
+        }
+        
+        for (let m of nextMoves) {
+            let nextState = {
+                pieces: m.pieces,
+                board: state.board,
+                turn: getEnemy(turn),
+                won: m.won
+            };
+            
+            let score = evaluateBoardUltraFast(maximizer, m.pieces, state.board, magnifiers);
+            
+            // Penalize score by depth to prefer faster wins / delayed losses
+            // score -= current.depth * 0.1;
+            
+            let child = {
+                state: nextState,
+                move: m,
+                rootMove: current.rootMove,
+                score: score,
+                depth: current.depth + 1
+            };
+            
+            // Insert into sorted list (binary search insert would be faster, but simple push+sort for now)
+            // Optimization: Only add if promising enough or list not full
+            openList.push(child);
+            nodesCount++;
+        }
+        
+        // Re-sort periodically or use a Heap (simulated here by sorting)
+        // Optimization: Sort only every N expansions or use binary insert
+        openList.sort((a, b) => b.score - a.score);
+        
+        // Pruning: Keep only top N nodes to prevent memory explosion
+        if (openList.length > 5000) {
+            openList.length = 5000;
+        }
+    }
+    
+    return bestMove;
+}

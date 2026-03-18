@@ -314,15 +314,156 @@ self.addEventListener("message", async function(e) {
 
                         let depth = charConfig.depth || 2;
                         let algorithm = charConfig.algorithm || 'minimaxAlphaBeta';
+                        
+                        let phases = charConfig.phases;
+                        let numPieces = obj.state.pieces.length;
+                        
+                        let currentDepth = depth;
+                        let currentMags = mags;
+                        let currentFilters = filters;
+                        
+                        // Handle legacy
+                        if (!phases && charConfig.altAlgorithm) {
+                            phases = [{threshold: charConfig.altPieceThreshold || 10, algorithm: charConfig.altAlgorithm}];
+                        }
+                        
+                        if (phases && phases.length > 0) {
+                            // Sorted descending by default
+                            for(let i=0; i<phases.length; i++) {
+                                if (numPieces <= phases[i].threshold) {
+                                    if (phases[i].algorithm) algorithm = phases[i].algorithm;
+                                    if (phases[i].depth) currentDepth = phases[i].depth;
+                                    
+                                    // Override magnifiers if specified in phase
+                                    // If phase has magnifier weights, we rebuild the whole array.
+                                    // If not, we keep the previous/base magnifiers.
+                                    if (phases[i].posValueWeight !== undefined || 
+                                        phases[i].pieceValueWeight !== undefined ||
+                                        phases[i].kingTropismWeight !== undefined || 
+                                        phases[i].defendedWeight !== undefined || 
+                                        phases[i].kingVulnAttackWeight !== undefined) {
+                                        
+                                        let pConfig = phases[i];
+                                        let newMags = [];
+                                        
+                                        let pvw = pConfig.posValueWeight;
+                                        if(pvw === undefined) pvw = charConfig.posValueWeight;
+                                        if(pvw !== undefined) newMags.push({ method: evaluationMagnifierMaxOptions, options: { posValue: pvw } });
+                                        
+                                        let pcv = pConfig.pieceValueWeight;
+                                        if(pcv === undefined) pcv = charConfig.pieceValueWeight;
+                                        if(pcv !== undefined) newMags.push({ method: evaluationMagnifierPiece, options: { pieceValue: pcv } });
+                                        
+                                        let ktv = pConfig.kingTropismWeight;
+                                        if(ktv === undefined) ktv = charConfig.kingTropismWeight;
+                                        if(ktv !== undefined) newMags.push({ method: evaluationMagnifierKingTropism, options: { relativeValue: ktv, onlyForEnemy: true, pieceValue: 1 } });
+                                        
+                                        let def = pConfig.defendedWeight;
+                                        if(def === undefined) def = charConfig.defendedWeight;
+                                        if(def !== undefined) newMags.push({ method: evaluationMagnifierPieceDefended, options: { relativeValue: def } });
+                                        
+                                        let kva = pConfig.kingVulnAttackWeight;
+                                        let kvp = pConfig.kingVulnProxWeight;
+                                        if(kva === undefined) kva = charConfig.kingVulnAttackWeight;
+                                        if(kvp === undefined) kvp = charConfig.kingVulnProxWeight;
+                                        if(kva !== undefined) newMags.push({ method: evaluationMagnifierKingVulnerability, options: { attackValue: kva, proximityValue: kvp || 0 } });
+                                        
+                                        currentMags = newMags;
+                                    } else if (phases[i].weights) {
+                                        // Legacy support for the brief period where we used 'weights' object
+                                        let w = phases[i].weights;
+                                        let newMags = [];
+                                        let pvw = w.pos !== undefined ? w.pos : charConfig.posValueWeight;
+                                        let pcv = w.piece !== undefined ? w.piece : charConfig.pieceValueWeight;
+                                        let ktv = w.kingTrop !== undefined ? w.kingTrop : charConfig.kingTropismWeight;
+                                        let def = w.def !== undefined ? w.def : charConfig.defendedWeight;
+                                        let kva = w.vulnAtt !== undefined ? w.vulnAtt : charConfig.kingVulnAttackWeight;
+                                        let kvp = w.vulnProx !== undefined ? w.vulnProx : charConfig.kingVulnProxWeight;
+                                        
+                                        if (pvw !== undefined) newMags.push({ method: evaluationMagnifierMaxOptions, options: { posValue: pvw } });
+                                        if (pcv !== undefined) newMags.push({ method: evaluationMagnifierPiece, options: { pieceValue: pcv } });
+                                        if (ktv !== undefined) newMags.push({ method: evaluationMagnifierKingTropism, options: { relativeValue: ktv, onlyForEnemy: true, pieceValue: 1 } });
+                                        if (def !== undefined) newMags.push({ method: evaluationMagnifierPieceDefended, options: { relativeValue: def } });
+                                        if (kva !== undefined) newMags.push({ method: evaluationMagnifierKingVulnerability, options: { attackValue: kva, proximityValue: kvp || 0 } });
+                                        
+                                        currentMags = newMags;
+                                    }
+                                    
+                                    // Rebuild Filters based on phase overrides
+                                    let p = phases[i];
+                                    if (p.useRemoveAttacked || p.useRemoveNonAttacking || p.useRandomlyRemove || p.useMaxMoves || p.useNthChance || p.useRemoveWellPositioned) {
+                                        let newFilters = [];
+                                        if (p.useRemoveAttacked) {
+                                            let exceptions = [];
+                                            if (p.raRandomException) exceptions.push(randomException);
+                                            if (p.raExceptionPieceValue) exceptions.push(pieceValueMustBeBiggerThanException);
+                                            if (p.raExceptionPieceValueSmaller) exceptions.push(pieceValueMustBeSmallerThanException);
+                                            newFilters.push({ method: removeAttackedMovesFilter, options: { randomException: p.raRandomException || 0.1, minPieceValue: 3, maxPieceValue: 5, exceptions: exceptions } });
+                                        }
+                                        if (p.useRemoveNonAttacking) {
+                                            let exceptions = [];
+                                            if (p.rnaExceptionRandom) exceptions.push(randomException);
+                                            if (p.rnaExceptionPieceValue) exceptions.push(pieceValueMustBeBiggerThanException);
+                                            if (p.rnaExceptionPieceValueSmaller) exceptions.push(pieceValueMustBeSmallerThanException);
+                                            newFilters.push({ method: removeNonAttackingMovesFilter, options: { maxPieceValue: p.rnaMaxPieceValue || 2, minPieceValue: 3, randomException: p.rnaExceptionRandom, exceptions: exceptions } });
+                                        }
+                                        if (p.useRandomlyRemove) {
+                                            let exceptions = [];
+                                            if (p.rrExceptionAttacked) exceptions.push(pieceAttackedException);
+                                            if (p.rrExceptionPieceValueSmaller) exceptions.push(pieceValueMustBeSmallerThanException);
+                                            if (p.rrExceptionRandom) exceptions.push(randomException);
+                                            newFilters.push({ method: randomlyRemove1NthFilter, options: { n: p.rrN || 2, maxPieceValue: 4, randomException: p.rrExceptionRandom, exceptions: exceptions } });
+                                        }
+                                        if (p.useMaxMoves) {
+                                            let exceptions = [];
+                                            if (p.mmExceptionAttacked) exceptions.push(pieceAttackedException);
+                                            newFilters.push({ method: maxNumberOfMovesPerPieceFilter, options: { maximum: p.mmMax || 2, exceptions: exceptions } });
+                                        }
+                                        if (p.useNthChance) {
+                                            let exceptions = [];
+                                            if (p.ncExceptionAttacked) exceptions.push(pieceAttackedException);
+                                            if (p.ncExceptionPieceValue) exceptions.push(pieceValueMustBeBiggerThanException);
+                                            newFilters.push({ method: nthChanceToRemovePieceFilter, options: { n: p.nthChance !== undefined ? p.nthChance : 0.1, minPieceValue: 3, exceptions: exceptions } });
+                                        }
+                                        if (p.useRemoveWellPositioned) {
+                                            let exceptions = [];
+                                            if (p.rwpExceptionAttacked) exceptions.push(pieceAttackedException);
+                                            newFilters.push({ method: removeWellPositionedPiecesFilter, options: { n: p.rwpN || 3, exceptions: exceptions } });
+                                        }
+                                        currentFilters = newFilters;
+                                    } else if (p.filters && p.filters.length > 0) {
+                                        // Legacy string array support
+                                        let newFilters = [];
+                                        let fs = p.filters;
+                                        
+                                        if (fs.includes('RA')) {
+                                            let exceptions = [];
+                                            if (charConfig.raRandomException) exceptions.push(randomException);
+                                            if (charConfig.raExceptionPieceValue) exceptions.push(pieceValueMustBeBiggerThanException);
+                                            if (charConfig.raExceptionPieceValueSmaller) exceptions.push(pieceValueMustBeSmallerThanException);
+                                            newFilters.push({ method: removeAttackedMovesFilter, options: { randomException: charConfig.raRandomException || 0.1, minPieceValue: 3, maxPieceValue: 5, exceptions: exceptions } });
+                                        }
+                                        // ... other legacy cases ...
+                                        // Since we just updated the UI to use the object format, we can skip full legacy implementation here
+                                        // unless strictly needed. The new UI writes the new format.
+                                        currentFilters = newFilters;
+                                    }
+                                } else {
+                                    break;
+                                }
+                            }
+                        }
 
                         if (algorithm === 'minimaxDeep') {
-                            move = minimaxDeep(obj.state, obj.color, depth, obj.removedTurns, mags, filters);
+                            move = minimaxDeep(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
                         } else if (algorithm === 'minimaxQuiescence') {
-                            move = minimaxQuiescence(obj.state, obj.color, depth, obj.removedTurns, mags, filters);
+                            move = minimaxQuiescence(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
                         } else if (algorithm === 'proofNumberSearch') {
-                            move = proofNumberSearch(obj.state, obj.color, depth, obj.removedTurns, mags, filters);
+                            move = proofNumberSearch(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
+                        } else if (algorithm === 'bestFirstSearch') {
+                            move = bestFirstSearch(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
                         } else {
-                            move = minimaxAlphaBeta(obj.state, obj.color, depth, obj.removedTurns, mags, filters);
+                            move = minimaxAlphaBeta(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
                         }
                     } catch(e) {
                         console.error("Failed parsing custom AI config", e);

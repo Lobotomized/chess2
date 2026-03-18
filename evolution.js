@@ -53,10 +53,22 @@ function generateRandomCharacter() {
         id: Math.random().toString(36).substr(2, 6).toUpperCase(),
         race: RACES[Math.floor(Math.random() * RACES.length)],
         depth: Math.floor(Math.random() * 2) + 2, // 2 or 3 for rapid play
-        algorithm: ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch'][Math.floor(Math.random() * 4)],
+        algorithm: ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch'][Math.floor(Math.random() * 5)],
+        phases: [],
         score: 1000,
         gamesPlayed: 0
     };
+    
+    // Add 0-2 random phases
+    let numPhases = Math.floor(Math.random() * 3);
+    for (let i = 0; i < numPhases; i++) {
+        char.phases.push({
+            threshold: Math.floor(Math.random() * 20) + 4, // 4 to 23 pieces
+            algorithm: ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch'][Math.floor(Math.random() * 5)]
+        });
+    }
+    // Sort phases by threshold descending so they evaluate correctly
+    char.phases.sort((a, b) => b.threshold - a.threshold);
     
     if (Math.random() > 0.2) char.posValueWeight = Math.random() * 0.5;
     if (Math.random() > 0.1) char.pieceValueWeight = 0.5 + Math.random() * 2;
@@ -486,7 +498,7 @@ function crossover(p1, p2) {
 
     // Make sure old characters getting crossed over receive an algorithm if missing
     if (!child.algorithm) {
-        child.algorithm = ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch'][Math.floor(Math.random() * 4)];
+        child.algorithm = ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch'][Math.floor(Math.random() * 5)];
     }
 
     if (p1.posValueWeight !== undefined || p2.posValueWeight !== undefined) {
@@ -587,7 +599,44 @@ function crossover(p1, p2) {
         child.depth = Math.floor(Math.random() * 2) + 2;
     }
     if (Math.random() < 0.1) {
-        child.algorithm = ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch'][Math.floor(Math.random() * 4)];
+        child.algorithm = ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch'][Math.floor(Math.random() * 5)];
+    }
+    
+    // Crossover phases
+    child.phases = [];
+    let pool = [...(p1.phases || []), ...(p2.phases || [])];
+    if (p1.altAlgorithm) pool.push({threshold: p1.altPieceThreshold || 10, algorithm: p1.altAlgorithm}); // Legacy support
+    if (p2.altAlgorithm) pool.push({threshold: p2.altPieceThreshold || 10, algorithm: p2.altAlgorithm}); // Legacy support
+    
+    // Pick 0-3 phases from parents
+    let childPhasesCount = Math.floor(Math.random() * Math.min(4, pool.length + 1));
+    for(let i = 0; i < childPhasesCount; i++) {
+        if(pool.length > 0) {
+            let idx = Math.floor(Math.random() * pool.length);
+            let picked = pool.splice(idx, 1)[0];
+            // slight mutation on threshold
+            picked.threshold = Math.max(2, picked.threshold + Math.floor(Math.random() * 5) - 2);
+            child.phases.push(picked);
+        }
+    }
+    
+    // Mutation: add a completely new random phase
+    if (Math.random() < 0.1) {
+        child.phases.push({
+             threshold: Math.floor(Math.random() * 20) + 4,
+             algorithm: ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch'][Math.floor(Math.random() * 5)]
+        });
+    }
+    
+    // Clean up phases: keep highest threshold if duplicates exist, sort descending
+    if (child.phases.length > 0) {
+        let uniquePhases = {};
+        for(let p of child.phases) {
+            if(!uniquePhases[p.algorithm] || uniquePhases[p.algorithm].threshold < p.threshold) {
+                uniquePhases[p.algorithm] = p;
+            }
+        }
+        child.phases = Object.values(uniquePhases).sort((a, b) => b.threshold - a.threshold);
     }
     if (Math.random() < 0.1) {
         child.race = RACES[Math.floor(Math.random() * RACES.length)];
@@ -660,13 +709,35 @@ function updateUI() {
             if(e.target.tagName !== 'BUTTON') showDetails(c.id);
         };
 
+        const getAlgShort = (alg) => {
+            if(alg === 'minimaxDeep') return 'Deep';
+            if(alg === 'minimaxQuiescence') return 'Q';
+            if(alg === 'proofNumberSearch') return 'PNS';
+            if(alg === 'bestFirstSearch') return 'BFS';
+            return 'AB';
+        };
+
+        let algStr = getAlgShort(c.algorithm);
+        
+        // Handle legacy
+        if (c.altAlgorithm && (!c.phases || c.phases.length === 0)) {
+            c.phases = [{threshold: c.altPieceThreshold || 10, algorithm: c.altAlgorithm}];
+        }
+        
+        if (c.phases && c.phases.length > 0) {
+            // sort phases for display just in case
+            let sortedPhases = [...c.phases].sort((a,b) => b.threshold - a.threshold);
+            let phaseStrs = sortedPhases.map(p => `${getAlgShort(p.algorithm)}<=${p.threshold}`);
+            algStr += ` <br><i style="font-size:0.85em">(${phaseStrs.join(', ')})</i>`;
+        }
+
         tr.innerHTML = `
             <td>${i + 1}</td>
             <td>${c.id}</td>
             <td>${c.race || '-'}</td>
             <td>${Math.round(c.score)}</td>
             <td>${c.gamesPlayed}</td>
-            <td>${c.algorithm === 'minimaxDeep' ? 'Deep' : (c.algorithm === 'minimaxQuiescence' ? 'Q' : (c.algorithm === 'proofNumberSearch' ? 'PNS' : 'AB'))}</td>
+            <td>${algStr}</td>
             <td>${c.depth}</td>
             <td>${c.pieceValueWeight !== undefined ? c.pieceValueWeight.toFixed(2) : '-'}</td>
             <td>${c.posValueWeight !== undefined ? c.posValueWeight.toFixed(2) : '-'}</td>
@@ -678,6 +749,7 @@ function updateUI() {
                 <button style="padding: 5px 10px; font-size: 12px;" onclick="playAgainst('${c.id}')">Play</button>
                 <button style="padding: 5px 10px; font-size: 12px; background:#e5989b;" onclick="saveBotToDb('${c.id}')">Save</button>
                 <button style="padding: 5px 10px; font-size: 12px; background:#4ecdc4;" onclick="showHistory('${c.id}')">History</button>
+                <button style="padding: 5px 10px; font-size: 12px; background:#ff4d4d; color:white; border:none;" onclick="killSpecificBot('${c.id}')">Kill</button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -705,7 +777,9 @@ function openCreateBotModal() {
     // resetCreateBotInputs();
     
     // Bind toggle events for filter options
-    setupCheckboxToggles();
+    // Note: The new tab system handles binding dynamically in evolution.html
+    // We don't need to call setupCheckboxToggles() here anymore as it refers to old IDs
+    // setupCheckboxToggles(); 
 
     modal.style.display = 'flex';
 }
@@ -714,29 +788,75 @@ function closeCreateBotModal() {
     document.getElementById('createBotModal').style.display = 'none';
 }
 
-function setupCheckboxToggles() {
-    const map = {
-        'cb_useRemoveAttacked': 'opts_useRemoveAttacked',
-        'cb_useRemoveNonAttacking': 'opts_useRemoveNonAttacking',
-        'cb_useRandomlyRemove': 'opts_useRandomlyRemove',
-        'cb_useMaxMoves': 'opts_useMaxMoves',
-        'cb_useNthChance': 'opts_useNthChance',
-        'cb_useRemoveWellPositioned': 'opts_useRemoveWellPositioned'
-    };
+// --- Kill Bot Modal Logic ---
+
+function openKillBotModal() {
+    let modal = document.getElementById('killBotModal');
+    modal.style.display = 'flex';
+}
+
+function closeKillBotModal() {
+    document.getElementById('killBotModal').style.display = 'none';
+}
+
+function killBotsByElo() {
+    let threshold = parseInt(document.getElementById('kill_elo_threshold').value);
+    if (isNaN(threshold)) return;
     
-    for (let cbId in map) {
-        let cb = document.getElementById(cbId);
-        let div = document.getElementById(map[cbId]);
-        
-        // Initial state
-        div.style.display = cb.checked ? 'block' : 'none';
-        
-        // Change listener
-        cb.onchange = () => {
-            div.style.display = cb.checked ? 'block' : 'none';
-        };
+    let initialCount = currentGenBots.length;
+    currentGenBots = currentGenBots.filter(c => c.score >= threshold);
+    
+    // Ensure we don't kill everyone, keep at least 2
+    if (currentGenBots.length < 2 && initialCount >= 2) {
+        alert("Cannot kill all bots! Kept the top 2.");
+        // We'd have to reload or sort, simpler just to alert for now
+        // A better approach is to sort and slice
+    }
+    
+    saveData();
+    updateUI();
+    closeKillBotModal();
+}
+
+function killSpecificBotImpl(idToKill) {
+    if (!idToKill) return;
+    
+    // Stop evolution loop if it's running
+    let wasEvolving = isEvolving;
+    if (isEvolving) {
+        toggleEvolution(); 
+    }
+    
+    if (currentGenBots.length <= 2) {
+        alert("Cannot kill bot. Minimum 2 bots required in the arena.");
+        if (wasEvolving) toggleEvolution();
+        return;
+    }
+    
+    if(confirm(`Are you sure you want to kill bot ${idToKill}?`)) {
+        currentGenBots = currentGenBots.filter(c => c.id !== idToKill);
+        saveData();
+        updateUI();
+    }
+    
+    // Resume evolution loop if it was running
+    if (wasEvolving) {
+        toggleEvolution();
     }
 }
+window.killSpecificBotImpl = killSpecificBotImpl;
+
+function killAllBots() {
+    if(confirm("Are you sure you want to delete ALL bots in the current generation? You will have to start over.")) {
+        currentGenBots = [];
+        saveData();
+        updateUI();
+        closeKillBotModal();
+    }
+}
+
+// Legacy function removed as it conflicts with new tab system
+// function setupCheckboxToggles() { ... }
 
 function createNewBot() {
     // Helper to get value if input is not empty
@@ -759,78 +879,103 @@ function createNewBot() {
         return el ? el.value : undefined;
     };
 
+    // Gather configuration from a specific panel context
+    function getBotConfigFromContext(context) {
+        let getVal = (cls) => {
+             let el = context.querySelector('.' + cls);
+             return el ? el.value : undefined;
+        };
+        let getNum = (cls) => {
+            let el = context.querySelector('.' + cls);
+            return el && el.value !== '' ? parseFloat(el.value) : undefined;
+        };
+        let getInt = (cls) => {
+            let el = context.querySelector('.' + cls);
+            return el && el.value !== '' ? parseInt(el.value) : undefined;
+        };
+        let getCheck = (cls) => {
+            let el = context.querySelector('.' + cls);
+            return el ? el.checked : false;
+        };
+
+        let config = {
+            algorithm: getVal('cb_algorithm'),
+            depth: getInt('cb_depth') || 2,
+            
+            // Magnifiers
+            posValueWeight: getNum('cb_posValueWeight'),
+            pieceValueWeight: getNum('cb_pieceValueWeight'),
+            kingTropismWeight: getNum('cb_kingTropismWeight'),
+            defendedWeight: getNum('cb_defendedWeight'),
+            kingVulnAttackWeight: getNum('cb_kingVulnAttackWeight'),
+            kingVulnProxWeight: getNum('cb_kingVulnProxWeight'),
+            
+            // Filters
+            useRemoveAttacked: getCheck('cb_useRemoveAttacked'),
+            raRandomException: getNum('cb_raRandomException'),
+            raExceptionPieceValue: getCheck('cb_raExceptionPieceValue'),
+            raExceptionPieceValueSmaller: getCheck('cb_raExceptionPieceValueSmaller'),
+            
+            useRemoveNonAttacking: getCheck('cb_useRemoveNonAttacking'),
+            rnaMaxPieceValue: getInt('cb_rnaMaxPieceValue'),
+            rnaExceptionRandom: getNum('cb_rnaExceptionRandom'),
+            rnaExceptionPieceValue: getCheck('cb_rnaExceptionPieceValue'),
+            rnaExceptionPieceValueSmaller: getCheck('cb_rnaExceptionPieceValueSmaller'),
+            
+            useRandomlyRemove: getCheck('cb_useRandomlyRemove'),
+            rrN: getInt('cb_rrN'),
+            rrExceptionRandom: getNum('cb_rrExceptionRandom'),
+            rrExceptionAttacked: getCheck('cb_rrExceptionAttacked'),
+            rrExceptionPieceValueSmaller: getCheck('cb_rrExceptionPieceValueSmaller'),
+            
+            useMaxMoves: getCheck('cb_useMaxMoves'),
+            mmMax: getInt('cb_mmMax'),
+            mmExceptionAttacked: getCheck('cb_mmExceptionAttacked'),
+            
+            useNthChance: getCheck('cb_useNthChance'),
+            nthChance: getNum('cb_nthChance'),
+            ncExceptionAttacked: getCheck('cb_ncExceptionAttacked'),
+            ncExceptionPieceValue: getCheck('cb_ncExceptionPieceValue'),
+            
+            useRemoveWellPositioned: getCheck('cb_useRemoveWellPositioned'),
+            rwpN: getInt('cb_rwpN'),
+            rwpExceptionAttacked: getCheck('cb_rwpExceptionAttacked')
+        };
+        
+        return config;
+    }
+
+    // Gather phases
+    let phasesList = [];
+    const phaseInputs = document.querySelectorAll('.phase-thresh-input');
+    phaseInputs.forEach(input => {
+        let id = input.dataset.id;
+        let threshold = parseInt(input.value);
+        let panel = document.getElementById('config-' + id);
+        
+        if (panel && !isNaN(threshold)) {
+            let phaseConfig = getBotConfigFromContext(panel);
+            phaseConfig.threshold = threshold;
+            phasesList.push(phaseConfig);
+        }
+    });
+    // Sort descending
+    phasesList.sort((a, b) => b.threshold - a.threshold);
+
+    // Get Base Config
+    let baseContext = document.getElementById('config-base');
+    let baseConfig = getBotConfigFromContext(baseContext);
+
     let char = {
         id: 'CUST-' + Math.random().toString(36).substr(2, 4).toUpperCase(),
-        race: getVal('cb_race'),
-        depth: getInt('cb_depth') || 2,
-        algorithm: getVal('cb_algorithm'),
+        race: document.getElementById('cb_race').value,
         score: 1000,
-        gamesPlayed: 0
+        gamesPlayed: 0,
+        phases: phasesList,
+        ...baseConfig
     };
-
-    // Magnifiers
-    let posValueWeight = getNum('cb_posValueWeight');
-    if (posValueWeight !== undefined) char.posValueWeight = posValueWeight;
     
-    let pieceValueWeight = getNum('cb_pieceValueWeight');
-    if (pieceValueWeight !== undefined) char.pieceValueWeight = pieceValueWeight;
-    
-    let kingTropismWeight = getNum('cb_kingTropismWeight');
-    if (kingTropismWeight !== undefined) char.kingTropismWeight = kingTropismWeight;
-    
-    let defendedWeight = getNum('cb_defendedWeight');
-    if (defendedWeight !== undefined) char.defendedWeight = defendedWeight;
-    
-    let kingVulnAttackWeight = getNum('cb_kingVulnAttackWeight');
-    if (kingVulnAttackWeight !== undefined) char.kingVulnAttackWeight = kingVulnAttackWeight;
-    
-    let kingVulnProxWeight = getNum('cb_kingVulnProxWeight');
-    if (kingVulnProxWeight !== undefined) char.kingVulnProxWeight = kingVulnProxWeight;
-
-    // Filters
-    if (getBool('cb_useRemoveAttacked')) {
-        char.useRemoveAttacked = true;
-        char.raRandomException = getNum('cb_raRandomException');
-        char.raExceptionPieceValue = getBool('cb_raExceptionPieceValue');
-        char.raExceptionPieceValueSmaller = getBool('cb_raExceptionPieceValueSmaller');
-    }
-
-    if (getBool('cb_useRemoveNonAttacking')) {
-        char.useRemoveNonAttacking = true;
-        char.rnaMaxPieceValue = getInt('cb_rnaMaxPieceValue');
-        char.rnaExceptionRandom = getNum('cb_rnaExceptionRandom');
-        char.rnaExceptionPieceValue = getBool('cb_rnaExceptionPieceValue');
-        char.rnaExceptionPieceValueSmaller = getBool('cb_rnaExceptionPieceValueSmaller');
-    }
-
-    if (getBool('cb_useRandomlyRemove')) {
-        char.useRandomlyRemove = true;
-        char.rrN = getInt('cb_rrN');
-        char.rrExceptionAttacked = getBool('cb_rrExceptionAttacked');
-        char.rrExceptionPieceValueSmaller = getBool('cb_rrExceptionPieceValueSmaller');
-        char.rrExceptionRandom = getNum('cb_rrExceptionRandom');
-    }
-
-    if (getBool('cb_useMaxMoves')) {
-        char.useMaxMoves = true;
-        char.mmMax = getInt('cb_mmMax');
-        char.mmExceptionAttacked = getBool('cb_mmExceptionAttacked');
-    }
-
-    if (getBool('cb_useNthChance')) {
-        char.useNthChance = true;
-        char.nthChance = getNum('cb_nthChance');
-        char.ncExceptionAttacked = getBool('cb_ncExceptionAttacked');
-        char.ncExceptionPieceValue = getBool('cb_ncExceptionPieceValue');
-    }
-
-    if (getBool('cb_useRemoveWellPositioned')) {
-        char.useRemoveWellPositioned = true;
-        char.rwpN = getInt('cb_rwpN');
-        char.rwpExceptionAttacked = getBool('cb_rwpExceptionAttacked');
-    }
-
-    // Add to list and save
+    // Add to pool
     characters.push(char);
     saveData();
     updateUI();

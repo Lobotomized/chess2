@@ -117,22 +117,156 @@ self.addEventListener("message", function(e) {
         let algorithm = isWhite ? charWhite.algorithm : charBlack.algorithm;
         if (!algorithm) algorithm = 'minimaxAlphaBeta'; // default
         
-        let magnifiers = isWhite ? whiteMagnifiers : blackMagnifiers;
-        let filters = isWhite ? whiteFilters : blackFilters;
+        let phases = isWhite ? charWhite.phases : charBlack.phases;
+        let numPieces = state.pieces.length;
+        
+        // Base config references
+        let currentDepth = depth;
+        let currentMags = isWhite ? whiteMagnifiers : blackMagnifiers;
+        let currentFilters = isWhite ? whiteFilters : blackFilters;
+        
+        // Handle legacy altAlgorithm
+        if (!phases && (isWhite ? charWhite.altAlgorithm : charBlack.altAlgorithm)) {
+             let altAlg = isWhite ? charWhite.altAlgorithm : charBlack.altAlgorithm;
+             let altThresh = isWhite ? charWhite.altPieceThreshold : charBlack.altPieceThreshold;
+             phases = [{threshold: altThresh || 10, algorithm: altAlg}];
+        }
+        
+        if (phases && phases.length > 0) {
+            for(let i=0; i<phases.length; i++) {
+                if (numPieces <= phases[i].threshold) {
+                    // Update current configuration from phase settings
+                    if (phases[i].algorithm) algorithm = phases[i].algorithm;
+                    if (phases[i].depth) currentDepth = phases[i].depth;
+                    
+                    // Rebuild Magnifiers based on phase overrides
+                    // If phase has magnifier weights, we rebuild the whole array.
+                    // If not, we keep the previous/base magnifiers.
+                    if (phases[i].posValueWeight !== undefined || 
+                        phases[i].pieceValueWeight !== undefined ||
+                        phases[i].kingTropismWeight !== undefined || 
+                        phases[i].defendedWeight !== undefined || 
+                        phases[i].kingVulnAttackWeight !== undefined) {
+                        
+                        let pConfig = phases[i];
+                        let newMags = [];
+                        
+                        let pvw = pConfig.posValueWeight;
+                        if(pvw === undefined) pvw = isWhite ? charWhite.posValueWeight : charBlack.posValueWeight;
+                        if(pvw !== undefined) newMags.push({ method: evaluationMagnifierMaxOptions, options: { posValue: pvw } });
+                        
+                        let pcv = pConfig.pieceValueWeight;
+                        if(pcv === undefined) pcv = isWhite ? charWhite.pieceValueWeight : charBlack.pieceValueWeight;
+                        if(pcv !== undefined) newMags.push({ method: evaluationMagnifierPiece, options: { pieceValue: pcv } });
+                        
+                        let ktv = pConfig.kingTropismWeight;
+                        if(ktv === undefined) ktv = isWhite ? charWhite.kingTropismWeight : charBlack.kingTropismWeight;
+                        if(ktv !== undefined) newMags.push({ method: evaluationMagnifierKingTropism, options: { relativeValue: ktv, onlyForEnemy: true, pieceValue: 1 } });
+                        
+                        let def = pConfig.defendedWeight;
+                        if(def === undefined) def = isWhite ? charWhite.defendedWeight : charBlack.defendedWeight;
+                        if(def !== undefined) newMags.push({ method: evaluationMagnifierPieceDefended, options: { relativeValue: def } });
+                        
+                        let kva = pConfig.kingVulnAttackWeight;
+                        let kvp = pConfig.kingVulnProxWeight;
+                        if(kva === undefined) kva = isWhite ? charWhite.kingVulnAttackWeight : charBlack.kingVulnAttackWeight;
+                        if(kvp === undefined) kvp = isWhite ? charWhite.kingVulnProxWeight : charBlack.kingVulnProxWeight;
+                        if(kva !== undefined) newMags.push({ method: evaluationMagnifierKingVulnerability, options: { attackValue: kva, proximityValue: kvp || 0 } });
+                        
+                        currentMags = newMags;
+                    } else if (phases[i].weights) {
+                        // Legacy support for the brief period where we used 'weights' object
+                        let w = phases[i].weights;
+                        let newMags = [];
+                        let pvw = w.pos !== undefined ? w.pos : (isWhite ? charWhite.posValueWeight : charBlack.posValueWeight);
+                        let pcv = w.piece !== undefined ? w.piece : (isWhite ? charWhite.pieceValueWeight : charBlack.pieceValueWeight);
+                        let ktv = w.kingTrop !== undefined ? w.kingTrop : (isWhite ? charWhite.kingTropismWeight : charBlack.kingTropismWeight);
+                        let def = w.def !== undefined ? w.def : (isWhite ? charWhite.defendedWeight : charBlack.defendedWeight);
+                        let kva = w.vulnAtt !== undefined ? w.vulnAtt : (isWhite ? charWhite.kingVulnAttackWeight : charBlack.kingVulnAttackWeight);
+                        let kvp = w.vulnProx !== undefined ? w.vulnProx : (isWhite ? charWhite.kingVulnProxWeight : charBlack.kingVulnProxWeight);
+                        
+                        if (pvw !== undefined) newMags.push({ method: evaluationMagnifierMaxOptions, options: { posValue: pvw } });
+                        if (pcv !== undefined) newMags.push({ method: evaluationMagnifierPiece, options: { pieceValue: pcv } });
+                        if (ktv !== undefined) newMags.push({ method: evaluationMagnifierKingTropism, options: { relativeValue: ktv, onlyForEnemy: true, pieceValue: 1 } });
+                        if (def !== undefined) newMags.push({ method: evaluationMagnifierPieceDefended, options: { relativeValue: def } });
+                        if (kva !== undefined) newMags.push({ method: evaluationMagnifierKingVulnerability, options: { attackValue: kva, proximityValue: kvp || 0 } });
+                        
+                        currentMags = newMags;
+                    }
+                    
+                    // Rebuild Filters based on phase overrides
+                    // If the phase has ANY filter flags set to true, we rebuild the filter list from that phase config
+                    // Otherwise we check for legacy 'filters' array support
+                    // Note: This logic implies that if you set ANY filter in a phase, you must set ALL filters you want for that phase.
+                    // It does NOT merge with base filters (which is usually safer to avoid duplicates).
+                    
+                    let p = phases[i];
+                    if (p.useRemoveAttacked || p.useRemoveNonAttacking || p.useRandomlyRemove || p.useMaxMoves || p.useNthChance || p.useRemoveWellPositioned) {
+                        let newFilters = [];
+                        if (p.useRemoveAttacked) {
+                            let exceptions = [];
+                            if (p.raRandomException) exceptions.push(randomException);
+                            if (p.raExceptionPieceValue) exceptions.push(pieceValueMustBeBiggerThanException);
+                            if (p.raExceptionPieceValueSmaller) exceptions.push(pieceValueMustBeSmallerThanException);
+                            newFilters.push({ method: removeAttackedMovesFilter, options: { randomException: p.raRandomException || 0.1, minPieceValue: 3, maxPieceValue: 5, exceptions: exceptions } });
+                        }
+                        if (p.useRemoveNonAttacking) {
+                            let exceptions = [];
+                            if (p.rnaExceptionRandom) exceptions.push(randomException);
+                            if (p.rnaExceptionPieceValue) exceptions.push(pieceValueMustBeBiggerThanException);
+                            if (p.rnaExceptionPieceValueSmaller) exceptions.push(pieceValueMustBeSmallerThanException);
+                            newFilters.push({ method: removeNonAttackingMovesFilter, options: { maxPieceValue: p.rnaMaxPieceValue || 2, minPieceValue: 3, randomException: p.rnaExceptionRandom, exceptions: exceptions } });
+                        }
+                        if (p.useRandomlyRemove) {
+                            let exceptions = [];
+                            if (p.rrExceptionAttacked) exceptions.push(pieceAttackedException);
+                            if (p.rrExceptionPieceValueSmaller) exceptions.push(pieceValueMustBeSmallerThanException);
+                            if (p.rrExceptionRandom) exceptions.push(randomException);
+                            newFilters.push({ method: randomlyRemove1NthFilter, options: { n: p.rrN || 2, maxPieceValue: 4, randomException: p.rrExceptionRandom, exceptions: exceptions } });
+                        }
+                        if (p.useMaxMoves) {
+                            let exceptions = [];
+                            if (p.mmExceptionAttacked) exceptions.push(pieceAttackedException);
+                            newFilters.push({ method: maxNumberOfMovesPerPieceFilter, options: { maximum: p.mmMax || 2, exceptions: exceptions } });
+                        }
+                        if (p.useNthChance) {
+                            let exceptions = [];
+                            if (p.ncExceptionAttacked) exceptions.push(pieceAttackedException);
+                            if (p.ncExceptionPieceValue) exceptions.push(pieceValueMustBeBiggerThanException);
+                            newFilters.push({ method: nthChanceToRemovePieceFilter, options: { n: p.nthChance !== undefined ? p.nthChance : 0.1, minPieceValue: 3, exceptions: exceptions } });
+                        }
+                        if (p.useRemoveWellPositioned) {
+                            let exceptions = [];
+                            if (p.rwpExceptionAttacked) exceptions.push(pieceAttackedException);
+                            newFilters.push({ method: removeWellPositionedPiecesFilter, options: { n: p.rwpN || 3, exceptions: exceptions } });
+                        }
+                        currentFilters = newFilters;
+                    } else if (p.filters && p.filters.length > 0) {
+                         // Legacy string array support
+                         // ... (existing code for string array)
+                         // For now we can rely on the previous implementation for this part if needed, 
+                         // but ideally we just use the full object structure now.
+                    }
+                    
+                } else {
+                    break; 
+                }
+            }
+        }
         
         self.postMessage(JSONfn.stringify({ type: 'thinking', color: state.turn, turns: turns }));
 
         let move;
         if (algorithm === 'minimaxDeep') {
-            move = minimaxDeep(state, state.turn, depth, [], magnifiers, filters);
+            move = minimaxDeep(state, state.turn, currentDepth, [], currentMags, currentFilters);
         } else if (algorithm === 'minimaxQuiescence') {
-            move = minimaxQuiescence(state, state.turn, depth, [], magnifiers, filters);
+            move = minimaxQuiescence(state, state.turn, currentDepth, [], currentMags, currentFilters);
         } else if (algorithm === 'proofNumberSearch') {
-            move = proofNumberSearch(state, state.turn, depth, [], magnifiers, filters);
+            move = proofNumberSearch(state, state.turn, currentDepth, [], currentMags, currentFilters);
+        } else if (algorithm === 'bestFirstSearch') {
+            move = bestFirstSearch(state, state.turn, currentDepth, [], currentMags, currentFilters);
         } else {
-            // Note: In your code, `minimaxAlphaBeta` calls `alphaBetaOptimized`
-            // So they are essentially the same for getting a move
-            move = minimaxAlphaBeta(state, state.turn, depth, [], magnifiers, filters);
+            move = minimaxAlphaBeta(state, state.turn, currentDepth, [], currentMags, currentFilters);
         }
         
         if (!move) {

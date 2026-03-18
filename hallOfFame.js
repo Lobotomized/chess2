@@ -56,13 +56,19 @@ function updateUI() {
         }
         
         let tr = document.createElement('tr');
+        let algStr = c.algorithm === 'minimaxDeep' ? 'Deep' : (c.algorithm === 'minimaxQuiescence' ? 'Q' : (c.algorithm === 'proofNumberSearch' ? 'PNS' : (c.algorithm === 'bestFirstSearch' ? 'BFS' : 'AB')));
+        if (c.altAlgorithm) {
+            let altAlgStr = c.altAlgorithm === 'minimaxDeep' ? 'Deep' : (c.altAlgorithm === 'minimaxQuiescence' ? 'Q' : (c.altAlgorithm === 'proofNumberSearch' ? 'PNS' : (c.altAlgorithm === 'bestFirstSearch' ? 'BFS' : 'AB')));
+            algStr += ` <i>(${altAlgStr}<=${c.altPieceThreshold || 10})</i>`;
+        }
+
         tr.innerHTML = `
             <td>${c.name || 'Unnamed'}</td>
             <td>${c.id}</td>
             <td>${c.race || '-'}</td>
             <td>${Math.round(c.score)}</td>
             <td>${c.gamesPlayed}</td>
-            <td>${c.algorithm === 'minimaxDeep' ? 'Deep' : (c.algorithm === 'minimaxQuiescence' ? 'Q' : (c.algorithm === 'proofNumberSearch' ? 'PNS' : 'AB'))}</td>
+            <td>${algStr}</td>
             <td>${c.depth}</td>
             <td>${filtersHtml}</td>
             <td>

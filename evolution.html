@@ -155,13 +155,32 @@
         }
         .detail-label { color: #888; }
         .detail-value { font-weight: bold; color: #e0e0e0; }
-        .section-title {
-            margin-top: 20px;
-            margin-bottom: 10px;
-            color: #829769;
-            font-size: 14px;
-            text-transform: uppercase;
+        .tab-btn {
+            background: #2a2a2a;
+            color: #888;
+            border: 1px solid #333;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: #1e1e1e;
+            color: #f0d9b5;
+            border-bottom: 2px solid #829769;
+            margin-bottom: -1px;
             font-weight: bold;
+        }
+        .config-panel {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+        .config-panel.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
     <script src="/src/jsonfn.js"></script>
@@ -184,6 +203,7 @@
         <div style="margin-bottom:20px;">
             <button class="primary" id="toggleBtn" onclick="toggleEvolution()">Start Evolution</button>
             <button class="primary" style="background: #4ecdc4; border-color: #4ecdc4;" onclick="openCreateBotModal()">Create Custom Bot</button>
+            <button class="primary" style="background: #e5989b; border-color: #e5989b;" onclick="openKillBotModal()">Kill Bots</button>
             <a href="/hallOfFame.html"><button>Go to Hall of Fame</button></a>
         </div>
         <div id="status">Ready to start.</div>
@@ -247,112 +267,126 @@
                 <button onclick="closeCreateBotModal()" style="padding:5px 10px;">X</button>
             </div>
             <div id="createBotBody" style="padding: 20px;">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div>
-                        <h3 class="section-title">Core</h3>
-                        <div class="detail-row"><span class="detail-label">Race</span>
-                            <select id="cb_race" style="background:#333; color:#f0d9b5; padding:5px; border:1px solid #555;">
-                                <!-- Populated by JS -->
-                            </select>
-                        </div>
-                        <div class="detail-row"><span class="detail-label">Algorithm</span>
-                            <select id="cb_algorithm" style="background:#333; color:#f0d9b5; padding:5px; border:1px solid #555;">
-                                <option value="minimaxDeep">Minimax Deep</option>
-                                <option value="minimaxAlphaBeta">Minimax AlphaBeta</option>
-                                <option value="minimaxQuiescence">Minimax Quiescence</option>
-                                <option value="proofNumberSearch">Proof Number Search</option>
-                            </select>
-                        </div>
-                        <div class="detail-row"><span class="detail-label">Depth</span>
-                            <input type="number" id="cb_depth" value="2" min="1" max="5" style="background:#333; color:#f0d9b5; padding:5px; border:1px solid #555; width: 60px;">
-                        </div>
+                
+                <div class="detail-row" style="margin-bottom: 20px;"><span class="detail-label" style="font-size: 16px; color: #fff;">Race</span>
+                    <select id="cb_race" style="background:#333; color:#f0d9b5; padding:5px; border:1px solid #555; font-size: 16px;">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
 
-                        <h3 class="section-title">Magnifiers (Weights)</h3>
-                        <div class="detail-row"><span class="detail-label">Position Value</span><input type="number" id="cb_posValueWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
-                        <div class="detail-row"><span class="detail-label">Piece Value</span><input type="number" id="cb_pieceValueWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
-                        <div class="detail-row"><span class="detail-label">King Tropism</span><input type="number" id="cb_kingTropismWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
-                        <div class="detail-row"><span class="detail-label">Defended</span><input type="number" id="cb_defendedWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
-                        <div class="detail-row"><span class="detail-label">King Vuln Attack</span><input type="number" id="cb_kingVulnAttackWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
-                        <div class="detail-row"><span class="detail-label">King Vuln Prox</span><input type="number" id="cb_kingVulnProxWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
-                    </div>
+                <div class="phase-tabs" style="display:flex; gap: 5px; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px;">
+                    <button class="tab-btn active" onclick="switchTab('base')" id="tab-base" style="padding: 8px 16px; font-size: 14px;">Base Phase (Start)</button>
+                    <div id="phase-tabs-container" style="display:flex; gap: 5px;"></div>
+                    <button onclick="addNewPhaseTab()" style="padding: 8px 12px; font-size: 14px; background: #333;">+</button>
+                </div>
 
-                    <div>
-                        <h3 class="section-title">Filters</h3>
-                        
-                        <!-- Remove Attacked -->
-                        <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-                            <div class="detail-row">
-                                <label><input type="checkbox" id="cb_useRemoveAttacked"> Use Remove Attacked</label>
+                <div id="config-container">
+                    <!-- Base Config -->
+                    <div id="config-base" class="config-panel">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <h3 class="section-title">Core Strategy</h3>
+                                <div class="detail-row"><span class="detail-label">Algorithm</span>
+                                    <select class="cb_algorithm" style="background:#333; color:#f0d9b5; padding:5px; border:1px solid #555;">
+                                        <option value="minimaxDeep">Minimax Deep</option>
+                                        <option value="minimaxAlphaBeta">Minimax AlphaBeta</option>
+                                        <option value="minimaxQuiescence">Minimax Quiescence</option>
+                                        <option value="proofNumberSearch">Proof Number Search</option>
+                                        <option value="bestFirstSearch">Best First Search</option>
+                                    </select>
+                                </div>
+                                <div class="detail-row"><span class="detail-label">Depth</span>
+                                    <input type="number" class="cb_depth" value="2" min="1" max="5" style="background:#333; color:#f0d9b5; padding:5px; border:1px solid #555; width: 60px;">
+                                </div>
+
+                                <h3 class="section-title">Magnifiers (Weights)</h3>
+                                <div class="detail-row"><span class="detail-label">Position Value</span><input type="number" class="cb_posValueWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
+                                <div class="detail-row"><span class="detail-label">Piece Value</span><input type="number" class="cb_pieceValueWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
+                                <div class="detail-row"><span class="detail-label">King Tropism</span><input type="number" class="cb_kingTropismWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
+                                <div class="detail-row"><span class="detail-label">Defended</span><input type="number" class="cb_defendedWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
+                                <div class="detail-row"><span class="detail-label">King Vuln Attack</span><input type="number" class="cb_kingVulnAttackWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
+                                <div class="detail-row"><span class="detail-label">King Vuln Prox</span><input type="number" class="cb_kingVulnProxWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
                             </div>
-                            <div id="opts_useRemoveAttacked" style="display:none; padding-left: 20px;">
-                                <div class="detail-row"><span class="detail-label">Random Exception</span><input type="number" id="cb_raRandomException" step="0.05" value="0.1" style="width:60px;"></div>
-                                <div class="detail-row"><label><input type="checkbox" id="cb_raExceptionPieceValue"> Piece Value > Min</label></div>
-                                <div class="detail-row"><label><input type="checkbox" id="cb_raExceptionPieceValueSmaller"> Piece Value < Max</label></div>
+
+                            <div>
+                                <h3 class="section-title">Filters</h3>
+                                <!-- Remove Attacked -->
+                                <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                                    <div class="detail-row">
+                                        <label><input type="checkbox" class="cb_useRemoveAttacked"> Use Remove Attacked</label>
+                                    </div>
+                                    <div class="opts_useRemoveAttacked" style="display:none; padding-left: 20px;">
+                                        <div class="detail-row"><span class="detail-label">Random Exception</span><input type="number" class="cb_raRandomException" step="0.05" value="0.1" style="width:60px;"></div>
+                                        <div class="detail-row"><label><input type="checkbox" class="cb_raExceptionPieceValue"> Piece Value > Min</label></div>
+                                        <div class="detail-row"><label><input type="checkbox" class="cb_raExceptionPieceValueSmaller"> Piece Value < Max</label></div>
+                                    </div>
+                                </div>
+
+                                <!-- Remove Non-Attacking -->
+                                <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                                    <div class="detail-row">
+                                        <label><input type="checkbox" class="cb_useRemoveNonAttacking"> Use Remove Non-Attacking</label>
+                                    </div>
+                                    <div class="opts_useRemoveNonAttacking" style="display:none; padding-left: 20px;">
+                                        <div class="detail-row"><span class="detail-label">Max Piece Value</span><input type="number" class="cb_rnaMaxPieceValue" value="2" style="width:60px;"></div>
+                                        <div class="detail-row"><span class="detail-label">Exception Random</span><input type="number" class="cb_rnaExceptionRandom" step="0.05" placeholder="Opt" style="width:60px;"></div>
+                                        <div class="detail-row"><label><input type="checkbox" class="cb_rnaExceptionPieceValue"> Piece Value > Min</label></div>
+                                        <div class="detail-row"><label><input type="checkbox" class="cb_rnaExceptionPieceValueSmaller"> Piece Value < Max</label></div>
+                                    </div>
+                                </div>
+
+                                <!-- Randomly Remove -->
+                                <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                                    <div class="detail-row">
+                                        <label><input type="checkbox" class="cb_useRandomlyRemove"> Use Randomly Remove</label>
+                                    </div>
+                                    <div class="opts_useRandomlyRemove" style="display:none; padding-left: 20px;">
+                                        <div class="detail-row"><span class="detail-label">N (1/N)</span><input type="number" class="cb_rrN" value="2" style="width:60px;"></div>
+                                        <div class="detail-row"><span class="detail-label">Exception Random</span><input type="number" class="cb_rrExceptionRandom" step="0.05" placeholder="Opt" style="width:60px;"></div>
+                                        <div class="detail-row"><label><input type="checkbox" class="cb_rrExceptionAttacked"> Exception Attacked</label></div>
+                                        <div class="detail-row"><label><input type="checkbox" class="cb_rrExceptionPieceValueSmaller"> Exception Value < Max</label></div>
+                                    </div>
+                                </div>
+
+                                <!-- Max Moves -->
+                                <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                                    <div class="detail-row">
+                                        <label><input type="checkbox" class="cb_useMaxMoves"> Use Max Moves</label>
+                                    </div>
+                                    <div class="opts_useMaxMoves" style="display:none; padding-left: 20px;">
+                                        <div class="detail-row"><span class="detail-label">Max Moves</span><input type="number" class="cb_mmMax" value="2" style="width:60px;"></div>
+                                        <div class="detail-row"><label><input type="checkbox" class="cb_mmExceptionAttacked"> Exception Attacked</label></div>
+                                    </div>
+                                </div>
+
+                                <!-- Nth Chance -->
+                                <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                                    <div class="detail-row">
+                                        <label><input type="checkbox" class="cb_useNthChance"> Use Nth Chance</label>
+                                    </div>
+                                    <div class="opts_useNthChance" style="display:none; padding-left: 20px;">
+                                        <div class="detail-row"><span class="detail-label">Chance (0-1)</span><input type="number" class="cb_nthChance" step="0.05" value="0.1" style="width:60px;"></div>
+                                        <div class="detail-row"><label><input type="checkbox" class="cb_ncExceptionAttacked"> Exception Attacked</label></div>
+                                        <div class="detail-row"><label><input type="checkbox" class="cb_ncExceptionPieceValue"> Exception Value > Min</label></div>
+                                    </div>
+                                </div>
+
+                                <!-- Remove Well Positioned -->
+                                <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
+                                    <div class="detail-row">
+                                        <label><input type="checkbox" class="cb_useRemoveWellPositioned"> Use Remove Well Pos</label>
+                                    </div>
+                                    <div class="opts_useRemoveWellPositioned" style="display:none; padding-left: 20px;">
+                                        <div class="detail-row"><span class="detail-label">N</span><input type="number" class="cb_rwpN" value="3" style="width:60px;"></div>
+                                        <div class="detail-row"><label><input type="checkbox" class="cb_rwpExceptionAttacked"> Exception Attacked</label></div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
-
-                        <!-- Remove Non-Attacking -->
-                        <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-                            <div class="detail-row">
-                                <label><input type="checkbox" id="cb_useRemoveNonAttacking"> Use Remove Non-Attacking</label>
-                            </div>
-                            <div id="opts_useRemoveNonAttacking" style="display:none; padding-left: 20px;">
-                                <div class="detail-row"><span class="detail-label">Max Piece Value</span><input type="number" id="cb_rnaMaxPieceValue" value="2" style="width:60px;"></div>
-                                <div class="detail-row"><span class="detail-label">Exception Random</span><input type="number" id="cb_rnaExceptionRandom" step="0.05" placeholder="Opt" style="width:60px;"></div>
-                                <div class="detail-row"><label><input type="checkbox" id="cb_rnaExceptionPieceValue"> Piece Value > Min</label></div>
-                                <div class="detail-row"><label><input type="checkbox" id="cb_rnaExceptionPieceValueSmaller"> Piece Value < Max</label></div>
-                            </div>
-                        </div>
-
-                        <!-- Randomly Remove -->
-                        <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-                            <div class="detail-row">
-                                <label><input type="checkbox" id="cb_useRandomlyRemove"> Use Randomly Remove</label>
-                            </div>
-                            <div id="opts_useRandomlyRemove" style="display:none; padding-left: 20px;">
-                                <div class="detail-row"><span class="detail-label">N (1/N)</span><input type="number" id="cb_rrN" value="2" style="width:60px;"></div>
-                                <div class="detail-row"><span class="detail-label">Exception Random</span><input type="number" id="cb_rrExceptionRandom" step="0.05" placeholder="Opt" style="width:60px;"></div>
-                                <div class="detail-row"><label><input type="checkbox" id="cb_rrExceptionAttacked"> Exception Attacked</label></div>
-                                <div class="detail-row"><label><input type="checkbox" id="cb_rrExceptionPieceValueSmaller"> Exception Value < Max</label></div>
-                            </div>
-                        </div>
-
-                        <!-- Max Moves -->
-                        <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-                            <div class="detail-row">
-                                <label><input type="checkbox" id="cb_useMaxMoves"> Use Max Moves</label>
-                            </div>
-                            <div id="opts_useMaxMoves" style="display:none; padding-left: 20px;">
-                                <div class="detail-row"><span class="detail-label">Max Moves</span><input type="number" id="cb_mmMax" value="2" style="width:60px;"></div>
-                                <div class="detail-row"><label><input type="checkbox" id="cb_mmExceptionAttacked"> Exception Attacked</label></div>
-                            </div>
-                        </div>
-
-                        <!-- Nth Chance -->
-                        <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-                            <div class="detail-row">
-                                <label><input type="checkbox" id="cb_useNthChance"> Use Nth Chance</label>
-                            </div>
-                            <div id="opts_useNthChance" style="display:none; padding-left: 20px;">
-                                <div class="detail-row"><span class="detail-label">Chance (0-1)</span><input type="number" id="cb_nthChance" step="0.05" value="0.1" style="width:60px;"></div>
-                                <div class="detail-row"><label><input type="checkbox" id="cb_ncExceptionAttacked"> Exception Attacked</label></div>
-                                <div class="detail-row"><label><input type="checkbox" id="cb_ncExceptionPieceValue"> Exception Value > Min</label></div>
-                            </div>
-                        </div>
-
-                        <!-- Remove Well Positioned -->
-                        <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-                            <div class="detail-row">
-                                <label><input type="checkbox" id="cb_useRemoveWellPositioned"> Use Remove Well Pos</label>
-                            </div>
-                            <div id="opts_useRemoveWellPositioned" style="display:none; padding-left: 20px;">
-                                <div class="detail-row"><span class="detail-label">N</span><input type="number" id="cb_rwpN" value="3" style="width:60px;"></div>
-                                <div class="detail-row"><label><input type="checkbox" id="cb_rwpExceptionAttacked"> Exception Attacked</label></div>
-                            </div>
-                        </div>
-
                     </div>
                 </div>
+
                 <div style="margin-top: 20px; text-align: center;">
                     <button class="primary" style="padding: 10px 40px; font-size: 16px;" onclick="createNewBot()">Create Bot</button>
                 </div>
@@ -360,6 +394,128 @@
         </div>
     </div>
 
+    <!-- Kill Bot Modal -->
+    <div id="killBotModal" class="modal-overlay" style="display:none;" onclick="if(event.target === this) closeKillBotModal()">
+        <div class="modal-content" style="max-width: 400px; padding: 20px;">
+            <div class="modal-header">
+                <h2>Kill Bots</h2>
+                <button onclick="closeKillBotModal()" style="padding:5px 10px;">X</button>
+            </div>
+            <div style="margin-top: 20px;">
+                <p>Select criteria to eliminate bots from the current generation:</p>
+                
+                <div class="detail-row" style="margin-bottom: 15px;">
+                    <span class="detail-label">Kill all below ELO:</span>
+                    <input type="number" id="kill_elo_threshold" value="1000" style="background:#333; color:#f0d9b5; padding:5px; border:1px solid #555; width: 80px;">
+                </div>
+                <button class="primary" style="background: #e5989b; border-color: #e5989b; width: 100%; margin-bottom: 10px;" onclick="killBotsByElo()">Execute (ELO)</button>
+
+                <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
+                
+                <button class="primary" style="background: #ff4d4d; border-color: #ff4d4d; width: 100%;" onclick="killAllBots()">Nuke Entire Generation</button>
+            </div>
+        </div>
+    </div>
+
     <script src="/evolution.js"></script>
+    <script>
+        let phases = [];
+        
+        function killSpecificBot(idToKill) {
+            // Forward the call to the function defined in evolution.js
+            if (window.killSpecificBotImpl) {
+                window.killSpecificBotImpl(idToKill);
+            }
+        }
+        
+        function switchTab(phaseId) {
+            // Hide all panels
+            document.querySelectorAll('.config-panel').forEach(p => p.classList.remove('active'));
+            // Show selected
+            const target = document.getElementById('config-' + phaseId);
+            if(target) target.classList.add('active');
+            
+            // Update tabs
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('tab-' + phaseId).classList.add('active');
+        }
+
+        function addNewPhaseTab() {
+            const id = 'p' + Math.floor(Math.random() * 10000);
+            const container = document.getElementById('phase-tabs-container');
+            const configContainer = document.getElementById('config-container');
+            
+            // Add Tab Button
+            const btn = document.createElement('button');
+            btn.className = 'tab-btn';
+            btn.id = 'tab-' + id;
+            btn.innerHTML = `Phase (<input type="number" class="phase-thresh-input" data-id="${id}" value="10" style="width:30px; background:transparent; border:none; color:inherit; font-weight:bold;"> Pcs) <span onclick="removePhase('${id}', event)" style="color:#e5989b; margin-left:5px;">&times;</span>`;
+            btn.onclick = (e) => { if(e.target.tagName !== 'INPUT' && e.target.tagName !== 'SPAN') switchTab(id); };
+            container.appendChild(btn);
+            
+            // Clone Base Config
+            const baseConfig = document.getElementById('config-base');
+            const newConfig = baseConfig.cloneNode(true);
+            newConfig.id = 'config-' + id;
+            newConfig.classList.remove('active');
+            
+            // Reset values in new config or keep defaults
+            // We need to attach event listeners for the checkboxes in the new panel
+            // Since the original event listeners were likely attached on load or inline, we need to re-init logic
+            
+            configContainer.appendChild(newConfig);
+            
+            // Re-bind checkbox toggles for this panel
+            bindCheckboxToggles(newConfig);
+            
+            phases.push(id);
+            switchTab(id);
+        }
+
+        function removePhase(id, e) {
+            e.stopPropagation();
+            if(confirm('Remove this phase?')) {
+                document.getElementById('tab-' + id).remove();
+                document.getElementById('config-' + id).remove();
+                phases = phases.filter(p => p !== id);
+                switchTab('base');
+            }
+        }
+        
+        function bindCheckboxToggles(context) {
+            context.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+                // Find parent container to identify which option this is
+                // The structure is usually label > input, inside a detail-row, inside a border-box
+                // We need to find the "Use X" checkboxes specifically to toggle their options div
+                
+                if(cb.className.includes('cb_use')) {
+                    // Extract the class name that starts with cb_use
+                    const classList = cb.className.split(' ');
+                    const useClass = classList.find(c => c.startsWith('cb_use'));
+                    
+                    if (useClass) {
+                        const toggleId = useClass.replace('cb_', 'opts_');
+                        const optsDiv = context.querySelector('.' + toggleId);
+                        if(optsDiv) {
+                            cb.onchange = () => {
+                                optsDiv.style.display = cb.checked ? 'block' : 'none';
+                            };
+                            // Trigger once to set initial state
+                            cb.onchange();
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize base panel
+        document.addEventListener('DOMContentLoaded', () => {
+            const base = document.getElementById('config-base');
+            if(base) {
+                base.classList.add('active');
+                bindCheckboxToggles(base);
+            }
+        });
+    </script>
 </body>
 </html>
