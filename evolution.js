@@ -685,3 +685,157 @@ function updateUI() {
 }
 
 window.onload = init;
+
+// --- Create Bot Modal Logic ---
+
+function openCreateBotModal() {
+    let modal = document.getElementById('createBotModal');
+    let raceSelect = document.getElementById('cb_race');
+    
+    // Populate races
+    raceSelect.innerHTML = '';
+    RACES.forEach(r => {
+        let opt = document.createElement('option');
+        opt.value = r;
+        opt.innerText = r.charAt(0).toUpperCase() + r.slice(1);
+        raceSelect.appendChild(opt);
+    });
+
+    // Reset inputs (optional, or keep last values)
+    // resetCreateBotInputs();
+    
+    // Bind toggle events for filter options
+    setupCheckboxToggles();
+
+    modal.style.display = 'flex';
+}
+
+function closeCreateBotModal() {
+    document.getElementById('createBotModal').style.display = 'none';
+}
+
+function setupCheckboxToggles() {
+    const map = {
+        'cb_useRemoveAttacked': 'opts_useRemoveAttacked',
+        'cb_useRemoveNonAttacking': 'opts_useRemoveNonAttacking',
+        'cb_useRandomlyRemove': 'opts_useRandomlyRemove',
+        'cb_useMaxMoves': 'opts_useMaxMoves',
+        'cb_useNthChance': 'opts_useNthChance',
+        'cb_useRemoveWellPositioned': 'opts_useRemoveWellPositioned'
+    };
+    
+    for (let cbId in map) {
+        let cb = document.getElementById(cbId);
+        let div = document.getElementById(map[cbId]);
+        
+        // Initial state
+        div.style.display = cb.checked ? 'block' : 'none';
+        
+        // Change listener
+        cb.onchange = () => {
+            div.style.display = cb.checked ? 'block' : 'none';
+        };
+    }
+}
+
+function createNewBot() {
+    // Helper to get value if input is not empty
+    const getNum = (id) => {
+        let el = document.getElementById(id);
+        if (el && el.value !== '') return parseFloat(el.value);
+        return undefined;
+    };
+    const getInt = (id) => {
+        let el = document.getElementById(id);
+        if (el && el.value !== '') return parseInt(el.value);
+        return undefined;
+    };
+    const getBool = (id) => {
+        let el = document.getElementById(id);
+        return el ? el.checked : false;
+    };
+    const getVal = (id) => {
+        let el = document.getElementById(id);
+        return el ? el.value : undefined;
+    };
+
+    let char = {
+        id: 'CUST-' + Math.random().toString(36).substr(2, 4).toUpperCase(),
+        race: getVal('cb_race'),
+        depth: getInt('cb_depth') || 2,
+        algorithm: getVal('cb_algorithm'),
+        score: 1000,
+        gamesPlayed: 0
+    };
+
+    // Magnifiers
+    let posValueWeight = getNum('cb_posValueWeight');
+    if (posValueWeight !== undefined) char.posValueWeight = posValueWeight;
+    
+    let pieceValueWeight = getNum('cb_pieceValueWeight');
+    if (pieceValueWeight !== undefined) char.pieceValueWeight = pieceValueWeight;
+    
+    let kingTropismWeight = getNum('cb_kingTropismWeight');
+    if (kingTropismWeight !== undefined) char.kingTropismWeight = kingTropismWeight;
+    
+    let defendedWeight = getNum('cb_defendedWeight');
+    if (defendedWeight !== undefined) char.defendedWeight = defendedWeight;
+    
+    let kingVulnAttackWeight = getNum('cb_kingVulnAttackWeight');
+    if (kingVulnAttackWeight !== undefined) char.kingVulnAttackWeight = kingVulnAttackWeight;
+    
+    let kingVulnProxWeight = getNum('cb_kingVulnProxWeight');
+    if (kingVulnProxWeight !== undefined) char.kingVulnProxWeight = kingVulnProxWeight;
+
+    // Filters
+    if (getBool('cb_useRemoveAttacked')) {
+        char.useRemoveAttacked = true;
+        char.raRandomException = getNum('cb_raRandomException');
+        char.raExceptionPieceValue = getBool('cb_raExceptionPieceValue');
+        char.raExceptionPieceValueSmaller = getBool('cb_raExceptionPieceValueSmaller');
+    }
+
+    if (getBool('cb_useRemoveNonAttacking')) {
+        char.useRemoveNonAttacking = true;
+        char.rnaMaxPieceValue = getInt('cb_rnaMaxPieceValue');
+        char.rnaExceptionRandom = getNum('cb_rnaExceptionRandom');
+        char.rnaExceptionPieceValue = getBool('cb_rnaExceptionPieceValue');
+        char.rnaExceptionPieceValueSmaller = getBool('cb_rnaExceptionPieceValueSmaller');
+    }
+
+    if (getBool('cb_useRandomlyRemove')) {
+        char.useRandomlyRemove = true;
+        char.rrN = getInt('cb_rrN');
+        char.rrExceptionAttacked = getBool('cb_rrExceptionAttacked');
+        char.rrExceptionPieceValueSmaller = getBool('cb_rrExceptionPieceValueSmaller');
+        char.rrExceptionRandom = getNum('cb_rrExceptionRandom');
+    }
+
+    if (getBool('cb_useMaxMoves')) {
+        char.useMaxMoves = true;
+        char.mmMax = getInt('cb_mmMax');
+        char.mmExceptionAttacked = getBool('cb_mmExceptionAttacked');
+    }
+
+    if (getBool('cb_useNthChance')) {
+        char.useNthChance = true;
+        char.nthChance = getNum('cb_nthChance');
+        char.ncExceptionAttacked = getBool('cb_ncExceptionAttacked');
+        char.ncExceptionPieceValue = getBool('cb_ncExceptionPieceValue');
+    }
+
+    if (getBool('cb_useRemoveWellPositioned')) {
+        char.useRemoveWellPositioned = true;
+        char.rwpN = getInt('cb_rwpN');
+        char.rwpExceptionAttacked = getBool('cb_rwpExceptionAttacked');
+    }
+
+    // Add to list and save
+    characters.push(char);
+    saveData();
+    updateUI();
+    closeCreateBotModal();
+    
+    // Optional: Flash success or scroll to bot
+    alert(`Custom Bot ${char.id} created!`);
+}
