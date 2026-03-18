@@ -127,6 +127,8 @@ self.addEventListener("message", function(e) {
             move = minimaxDeep(state, state.turn, depth, [], magnifiers, filters);
         } else if (algorithm === 'minimaxQuiescence') {
             move = minimaxQuiescence(state, state.turn, depth, [], magnifiers, filters);
+        } else if (algorithm === 'proofNumberSearch') {
+            move = proofNumberSearch(state, state.turn, depth, [], magnifiers, filters);
         } else {
             // Note: In your code, `minimaxAlphaBeta` calls `alphaBetaOptimized`
             // So they are essentially the same for getting a move

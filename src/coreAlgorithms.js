@@ -724,3 +724,212 @@ function quiescenceSearch(state, alpha, beta, isMaximizer, maximizerColor, filte
     
     return isMaximizer ? alpha : beta;
 }
+
+function proofNumberSearch(state, maximizer, depth, removedTurns, magnifiers, filters) {
+    const maxNodes = depth * 500; // Heuristic node limit based on depth
+    let root = new PnsNode(state, null, null, true, maximizer);
+    
+    // Initial expansion
+    root.expand(maximizer, filters);
+
+    let nodesCount = 1; // Root
+    
+    // Loop until solved or node limit reached
+    while(nodesCount < maxNodes && root.pn !== 0 && root.dn !== 0) {
+        let mostProving = root.selectMostProvingNode();
+        if(!mostProving) break;
+        
+        // Expand the leaf
+        // Determine turn for the leaf node
+        let turn = mostProving.isOr ? maximizer : getEnemy(maximizer);
+        
+        mostProving.expand(turn, filters);
+        nodesCount += mostProving.children.length;
+        
+        // Backpropagate values
+        mostProving.updateAncestors();
+    }
+    
+    // Select best move based on results
+    let bestChild = null;
+    
+    if (root.pn === 0) {
+        // We found a proven win
+        bestChild = root.children.find(c => c.pn === 0);
+    } else if (root.dn === 0) {
+        // Proven loss - try to delay it (highest dn)
+        bestChild = root.children.reduce((best, current) => {
+            if (!best) return current;
+            return current.dn > best.dn ? current : best;
+        }, null);
+    } else {
+        // Unsolved - use heuristic: minimal PN (closest to win)
+        // If tied, use maximal DN (hardest to lose)
+        // Fallback: use static evaluation if PN/DN are equal (unexplored)
+        
+        bestChild = root.children.reduce((best, current) => {
+            if (!best) return current;
+            
+            // Prioritize exploring promising nodes
+            if (current.pn < best.pn) return current;
+            if (current.pn > best.pn) return best;
+            
+            // Tie-break with disproof number
+            if (current.dn > best.dn) return current;
+            if (current.dn < best.dn) return best;
+            
+            // If still tied, use static evaluation if available, or just first one
+            // We could run evaluateBoardUltraFast here for tie-breaking
+            return best;
+        }, null);
+        
+        // If we still have a tie (e.g. all 1/1), evaluate children statically
+        if (bestChild && bestChild.pn === 1 && bestChild.dn === 1) {
+             let bestScore = -Infinity;
+             for (let child of root.children) {
+                 let score = evaluateBoardUltraFast(maximizer, child.state.pieces, child.state.board, magnifiers);
+                 if (score > bestScore) {
+                     bestScore = score;
+                     bestChild = child;
+                 }
+             }
+        }
+    }
+    
+    if (bestChild && bestChild.move) {
+        return bestChild.move;
+    }
+    
+    return undefined;
+}
+
+class PnsNode {
+    constructor(state, move, parent, isOr, maximizerColor) {
+        this.state = state;
+        this.move = move;
+        this.parent = parent;
+        this.children = [];
+        this.isOr = isOr; // OR node = maximizer's turn
+        this.maximizerColor = maximizerColor;
+        this.expanded = false;
+        
+        this.pn = 1;
+        this.dn = 1;
+        
+        this.evaluateTerminal();
+    }
+    
+    evaluateTerminal() {
+        if (this.state.won) {
+            if (this.state.won === this.maximizerColor) {
+                this.pn = 0;
+                this.dn = Infinity;
+            } else if (this.state.won === 'tie') {
+                this.pn = Infinity;
+                this.dn = Infinity;
+            } else {
+                this.pn = Infinity;
+                this.dn = 0;
+            }
+        }
+    }
+    
+    expand(turn, filters) {
+        if (this.expanded || this.pn === 0 || this.dn === 0) return;
+        
+        let moves = generateMovesFromPiecesAlphaBeta(this.state, turn, filters);
+        
+        if (moves.length === 0 && !this.state.won) {
+             // No moves available but not marked won/lost yet
+             // Assume loss for current player 'turn'
+             if (turn === this.maximizerColor) {
+                 this.pn = Infinity;
+                 this.dn = 0;
+             } else {
+                 this.pn = 0;
+                 this.dn = Infinity;
+             }
+             this.expanded = true;
+             return;
+        }
+        
+        for (let m of moves) {
+            let nextState = {
+                pieces: m.pieces,
+                board: this.state.board,
+                turn: getEnemy(turn),
+                won: m.won
+            };
+            
+            let child = new PnsNode(nextState, m, this, !this.isOr, this.maximizerColor);
+            this.children.push(child);
+        }
+        
+        this.expanded = true;
+        this.updateValue();
+    }
+    
+    updateValue() {
+        if (this.children.length === 0) return;
+        
+        if (this.isOr) {
+            // OR node: pn = min(children.pn), dn = sum(children.dn)
+            let minPn = Infinity;
+            let sumDn = 0;
+            for (let c of this.children) {
+                if (c.pn < minPn) minPn = c.pn;
+                sumDn += c.dn;
+            }
+            this.pn = minPn;
+            this.dn = sumDn;
+        } else {
+            // AND node: pn = sum(children.pn), dn = min(children.dn)
+            let sumPn = 0;
+            let minDn = Infinity;
+            for (let c of this.children) {
+                sumPn += c.pn;
+                if (c.dn < minDn) minDn = c.dn;
+            }
+            this.pn = sumPn;
+            this.dn = minDn;
+        }
+    }
+    
+    updateAncestors() {
+        let curr = this;
+        while (curr.parent) {
+            let parent = curr.parent;
+            let oldPn = parent.pn;
+            let oldDn = parent.dn;
+            
+            parent.updateValue();
+            
+            if (parent.pn === oldPn && parent.dn === oldDn) break;
+            curr = parent;
+        }
+    }
+    
+    selectMostProvingNode() {
+        let curr = this;
+        while (curr.expanded && curr.children.length > 0) {
+            if (curr.pn === 0 || curr.dn === 0) return curr; // Solved
+            
+            if (curr.isOr) {
+                // OR node: select child with min pn
+                let best = curr.children[0];
+                for (let c of curr.children) {
+                    if (c.pn < best.pn) best = c;
+                }
+                curr = best;
+            } else {
+                // AND node: select child with min dn
+                let best = curr.children[0];
+                for (let c of curr.children) {
+                    if (c.dn < best.dn) best = c;
+                }
+                curr = best;
+            }
+        }
+        return curr;
+    }
+}
