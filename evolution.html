@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess 2 - AI Evolution</title>
+    <link rel="stylesheet" href="/src/main.css">
+    <style>
+        body {
+            background-color: #2e2e2e;
+            color: #f0d9b5;
+            font-family: 'Georgia', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            width: 95%;
+            max-width: 1200px;
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        }
+        button {
+            padding: 10px 20px;
+            background: #829769;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #6a7d55;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 14px;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #444;
+        }
+        th {
+            background-color: #333;
+            position: sticky;
+            top: 0;
+        }
+        .filter-tag {
+            display: inline-block;
+            padding: 2px 4px;
+            margin: 1px;
+            border-radius: 3px;
+            font-size: 10px;
+            font-weight: bold;
+            color: #1a1a1a;
+        }
+        .filter-ra { background-color: #ff6b6b; } /* Remove Attacked */
+        .filter-rna { background-color: #4ecdc4; } /* Remove Non-Attacking */
+        .filter-rr { background-color: #ffe66d; } /* Random Remove */
+        
+        #status {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+    <script src="/src/jsonfn.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Evolutionary Arena</h1>
+        <p>Characters evolve by playing rapid games against each other. Max 50 turns per side. Results cached in localStorage. <br>
+           <b>Timeout:</b> >60s per move counts as loss. <b>Elimination:</b> Bots below 980 ELO are killed. <br>
+           <b>Filters:</b> 
+           <span class="filter-tag filter-ra">RA</span> Remove Attacked, 
+           <span class="filter-tag filter-rna">RNA</span> Remove Non-Attacking, 
+           <span class="filter-tag filter-rr">RR</span> Random Remove,
+           <span class="filter-tag" style="background-color: #f7a072;">MM</span> Max Moves,
+           <span class="filter-tag" style="background-color: #b5838d;">NC</span> Nth Chance,
+           <span class="filter-tag" style="background-color: #e5989b;">RWP</span> Remove Well Positioned <br>
+           <b>Exceptions:</b> pV (Piece Value > min), att (Piece Attacked), rnd (Random Chance), pVS (Piece Value < max)
+        </p>
+        
+        <div style="margin-bottom:20px;">
+            <button id="toggleBtn" onclick="toggleEvolution()">Start Evolution</button>
+            <a href="/hallOfFame.html"><button style="background:#555;">Go to Hall of Fame</button></a>
+        </div>
+        <div id="status">Ready to start.</div>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>ID</th>
+                    <th>Race</th>
+                    <th>ELO</th>
+                    <th>Games</th>
+                    <th>Alg</th>
+                    <th>Depth</th>
+                    <th>Piece W.</th>
+                    <th>Pos W.</th>
+                    <th>King T.</th>
+                    <th>Def. W.</th>
+                    <th>K. Vuln</th>
+                    <th>Filters</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="leaderboard">
+                <!-- Leaderboard entries -->
+            </tbody>
+        </table>
+        <div id="raceSelectionModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
+            <div style="background:#1a1a1a; padding:30px; border-radius:8px; text-align:center; min-width:300px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+                <h2 style="margin-top:0;">Choose Your Race</h2>
+                <select id="playerRaceSelect" style="padding:10px; font-size:16px; margin:20px 0; width:100%; background:#333; color:#f0d9b5; border:1px solid #555; border-radius:4px;">
+                    <!-- Options populated by JS -->
+                </select>
+                <br>
+                <div style="display:flex; justify-content:space-between; gap:10px;">
+                    <button onclick="confirmPlay()" style="flex:1;">Start Game</button>
+                    <button onclick="closeRaceModal()" style="background:#555; flex:1;">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/evolution.js"></script>
+</body>
+</html>

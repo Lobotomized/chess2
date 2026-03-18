@@ -412,3 +412,16 @@ function minimaxAlphaBeta(state, maximizer, depth, removedTurns, magnifiers, fil
      }
      return valueCounter;
  }
+
+function getMoveByValue(moves, weakest){
+    if(!moves.length){
+        return undefined;
+    }
+    return moves.reduce((max, move) => {
+        if(!weakest){
+            return max.value > move.value ? max : move;
+        } else {
+            return max.value < move.value ? max : move;
+        }
+    });
+ }

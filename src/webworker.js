@@ -18,24 +18,12 @@ importScripts('/src/AI/general.js')
 importScripts('/src/AI/magnifiers.js')
 importScripts('/src/AI/filters.js')
 
-importScripts('/wasm/webworker_interface.js')
 
 self.addEventListener("message", async function(e) {
     
     let obj = JSONfn.parse(e.data)
     if(!obj.state.won){
             
-            // Allow bypassing to JS AI using a flag or if Wasm isn't ready
-            if (obj.useWasm) {
-                if (typeof wasmReadyPromise !== "undefined") {
-                    await wasmReadyPromise;
-                }
-                let wasmMove = callWasmAI(obj);
-                if (wasmMove) {
-                    postMessage(JSONfn.stringify(wasmMove));
-                    return;
-                }
-            }
 
             let move;
             let methods = {
@@ -47,7 +35,9 @@ self.addEventListener("message", async function(e) {
                 positionalOffeniveCharacter:positionalOffensiveCharacter,
                 noPosition:noPosition
             }
-            obj.AIPower = parseInt(obj.AIPower)
+            if(obj.AIPower !== 'customEvolution') {
+                obj.AIPower = parseInt(obj.AIPower)
+            }
             if(obj.AIPower === -1){
                 if(obj.state.pieces.length > 20){
                     obj.AIPower = 1;
@@ -260,40 +250,90 @@ self.addEventListener("message", async function(e) {
                 )
                 console.timeEnd('106')
             }
-            else if(obj.AIPower === 107){
-                console.time('107')
+            else if(obj.AIPower === 'customEvolution'){
+                console.time('customEvolution');
                 
-                // Ensure WASM is ready
-                if (typeof wasmReadyPromise !== "undefined") {
-                    await wasmReadyPromise;
-                }
+                // Read custom AI configuration
+                let charWhiteStr = obj.customEvolutionWhite;
+                let charBlackStr = obj.customEvolutionBlack;
+                let charConfigStr = obj.color === 'white' ? charWhiteStr : charBlackStr;
                 
-                let wasmMove = callWasmAI(obj);
-                console.log(wasmMove, '  the move?! ', getColorPieces(obj.state.pieces, obj.state.turn))
-               
-                if (wasmMove) {
-                    move = wasmMove;
+                let moveFallback = false;
+
+                if (charConfigStr) {
+                    try {
+                        let charConfig = JSON.parse(charConfigStr);
+                        
+                        // Build magnifiers
+                        let mags = [];
+                        if (charConfig.posValueWeight !== undefined) mags.push({ method: evaluationMagnifierMaxOptions, options: { posValue: charConfig.posValueWeight } });
+                        if (charConfig.pieceValueWeight !== undefined) mags.push({ method: evaluationMagnifierPiece, options: { pieceValue: charConfig.pieceValueWeight } });
+                        if (charConfig.kingTropismWeight !== undefined) mags.push({ method: evaluationMagnifierKingTropism, options: { relativeValue: charConfig.kingTropismWeight, onlyForEnemy: true, pieceValue: 1 } });
+                        if (charConfig.defendedWeight !== undefined) mags.push({ method: evaluationMagnifierPieceDefended, options: { relativeValue: charConfig.defendedWeight } });
+                        if (charConfig.kingVulnAttackWeight !== undefined) mags.push({ method: evaluationMagnifierKingVulnerability, options: { attackValue: charConfig.kingVulnAttackWeight, proximityValue: charConfig.kingVulnProxWeight || 0 } });
+                        
+                        // Build filters
+                        let filters = [];
+                        if (charConfig.useRemoveAttacked) {
+                            let exceptions = [];
+                            if (charConfig.raRandomException) exceptions.push(randomException);
+                            if (charConfig.raExceptionPieceValue) exceptions.push(pieceValueMustBeBiggerThanException);
+                            if (charConfig.raExceptionPieceValueSmaller) exceptions.push(pieceValueMustBeSmallerThanException);
+                            filters.push({ method: removeAttackedMovesFilter, options: { randomException: charConfig.raRandomException || 0.1, minPieceValue: 3, maxPieceValue: 5, exceptions: exceptions } });
+                        }
+                        if (charConfig.useRemoveNonAttacking) {
+                            let exceptions = [];
+                            if (charConfig.rnaExceptionRandom) exceptions.push(randomException);
+                            if (charConfig.rnaExceptionPieceValue) exceptions.push(pieceValueMustBeBiggerThanException);
+                            if (charConfig.rnaExceptionPieceValueSmaller) exceptions.push(pieceValueMustBeSmallerThanException);
+                            filters.push({ method: removeNonAttackingMovesFilter, options: { maxPieceValue: charConfig.rnaMaxPieceValue || 2, minPieceValue: 3, randomException: charConfig.rnaExceptionRandom, exceptions: exceptions } });
+                        }
+                        if (charConfig.useRandomlyRemove) {
+                            let exceptions = [];
+                            if (charConfig.rrExceptionAttacked) exceptions.push(pieceAttackedException);
+                            if (charConfig.rrExceptionPieceValueSmaller) exceptions.push(pieceValueMustBeSmallerThanException);
+                            if (charConfig.rrExceptionRandom) exceptions.push(randomException);
+                            filters.push({ method: randomlyRemove1NthFilter, options: { n: charConfig.rrN || 2, maxPieceValue: 4, randomException: charConfig.rrExceptionRandom, exceptions: exceptions } });
+                        }
+                        if (charConfig.useMaxMoves) {
+                            let exceptions = [];
+                            if (charConfig.mmExceptionAttacked) exceptions.push(pieceAttackedException);
+                            filters.push({ method: maxNumberOfMovesPerPieceFilter, options: { maximum: charConfig.mmMax || 2, exceptions: exceptions } });
+                        }
+                        if (charConfig.useNthChance) {
+                            let exceptions = [];
+                            if (charConfig.ncExceptionAttacked) exceptions.push(pieceAttackedException);
+                            if (charConfig.ncExceptionPieceValue) exceptions.push(pieceValueMustBeBiggerThanException);
+                            filters.push({ method: nthChanceToRemovePieceFilter, options: { n: charConfig.nthChance !== undefined ? charConfig.nthChance : 0.1, minPieceValue: 3, exceptions: exceptions } });
+                        }
+                        if (charConfig.useRemoveWellPositioned) {
+                            let exceptions = [];
+                            if (charConfig.rwpExceptionAttacked) exceptions.push(pieceAttackedException);
+                            filters.push({ method: removeWellPositionedPiecesFilter, options: { n: charConfig.rwpN || 3, exceptions: exceptions } });
+                        }
+
+                        let depth = charConfig.depth || 2;
+                        let algorithm = charConfig.algorithm || 'minimaxAlphaBeta';
+
+                        if (algorithm === 'minimaxDeep') {
+                            move = minimaxDeep(obj.state, obj.color, depth, obj.removedTurns, mags, filters);
+                        } else {
+                            move = minimaxAlphaBeta(obj.state, obj.color, depth, obj.removedTurns, mags, filters);
+                        }
+                    } catch(e) {
+                        console.error("Failed parsing custom AI config", e);
+                        moveFallback = true;
+                    }
                 } else {
-                    console.warn("WASM AI failed for difficulty 107, falling back to JS (diff 106)");
-                    // Fallback to JS AI (same logic as 106)
-                    let character = methods[obj.AICharacter];
-                    if(!obj.AICharacter){
-                        character = rogueLikeCharacter;
-                    }
-                    let depth = 3;
-                     if(obj.state.pieces.length < 16  && obj.state.pieces.length > 8){
-                        depth = 4;
-                    }
-                    else if(obj.state.pieces.length < 8){
-                        depth = 5;
-                    }
-                    move = minimaxAlphaBeta(obj.state,obj.color,depth, obj.removedTurns,
-                        character(0),
-                        [
-                        ]
-                    )
+                    moveFallback = true;
                 }
-                console.timeEnd('107')
+
+                if (moveFallback) {
+                    // Fallback to medium AI if no config found
+                    move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns, methods[obj.AICharacter](0), []);
+                }
+
+                console.timeEnd('customEvolution');
             }
             move.removedTurns = obj.removedTurns;
             postMessage(JSONfn.stringify(move));

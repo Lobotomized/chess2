@@ -10,6 +10,10 @@ let aiPowers = {
     black:AIPowerBlack ? AIPowerBlack : 3
 }
 
+// Ensure "customEvolution" doesn't get parsed as int
+if (AIPowerWhite === 'customEvolution') aiPowers.white = 'customEvolution';
+if (AIPowerBlack === 'customEvolution') aiPowers.black = 'customEvolution';
+
 let ani = function(){
     animate(hotseatGame.state)
 }
@@ -339,7 +343,19 @@ canvas.addEventListener('click', (e) => {
         
         state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
         if(state.turn === AIColor){
-            w.postMessage(JSONfn.stringify({state:state, color:AIColor, AIPower:aiPowers[state.turn]}));
+            
+            // Read custom evolution bot config from localStorage if playing against one
+            let customEvolutionBlackStr = undefined;
+            if (aiPowers[state.turn] === 'customEvolution') {
+                customEvolutionBlackStr = localStorage.getItem('chess_evolution_custom_ai');
+            }
+
+            w.postMessage(JSONfn.stringify({
+                state:state, 
+                color:AIColor, 
+                AIPower:aiPowers[state.turn],
+                customEvolutionBlack: customEvolutionBlackStr
+            }));
 
             w.onmessage = function(event){
                 let move = JSONfn.parse(event.data)
@@ -350,7 +366,13 @@ canvas.addEventListener('click', (e) => {
                     if(move.removedTurns){
                         removedTurns = [...removedTurns, ...move.removedTurns]
                     }
-                    w.postMessage(JSONfn.stringify({state:state, color:AIColor, AIPower:aiPowers[state.turn], removedTurns:removedTurns}));
+                    w.postMessage(JSONfn.stringify({
+                        state:state, 
+                        color:AIColor, 
+                        AIPower:aiPowers[state.turn], 
+                        removedTurns:removedTurns,
+                        customEvolutionBlack: customEvolutionBlackStr
+                    }));
                 }
             }
         }

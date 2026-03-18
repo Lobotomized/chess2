@@ -2,10 +2,11 @@ const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
 const Map = require('./models/map'); // Import the Map model
+const Bot = require('./models/bot'); // Import the Bot model
+app.use(express.json()); // Allow JSON body parsing
 app.use('/boardGeneration.js', express.static('./boardGeneration.js'))
 app.use('/pieceDefinitions.js', express.static('./pieceDefinitions.js'))
 app.use('/pieces', express.static('./pieces'))
-app.use('/wasm', express.static('./wasm'))
 app.use('/helperFunctions.js', express.static('./helperFunctions.js'))
 app.use('/moveMethods.js', express.static('./moveMethods.js'))
 app.use('/rogueLike.js', express.static('./rogueLike.js'))
@@ -13,6 +14,11 @@ app.use('/rogueLikeDifficulties.js', express.static('./rogueLikeDifficulties.js'
 app.use('/rogueLikeDetails.js', express.static('./rogueLikeDetails.js'))
 app.use('/grandMap.js', express.static('./grandMap.js'))
 app.use('/mapVisuals.js', express.static('./mapVisuals.js'))
+app.use('/evolution.html', express.static('./evolution.html'))
+app.use('/evolution.js', express.static('./evolution.js'))
+app.use('/evolutionWorker.js', express.static('./evolutionWorker.js'))
+app.use('/hallOfFame.html', express.static('./hallOfFame.html'))
+app.use('/hallOfFame.js', express.static('./hallOfFame.js'))
 
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
@@ -54,6 +60,25 @@ mongoose.connect('mongodb+srv://Lobotomy:Micasmu4ka@cluster0.tippd.mongodb.net/c
 // app.use('/pieceDefinitions.js, express.static('pieces'))
 // app.use('/boardGeneration.js', express.static('boardGeneration.js'))
 
+
+app.get('/bots', async (req, res) => {
+    try {
+        const bots = await Bot.find().sort({ score: -1 }).limit(100);
+        res.json(bots);
+    } catch (err) {
+        res.status(500).send(err);
+    }
+});
+
+app.post('/bots', async (req, res) => {
+    try {
+        const bot = new Bot(req.body);
+        await bot.save();
+        res.status(201).json(bot);
+    } catch (err) {
+        res.status(500).send(err);
+    }
+});
 
 let lobby = newG({properties:{
     baseState: {
