@@ -7,67 +7,160 @@
     <link rel="stylesheet" href="/src/main.css">
     <style>
         body {
-            background-color: #2e2e2e;
-            color: #f0d9b5;
-            font-family: 'Georgia', serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding: 20px;
+            padding: 40px;
+            margin: 0;
         }
         .container {
             width: 95%;
-            max-width: 1200px;
-            background: #1a1a1a;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            max-width: 1400px;
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+        }
+        h1 {
+            color: #f0d9b5;
+            margin-bottom: 10px;
+            font-weight: 300;
+            letter-spacing: 1px;
+        }
+        p {
+            color: #aaa;
+            line-height: 1.6;
         }
         button {
             padding: 10px 20px;
-            background: #829769;
-            color: white;
-            border: none;
-            border-radius: 4px;
+            background: #3a3a3a;
+            color: #e0e0e0;
+            border: 1px solid #555;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 16px;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            margin-right: 5px;
         }
         button:hover {
+            background: #505050;
+            border-color: #777;
+            transform: translateY(-1px);
+        }
+        button.primary {
+            background: #829769;
+            border-color: #829769;
+            color: white;
+        }
+        button.primary:hover {
             background: #6a7d55;
+            border-color: #6a7d55;
         }
         table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 30px;
             font-size: 14px;
+            background: #252525;
+            border-radius: 8px;
+            overflow: hidden;
         }
         th, td {
-            padding: 8px;
+            padding: 15px;
             text-align: left;
-            border-bottom: 1px solid #444;
+            border-bottom: 1px solid #333;
         }
         th {
-            background-color: #333;
+            background-color: #2a2a2a;
+            color: #888;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 12px;
+            letter-spacing: 0.5px;
             position: sticky;
             top: 0;
         }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover td {
+            background-color: #2d2d2d;
+        }
         .filter-tag {
             display: inline-block;
-            padding: 2px 4px;
-            margin: 1px;
-            border-radius: 3px;
-            font-size: 10px;
-            font-weight: bold;
+            padding: 3px 6px;
+            margin: 2px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
             color: #1a1a1a;
+            cursor: default;
         }
-        .filter-ra { background-color: #ff6b6b; } /* Remove Attacked */
-        .filter-rna { background-color: #4ecdc4; } /* Remove Non-Attacking */
-        .filter-rr { background-color: #ffe66d; } /* Random Remove */
+        .filter-ra { background-color: #ff6b6b; } 
+        .filter-rna { background-color: #4ecdc4; } 
+        .filter-rr { background-color: #ffe66d; } 
         
         #status {
             margin-top: 20px;
-            font-size: 18px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #829769;
+            background: #252525;
+            padding: 10px 15px;
+            border-radius: 6px;
+            display: inline-block;
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            min-width: 400px;
+            max-width: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            border: 1px solid #333;
+            text-align: left;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .modal-header h2 { margin: 0; color: #f0d9b5; }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        .detail-label { color: #888; }
+        .detail-value { font-weight: bold; color: #e0e0e0; }
+        .section-title {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: #829769;
+            font-size: 14px;
+            text-transform: uppercase;
             font-weight: bold;
         }
     </style>
@@ -89,8 +182,8 @@
         </p>
         
         <div style="margin-bottom:20px;">
-            <button id="toggleBtn" onclick="toggleEvolution()">Start Evolution</button>
-            <a href="/hallOfFame.html"><button style="background:#555;">Go to Hall of Fame</button></a>
+            <button class="primary" id="toggleBtn" onclick="toggleEvolution()">Start Evolution</button>
+            <a href="/hallOfFame.html"><button>Go to Hall of Fame</button></a>
         </div>
         <div id="status">Ready to start.</div>
         
@@ -132,6 +225,19 @@
         </div>
     </div>
     
+    <!-- Bot Details Modal -->
+    <div id="detailsModal" class="modal-overlay" onclick="if(event.target === this) closeDetailsModal()">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Bot Details</h2>
+                <button onclick="closeDetailsModal()" style="padding:5px 10px;">X</button>
+            </div>
+            <div id="modalBody">
+                <!-- Content populated by JS -->
+            </div>
+        </div>
+    </div>
+
     <script src="/evolution.js"></script>
 </body>
 </html>

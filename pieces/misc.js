@@ -1,4 +1,5 @@
 try{
+    
     var {posValue: posValueImport, findCopyPieceByXY} = require('../helperFunctions.js')
     if(typeof window === 'undefined'){
         global.posValue = posValueImport;

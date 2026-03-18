@@ -3,7 +3,8 @@ const app = express();
 const mongoose = require('mongoose');
 const Map = require('./models/map'); // Import the Map model
 const Bot = require('./models/bot'); // Import the Bot model
-app.use(express.json()); // Allow JSON body parsing
+const GameHistory = require('./models/gameHistory'); // Import the GameHistory model
+app.use(express.json({ limit: '50mb' })); // Allow JSON body parsing with large limit
 app.use('/boardGeneration.js', express.static('./boardGeneration.js'))
 app.use('/pieceDefinitions.js', express.static('./pieceDefinitions.js'))
 app.use('/pieces', express.static('./pieces'))
@@ -19,6 +20,8 @@ app.use('/evolution.js', express.static('./evolution.js'))
 app.use('/evolutionWorker.js', express.static('./evolutionWorker.js'))
 app.use('/hallOfFame.html', express.static('./hallOfFame.html'))
 app.use('/hallOfFame.js', express.static('./hallOfFame.js'))
+app.use('/replay.html', express.static('./replay.html'))
+app.use('/replay.js', express.static('./replay.js'))
 
 const http = require('http').createServer(app);
 const io = require('socket.io')(http);
@@ -75,6 +78,39 @@ app.post('/bots', async (req, res) => {
         const bot = new Bot(req.body);
         await bot.save();
         res.status(201).json(bot);
+    } catch (err) {
+        res.status(500).send(err);
+    }
+});
+
+app.post('/games', async (req, res) => {
+    try {
+        const game = new GameHistory(req.body);
+        await game.save();
+        res.status(201).json(game);
+    } catch (err) {
+        res.status(500).send(err);
+    }
+});
+
+app.get('/games/:botId', async (req, res) => {
+    try {
+        const games = await GameHistory.find({ 
+            $or: [
+                { whiteId: req.params.botId },
+                { blackId: req.params.botId }
+            ] 
+        }).sort({ date: -1 }).limit(50);
+        res.json(games);
+    } catch (err) {
+        res.status(500).send(err);
+    }
+});
+
+app.get('/game/:gameId', async (req, res) => {
+    try {
+        const game = await GameHistory.findById(req.params.gameId);
+        res.json(game);
     } catch (err) {
         res.status(500).send(err);
     }

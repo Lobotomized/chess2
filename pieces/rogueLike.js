@@ -1,5 +1,8 @@
 
 try{
+        var {playerMove} = require('../moveMethods.js')
+    var {checkEmptyHorizontalBetween, isRoadAttacked, blockableCheck, areYouChecked, findPieceByXY, 
+        findCopyPieceByXY, areYouCheckedWithoutTempMoves, isPositionAttacked, lightBoardFE, posValue: posValueImport, JSONfn: JSONfnImport} = require('../helperFunctions.js')
     var {posValue: posValueImport} = require('../helperFunctions.js')
     if(typeof window === 'undefined'){
         global.posValue = posValueImport;

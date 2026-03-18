@@ -1,5 +1,6 @@
 try{
     var {posValue: posValueImport, cyborgTeleport} = require('../helperFunctions.js')
+    
     if(typeof window === 'undefined'){
         global.posValue = posValueImport;
     }

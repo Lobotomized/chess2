@@ -132,6 +132,139 @@ function playAgainst(charId) {
     modal.style.display = 'flex';
 }
 
+function showDetails(charId) {
+    let c = characters.find(char => char.id === charId);
+    if (!c) return;
+
+    document.getElementById('modalTitle').innerText = `Bot: ${c.id}`;
+    let body = document.getElementById('modalBody');
+    
+    let filtersHtml = '';
+    
+    // Helper to format exceptions
+    const formatExc = (val, name) => val ? `<div class="detail-row"><span class="detail-label"> - ${name}</span><span class="detail-value">Yes</span></div>` : '';
+    const formatVal = (val, name) => val !== undefined ? `<div class="detail-row"><span class="detail-label"> - ${name}</span><span class="detail-value">${val.toFixed ? val.toFixed(2) : val}</span></div>` : '';
+
+    if(c.useRemoveAttacked) {
+        filtersHtml += `<div class="section-title">Remove Attacked Moves</div>`;
+        filtersHtml += formatVal(c.raRandomException, 'Random Exception');
+        filtersHtml += formatExc(c.raExceptionPieceValue, 'Piece Value Exception');
+        filtersHtml += formatExc(c.raExceptionPieceValueSmaller, 'Piece Value Smaller Exception');
+    }
+    if(c.useRemoveNonAttacking) {
+        filtersHtml += `<div class="section-title">Remove Non-Attacking Moves</div>`;
+        filtersHtml += formatVal(c.rnaMaxPieceValue, 'Max Piece Value');
+        filtersHtml += formatVal(c.rnaExceptionRandom, 'Random Exception');
+        filtersHtml += formatExc(c.rnaExceptionPieceValue, 'Piece Value Exception');
+        filtersHtml += formatExc(c.rnaExceptionPieceValueSmaller, 'Piece Value Smaller Exception');
+    }
+    if(c.useRandomlyRemove) {
+        filtersHtml += `<div class="section-title">Randomly Remove Moves</div>`;
+        filtersHtml += formatVal(c.rrN, '1 in N moves removed');
+        filtersHtml += formatVal(c.rrExceptionRandom, 'Random Exception');
+        filtersHtml += formatExc(c.rrExceptionAttacked, 'Attacked Exception');
+        filtersHtml += formatExc(c.rrExceptionPieceValueSmaller, 'Piece Value Smaller Exception');
+    }
+    if(c.useMaxMoves) {
+        filtersHtml += `<div class="section-title">Max Moves Per Piece</div>`;
+        filtersHtml += formatVal(c.mmMax, 'Max Moves');
+        filtersHtml += formatExc(c.mmExceptionAttacked, 'Attacked Exception');
+    }
+    if(c.useNthChance) {
+        filtersHtml += `<div class="section-title">Nth Chance to Skip Piece</div>`;
+        filtersHtml += formatVal(c.nthChance, 'Chance');
+        filtersHtml += formatExc(c.ncExceptionAttacked, 'Attacked Exception');
+        filtersHtml += formatExc(c.ncExceptionPieceValue, 'Piece Value Exception');
+    }
+    if(c.useRemoveWellPositioned) {
+        filtersHtml += `<div class="section-title">Remove Well Positioned</div>`;
+        filtersHtml += formatVal(c.rwpN, 'Max Moves Threshold');
+        filtersHtml += formatExc(c.rwpExceptionAttacked, 'Attacked Exception');
+    }
+
+    body.innerHTML = `
+        <div class="section-title" style="margin-top:0;">General Stats</div>
+        <div class="detail-row"><span class="detail-label">ELO Score</span><span class="detail-value">${Math.round(c.score)}</span></div>
+        <div class="detail-row"><span class="detail-label">Games Played</span><span class="detail-value">${c.gamesPlayed}</span></div>
+        <div class="detail-row"><span class="detail-label">Algorithm</span><span class="detail-value">${c.algorithm || 'minimaxAlphaBeta'}</span></div>
+        <div class="detail-row"><span class="detail-label">Search Depth</span><span class="detail-value">${c.depth}</span></div>
+        
+        <div class="section-title">Magnifiers (Weights)</div>
+        <div class="detail-row"><span class="detail-label">Piece Value</span><span class="detail-value">${c.pieceValueWeight !== undefined ? c.pieceValueWeight.toFixed(2) : '-'}</span></div>
+        <div class="detail-row"><span class="detail-label">Positional Value</span><span class="detail-value">${c.posValueWeight !== undefined ? c.posValueWeight.toFixed(2) : '-'}</span></div>
+        <div class="detail-row"><span class="detail-label">King Tropism</span><span class="detail-value">${c.kingTropismWeight !== undefined ? c.kingTropismWeight.toFixed(2) : '-'}</span></div>
+        <div class="detail-row"><span class="detail-label">Defended Pieces</span><span class="detail-value">${c.defendedWeight !== undefined ? c.defendedWeight.toFixed(2) : '-'}</span></div>
+        <div class="detail-row"><span class="detail-label">King Vulnerability (Attack)</span><span class="detail-value">${c.kingVulnAttackWeight !== undefined ? c.kingVulnAttackWeight.toFixed(2) : '-'}</span></div>
+        <div class="detail-row"><span class="detail-label">King Vulnerability (Prox)</span><span class="detail-value">${c.kingVulnProxWeight !== undefined ? c.kingVulnProxWeight.toFixed(2) : '-'}</span></div>
+
+        ${filtersHtml}
+    `;
+
+    document.getElementById('detailsModal').style.display = 'flex';
+}
+
+function closeDetailsModal() {
+    document.getElementById('detailsModal').style.display = 'none';
+}
+
+function showHistory(charId) {
+    let char = characters.find(c => c.id === charId);
+    if(!char) return;
+    
+    // Create or reuse a history modal
+    let modal = document.getElementById('historyModal');
+    if(!modal) {
+        modal = document.createElement('div');
+        modal.id = 'historyModal';
+        modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; justify-content:center; align-items:center;';
+        modal.innerHTML = `
+            <div style="background:#1a1a1a; padding:20px; border-radius:8px; width:80%; max-height:80%; overflow-y:auto; position:relative;">
+                <button onclick="document.getElementById('historyModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:#555;">Close</button>
+                <h2>Match History: ${char.id}</h2>
+                <div id="historyContent">Loading...</div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    modal.style.display = 'flex';
+    document.getElementById('historyContent').innerHTML = 'Loading...';
+    
+    fetch(`/games/${char.id}`)
+    .then(res => res.json())
+    .then(games => {
+        let html = '<table style="width:100%; text-align:left;"><thead><tr><th>Date</th><th>Opponent</th><th>Result</th><th>Turns</th><th>Action</th></tr></thead><tbody>';
+        if (!games || games.length === 0) {
+            html += '<tr><td colspan="5" style="text-align:center; padding: 10px;">No match history found. Games may have been played before history tracking or timed out without data.</td></tr>';
+        } else {
+            games.forEach(g => {
+                let opponentId = g.whiteId === char.id ? g.blackId : g.whiteId;
+                let result = g.winner === 'tie' ? 'Draw' : (g.winner === (g.whiteId === char.id ? 'white' : 'black') ? 'Win' : 'Loss');
+                let color = result === 'Win' ? '#829769' : (result === 'Loss' ? '#ff6b6b' : '#f0d9b5');
+                html += `
+                    <tr>
+                        <td>${new Date(g.date).toLocaleString()}</td>
+                        <td>${opponentId}</td>
+                        <td style="color:${color}; font-weight:bold;">${result}</td>
+                        <td>${g.turns}</td>
+                        <td><button style="padding:5px;" onclick="replayGame('${g._id}')">Replay</button></td>
+                    </tr>
+                `;
+            });
+        }
+        html += '</tbody></table>';
+        document.getElementById('historyContent').innerHTML = html;
+    })
+    .catch(e => {
+        document.getElementById('historyContent').innerText = 'Error loading history.';
+        console.error(e);
+    });
+}
+
+function replayGame(gameId) {
+    window.open(`/replay.html?gameId=${gameId}`, '_blank');
+}
+
 function saveBotToDb(charId) {
     let char = characters.find(c => c.id === charId);
     if(!char) return;
@@ -242,7 +375,16 @@ function runMatch() {
                     
                     let result = {
                         winner: thinkingColor === 'white' ? 'black' : 'white',
-                        turns: msg.turns || 0
+                        turns: msg.turns || 0,
+                        history: {
+                            whiteId: charWhite.id,
+                            blackId: charBlack.id,
+                            whiteRace: whiteRace,
+                            blackRace: blackRace,
+                            winner: thinkingColor === 'white' ? 'black' : 'white',
+                            turns: msg.turns || 0,
+                            moves: [] // Timeout, moves lost
+                        }
                     };
                     handleMatchResult(charWhite, charBlack, result);
                 }
@@ -295,6 +437,15 @@ function handleMatchResult(charWhite, charBlack, result) {
         evolve();
     }
     
+    // Save game history to DB
+    if (result.history) {
+        fetch('/games', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(result.history)
+        }).catch(e => console.error("Failed to save game history", e));
+    }
+
     saveData();
     updateUI();
     
@@ -502,6 +653,13 @@ function updateUI() {
         }
         
         let tr = document.createElement('tr');
+        // Add click event to row for details
+        tr.style.cursor = 'pointer';
+        tr.onclick = (e) => {
+            // Prevent if clicking buttons
+            if(e.target.tagName !== 'BUTTON') showDetails(c.id);
+        };
+
         tr.innerHTML = `
             <td>${i + 1}</td>
             <td>${c.id}</td>
@@ -519,6 +677,7 @@ function updateUI() {
             <td>
                 <button style="padding: 5px 10px; font-size: 12px;" onclick="playAgainst('${c.id}')">Play</button>
                 <button style="padding: 5px 10px; font-size: 12px; background:#e5989b;" onclick="saveBotToDb('${c.id}')">Save</button>
+                <button style="padding: 5px 10px; font-size: 12px; background:#4ecdc4;" onclick="showHistory('${c.id}')">History</button>
             </td>
         `;
         tbody.appendChild(tr);

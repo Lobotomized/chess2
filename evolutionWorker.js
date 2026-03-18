@@ -108,10 +108,12 @@ self.addEventListener("message", function(e) {
 
     let turnLimit = 100; // 50 turns per side
     let turns = 0;
+    let movesHistory = [];
     
     while (!state.won && turns < turnLimit) {
         let isWhite = state.turn === 'white';
         let depth = isWhite ? charWhite.depth : charBlack.depth;
+        if (!depth) depth = 2; // Default depth if undefined
         let algorithm = isWhite ? charWhite.algorithm : charBlack.algorithm;
         if (!algorithm) algorithm = 'minimaxAlphaBeta'; // default
         
@@ -134,10 +136,29 @@ self.addEventListener("message", function(e) {
             break;
         }
         
-        let piece = state.pieces[move.pieceCounter];
-        state.pieceSelected = piece;
+        // Store before moving
+        let myPieces = state.pieces.filter(p => p.color === state.turn);
+        let movedPiece = myPieces[move.pieceCounter];
+        
+        if (!movedPiece) {
+            // Failsafe in case of mismatch
+            state.won = isWhite ? 'black' : 'white';
+            break;
+        }
+
+        let fromX = movedPiece.x;
+        let fromY = movedPiece.y;
+        
+        state.pieceSelected = movedPiece;
         playerMove({x: move.xClicked, y: move.yClicked}, state, true);
         
+        movesHistory.push({
+            color: state.turn,
+            from: {x: fromX, y: fromY},
+            pieceIndex: move.pieceCounter,
+            to: {x: move.xClicked, y: move.yClicked}
+        });
+
         if (checkRemi(state)) {
             state.won = 'tie';
             break;
@@ -159,9 +180,21 @@ self.addEventListener("message", function(e) {
         state.won = 'tie';
     }
     
+    // Store game history if it was an evolution match
+    // Note: worker can't save to DB directly, so we pass data back to main thread
+    
     self.postMessage(JSONfn.stringify({
         type: 'result',
         winner: state.won,
-        turns: turns
+        turns: turns,
+        history: {
+            whiteId: charWhite.id,
+            blackId: charBlack.id,
+            whiteRace: whiteRace,
+            blackRace: blackRace,
+            winner: state.won,
+            turns: turns,
+            moves: movesHistory 
+        }
     }));
 });

@@ -236,7 +236,6 @@ function minimaxAlphaBeta(state, maximizer, depth, removedTurns, magnifiers, fil
 
     return bestMove;
 }
-
 // Ultra-optimized alpha-beta pruning function
  function alphaBetaOptimized(state, depth, alpha, beta, isMaximizer, maximizerColor, filters, magnifiers) {
      // Terminal node checks with immediate returns
