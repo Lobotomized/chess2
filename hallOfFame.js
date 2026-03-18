@@ -62,7 +62,7 @@ function updateUI() {
             <td>${c.race || '-'}</td>
             <td>${Math.round(c.score)}</td>
             <td>${c.gamesPlayed}</td>
-            <td>${c.algorithm === 'minimaxDeep' ? 'Deep' : 'AB'}</td>
+            <td>${c.algorithm === 'minimaxDeep' ? 'Deep' : (c.algorithm === 'minimaxQuiescence' ? 'Q' : 'AB')}</td>
             <td>${c.depth}</td>
             <td>${filtersHtml}</td>
             <td>

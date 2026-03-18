@@ -317,6 +317,8 @@ self.addEventListener("message", async function(e) {
 
                         if (algorithm === 'minimaxDeep') {
                             move = minimaxDeep(obj.state, obj.color, depth, obj.removedTurns, mags, filters);
+                        } else if (algorithm === 'minimaxQuiescence') {
+                            move = minimaxQuiescence(obj.state, obj.color, depth, obj.removedTurns, mags, filters);
                         } else {
                             move = minimaxAlphaBeta(obj.state, obj.color, depth, obj.removedTurns, mags, filters);
                         }

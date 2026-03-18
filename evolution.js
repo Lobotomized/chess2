@@ -53,7 +53,7 @@ function generateRandomCharacter() {
         id: Math.random().toString(36).substr(2, 6).toUpperCase(),
         race: RACES[Math.floor(Math.random() * RACES.length)],
         depth: Math.floor(Math.random() * 2) + 2, // 2 or 3 for rapid play
-        algorithm: ['minimaxDeep', 'minimaxAlphaBeta'][Math.floor(Math.random() * 2)],
+        algorithm: ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence'][Math.floor(Math.random() * 3)],
         score: 1000,
         gamesPlayed: 0
     };
@@ -486,7 +486,7 @@ function crossover(p1, p2) {
 
     // Make sure old characters getting crossed over receive an algorithm if missing
     if (!child.algorithm) {
-        child.algorithm = ['minimaxDeep', 'minimaxAlphaBeta'][Math.floor(Math.random() * 2)];
+        child.algorithm = ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence'][Math.floor(Math.random() * 3)];
     }
 
     if (p1.posValueWeight !== undefined || p2.posValueWeight !== undefined) {
@@ -587,7 +587,7 @@ function crossover(p1, p2) {
         child.depth = Math.floor(Math.random() * 2) + 2;
     }
     if (Math.random() < 0.1) {
-        child.algorithm = ['minimaxDeep', 'minimaxAlphaBeta'][Math.floor(Math.random() * 2)];
+        child.algorithm = ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence'][Math.floor(Math.random() * 3)];
     }
     if (Math.random() < 0.1) {
         child.race = RACES[Math.floor(Math.random() * RACES.length)];
@@ -666,7 +666,7 @@ function updateUI() {
             <td>${c.race || '-'}</td>
             <td>${Math.round(c.score)}</td>
             <td>${c.gamesPlayed}</td>
-            <td>${c.algorithm === 'minimaxDeep' ? 'Deep' : 'AB'}</td>
+            <td>${c.algorithm === 'minimaxDeep' ? 'Deep' : (c.algorithm === 'minimaxQuiescence' ? 'Q' : 'AB')}</td>
             <td>${c.depth}</td>
             <td>${c.pieceValueWeight !== undefined ? c.pieceValueWeight.toFixed(2) : '-'}</td>
             <td>${c.posValueWeight !== undefined ? c.posValueWeight.toFixed(2) : '-'}</td>
