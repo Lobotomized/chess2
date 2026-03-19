@@ -29,11 +29,11 @@ function swordsMen(color, x, y){
 
 
 function northernKing(color, x, y, options){
-    let moves = [{ type: 'absolute',  y: -1, x: 0 },{ type: 'absolute',  y: -1, x: -1 },{ type: 'absolute',  y: -1, x: 1 }]
+    let moves = [{ type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
+            { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },
+            { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }]
 
-    if (color == 'black') {
-        moves = [{ type: 'absolute',  y: 1, x: 0 },{ type: 'absolute',  y: 1, x: -1 },{ type: 'absolute',  y: 1, x: 1 }];
-    }
+
     return {
         icon: color + 'NorthernKing.png',
         moves: moves,
@@ -75,24 +75,27 @@ function northernKing(color, x, y, options){
 
             this.value += 2;
             
-            let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
             let fencerPower = this.color === 'black' ? this.y : 7 -this.y;
 
-            if(this.options && this.options.yTrigger){
-                promoteCondition = this.y === this.options.yTrigger;
-            }
-
-
+            let promoteCondition = (this.color === 'black' && this.y >= 3 || this.color === 'white' && this.y <= 4) &&
+                state.pieces.some(p => p.color === this.color && p.icon === this.color + 'NorthernKing.png') &&
+                state.pieces.some(p => p.color === this.color && p.icon === this.color + 'PlagueDoctor.png' && 
+                    ((this.color === 'black' && p.y >= 3) || (this.color === 'white' && p.y <= 4)));
+            
+                
             if(promoteCondition){
                 state.pieces.forEach((piece) => {
-                    if(piece.color === this.color && (piece.icon === piece.color + 'Pikeman.png' || piece.icon === piece.color + 'Swordsmen.png')){
-                        piece.icon =  piece.color+'Knight.png';
-                        piece.moves = [
+                    if(piece.color === this.color && piece.icon === piece.color + 'SleepingDragon.png'){
+                        piece.icon =  piece.color+'Dragon.png';
+                        piece.moves =  [
+                        { type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },
+                        { type: 'blockable', repeat: true, x: -1, y: 0 }, { type: 'blockable', repeat: true, x: 1, y: 0 },
                         { type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
                         { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 },
                         { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: 1, x: -2 },
-                        { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }]
-                        piece.value = fencerPower;
+                        { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }
+                    ],
+                        piece.value = 8.5;
                         piece.posValue = posValue[3];
                     }
                 })
@@ -240,11 +243,9 @@ function shield(color, x, y){
 }
 
 function plagueDoctor(color, x, y){
-    let moves = [{ type: 'absolute',  y: -1, x: 0 },{ type: 'absolute',  y: -1, x: -1 },{ type: 'absolute',  y: -1, x: 1 }]
-
-    if (color == 'black') {
-        moves = [{ type: 'absolute',  y: 1, x: 0 },{ type: 'absolute',  y: 1, x: -1 },{ type: 'absolute',  y: 1, x: 1 }]
-    }
+    let moves = [{ type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
+        { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },
+        { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }]
     return {
         icon: color + 'PlagueDoctor.png',
         moves: moves,
@@ -265,7 +266,7 @@ function plagueDoctor(color, x, y){
 
             if(this.color === 'black'){
                 if(this.y === 7){
-                    this.value = 1000;
+                    this.value = 2000;
                     state.won = 'black';
                 }
                 else{
@@ -274,7 +275,7 @@ function plagueDoctor(color, x, y){
             }
             else if(this.color === 'white' && this.y === 0){
                 if(this.y === 0){
-                    this.value = 1000;
+                    this.value = 2000;
                     state.won = 'white';
                 }
                 else{
@@ -282,7 +283,12 @@ function plagueDoctor(color, x, y){
                 }            
             }
             this.value += 2;
-            let promoteCondition = this.color === 'black' && this.y === 3 || this.color === 'white' && this.y === 4;
+            let promoteCondition = (this.color === 'black' && this.y >= 3 || this.color === 'white' && this.y <= 4) &&
+                state.pieces.some(p => p.color === this.color && p.icon === this.color + 'NorthernKing.png') &&
+                state.pieces.some(p => p.color === this.color && p.icon === this.color + 'PlagueDoctor.png' && 
+                    ((this.color === 'black' && p.y >= 3) || (this.color === 'white' && p.y <= 4)));
+
+                
             let kolbaPower = this.color === 'black' ? this.y : 7-this.y;
             if(promoteCondition){
                 state.pieces.forEach((piece) => {
@@ -303,6 +309,7 @@ function plagueDoctor(color, x, y){
             }
             state.pieces.forEach((piece) => {
                 if(piece.color === this.color && piece.icon === piece.color + 'Gargoyle.png'){
+                    piece.moves = []
                     for(let i = kolbaPower; i>0; i--){
                         piece.moves.push(
                             {type: 'absolute', y: i, x: 0 },
