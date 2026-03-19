@@ -218,6 +218,48 @@ function evaluationMagnifierPiece(piece,pieces,board,colorPerspective,options){
     return piece.value*options.pieceValue;
 }
 
+function evaluationMagnifierThreatGeneration(piece,pieces,board,colorPerspective,options){
+    /*
+        Rewards pieces that attack enemy pieces, especially if the enemy is more valuable.
+        options -
+        threatMultiplier - Multiplier for the value difference or just the threat value.
+        onlyValueDifference - If true, only rewards if the target is more valuable than the attacker.
+        includeDefended - If true, only reward if the attacking piece is defended.
+    */
+    if(piece.color !== colorPerspective){
+        return 0;
+    }
+
+    let score = 0;
+    
+    lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true);
+
+    const enemyPieces = pieces.filter(p => p.color !== colorPerspective);
+    
+    for(let i = 0; i < enemyPieces.length; i++){
+        const enemy = enemyPieces[i];
+        if(enemy.value > 500) continue; // Skip king (handled by KingVulnerability)
+
+        const isAttacked = board.find(square => square.x === enemy.x && square.y === enemy.y && square.allowedMove);
+        if(isAttacked){
+            let valueDiff = enemy.value - piece.value;
+            if(options.onlyValueDifference && valueDiff <= 0){
+                continue;
+            }
+            let threatValue = options.onlyValueDifference ? valueDiff : enemy.value;
+            
+            if(options.includeDefended){
+                if(!isPositionAttacked({board:board,pieces:pieces,turn:colorPerspective},piece.color,piece.x,piece.y)){
+                    continue; 
+                }
+            }
+
+            score += threatValue * (options.threatMultiplier || 1);
+        }
+    }
+
+    return score;
+}
 
 //isPositionAttacked
 

@@ -43,6 +43,7 @@ function parseMags(magsList, fallbackConfig) {
         else if (m.name === 'PieceDefended') method = evaluationMagnifierPieceDefended;
         else if (m.name === 'KingTropism') method = evaluationMagnifierKingTropism;
         else if (m.name === 'KingVulnerability') method = evaluationMagnifierKingVulnerability;
+        else if (m.name === 'ThreatGeneration') method = evaluationMagnifierThreatGeneration;
 
         let opts = {...m.options};
         if (opts.useMask) opts.mask = positionMaskDefault;

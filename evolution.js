@@ -75,6 +75,7 @@ function generateRandomCharacter() {
     }
     if (Math.random() > 0.5) char.magnifiers.push({name: 'PieceDefended', options: {relativeValue: 0.1}});
     if (Math.random() > 0.5) char.magnifiers.push({name: 'KingVulnerability', options: {attackValue: 1.5, proximityValue: 0.2}});
+    if (Math.random() > 0.5) char.magnifiers.push({name: 'ThreatGeneration', options: {threatMultiplier: Math.random() * 1.5 + 0.5, onlyValueDifference: Math.random() > 0.5, includeDefended: Math.random() > 0.5}});
     // Add 0-2 random phases
     let numPhases = Math.floor(Math.random() * 3);
     for (let i = 0; i < numPhases; i++) {
@@ -871,6 +872,7 @@ function updateUI() {
                 if(m.name==='MaxOptions') s='Max';
                 if(m.name==='KingTropism') s='Tro';
                 if(m.name==='KingVulnerability') s='Vul';
+                if(m.name==='ThreatGeneration') s='Thr';
                 return s;
             }).join(', ');
         } else {
