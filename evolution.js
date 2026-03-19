@@ -62,7 +62,7 @@ function generateRandomCharacter() {
     
     // Each magnifier has a 50% chance of appearing
     if (Math.random() > 0.5) char.magnifiers.push({name: 'MaxOptions', options: {posValue: 0.1, useMask: true}});
-    if (Math.random() > 0.5) char.magnifiers.push({name: 'Piece', options: {pieceValue: Math.random() * 2.9 + 0.1}});
+    if (Math.random() > 0.15) char.magnifiers.push({name: 'Piece', options: {pieceValue: Math.random() * 2.9 + 0.1}});
     if (Math.random() > 0.5) {
         let ktOpts = {relativeValue: Math.random()*0.3, pieceValue: 1};
         let r = Math.random();
