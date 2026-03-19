@@ -14,11 +14,11 @@
         for (let j = 0; j < magLen; j++) {
             const magObj = magnifierMethods[j];
             if (colorPerspective === piece.color) {
-                if (!magObj.onlyForEnemy) {
+                if (!(magObj.options && magObj.options.onlyForEnemy)) {
                     magnifier += magObj.method(piece, pieces, board, piece.color, magObj.options);
                 }
             } else {
-                if (!magObj.onlyForMe) {
+                if (!(magObj.options && magObj.options.onlyForMe)) {
                     magnifier += magObj.method(piece, pieces, board, piece.color, magObj.options);
                 }
             }

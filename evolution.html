@@ -218,11 +218,7 @@
                     <th>Games</th>
                     <th>Alg</th>
                     <th>Depth</th>
-                    <th>Piece W.</th>
-                    <th>Pos W.</th>
-                    <th>King T.</th>
-                    <th>Def. W.</th>
-                    <th>K. Vuln</th>
+                    <th>Magnifiers</th>
                     <th>Filters</th>
                     <th>Action</th>
                 </tr>
@@ -285,9 +281,9 @@
                     <div id="config-base" class="config-panel">
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
                             <div>
-                                <h3 class="section-title">Core Strategy</h3>
-                                <div class="detail-row"><span class="detail-label">Algorithm</span>
-                                    <select class="cb_algorithm" style="background:#333; color:#f0d9b5; padding:5px; border:1px solid #555;">
+                                <h3 class="section-title" title="Primary settings for how the bot thinks">Core Strategy</h3>
+                                <div class="detail-row"><span class="detail-label" title="The mathematical search algorithm used">Algorithm</span>
+                                    <select class="cb_algorithm" style="background:#333; color:#f0d9b5; padding:5px; border:1px solid #555; width: 140px;">
                                         <option value="minimaxDeep">Minimax Deep</option>
                                         <option value="minimaxAlphaBeta">Minimax AlphaBeta</option>
                                         <option value="minimaxQuiescence">Minimax Quiescence</option>
@@ -295,90 +291,87 @@
                                         <option value="bestFirstSearch">Best First Search</option>
                                     </select>
                                 </div>
-                                <div class="detail-row"><span class="detail-label">Depth</span>
-                                    <input type="number" class="cb_depth" value="2" min="1" max="5" style="background:#333; color:#f0d9b5; padding:5px; border:1px solid #555; width: 60px;">
+                                <div class="detail-row"><span class="detail-label" title="How many turns ahead the bot calculates">Depth</span>
+                                    <input type="number" class="cb_depth" value="2" min="1" max="5" style="background:#333; color:#f0d9b5; padding:5px; border:1px solid #555; width: 70px;">
                                 </div>
 
-                                <h3 class="section-title">Magnifiers (Weights)</h3>
-                                <div class="detail-row"><span class="detail-label">Position Value</span><input type="number" class="cb_posValueWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
-                                <div class="detail-row"><span class="detail-label">Piece Value</span><input type="number" class="cb_pieceValueWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
-                                <div class="detail-row"><span class="detail-label">King Tropism</span><input type="number" class="cb_kingTropismWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
-                                <div class="detail-row"><span class="detail-label">Defended</span><input type="number" class="cb_defendedWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
-                                <div class="detail-row"><span class="detail-label">King Vuln Attack</span><input type="number" class="cb_kingVulnAttackWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
-                                <div class="detail-row"><span class="detail-label">King Vuln Prox</span><input type="number" class="cb_kingVulnProxWeight" step="0.1" placeholder="Optional" style="background:#333; color:#f0d9b5; width:80px;"></div>
+                                <h3 class="section-title" title="Modifiers that change how the board is evaluated">Magnifiers</h3>
+                                <div class="magnifiers-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px;"></div>
+                                <button type="button" onclick="addMagnifier(this)" style="background:#4ecdc4; border:none; padding:8px 16px; border-radius:4px; color:#111; cursor:pointer; font-size:14px; font-weight:bold; width:100%; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">+ Add Magnifier</button>
                             </div>
 
                             <div>
-                                <h3 class="section-title">Filters</h3>
+                                <h3 class="section-title" title="Pruning filters that speed up calculation by ignoring bad moves">Filters</h3>
+                                
                                 <!-- Remove Attacked -->
-                                <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-                                    <div class="detail-row">
-                                        <label><input type="checkbox" class="cb_useRemoveAttacked"> Use Remove Attacked</label>
+                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; background:#222;">
+                                    <div class="detail-row" style="border:none; padding:0;">
+                                        <label title="Ignores moves that put pieces in immediate danger"><input type="checkbox" class="cb_useRemoveAttacked" style="transform: scale(1.2); margin-right: 8px;"> <strong>Use Remove Attacked</strong></label>
                                     </div>
-                                    <div class="opts_useRemoveAttacked" style="display:none; padding-left: 20px;">
-                                        <div class="detail-row"><span class="detail-label">Random Exception</span><input type="number" class="cb_raRandomException" step="0.05" value="0.1" style="width:60px;"></div>
-                                        <div class="detail-row"><label><input type="checkbox" class="cb_raExceptionPieceValue"> Piece Value > Min</label></div>
-                                        <div class="detail-row"><label><input type="checkbox" class="cb_raExceptionPieceValueSmaller"> Piece Value < Max</label></div>
+                                    <div class="opts_useRemoveAttacked" style="display:none; padding-left: 20px; margin-top: 10px;">
+                                        <div class="detail-row" style="border-bottom: 1px dashed #444;"><span class="detail-label">Random Exception</span><input type="number" class="cb_raRandomException" step="0.05" value="0.1" style="width:70px; background:#333; color:#f0d9b5; border:1px solid #555;"></div>
+                                        <div class="detail-row" style="border-bottom: 1px dashed #444;"><label><input type="checkbox" class="cb_raExceptionPieceValue"> Piece Value > Min</label></div>
+                                        <div class="detail-row" style="border:none;"><label><input type="checkbox" class="cb_raExceptionPieceValueSmaller"> Piece Value < Max</label></div>
                                     </div>
                                 </div>
 
                                 <!-- Remove Non-Attacking -->
-                                <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-                                    <div class="detail-row">
-                                        <label><input type="checkbox" class="cb_useRemoveNonAttacking"> Use Remove Non-Attacking</label>
+                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; background:#222;">
+                                    <div class="detail-row" style="border:none; padding:0;">
+                                        <label title="Ignores quiet moves, focusing only on captures/checks"><input type="checkbox" class="cb_useRemoveNonAttacking" style="transform: scale(1.2); margin-right: 8px;"> <strong>Use Remove Non-Attacking</strong></label>
                                     </div>
-                                    <div class="opts_useRemoveNonAttacking" style="display:none; padding-left: 20px;">
-                                        <div class="detail-row"><span class="detail-label">Max Piece Value</span><input type="number" class="cb_rnaMaxPieceValue" value="2" style="width:60px;"></div>
-                                        <div class="detail-row"><span class="detail-label">Exception Random</span><input type="number" class="cb_rnaExceptionRandom" step="0.05" placeholder="Opt" style="width:60px;"></div>
-                                        <div class="detail-row"><label><input type="checkbox" class="cb_rnaExceptionPieceValue"> Piece Value > Min</label></div>
-                                        <div class="detail-row"><label><input type="checkbox" class="cb_rnaExceptionPieceValueSmaller"> Piece Value < Max</label></div>
+                                    <div class="opts_useRemoveNonAttacking" style="display:none; padding-left: 20px; margin-top: 10px;">
+                                        <div class="detail-row" style="border-bottom: 1px dashed #444;"><span class="detail-label">Max Piece Value</span><input type="number" class="cb_rnaMaxPieceValue" value="2" style="width:70px; background:#333; color:#f0d9b5; border:1px solid #555;"></div>
+                                        <div class="detail-row" style="border-bottom: 1px dashed #444;"><span class="detail-label">Exception Random</span><input type="number" class="cb_rnaExceptionRandom" step="0.05" placeholder="Opt" style="width:70px; background:#333; color:#f0d9b5; border:1px solid #555;"></div>
+                                        <div class="detail-row" style="border-bottom: 1px dashed #444;"><label><input type="checkbox" class="cb_rnaExceptionPieceValue"> Piece Value > Min</label></div>
+                                        <div class="detail-row" style="border:none;"><label><input type="checkbox" class="cb_rnaExceptionPieceValueSmaller"> Piece Value < Max</label></div>
                                     </div>
                                 </div>
 
                                 <!-- Randomly Remove -->
-                                <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-                                    <div class="detail-row">
-                                        <label><input type="checkbox" class="cb_useRandomlyRemove"> Use Randomly Remove</label>
+                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; background:#222;">
+                                    <div class="detail-row" style="border:none; padding:0;">
+                                        <label title="Randomly prunes moves to introduce unpredictability"><input type="checkbox" class="cb_useRandomlyRemove" style="transform: scale(1.2); margin-right: 8px;"> <strong>Use Randomly Remove</strong></label>
                                     </div>
-                                    <div class="opts_useRandomlyRemove" style="display:none; padding-left: 20px;">
-                                        <div class="detail-row"><span class="detail-label">N (1/N)</span><input type="number" class="cb_rrN" value="2" style="width:60px;"></div>
-                                        <div class="detail-row"><span class="detail-label">Exception Random</span><input type="number" class="cb_rrExceptionRandom" step="0.05" placeholder="Opt" style="width:60px;"></div>
-                                        <div class="detail-row"><label><input type="checkbox" class="cb_rrExceptionAttacked"> Exception Attacked</label></div>
-                                        <div class="detail-row"><label><input type="checkbox" class="cb_rrExceptionPieceValueSmaller"> Exception Value < Max</label></div>
+                                    <div class="opts_useRandomlyRemove" style="display:none; padding-left: 20px; margin-top: 10px;">
+                                        <div class="detail-row" style="border-bottom: 1px dashed #444;"><span class="detail-label">N (1/N)</span><input type="number" class="cb_rrN" value="2" style="width:70px; background:#333; color:#f0d9b5; border:1px solid #555;"></div>
+                                        <div class="detail-row" style="border-bottom: 1px dashed #444;"><span class="detail-label">Exception Random</span><input type="number" class="cb_rrExceptionRandom" step="0.05" placeholder="Opt" style="width:70px; background:#333; color:#f0d9b5; border:1px solid #555;"></div>
+                                        <div class="detail-row" style="border-bottom: 1px dashed #444;"><label><input type="checkbox" class="cb_rrExceptionAttacked"> Exception Attacked</label></div>
+                                        <div class="detail-row" style="border:none;"><label><input type="checkbox" class="cb_rrExceptionPieceValueSmaller"> Exception Value < Max</label></div>
                                     </div>
                                 </div>
 
                                 <!-- Max Moves -->
-                                <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-                                    <div class="detail-row">
-                                        <label><input type="checkbox" class="cb_useMaxMoves"> Use Max Moves</label>
+                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; background:#222;">
+                                    <div class="detail-row" style="border:none; padding:0;">
+                                        <label title="Limits the maximum number of moves generated per piece"><input type="checkbox" class="cb_useMaxMoves" style="transform: scale(1.2); margin-right: 8px;"> <strong>Use Max Moves</strong></label>
                                     </div>
-                                    <div class="opts_useMaxMoves" style="display:none; padding-left: 20px;">
-                                        <div class="detail-row"><span class="detail-label">Max Moves</span><input type="number" class="cb_mmMax" value="2" style="width:60px;"></div>
-                                        <div class="detail-row"><label><input type="checkbox" class="cb_mmExceptionAttacked"> Exception Attacked</label></div>
+                                    <div class="opts_useMaxMoves" style="display:none; padding-left: 20px; margin-top: 10px;">
+                                        <div class="detail-row" style="border-bottom: 1px dashed #444;"><span class="detail-label">Max Moves</span><input type="number" class="cb_mmMax" value="2" style="width:70px; background:#333; color:#f0d9b5; border:1px solid #555;"></div>
+                                        <div class="detail-row" style="border:none;"><label><input type="checkbox" class="cb_mmExceptionAttacked"> Exception Attacked</label></div>
                                     </div>
                                 </div>
 
                                 <!-- Nth Chance -->
-                                <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-                                    <div class="detail-row">
-                                        <label><input type="checkbox" class="cb_useNthChance"> Use Nth Chance</label>
+                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; background:#222;">
+                                    <div class="detail-row" style="border:none; padding:0;">
+                                        <label title="Removes pieces with a specific probability"><input type="checkbox" class="cb_useNthChance" style="transform: scale(1.2); margin-right: 8px;"> <strong>Use Nth Chance</strong></label>
                                     </div>
-                                    <div class="opts_useNthChance" style="display:none; padding-left: 20px;">
-                                        <div class="detail-row"><span class="detail-label">Chance (0-1)</span><input type="number" class="cb_nthChance" step="0.05" value="0.1" style="width:60px;"></div>
-                                        <div class="detail-row"><label><input type="checkbox" class="cb_ncExceptionAttacked"> Exception Attacked</label></div>
-                                        <div class="detail-row"><label><input type="checkbox" class="cb_ncExceptionPieceValue"> Exception Value > Min</label></div>
+                                    <div class="opts_useNthChance" style="display:none; padding-left: 20px; margin-top: 10px;">
+                                        <div class="detail-row" style="border-bottom: 1px dashed #444;"><span class="detail-label">Chance (0-1)</span><input type="number" class="cb_nthChance" step="0.05" value="0.1" style="width:70px; background:#333; color:#f0d9b5; border:1px solid #555;"></div>
+                                        <div class="detail-row" style="border-bottom: 1px dashed #444;"><label><input type="checkbox" class="cb_ncExceptionAttacked"> Exception Attacked</label></div>
+                                        <div class="detail-row" style="border:none;"><label><input type="checkbox" class="cb_ncExceptionPieceValue"> Exception Value > Min</label></div>
                                     </div>
                                 </div>
 
                                 <!-- Remove Well Positioned -->
-                                <div style="border: 1px solid #333; padding: 10px; margin-bottom: 10px; border-radius: 4px;">
-                                    <div class="detail-row">
-                                        <label><input type="checkbox" class="cb_useRemoveWellPositioned"> Use Remove Well Pos</label>
+                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; background:#222;">
+                                    <div class="detail-row" style="border:none; padding:0;">
+                                        <label title="Prevents moving pieces that are already in strong positions"><input type="checkbox" class="cb_useRemoveWellPositioned" style="transform: scale(1.2); margin-right: 8px;"> <strong>Use Remove Well Pos</strong></label>
                                     </div>
-                                    <div class="opts_useRemoveWellPositioned" style="display:none; padding-left: 20px;">
-                                        <div class="detail-row"><span class="detail-label">N</span><input type="number" class="cb_rwpN" value="3" style="width:60px;"></div>
-                                        <div class="detail-row"><label><input type="checkbox" class="cb_rwpExceptionAttacked"> Exception Attacked</label></div>
+                                    <div class="opts_useRemoveWellPositioned" style="display:none; padding-left: 20px; margin-top: 10px;">
+                                        <div class="detail-row" style="border-bottom: 1px dashed #444;"><span class="detail-label">N (Threshold)</span><input type="number" class="cb_rwpN" value="3" style="width:70px; background:#333; color:#f0d9b5; border:1px solid #555;"></div>
+                                        <div class="detail-row" style="border:none;"><label><input type="checkbox" class="cb_rwpExceptionAttacked"> Exception Attacked</label></div>
                                     </div>
                                 </div>
 
@@ -421,6 +414,129 @@
     <script>
         let phases = [];
         
+        const MAG_TEMPLATES = {
+            'MaxOptions': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
+                             <div style="font-size:11px; color:#aaa; font-style:italic; margin-bottom:2px;">
+                               Rewards pieces that have many legal moves (Mobility). Good for open play.
+                             </div>
+                             <div style="display:flex; align-items:center; gap:8px;">
+                               <span style="width:60px; font-size:12px; color:#aaa;">Pos Value:</span>
+                               <input type="number" class="opt-posValue" title="Score added per legal move available" step="0.1" value="0.1" style="width:60px; background:#333; color:#f0d9b5; border:1px solid #555; padding:2px;">
+                             </div>
+                             <div style="display:flex; gap:10px; font-size:12px; flex-wrap:wrap;">
+                               <label title="If checked, multiplies score by piece-specific mobility factors (e.g. Knights valued higher)"><input type="checkbox" class="opt-useMask" checked> Use Mask</label>
+                               <label title="Calculate mobility only for YOUR pieces"><input type="checkbox" class="opt-onlyForMe"> Only Me</label>
+                               <label title="Calculate mobility only for ENEMY pieces (to restrict them)"><input type="checkbox" class="opt-onlyForEnemy"> Only Enemy</label>
+                             </div>
+                           </div>`,
+            'Piece': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
+                        <div style="font-size:11px; color:#aaa; font-style:italic; margin-bottom:2px;">
+                          Standard material evaluation. Base values: Pawn=1, Knight/Bishop=3, Rook=5, Queen=9.
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px;">
+                          <span style="width:60px; font-size:12px; color:#aaa;">Piece Val:</span>
+                          <input type="number" class="opt-pieceValue" title="Multiplier for the material value (e.g. 2.0 makes pieces twice as valuable)" step="0.1" value="1" style="width:60px; background:#333; color:#f0d9b5; border:1px solid #555; padding:2px;">
+                        </div>
+                        <div style="display:flex; gap:10px; font-size:12px; flex-wrap:wrap;">
+                          <label title="Only count this value if the piece is currently under attack (Safety check)"><input type="checkbox" class="opt-pieceAttacked"> Only if Attacked</label>
+                          <label title="Count material for YOU"><input type="checkbox" class="opt-onlyForMe"> Only Me</label>
+                          <label title="Count material for ENEMY"><input type="checkbox" class="opt-onlyForEnemy"> Only Enemy</label>
+                        </div>
+                      </div>`,
+            'PieceDefended': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
+                                <div style="font-size:11px; color:#aaa; font-style:italic; margin-bottom:2px;">
+                                  Rewards pieces that are protected by other friendly pieces (Solidarity).
+                                </div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                  <span style="width:60px; font-size:12px; color:#aaa;">Rel Value:</span>
+                                  <input type="number" class="opt-relativeValue" title="Flat score bonus added for being defended" step="0.1" value="0.1" style="width:60px; background:#333; color:#f0d9b5; border:1px solid #555; padding:2px;">
+                                </div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                  <span style="width:60px; font-size:12px; color:#aaa;">Piece Val:</span>
+                                  <input type="number" class="opt-pieceValue" title="Additional bonus: (This Multiplier * Piece Value). Higher value pieces get more bonus." step="0.1" style="width:60px; background:#333; color:#f0d9b5; border:1px solid #555; padding:2px;">
+                                </div>
+                                <div style="display:flex; gap:10px; font-size:12px; flex-wrap:wrap;">
+                                  <label title="Only reward defense if the piece is actually threatened by an enemy"><input type="checkbox" class="opt-pieceAttacked"> Only if Attacked</label>
+                                  <label title="Evaluate YOUR defended pieces"><input type="checkbox" class="opt-onlyForMe"> Only Me</label>
+                                  <label title="Evaluate ENEMY defended pieces (to avoid them?)"><input type="checkbox" class="opt-onlyForEnemy"> Only Enemy</label>
+                                </div>
+                              </div>`,
+            'KingTropism': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
+                              <div style="font-size:11px; color:#aaa; font-style:italic; margin-bottom:2px;">
+                                Evaluates distance to a King. Closer is better. Used for Attacking (Enemy King) or Defending (My King).
+                              </div>
+                              <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="width:60px; font-size:12px; color:#aaa;">Rel Value:</span>
+                                <input type="number" class="opt-relativeValue" title="Score weight based on proximity (Distance to King)" step="0.1" value="0.1" style="width:60px; background:#333; color:#f0d9b5; border:1px solid #555; padding:2px;">
+                              </div>
+                              <div style="display:flex; align-items:center; gap:8px;">
+                                <span style="width:60px; font-size:12px; color:#aaa;">Piece Val:</span>
+                                <input type="number" class="opt-pieceValue" title="Multiplier: (Proximity Score * Piece Value). Important pieces matter more." step="0.1" style="width:60px; background:#333; color:#f0d9b5; border:1px solid #555; padding:2px;">
+                              </div>
+                              <div style="display:flex; gap:10px; font-size:12px; flex-wrap:wrap;">
+                                <label title="If CHECKED: Measure distance to YOUR King (Defense). If UNCHECKED: Measure distance to ENEMY King (Attack)."><input type="checkbox" class="opt-defendersSearch"> Search Defenders</label>
+                                <label title="Apply this logic only for YOUR pieces"><input type="checkbox" class="opt-onlyForMe"> Only Me</label>
+                                <label title="Apply this logic only for ENEMY pieces"><input type="checkbox" class="opt-onlyForEnemy"> Only Enemy</label>
+                              </div>
+                            </div>`,
+            'KingVulnerability': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
+                                    <div style="font-size:11px; color:#aaa; font-style:italic; margin-bottom:2px;">
+                                      Penalties/Rewards for King Safety. Checks and square control around King.
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                      <span style="width:60px; font-size:12px; color:#aaa;">Attack Val:</span>
+                                      <input type="number" class="opt-attackValue" title="Score for directly attacking the King (Check)" step="0.1" value="1" style="width:60px; background:#333; color:#f0d9b5; border:1px solid #555; padding:2px;">
+                                    </div>
+                                    <div style="display:flex; align-items:center; gap:8px;">
+                                      <span style="width:60px; font-size:12px; color:#aaa;">Prox Val:</span>
+                                      <input type="number" class="opt-proximityValue" title="Score for attacking squares adjacent to the King" step="0.1" value="0.1" style="width:60px; background:#333; color:#f0d9b5; border:1px solid #555; padding:2px;">
+                                    </div>
+                                  </div>`
+        };
+
+        function updateMagOptions(selectEl) {
+            const optsDiv = selectEl.parentElement.parentElement.querySelector('.mag-opts');
+            optsDiv.innerHTML = MAG_TEMPLATES[selectEl.value] || '';
+        }
+
+        function addMagnifier(btn, type='Piece', options={}) {
+            const container = btn.previousElementSibling;
+            const div = document.createElement('div');
+            div.className = 'mag-row';
+            div.style.cssText = 'border: 1px solid #555; padding: 8px; font-size: 12px; display:flex; flex-direction:column; gap:8px; background:#1e1e1e; border-radius:6px; margin-bottom:5px;';
+            
+            div.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <select class="mag-type" onchange="updateMagOptions(this)" style="background:#333; color:#f0d9b5; border:1px solid #555; padding:4px; font-size:14px; font-weight:bold; border-radius:4px;">
+                        <option value="MaxOptions">MaxOptions</option>
+                        <option value="Piece">Piece</option>
+                        <option value="PieceDefended">PieceDefended</option>
+                        <option value="KingTropism">KingTropism</option>
+                        <option value="KingVulnerability">KingVulnerability</option>
+                    </select>
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" style="background:#e5989b; color:#fff; padding:4px 8px; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Remove</button>
+                </div>
+                <div class="mag-opts" style="display:flex; flex-direction:column; gap:5px; width:100%;"></div>
+            `;
+            
+            const select = div.querySelector('.mag-type');
+            select.value = type;
+            
+            // Explicitly pass the select element to the update function to ensure the DOM nodes are mapped correctly
+            updateMagOptions(select);
+            
+            // Populate options if provided
+            for (let key in options) {
+                let input = div.querySelector('.opt-' + key);
+                if (input) {
+                    if (input.type === 'checkbox') input.checked = options[key];
+                    else input.value = options[key];
+                }
+            }
+            
+            container.appendChild(div);
+        }
+
         function killSpecificBot(idToKill) {
             // Forward the call to the function defined in evolution.js
             if (window.killSpecificBotImpl) {
@@ -514,6 +630,12 @@
             if(base) {
                 base.classList.add('active');
                 bindCheckboxToggles(base);
+                
+                // Add some default magnifiers to base panel
+                const addBtn = base.querySelector('.magnifiers-container').nextElementSibling;
+                addMagnifier(addBtn, 'MaxOptions', {posValue: 0.1, useMask: true});
+                addMagnifier(addBtn, 'Piece', {pieceValue: 1});
+                addMagnifier(addBtn, 'KingTropism', {relativeValue: 0.2, onlyForEnemy: true, pieceValue: 1});
             }
         });
     </script>

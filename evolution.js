@@ -55,10 +55,26 @@ function generateRandomCharacter() {
         depth: Math.floor(Math.random() * 2) + 2, // 2 or 3 for rapid play
         algorithm: ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch'][Math.floor(Math.random() * 5)],
         phases: [],
+        magnifiers: [],
         score: 1000,
         gamesPlayed: 0
     };
     
+    // Each magnifier has a 50% chance of appearing
+    if (Math.random() > 0.5) char.magnifiers.push({name: 'MaxOptions', options: {posValue: 0.1, useMask: true}});
+    if (Math.random() > 0.5) char.magnifiers.push({name: 'Piece', options: {pieceValue: Math.random() * 2.9 + 0.1}});
+    if (Math.random() > 0.5) {
+        let ktOpts = {relativeValue: Math.random()*0.3, pieceValue: 1};
+        let r = Math.random();
+        if (r < 0.33) ktOpts.onlyForEnemy = true;
+        else if (r < 0.66) ktOpts.onlyForMe = true;
+        
+        if (Math.random() > 0.5) ktOpts.defendersSearch = true;
+        
+        char.magnifiers.push({name: 'KingTropism', options: ktOpts});
+    }
+    if (Math.random() > 0.5) char.magnifiers.push({name: 'PieceDefended', options: {relativeValue: 0.1}});
+    if (Math.random() > 0.5) char.magnifiers.push({name: 'KingVulnerability', options: {attackValue: 1.5, proximityValue: 0.2}});
     // Add 0-2 random phases
     let numPhases = Math.floor(Math.random() * 3);
     for (let i = 0; i < numPhases; i++) {
@@ -69,15 +85,6 @@ function generateRandomCharacter() {
     }
     // Sort phases by threshold descending so they evaluate correctly
     char.phases.sort((a, b) => b.threshold - a.threshold);
-    
-    if (Math.random() > 0.2) char.posValueWeight = Math.random() * 0.5;
-    if (Math.random() > 0.1) char.pieceValueWeight = 0.5 + Math.random() * 2;
-    if (Math.random() > 0.3) char.kingTropismWeight = Math.random() * 0.5;
-    if (Math.random() > 0.3) char.defendedWeight = Math.random() * 0.3;
-    if (Math.random() > 0.4) {
-        char.kingVulnAttackWeight = Math.random() * 2;
-        char.kingVulnProxWeight = Math.random() * 0.5;
-    }
 
     if (Math.random() > 0.7) {
         char.useRemoveAttacked = true;
@@ -114,6 +121,11 @@ function generateRandomCharacter() {
         char.useRemoveWellPositioned = true;
         char.rwpN = Math.floor(Math.random() * 5) + 2; // 2 to 6
         if(Math.random() > 0.5) char.rwpExceptionAttacked = true;
+    }
+
+    // Ensure at least one magnifier
+    if (char.magnifiers.length === 0) {
+        char.magnifiers.push({name: 'Piece', options: {pieceValue: Math.random() * 9.9 + 0.1}});
     }
 
     return char;
@@ -194,6 +206,32 @@ function showDetails(charId) {
         filtersHtml += formatExc(c.rwpExceptionAttacked, 'Attacked Exception');
     }
 
+    let magnifiersHtml = `<div class="section-title">Magnifiers</div>`;
+    
+    if (c.magnifiers && c.magnifiers.length > 0) {
+        c.magnifiers.forEach(m => {
+            magnifiersHtml += `<div class="detail-row" style="background:#333; padding:5px; border-radius:4px; margin-bottom:5px; display:block;">
+                <div style="font-weight:bold; color:#f0d9b5; margin-bottom:2px;">${m.name}</div>
+                <div style="display:flex; flex-wrap:wrap; gap:8px; font-size:11px;">`;
+            
+            Object.keys(m.options).forEach(k => {
+                let v = m.options[k];
+                if(typeof v === 'number') v = parseFloat(v.toFixed(2));
+                magnifiersHtml += `<span style="background:#222; padding:2px 4px; border-radius:3px; color:#aaa;">${k}: <span style="color:#fff;">${v}</span></span>`;
+            });
+            
+            magnifiersHtml += `</div></div>`;
+        });
+    } else {
+        // Legacy display
+        if(c.pieceValueWeight !== undefined) magnifiersHtml += `<div class="detail-row"><span class="detail-label">Piece Value</span><span class="detail-value">${c.pieceValueWeight.toFixed(2)}</span></div>`;
+        if(c.posValueWeight !== undefined) magnifiersHtml += `<div class="detail-row"><span class="detail-label">Positional Value</span><span class="detail-value">${c.posValueWeight.toFixed(2)}</span></div>`;
+        if(c.kingTropismWeight !== undefined) magnifiersHtml += `<div class="detail-row"><span class="detail-label">King Tropism</span><span class="detail-value">${c.kingTropismWeight.toFixed(2)}</span></div>`;
+        if(c.defendedWeight !== undefined) magnifiersHtml += `<div class="detail-row"><span class="detail-label">Defended Pieces</span><span class="detail-value">${c.defendedWeight.toFixed(2)}</span></div>`;
+        if(c.kingVulnAttackWeight !== undefined) magnifiersHtml += `<div class="detail-row"><span class="detail-label">King Vuln (Att)</span><span class="detail-value">${c.kingVulnAttackWeight.toFixed(2)}</span></div>`;
+        if(c.kingVulnProxWeight !== undefined) magnifiersHtml += `<div class="detail-row"><span class="detail-label">King Vuln (Prox)</span><span class="detail-value">${c.kingVulnProxWeight.toFixed(2)}</span></div>`;
+    }
+
     body.innerHTML = `
         <div class="section-title" style="margin-top:0;">General Stats</div>
         <div class="detail-row"><span class="detail-label">ELO Score</span><span class="detail-value">${Math.round(c.score)}</span></div>
@@ -201,13 +239,7 @@ function showDetails(charId) {
         <div class="detail-row"><span class="detail-label">Algorithm</span><span class="detail-value">${c.algorithm || 'minimaxAlphaBeta'}</span></div>
         <div class="detail-row"><span class="detail-label">Search Depth</span><span class="detail-value">${c.depth}</span></div>
         
-        <div class="section-title">Magnifiers (Weights)</div>
-        <div class="detail-row"><span class="detail-label">Piece Value</span><span class="detail-value">${c.pieceValueWeight !== undefined ? c.pieceValueWeight.toFixed(2) : '-'}</span></div>
-        <div class="detail-row"><span class="detail-label">Positional Value</span><span class="detail-value">${c.posValueWeight !== undefined ? c.posValueWeight.toFixed(2) : '-'}</span></div>
-        <div class="detail-row"><span class="detail-label">King Tropism</span><span class="detail-value">${c.kingTropismWeight !== undefined ? c.kingTropismWeight.toFixed(2) : '-'}</span></div>
-        <div class="detail-row"><span class="detail-label">Defended Pieces</span><span class="detail-value">${c.defendedWeight !== undefined ? c.defendedWeight.toFixed(2) : '-'}</span></div>
-        <div class="detail-row"><span class="detail-label">King Vulnerability (Attack)</span><span class="detail-value">${c.kingVulnAttackWeight !== undefined ? c.kingVulnAttackWeight.toFixed(2) : '-'}</span></div>
-        <div class="detail-row"><span class="detail-label">King Vulnerability (Prox)</span><span class="detail-value">${c.kingVulnProxWeight !== undefined ? c.kingVulnProxWeight.toFixed(2) : '-'}</span></div>
+        ${magnifiersHtml}
 
         ${filtersHtml}
     `;
@@ -638,6 +670,52 @@ function crossover(p1, p2) {
         }
         child.phases = Object.values(uniquePhases).sort((a, b) => b.threshold - a.threshold);
     }
+    
+    // Crossover magnifiers
+    let poolMags = [];
+    
+    // Support legacy parents
+    if (p1.posValueWeight !== undefined) poolMags.push({name:'MaxOptions', options:{posValue:p1.posValueWeight, useMask:true}});
+    if (p1.pieceValueWeight !== undefined) poolMags.push({name:'Piece', options:{pieceValue:p1.pieceValueWeight}});
+    if (p1.kingTropismWeight !== undefined) poolMags.push({name:'KingTropism', options:{relativeValue:p1.kingTropismWeight, onlyForEnemy:true, pieceValue:1}});
+    if (p1.defendedWeight !== undefined) poolMags.push({name:'PieceDefended', options:{relativeValue:p1.defendedWeight}});
+    if (p1.kingVulnAttackWeight !== undefined) poolMags.push({name:'KingVulnerability', options:{attackValue:p1.kingVulnAttackWeight, proximityValue:p1.kingVulnProxWeight||0}});
+
+    if (p2.posValueWeight !== undefined) poolMags.push({name:'MaxOptions', options:{posValue:p2.posValueWeight, useMask:true}});
+    if (p2.pieceValueWeight !== undefined) poolMags.push({name:'Piece', options:{pieceValue:p2.pieceValueWeight}});
+    if (p2.kingTropismWeight !== undefined) poolMags.push({name:'KingTropism', options:{relativeValue:p2.kingTropismWeight, onlyForEnemy:true, pieceValue:1}});
+    if (p2.defendedWeight !== undefined) poolMags.push({name:'PieceDefended', options:{relativeValue:p2.defendedWeight}});
+    if (p2.kingVulnAttackWeight !== undefined) poolMags.push({name:'KingVulnerability', options:{attackValue:p2.kingVulnAttackWeight, proximityValue:p2.kingVulnProxWeight||0}});
+
+    poolMags.push(...(p1.magnifiers || []), ...(p2.magnifiers || []));
+    
+    child.magnifiers = [];
+    let childMagsCount = Math.floor(Math.random() * 3) + 2; // 2 to 4
+    for(let i=0; i<childMagsCount; i++) {
+        if (poolMags.length > 0) {
+            let idx = Math.floor(Math.random() * poolMags.length);
+            let picked = JSON.parse(JSON.stringify(poolMags.splice(idx, 1)[0]));
+            // mutate values slightly
+            for (let k in picked.options) {
+                if (typeof picked.options[k] === 'number') {
+                    if (Math.random() < 0.2) picked.options[k] *= (0.8 + Math.random()*0.4);
+                } else if (typeof picked.options[k] === 'boolean') {
+                    if (Math.random() < 0.05) picked.options[k] = !picked.options[k];
+                }
+            }
+            child.magnifiers.push(picked);
+        }
+    }
+    // ensure unique names
+    let uniqueMags = {};
+    for (let m of child.magnifiers) {
+        uniqueMags[m.name] = m;
+    }
+    child.magnifiers = Object.values(uniqueMags);
+    if(child.magnifiers.length === 0) {
+        child.magnifiers.push({name: 'Piece', options: {pieceValue: 1}});
+    }
+
     if (Math.random() < 0.1) {
         child.race = RACES[Math.floor(Math.random() * RACES.length)];
     }
@@ -696,11 +774,6 @@ function updateUI() {
             filtersHtml += `<span class="filter-tag" style="background-color: #e5989b;" title="Remove Well Positioned">RWP (${excStr})</span>`;
         }
         
-        let kvStr = '-';
-        if (c.kingVulnAttackWeight !== undefined) {
-            kvStr = `${c.kingVulnAttackWeight.toFixed(2)}/${c.kingVulnProxWeight.toFixed(2)}`;
-        }
-        
         let tr = document.createElement('tr');
         // Add click event to row for details
         tr.style.cursor = 'pointer';
@@ -731,6 +804,24 @@ function updateUI() {
             algStr += ` <br><i style="font-size:0.85em">(${phaseStrs.join(', ')})</i>`;
         }
 
+        // Display magnifiers briefly
+        let magsStr = '';
+        if (c.magnifiers && c.magnifiers.length > 0) {
+            magsStr = c.magnifiers.map(m => {
+                let s = m.name.substring(0,3);
+                if(m.name==='MaxOptions') s='Max';
+                if(m.name==='KingTropism') s='Tro';
+                if(m.name==='KingVulnerability') s='Vul';
+                return s;
+            }).join(', ');
+        } else {
+            // legacy display
+            if(c.posValueWeight !== undefined) magsStr+='Max, ';
+            if(c.pieceValueWeight !== undefined) magsStr+='Pce, ';
+            if(c.kingTropismWeight !== undefined) magsStr+='Tro, ';
+            if(magsStr.endsWith(', ')) magsStr = magsStr.slice(0,-2);
+        }
+
         tr.innerHTML = `
             <td>${i + 1}</td>
             <td>${c.id}</td>
@@ -739,11 +830,7 @@ function updateUI() {
             <td>${c.gamesPlayed}</td>
             <td>${algStr}</td>
             <td>${c.depth}</td>
-            <td>${c.pieceValueWeight !== undefined ? c.pieceValueWeight.toFixed(2) : '-'}</td>
-            <td>${c.posValueWeight !== undefined ? c.posValueWeight.toFixed(2) : '-'}</td>
-            <td>${c.kingTropismWeight !== undefined ? c.kingTropismWeight.toFixed(2) : '-'}</td>
-            <td>${c.defendedWeight !== undefined ? c.defendedWeight.toFixed(2) : '-'}</td>
-            <td>${kvStr}</td>
+            <td style="font-size:10px;">${magsStr}</td>
             <td>${filtersHtml}</td>
             <td>
                 <button style="padding: 5px 10px; font-size: 12px;" onclick="playAgainst('${c.id}')">Play</button>
@@ -803,11 +890,11 @@ function killBotsByElo() {
     let threshold = parseInt(document.getElementById('kill_elo_threshold').value);
     if (isNaN(threshold)) return;
     
-    let initialCount = currentGenBots.length;
-    currentGenBots = currentGenBots.filter(c => c.score >= threshold);
+    let initialCount = characters.length;
+    characters = characters.filter(c => c.score >= threshold);
     
     // Ensure we don't kill everyone, keep at least 2
-    if (currentGenBots.length < 2 && initialCount >= 2) {
+    if (characters.length < 2 && initialCount >= 2) {
         alert("Cannot kill all bots! Kept the top 2.");
         // We'd have to reload or sort, simpler just to alert for now
         // A better approach is to sort and slice
@@ -822,19 +909,19 @@ function killSpecificBotImpl(idToKill) {
     if (!idToKill) return;
     
     // Stop evolution loop if it's running
-    let wasEvolving = isEvolving;
-    if (isEvolving) {
+    let wasEvolving = isRunning;
+    if (isRunning) {
         toggleEvolution(); 
     }
     
-    if (currentGenBots.length <= 2) {
+    if (characters.length <= 2) {
         alert("Cannot kill bot. Minimum 2 bots required in the arena.");
         if (wasEvolving) toggleEvolution();
         return;
     }
     
     if(confirm(`Are you sure you want to kill bot ${idToKill}?`)) {
-        currentGenBots = currentGenBots.filter(c => c.id !== idToKill);
+        characters = characters.filter(c => c.id !== idToKill);
         saveData();
         updateUI();
     }
@@ -848,10 +935,10 @@ window.killSpecificBotImpl = killSpecificBotImpl;
 
 function killAllBots() {
     if(confirm("Are you sure you want to delete ALL bots in the current generation? You will have to start over.")) {
-        currentGenBots = [];
+        characters = [];
         saveData();
-        updateUI();
-        closeKillBotModal();
+        // Force reload to trigger init() and generate new bots
+        location.reload();
     }
 }
 
@@ -902,14 +989,6 @@ function createNewBot() {
             algorithm: getVal('cb_algorithm'),
             depth: getInt('cb_depth') || 2,
             
-            // Magnifiers
-            posValueWeight: getNum('cb_posValueWeight'),
-            pieceValueWeight: getNum('cb_pieceValueWeight'),
-            kingTropismWeight: getNum('cb_kingTropismWeight'),
-            defendedWeight: getNum('cb_defendedWeight'),
-            kingVulnAttackWeight: getNum('cb_kingVulnAttackWeight'),
-            kingVulnProxWeight: getNum('cb_kingVulnProxWeight'),
-            
             // Filters
             useRemoveAttacked: getCheck('cb_useRemoveAttacked'),
             raRandomException: getNum('cb_raRandomException'),
@@ -941,6 +1020,23 @@ function createNewBot() {
             rwpN: getInt('cb_rwpN'),
             rwpExceptionAttacked: getCheck('cb_rwpExceptionAttacked')
         };
+        
+        // Gather magnifiers
+        let magnifiers = [];
+        context.querySelectorAll('.mag-row').forEach(row => {
+            let type = row.querySelector('.mag-type').value;
+            let opts = {};
+            row.querySelectorAll('.mag-opts input').forEach(input => {
+                let key = input.className.replace('opt-', '');
+                if (input.type === 'checkbox') {
+                    opts[key] = input.checked;
+                } else {
+                    if (input.value !== '') opts[key] = parseFloat(input.value);
+                }
+            });
+            magnifiers.push({name: type, options: opts});
+        });
+        config.magnifiers = magnifiers;
         
         return config;
     }

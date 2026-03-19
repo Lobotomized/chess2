@@ -18,24 +18,40 @@ importScripts('/src/AI/general.js')
 importScripts('/src/AI/magnifiers.js')
 importScripts('/src/AI/filters.js')
 
-function characterToMagnifiers(charConfig) {
+function buildMagsFromLegacy(charConfig) {
     let mags = [];
-    if (charConfig.posValueWeight !== undefined) {
-        mags.push({ method: evaluationMagnifierMaxOptions, options: { posValue: charConfig.posValueWeight } });
-    }
-    if (charConfig.pieceValueWeight !== undefined) {
-        mags.push({ method: evaluationMagnifierPiece, options: { pieceValue: charConfig.pieceValueWeight } });
-    }
-    if (charConfig.kingTropismWeight !== undefined) {
-        mags.push({ method: evaluationMagnifierKingTropism, options: { relativeValue: charConfig.kingTropismWeight, onlyForEnemy: true, pieceValue: 1 } });
-    }
-    if (charConfig.defendedWeight !== undefined) {
-        mags.push({ method: evaluationMagnifierPieceDefended, options: { relativeValue: charConfig.defendedWeight } });
-    }
-    if (charConfig.kingVulnAttackWeight !== undefined) {
-        mags.push({ method: evaluationMagnifierKingVulnerability, options: { attackValue: charConfig.kingVulnAttackWeight, proximityValue: charConfig.kingVulnProxWeight || 0 } });
-    }
+    if(charConfig.posValueWeight !== undefined) mags.push({name:'MaxOptions', options:{posValue:charConfig.posValueWeight, useMask:true}});
+    if(charConfig.pieceValueWeight !== undefined) mags.push({name:'Piece', options:{pieceValue:charConfig.pieceValueWeight}});
+    if(charConfig.kingTropismWeight !== undefined) mags.push({name:'KingTropism', options:{relativeValue:charConfig.kingTropismWeight, onlyForEnemy:true, pieceValue:1}});
+    if(charConfig.defendedWeight !== undefined) mags.push({name:'PieceDefended', options:{relativeValue:charConfig.defendedWeight}});
+    if(charConfig.kingVulnAttackWeight !== undefined) mags.push({name:'KingVulnerability', options:{attackValue:charConfig.kingVulnAttackWeight, proximityValue:charConfig.kingVulnProxWeight||0}});
     return mags;
+}
+
+function parseMags(magsList, fallbackConfig) {
+    if (!magsList || magsList.length === 0) {
+        magsList = buildMagsFromLegacy(fallbackConfig);
+    }
+    if (!magsList || magsList.length === 0) {
+        magsList = [{name:'Piece', options:{pieceValue:1}}]; 
+    }
+    return magsList.map(m => {
+        let method;
+        if (m.name === 'MaxOptions') method = evaluationMagnifierMaxOptions;
+        else if (m.name === 'Piece') method = evaluationMagnifierPiece;
+        else if (m.name === 'PieceDefended') method = evaluationMagnifierPieceDefended;
+        else if (m.name === 'KingTropism') method = evaluationMagnifierKingTropism;
+        else if (m.name === 'KingVulnerability') method = evaluationMagnifierKingVulnerability;
+
+        let opts = {...m.options};
+        if (opts.useMask) opts.mask = positionMaskDefault;
+
+        return { method: method, options: opts };
+    });
+}
+
+function characterToMagnifiers(charConfig) {
+    return parseMags(charConfig.magnifiers, charConfig);
 }
 
 function characterToFilters(charConfig) {
@@ -140,58 +156,26 @@ self.addEventListener("message", function(e) {
                     if (phases[i].depth) currentDepth = phases[i].depth;
                     
                     // Rebuild Magnifiers based on phase overrides
-                    // If phase has magnifier weights, we rebuild the whole array.
-                    // If not, we keep the previous/base magnifiers.
-                    if (phases[i].posValueWeight !== undefined || 
+                    if (phases[i].magnifiers && phases[i].magnifiers.length > 0) {
+                        currentMags = parseMags(phases[i].magnifiers, phases[i]);
+                    } else if (phases[i].posValueWeight !== undefined || 
                         phases[i].pieceValueWeight !== undefined ||
                         phases[i].kingTropismWeight !== undefined || 
                         phases[i].defendedWeight !== undefined || 
                         phases[i].kingVulnAttackWeight !== undefined) {
-                        
-                        let pConfig = phases[i];
-                        let newMags = [];
-                        
-                        let pvw = pConfig.posValueWeight;
-                        if(pvw === undefined) pvw = isWhite ? charWhite.posValueWeight : charBlack.posValueWeight;
-                        if(pvw !== undefined) newMags.push({ method: evaluationMagnifierMaxOptions, options: { posValue: pvw } });
-                        
-                        let pcv = pConfig.pieceValueWeight;
-                        if(pcv === undefined) pcv = isWhite ? charWhite.pieceValueWeight : charBlack.pieceValueWeight;
-                        if(pcv !== undefined) newMags.push({ method: evaluationMagnifierPiece, options: { pieceValue: pcv } });
-                        
-                        let ktv = pConfig.kingTropismWeight;
-                        if(ktv === undefined) ktv = isWhite ? charWhite.kingTropismWeight : charBlack.kingTropismWeight;
-                        if(ktv !== undefined) newMags.push({ method: evaluationMagnifierKingTropism, options: { relativeValue: ktv, onlyForEnemy: true, pieceValue: 1 } });
-                        
-                        let def = pConfig.defendedWeight;
-                        if(def === undefined) def = isWhite ? charWhite.defendedWeight : charBlack.defendedWeight;
-                        if(def !== undefined) newMags.push({ method: evaluationMagnifierPieceDefended, options: { relativeValue: def } });
-                        
-                        let kva = pConfig.kingVulnAttackWeight;
-                        let kvp = pConfig.kingVulnProxWeight;
-                        if(kva === undefined) kva = isWhite ? charWhite.kingVulnAttackWeight : charBlack.kingVulnAttackWeight;
-                        if(kvp === undefined) kvp = isWhite ? charWhite.kingVulnProxWeight : charBlack.kingVulnProxWeight;
-                        if(kva !== undefined) newMags.push({ method: evaluationMagnifierKingVulnerability, options: { attackValue: kva, proximityValue: kvp || 0 } });
-                        
-                        currentMags = newMags;
+                        currentMags = parseMags(buildMagsFromLegacy(phases[i]), phases[i]);
                     } else if (phases[i].weights) {
                         // Legacy support for the brief period where we used 'weights' object
                         let w = phases[i].weights;
-                        let newMags = [];
-                        let pvw = w.pos !== undefined ? w.pos : (isWhite ? charWhite.posValueWeight : charBlack.posValueWeight);
-                        let pcv = w.piece !== undefined ? w.piece : (isWhite ? charWhite.pieceValueWeight : charBlack.pieceValueWeight);
-                        let ktv = w.kingTrop !== undefined ? w.kingTrop : (isWhite ? charWhite.kingTropismWeight : charBlack.kingTropismWeight);
-                        let def = w.def !== undefined ? w.def : (isWhite ? charWhite.defendedWeight : charBlack.defendedWeight);
-                        let kva = w.vulnAtt !== undefined ? w.vulnAtt : (isWhite ? charWhite.kingVulnAttackWeight : charBlack.kingVulnAttackWeight);
-                        let kvp = w.vulnProx !== undefined ? w.vulnProx : (isWhite ? charWhite.kingVulnProxWeight : charBlack.kingVulnProxWeight);
-                        
-                        if (pvw !== undefined) newMags.push({ method: evaluationMagnifierMaxOptions, options: { posValue: pvw } });
-                        if (pcv !== undefined) newMags.push({ method: evaluationMagnifierPiece, options: { pieceValue: pcv } });
-                        if (ktv !== undefined) newMags.push({ method: evaluationMagnifierKingTropism, options: { relativeValue: ktv, onlyForEnemy: true, pieceValue: 1 } });
-                        if (def !== undefined) newMags.push({ method: evaluationMagnifierPieceDefended, options: { relativeValue: def } });
-                        if (kva !== undefined) newMags.push({ method: evaluationMagnifierKingVulnerability, options: { attackValue: kva, proximityValue: kvp || 0 } });
-                        
-                        currentMags = newMags;
+                        let legacyConfig = {
+                            posValueWeight: w.pos !== undefined ? w.pos : undefined,
+                            pieceValueWeight: w.piece !== undefined ? w.piece : undefined,
+                            kingTropismWeight: w.kingTrop !== undefined ? w.kingTrop : undefined,
+                            defendedWeight: w.def !== undefined ? w.def : undefined,
+                            kingVulnAttackWeight: w.vulnAtt !== undefined ? w.vulnAtt : undefined,
+                            kingVulnProxWeight: w.vulnProx !== undefined ? w.vulnProx : undefined
+                        };
+                        currentMags = parseMags(buildMagsFromLegacy(legacyConfig), legacyConfig);
                     }
                     
                     // Rebuild Filters based on phase overrides

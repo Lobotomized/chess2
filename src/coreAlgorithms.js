@@ -396,9 +396,9 @@ function minimaxAlphaBeta(state, maximizer, depth, removedTurns, magnifiers, fil
              const magObj = magnifierMethods[j];
              const isFriendly = colorPerspective === piece.color;
              
-             if (isFriendly && !magObj.onlyForEnemy) {
+             if (isFriendly && !(magObj.options && magObj.options.onlyForEnemy)) {
                  magnifier += magObj.method(piece, pieces, board, piece.color, magObj.options);
-             } else if (!isFriendly && !magObj.onlyForMe) {
+             } else if (!isFriendly && !(magObj.options && magObj.options.onlyForMe)) {
                  magnifier += magObj.method(piece, pieces, board, piece.color, magObj.options);
              }
          }
