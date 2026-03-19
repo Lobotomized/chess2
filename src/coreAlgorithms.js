@@ -940,14 +940,7 @@ function bestFirstSearch(state, maximizer, depth, removedTurns, magnifiers, filt
     // Priority queue for open nodes
     let openList = [];
     
-    // Initial expansion
-    let root = {
-        state: state,
-        move: null,
-        score: evaluateBoardUltraFast(maximizer, state.pieces, state.board, magnifiers),
-        depth: 0,
-        id: crypto.randomUUID()
-    };
+
     
     // Generate initial moves
     let firstMoves = generateMovesFromPiecesAlphaBeta(state, maximizer, filters);
@@ -1055,4 +1048,233 @@ function bestFirstSearch(state, maximizer, depth, removedTurns, magnifiers, filt
     }
     
     return bestMove;
+}
+
+function principalVariationSearch(state, maximizer, depth, removedTurns, magnifiers, filters) {
+    state.id = crypto.randomUUID();
+    let enemy = getEnemy(maximizer);
+    
+    // Generate moves with early filtering
+    let firstGen = generateMovesFromPiecesAlphaBeta(state, maximizer, filters);
+
+    // Filter out removed turns if specified
+    if (removedTurns && removedTurns.length) {
+        const removedSet = new Set();
+        const rtLen = removedTurns.length;
+        for (let i = 0; i < rtLen; i++) {
+            const rtm = removedTurns[i];
+            removedSet.add(`${rtm.xClicked},${rtm.yClicked},${rtm.pieceCounter}`);
+        }
+        
+        const filteredMoves = [];
+        const fgLen = firstGen.length;
+        for (let i = 0; i < fgLen; i++) {
+            const fgm = firstGen[i];
+            const key = `${fgm.xClicked},${fgm.yClicked},${fgm.pieceCounter}`;
+            if (!removedSet.has(key)) {
+                filteredMoves.push(fgm);
+            }
+        }
+        firstGen = filteredMoves;
+    }
+
+    if (!firstGen || firstGen.length === 0) return undefined;
+
+    // Fast initial evaluation and sorting
+    const len = firstGen.length;
+    const scores = new Array(len);
+    const movesWithScores = new Array(len);
+    
+    for (let i = 0; i < len; i++) {
+        let move = firstGen[i];
+        
+        if (move.won && move.won === maximizer) {
+            move.value = 9999999999999999999;
+            return move;
+        }
+        
+        let score = 0;
+        const pieces = move.pieces;
+        const pLen = pieces.length;
+        
+        for (let j = 0; j < pLen; j++) {
+            const p = pieces[j];
+            score += p.color === maximizer ? (p.value || 3) : -(p.value || 3);
+        }
+        
+        if (move.xClicked !== undefined && move.yClicked !== undefined) {
+            const centerDist = Math.abs(move.xClicked - 2.5) + Math.abs(move.yClicked - 2.5);
+            score -= centerDist * 0.1;
+        }
+        
+        scores[i] = score;
+        movesWithScores[i] = {move, score};
+    }
+    
+    movesWithScores.sort((a, b) => b.score - a.score);
+    
+    for (let i = 0; i < len; i++) {
+        firstGen[i] = movesWithScores[i].move;
+        firstGen[i]._score = movesWithScores[i].score;
+    }
+
+    let bestMove = undefined;
+    let alpha = -Infinity;
+    let beta = Infinity;
+
+    for (let i = 0; i < len; i++) {
+        let move = firstGen[i];
+        
+        let evalBoard;
+        if (i === 0) {
+            evalBoard = pvsOptimized(
+                { pieces: move.pieces, board: state.board, turn: enemy, won: move.won },
+                depth - 1, alpha, beta, false, maximizer, filters, magnifiers
+            );
+        } else {
+            // Null window search
+            evalBoard = pvsOptimized(
+                { pieces: move.pieces, board: state.board, turn: enemy, won: move.won },
+                depth - 1, alpha, alpha + 1, false, maximizer, filters, magnifiers
+            );
+            if (evalBoard > alpha && evalBoard < beta) {
+                // Re-search with full window
+                evalBoard = pvsOptimized(
+                    { pieces: move.pieces, board: state.board, turn: enemy, won: move.won },
+                    depth - 1, alpha, beta, false, maximizer, filters, magnifiers
+                );
+            }
+        }
+        
+        move.value = evalBoard;
+        
+        if (bestMove === undefined || evalBoard > alpha) {
+            alpha = evalBoard;
+            bestMove = move;
+        }
+    }
+
+    return bestMove;
+}
+
+function pvsOptimized(state, depth, alpha, beta, isMaximizer, maximizerColor, filters, magnifiers) {
+    if (state.won) {
+        return state.won === maximizerColor ? 9999999999999999999 : -9999999999999999999;
+    }
+    
+    if (depth <= 0) {
+        return evaluateBoardUltraFast(maximizerColor, state.pieces, state.board, magnifiers);
+    }
+    
+    const currentColor = isMaximizer ? maximizerColor : getEnemy(maximizerColor);
+    const moves = generateMovesFromPiecesAlphaBeta(state, currentColor, filters);
+    
+    if (moves.length === 0) {
+        return evaluateBoardUltraFast(maximizerColor, state.pieces, state.board, magnifiers);
+    }
+    
+    const len = moves.length;
+    const scores = new Array(len);
+    
+    for (let i = 0; i < len; i++) {
+        const m = moves[i];
+        if (m.won) {
+            scores[i] = isMaximizer ? 100000 : -100000;
+            continue;
+        }
+        
+        let score = 0;
+        const pieces = m.pieces;
+        const pLen = pieces.length;
+        
+        for (let j = 0; j < pLen; j++) {
+            const p = pieces[j];
+            score += p.color === maximizerColor ? (p.value || 3) : -(p.value || 3);
+        }
+        scores[i] = score;
+    }
+
+    if (isMaximizer) {
+        for (let i = 1; i < len; i++) {
+            const currentScore = scores[i];
+            const currentMove = moves[i];
+            let j = i - 1;
+            while (j >= 0 && scores[j] < currentScore) {
+                scores[j + 1] = scores[j];
+                moves[j + 1] = moves[j];
+                j--;
+            }
+            scores[j + 1] = currentScore;
+            moves[j + 1] = currentMove;
+        }
+        
+        let maxEval = -Infinity;
+        for (let i = 0; i < len; i++) {
+            const m = moves[i];
+            let evalBoard;
+            if (i === 0) {
+                evalBoard = pvsOptimized(
+                    { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                    depth - 1, alpha, beta, false, maximizerColor, filters, magnifiers
+                );
+            } else {
+                evalBoard = pvsOptimized(
+                    { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                    depth - 1, alpha, alpha + 1, false, maximizerColor, filters, magnifiers
+                );
+                if (evalBoard > alpha && evalBoard < beta) {
+                    evalBoard = pvsOptimized(
+                        { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                        depth - 1, alpha, beta, false, maximizerColor, filters, magnifiers
+                    );
+                }
+            }
+            
+            if (evalBoard > maxEval) maxEval = evalBoard;
+            if (evalBoard > alpha) alpha = evalBoard;
+            if (alpha >= beta) break;
+        }
+        return maxEval;
+    } else {
+        for (let i = 1; i < len; i++) {
+            const currentScore = scores[i];
+            const currentMove = moves[i];
+            let j = i - 1;
+            while (j >= 0 && scores[j] > currentScore) {
+                scores[j + 1] = scores[j];
+                moves[j + 1] = moves[j];
+                j--;
+            }
+            scores[j + 1] = currentScore;
+            moves[j + 1] = currentMove;
+        }
+        
+        let minEval = Infinity;
+        for (let i = 0; i < len; i++) {
+            const m = moves[i];
+            let evalBoard;
+            if (i === 0) {
+                evalBoard = pvsOptimized(
+                    { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                    depth - 1, alpha, beta, true, maximizerColor, filters, magnifiers
+                );
+            } else {
+                evalBoard = pvsOptimized(
+                    { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                    depth - 1, beta - 1, beta, true, maximizerColor, filters, magnifiers
+                );
+                if (evalBoard > alpha && evalBoard < beta) {
+                    evalBoard = pvsOptimized(
+                        { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                        depth - 1, alpha, beta, true, maximizerColor, filters, magnifiers
+                    );
+                }
+            }
+            
+            if (evalBoard < minEval) minEval = evalBoard;
+            if (evalBoard < beta) beta = evalBoard;
+            if (beta <= alpha) break;
+        }
+        return minEval;
+    }
 }

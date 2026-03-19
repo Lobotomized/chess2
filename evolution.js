@@ -53,7 +53,7 @@ function generateRandomCharacter() {
         id: Math.random().toString(36).substr(2, 6).toUpperCase(),
         race: RACES[Math.floor(Math.random() * RACES.length)],
         depth: Math.floor(Math.random() * 2) + 2, // 2 or 3 for rapid play
-        algorithm: ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch'][Math.floor(Math.random() * 5)],
+        algorithm: ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch', 'principalVariationSearch'][Math.floor(Math.random() * 6)],
         phases: [],
         magnifiers: [],
         score: 1000,
@@ -80,7 +80,7 @@ function generateRandomCharacter() {
     for (let i = 0; i < numPhases; i++) {
         char.phases.push({
             threshold: Math.floor(Math.random() * 20) + 4, // 4 to 23 pieces
-            algorithm: ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch'][Math.floor(Math.random() * 5)]
+            algorithm: ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch', 'principalVariationSearch'][Math.floor(Math.random() * 6)]
         });
     }
     // Sort phases by threshold descending so they evaluate correctly
@@ -530,7 +530,7 @@ function crossover(p1, p2) {
 
     // Make sure old characters getting crossed over receive an algorithm if missing
     if (!child.algorithm) {
-        child.algorithm = ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch'][Math.floor(Math.random() * 5)];
+        child.algorithm = ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch', 'principalVariationSearch'][Math.floor(Math.random() * 6)];
     }
 
     if (p1.posValueWeight !== undefined || p2.posValueWeight !== undefined) {
@@ -628,10 +628,10 @@ function crossover(p1, p2) {
     }
 
     if (Math.random() < 0.1) {
-        child.depth = Math.floor(Math.random() * 2) + 2;
+        child.depth = Math.floor(Math.random() * 4) + 2;
     }
     if (Math.random() < 0.1) {
-        child.algorithm = ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch'][Math.floor(Math.random() * 5)];
+        child.algorithm = ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch', 'principalVariationSearch'][Math.floor(Math.random() * 6)];
     }
     
     // Crossover phases
@@ -656,7 +656,7 @@ function crossover(p1, p2) {
     if (Math.random() < 0.1) {
         child.phases.push({
              threshold: Math.floor(Math.random() * 20) + 4,
-             algorithm: ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch'][Math.floor(Math.random() * 5)]
+             algorithm: ['minimaxDeep', 'minimaxAlphaBeta', 'minimaxQuiescence', 'proofNumberSearch', 'bestFirstSearch', 'principalVariationSearch'][Math.floor(Math.random() * 6)]
         });
     }
     
@@ -787,6 +787,7 @@ function updateUI() {
             if(alg === 'minimaxQuiescence') return 'Q';
             if(alg === 'proofNumberSearch') return 'PNS';
             if(alg === 'bestFirstSearch') return 'BFS';
+            if(alg === 'principalVariationSearch') return 'PVS';
             return 'AB';
         };
 

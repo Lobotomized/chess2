@@ -298,7 +298,7 @@ self.addEventListener("message", async function(e) {
                         
                         // Build magnifiers
                         let mags = parseMags(charConfig.magnifiers, charConfig);
-                        
+                        console.log(mags, charConfig, '  mags?')
                         // Build filters
                         let filters = [];
                         if (charConfig.useRemoveAttacked) {
@@ -457,6 +457,8 @@ self.addEventListener("message", async function(e) {
                             move = proofNumberSearch(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
                         } else if (algorithm === 'bestFirstSearch') {
                             move = bestFirstSearch(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
+                        } else if (algorithm === 'principalVariationSearch') {
+                            move = principalVariationSearch(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
                         } else {
                             move = minimaxAlphaBeta(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
                         }

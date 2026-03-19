@@ -249,6 +249,8 @@ self.addEventListener("message", function(e) {
             move = proofNumberSearch(state, state.turn, currentDepth, [], currentMags, currentFilters);
         } else if (algorithm === 'bestFirstSearch') {
             move = bestFirstSearch(state, state.turn, currentDepth, [], currentMags, currentFilters);
+        } else if (algorithm === 'principalVariationSearch') {
+            move = principalVariationSearch(state, state.turn, currentDepth, [], currentMags, currentFilters);
         } else {
             move = minimaxAlphaBeta(state, state.turn, currentDepth, [], currentMags, currentFilters);
         }
