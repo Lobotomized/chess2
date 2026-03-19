@@ -278,18 +278,21 @@ function showHistory(charId) {
     fetch(`/games/${char.id}`)
     .then(res => res.json())
     .then(games => {
-        let html = '<table style="width:100%; text-align:left;"><thead><tr><th>Date</th><th>Opponent</th><th>Result</th><th>Turns</th><th>Action</th></tr></thead><tbody>';
+        let html = '<table style="width:100%; text-align:left;"><thead><tr><th>Date</th><th>Opponent</th><th>Race vs Opp Race</th><th>Result</th><th>Turns</th><th>Action</th></tr></thead><tbody>';
         if (!games || games.length === 0) {
-            html += '<tr><td colspan="5" style="text-align:center; padding: 10px;">No match history found. Games may have been played before history tracking or timed out without data.</td></tr>';
+            html += '<tr><td colspan="6" style="text-align:center; padding: 10px;">No match history found. Games may have been played before history tracking or timed out without data.</td></tr>';
         } else {
             games.forEach(g => {
                 let opponentId = g.whiteId === char.id ? g.blackId : g.whiteId;
+                let myRace = g.whiteId === char.id ? g.whiteRace : g.blackRace;
+                let opponentRace = g.whiteId === char.id ? g.blackRace : g.whiteRace;
                 let result = g.winner === 'tie' ? 'Draw' : (g.winner === (g.whiteId === char.id ? 'white' : 'black') ? 'Win' : 'Loss');
                 let color = result === 'Win' ? '#829769' : (result === 'Loss' ? '#ff6b6b' : '#f0d9b5');
                 html += `
                     <tr>
                         <td>${new Date(g.date).toLocaleString()}</td>
                         <td>${opponentId}</td>
+                        <td>${myRace || '-'} vs ${opponentRace || '-'}</td>
                         <td style="color:${color}; font-weight:bold;">${result}</td>
                         <td>${g.turns}</td>
                         <td><button style="padding:5px;" onclick="replayGame('${g._id}')">Replay</button></td>
@@ -330,18 +333,20 @@ function showAllHistory() {
     fetch(`/games`)
     .then(res => res.json())
     .then(games => {
-        let html = '<table style="width:100%; text-align:left;"><thead><tr><th>Date</th><th>White</th><th>Black</th><th>Result</th><th>Turns</th><th>Action</th></tr></thead><tbody>';
+        let html = '<table style="width:100%; text-align:left;"><thead><tr><th>Date</th><th>White (Race)</th><th>Black (Race)</th><th>Result</th><th>Turns</th><th>Action</th></tr></thead><tbody>';
         if (!games || games.length === 0) {
             html += '<tr><td colspan="6" style="text-align:center; padding: 10px;">No match history found.</td></tr>';
         } else {
             games.forEach(g => {
                 let result = g.winner === 'tie' ? 'Draw' : (g.winner === 'white' ? 'White Win' : 'Black Win');
                 let color = g.winner === 'tie' ? '#f0d9b5' : (g.winner === 'white' ? '#e0e0e0' : '#888888');
+                let wRace = g.whiteRace ? `(${g.whiteRace})` : '';
+                let bRace = g.blackRace ? `(${g.blackRace})` : '';
                 html += `
                     <tr>
                         <td>${new Date(g.date).toLocaleString()}</td>
-                        <td>${g.whiteId}</td>
-                        <td>${g.blackId}</td>
+                        <td>${g.whiteId} ${wRace}</td>
+                        <td>${g.blackId} ${bRace}</td>
                         <td style="color:${color}; font-weight:bold;">${result}</td>
                         <td>${g.turns}</td>
                         <td><button style="padding:5px;" onclick="replayGame('${g._id}')">Replay</button></td>
