@@ -93,6 +93,15 @@ app.post('/games', async (req, res) => {
     }
 });
 
+app.get('/games', async (req, res) => {
+    try {
+        const games = await GameHistory.find().sort({ date: -1 }).limit(100);
+        res.json(games);
+    } catch (err) {
+        res.status(500).send(err);
+    }
+});
+
 app.get('/games/:botId', async (req, res) => {
     try {
         const games = await GameHistory.find({ 

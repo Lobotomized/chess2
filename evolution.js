@@ -264,13 +264,14 @@ function showHistory(charId) {
         modal.innerHTML = `
             <div style="background:#1a1a1a; padding:20px; border-radius:8px; width:80%; max-height:80%; overflow-y:auto; position:relative;">
                 <button onclick="document.getElementById('historyModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:#555;">Close</button>
-                <h2>Match History: ${char.id}</h2>
+                <h2 id="historyModalTitle">Match History</h2>
                 <div id="historyContent">Loading...</div>
             </div>
         `;
         document.body.appendChild(modal);
     }
     
+    document.getElementById('historyModalTitle').innerText = `Match History: ${char.id}`;
     modal.style.display = 'flex';
     document.getElementById('historyContent').innerHTML = 'Loading...';
     
@@ -289,6 +290,58 @@ function showHistory(charId) {
                     <tr>
                         <td>${new Date(g.date).toLocaleString()}</td>
                         <td>${opponentId}</td>
+                        <td style="color:${color}; font-weight:bold;">${result}</td>
+                        <td>${g.turns}</td>
+                        <td><button style="padding:5px;" onclick="replayGame('${g._id}')">Replay</button></td>
+                    </tr>
+                `;
+            });
+        }
+        html += '</tbody></table>';
+        document.getElementById('historyContent').innerHTML = html;
+    })
+    .catch(e => {
+        document.getElementById('historyContent').innerText = 'Error loading history.';
+        console.error(e);
+    });
+}
+
+function showAllHistory() {
+    // Create or reuse a history modal
+    let modal = document.getElementById('historyModal');
+    if(!modal) {
+        modal = document.createElement('div');
+        modal.id = 'historyModal';
+        modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; justify-content:center; align-items:center;';
+        modal.innerHTML = `
+            <div style="background:#1a1a1a; padding:20px; border-radius:8px; width:80%; max-height:80%; overflow-y:auto; position:relative;">
+                <button onclick="document.getElementById('historyModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:#555;">Close</button>
+                <h2 id="historyModalTitle">Match History</h2>
+                <div id="historyContent">Loading...</div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    document.getElementById('historyModalTitle').innerText = `All Games History`;
+    modal.style.display = 'flex';
+    document.getElementById('historyContent').innerHTML = 'Loading...';
+    
+    fetch(`/games`)
+    .then(res => res.json())
+    .then(games => {
+        let html = '<table style="width:100%; text-align:left;"><thead><tr><th>Date</th><th>White</th><th>Black</th><th>Result</th><th>Turns</th><th>Action</th></tr></thead><tbody>';
+        if (!games || games.length === 0) {
+            html += '<tr><td colspan="6" style="text-align:center; padding: 10px;">No match history found.</td></tr>';
+        } else {
+            games.forEach(g => {
+                let result = g.winner === 'tie' ? 'Draw' : (g.winner === 'white' ? 'White Win' : 'Black Win');
+                let color = g.winner === 'tie' ? '#f0d9b5' : (g.winner === 'white' ? '#e0e0e0' : '#888888');
+                html += `
+                    <tr>
+                        <td>${new Date(g.date).toLocaleString()}</td>
+                        <td>${g.whiteId}</td>
+                        <td>${g.blackId}</td>
                         <td style="color:${color}; font-weight:bold;">${result}</td>
                         <td>${g.turns}</td>
                         <td><button style="padding:5px;" onclick="replayGame('${g._id}')">Replay</button></td>
