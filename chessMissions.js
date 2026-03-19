@@ -102,6 +102,15 @@ app.get('/games', async (req, res) => {
     }
 });
 
+app.get('/hof-games', async (req, res) => {
+    try {
+        const games = await GameHistory.find({ isHallOfFame: true }).sort({ date: -1 }).limit(100);
+        res.json(games);
+    } catch (err) {
+        res.status(500).send(err);
+    }
+});
+
 app.get('/games/:botId', async (req, res) => {
     try {
         const games = await GameHistory.find({ 

@@ -203,6 +203,7 @@
         <div style="margin-bottom:20px;">
             <button class="primary" id="toggleBtn" onclick="toggleEvolution()">Start Evolution</button>
             <button class="primary" style="background: #4ecdc4; border-color: #4ecdc4;" onclick="openCreateBotModal()">Create Custom Bot</button>
+            <button class="primary" style="background: #e67e22; border-color: #e67e22;" onclick="openEvoFightModal()">Fight Bots</button>
             <button class="primary" style="background: #e5989b; border-color: #e5989b;" onclick="openKillBotModal()">Kill Bots</button>
             <button class="primary" style="background: #9b59b6; border-color: #9b59b6;" onclick="showAllHistory()">All Games History</button>
             <a href="/hallOfFame.html"><button>Go to Hall of Fame</button></a>
@@ -408,6 +409,32 @@
                 <hr style="border: 0; border-top: 1px solid #444; margin: 20px 0;">
                 
                 <button class="primary" style="background: #ff4d4d; border-color: #ff4d4d; width: 100%;" onclick="killAllBots()">Nuke Entire Generation</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fight Bots Modal -->
+    <div id="evoFightModal" class="modal-overlay" style="display:none;" onclick="if(event.target === this) closeEvoFightModal()">
+        <div class="modal-content" style="background:#1a1a1a; padding:30px; border-radius:8px; text-align:center; min-width:400px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+            <div class="modal-header" style="justify-content: center; position: relative;">
+                <h2 style="margin-top:0;">Fight Arena Bots</h2>
+                <button onclick="closeEvoFightModal()" style="padding:5px 10px; position: absolute; right: 0;">X</button>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; gap: 20px;">
+                <div style="flex:1;">
+                    <h3>White Bot</h3>
+                    <select id="evoWhiteBotSelect" style="padding:10px; width:100%; background:#333; color:#f0d9b5; border:1px solid #555;"></select>
+                </div>
+                <div><h1>VS</h1></div>
+                <div style="flex:1;">
+                    <h3>Black Bot</h3>
+                    <select id="evoBlackBotSelect" style="padding:10px; width:100%; background:#333; color:#f0d9b5; border:1px solid #555;"></select>
+                </div>
+            </div>
+            <div id="evoFightStatus" style="margin-top: 20px; font-weight: bold; color: #4ecdc4;"></div>
+            <div style="display:flex; justify-content:space-between; gap:10px; margin-top:20px;">
+                <button id="evoStartFightBtn" onclick="startEvoFight()" style="flex:1; background:#e67e22;" class="primary">Fight!</button>
+                <button onclick="closeEvoFightModal()" style="background:#555; flex:1;" class="primary">Close</button>
             </div>
         </div>
     </div>

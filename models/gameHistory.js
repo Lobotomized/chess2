@@ -10,7 +10,8 @@ const gameHistorySchema = new Schema({
     turns: Number,
     date: { type: Date, default: Date.now },
     moves: Array, // Store the sequence of moves for replay
-    initialPieces: String // Store the initial board setup
+    initialPieces: String, // Store the initial board setup
+    isHallOfFame: Boolean // True if this game was manually fought in the Hall of Fame
 });
 
 module.exports = mongoose.model('GameHistory', gameHistorySchema);

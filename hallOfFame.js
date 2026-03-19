@@ -117,4 +117,126 @@ function confirmPlay() {
     closeRaceModal();
 }
 
+function openHofFightModal() {
+    let whiteSelect = document.getElementById('whiteBotSelect');
+    let blackSelect = document.getElementById('blackBotSelect');
+    whiteSelect.innerHTML = '';
+    blackSelect.innerHTML = '';
+    
+    bots.forEach(b => {
+        let name = b.name ? `${b.name} (${b.id})` : b.id;
+        let opt1 = document.createElement('option');
+        opt1.value = b.id;
+        opt1.innerText = name;
+        whiteSelect.appendChild(opt1);
+        
+        let opt2 = document.createElement('option');
+        opt2.value = b.id;
+        opt2.innerText = name;
+        blackSelect.appendChild(opt2);
+    });
+    
+    document.getElementById('fightStatus').innerText = '';
+    document.getElementById('startFightBtn').style.display = 'block';
+    document.getElementById('hofFightModal').style.display = 'flex';
+}
+
+function closeHofFightModal() {
+    document.getElementById('hofFightModal').style.display = 'none';
+}
+
+function startHofFight() {
+    let wId = document.getElementById('whiteBotSelect').value;
+    let bId = document.getElementById('blackBotSelect').value;
+    
+    let wBot = bots.find(b => b.id === wId);
+    let bBot = bots.find(b => b.id === bId);
+    
+    if(!wBot || !bBot) return;
+    
+    document.getElementById('fightStatus').innerText = 'Fighting... please wait.';
+    document.getElementById('startFightBtn').style.display = 'none';
+    
+    let worker = new Worker('evolutionWorker.js');
+    
+    worker.postMessage(JSONfn.stringify({
+        charWhite: wBot,
+        charBlack: bBot,
+        whiteRace: wBot.race || 'classic',
+        blackRace: bBot.race || 'classic'
+    }));
+    
+    worker.onmessage = function(e) {
+        let msg = JSONfn.parse(e.data);
+        if (msg.type === 'result') {
+            worker.terminate();
+            
+            let result = msg;
+            if (result.history) {
+                result.history.isHallOfFame = true; // Flag as HoF match
+                
+                fetch('/games', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(result.history)
+                }).then(res => res.json()).then(savedGame => {
+                    let wName = wBot.name || wBot.id;
+                    let bName = bBot.name || bBot.id;
+                    let winText = result.winner === 'tie' ? 'It was a tie!' : (result.winner === 'white' ? `${wName} (White) won!` : `${bName} (Black) won!`);
+                    
+                    document.getElementById('fightStatus').innerHTML = `
+                        ${winText} in ${result.turns} turns.<br><br>
+                        <button onclick="window.open('/replay.html?gameId=${savedGame._id}', '_blank')" style="background:#829769; padding:5px 10px; font-size:14px;">Watch Replay</button>
+                    `;
+                }).catch(err => {
+                    document.getElementById('fightStatus').innerText = 'Fight finished, but failed to save history.';
+                });
+            }
+        }
+    };
+    
+    worker.onerror = function(err) {
+        document.getElementById('fightStatus').innerText = 'Error during fight!';
+        worker.terminate();
+    };
+}
+
+function showHofHistory() {
+    let modal = document.getElementById('historyModal');
+    modal.style.display = 'flex';
+    document.getElementById('historyContent').innerHTML = 'Loading...';
+    
+    fetch('/hof-games')
+    .then(res => res.json())
+    .then(games => {
+        let html = '<table style="width:100%; text-align:left;"><thead><tr><th>Date</th><th>White (Race)</th><th>Black (Race)</th><th>Result</th><th>Turns</th><th>Action</th></tr></thead><tbody>';
+        if (!games || games.length === 0) {
+            html += '<tr><td colspan="6" style="text-align:center; padding: 10px;">No Hall of Fame match history found.</td></tr>';
+        } else {
+            games.forEach(g => {
+                let result = g.winner === 'tie' ? 'Draw' : (g.winner === 'white' ? 'White Win' : 'Black Win');
+                let color = g.winner === 'tie' ? '#f0d9b5' : (g.winner === 'white' ? '#e0e0e0' : '#888888');
+                let wRace = g.whiteRace ? `(${g.whiteRace})` : '';
+                let bRace = g.blackRace ? `(${g.blackRace})` : '';
+                html += `
+                    <tr>
+                        <td>${new Date(g.date).toLocaleString()}</td>
+                        <td>${g.whiteId} ${wRace}</td>
+                        <td>${g.blackId} ${bRace}</td>
+                        <td style="color:${color}; font-weight:bold;">${result}</td>
+                        <td>${g.turns}</td>
+                        <td><button style="padding:5px;" onclick="window.open('/replay.html?gameId=${g._id}', '_blank')">Replay</button></td>
+                    </tr>
+                `;
+            });
+        }
+        html += '</tbody></table>';
+        document.getElementById('historyContent').innerHTML = html;
+    })
+    .catch(e => {
+        document.getElementById('historyContent').innerText = 'Error loading history.';
+        console.error(e);
+    });
+}
+
 window.onload = init;

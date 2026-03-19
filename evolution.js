@@ -945,6 +945,128 @@ function closeKillBotModal() {
     document.getElementById('killBotModal').style.display = 'none';
 }
 
+function openEvoFightModal() {
+    let whiteSelect = document.getElementById('evoWhiteBotSelect');
+    let blackSelect = document.getElementById('evoBlackBotSelect');
+    whiteSelect.innerHTML = '';
+    blackSelect.innerHTML = '';
+    
+    // Sort characters by ID to make it easier to find them
+    let sortedChars = [...characters].sort((a, b) => a.id.localeCompare(b.id));
+    
+    sortedChars.forEach(b => {
+        let name = `${b.id} (${Math.round(b.score)} ELO)`;
+        let opt1 = document.createElement('option');
+        opt1.value = b.id;
+        opt1.innerText = name;
+        whiteSelect.appendChild(opt1);
+        
+        let opt2 = document.createElement('option');
+        opt2.value = b.id;
+        opt2.innerText = name;
+        blackSelect.appendChild(opt2);
+    });
+    
+    document.getElementById('evoFightStatus').innerText = '';
+    document.getElementById('evoStartFightBtn').style.display = 'block';
+    document.getElementById('evoFightModal').style.display = 'flex';
+}
+
+function closeEvoFightModal() {
+    document.getElementById('evoFightModal').style.display = 'none';
+}
+
+function startEvoFight() {
+    let wId = document.getElementById('evoWhiteBotSelect').value;
+    let bId = document.getElementById('evoBlackBotSelect').value;
+    
+    let wBot = characters.find(b => b.id === wId);
+    let bBot = characters.find(b => b.id === bId);
+    
+    if(!wBot || !bBot) return;
+    
+    // Stop evolution loop if it's running so it doesn't interfere
+    let wasEvolving = isRunning;
+    if (isRunning) {
+        toggleEvolution(); 
+    }
+    
+    document.getElementById('evoFightStatus').innerText = 'Fighting... please wait.';
+    document.getElementById('evoStartFightBtn').style.display = 'none';
+    
+    let fightWorker = new Worker('evolutionWorker.js');
+    
+    fightWorker.postMessage(JSONfn.stringify({
+        charWhite: wBot,
+        charBlack: bBot,
+        whiteRace: wBot.race || 'classic',
+        blackRace: bBot.race || 'classic'
+    }));
+    
+    fightWorker.onmessage = function(e) {
+        let msg = JSONfn.parse(e.data);
+        if (msg.type === 'result') {
+            fightWorker.terminate();
+            
+            let result = msg;
+            
+            // Optionally update ELO here based on the manual fight result
+            handleMatchResult(wBot, bBot, result);
+            
+            if (result.history) {
+                // Game was saved to DB inside handleMatchResult, but we need the ID to watch replay
+                // Let's manually save it again to get the returned ID immediately, or rely on handleMatchResult
+                // handleMatchResult saves it but doesn't return the promise. 
+                // For immediate replay access, we save it here as well and handleMatchResult will create a duplicate... 
+                // Let's modify the behavior: we won't call handleMatchResult for manual fights to keep it clean, 
+                // or we just save the history directly here and update ELO manually.
+                
+                // Let's just update ELO manually so we can get the DB _id for the replay
+                let k = 32;
+                let expectedWhite = 1 / (1 + Math.pow(10, (bBot.score - wBot.score) / 400));
+                let expectedBlack = 1 / (1 + Math.pow(10, (wBot.score - bBot.score) / 400));
+                
+                let actualWhite = result.winner === 'white' ? 1 : (result.winner === 'tie' ? 0.5 : 0);
+                let actualBlack = result.winner === 'black' ? 1 : (result.winner === 'tie' ? 0.5 : 0);
+                
+                wBot.score += k * (actualWhite - expectedWhite);
+                bBot.score += k * (actualBlack - expectedBlack);
+                wBot.gamesPlayed++;
+                bBot.gamesPlayed++;
+                
+                saveData();
+                updateUI();
+                
+                fetch('/games', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(result.history)
+                }).then(res => res.json()).then(savedGame => {
+                    let winText = result.winner === 'tie' ? 'It was a tie!' : (result.winner === 'white' ? `${wBot.id} (White) won!` : `${bBot.id} (Black) won!`);
+                    
+                    document.getElementById('evoFightStatus').innerHTML = `
+                        ${winText} in ${result.turns} turns.<br><br>
+                        <button onclick="window.open('/replay.html?gameId=${savedGame._id}', '_blank')" style="background:#829769; padding:5px 10px; font-size:14px; border:none; border-radius:4px; color:white; cursor:pointer;">Watch Replay</button>
+                    `;
+                    
+                    if (wasEvolving) {
+                        toggleEvolution(); // Resume
+                    }
+                }).catch(err => {
+                    document.getElementById('evoFightStatus').innerText = 'Fight finished, but failed to save history.';
+                    if (wasEvolving) toggleEvolution();
+                });
+            }
+        }
+    };
+    
+    fightWorker.onerror = function(err) {
+        document.getElementById('evoFightStatus').innerText = 'Error during fight!';
+        fightWorker.terminate();
+        if (wasEvolving) toggleEvolution();
+    };
+}
+
 function killBotsByElo() {
     let threshold = parseInt(document.getElementById('kill_elo_threshold').value);
     if (isNaN(threshold)) return;
