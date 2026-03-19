@@ -76,20 +76,29 @@ function loop() {
 }
 
 const startGameLoop = () => {
+    const afterInit = () => {
+        startAni();
+        
+        // If it's the AI's turn immediately, trigger its logic
+        if(hotseatGame.state.turn === AIColor || AIColor === 'all'){
+            triggerAITurn(hotseatGame.state);
+        }
+    };
+
     if(hotseatGame.state.gameType){
         if(hotseatGame.state.gameType === 'customMap'){
             window[hotseatGame.state.gameType](hotseatGame.state,hotseatGame.state.whiteRace,hotseatGame.state.blackRace).then(() => {
-                startAni();
+                afterInit();
             })
         }
         else{
             window[hotseatGame.state.gameType](hotseatGame.state,hotseatGame.state.whiteRace,hotseatGame.state.blackRace)
-            startAni();
+            afterInit();
 
         }
     }
     else{
-        startAni();
+        afterInit();
     }
 }
 
@@ -126,6 +135,54 @@ function AIMove(pieceIndex, xClicked, yClicked, color){
     const selectedPiece = state.pieceSelected;
     lightBoardFE(selectedPiece,{pieces:state.pieces, board:state.board, turn:state.turn})
     hotseatGame.move(state.turn,{ x: xClicked, y: yClicked });
+}
+
+function triggerAITurn(state) {
+    if(!w){
+        w = new Worker("src/webworker.js");
+    }
+
+    state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
+    
+    let customEvolutionWhiteStr = undefined;
+    let customEvolutionBlackStr = undefined;
+    if (aiPowers[state.turn] === 'customEvolution') {
+        if(state.turn === 'white' || AIColor === 'all') customEvolutionWhiteStr = localStorage.getItem('chess_evolution_custom_ai_white');
+        if(state.turn === 'black' || AIColor === 'all') customEvolutionBlackStr = localStorage.getItem('chess_evolution_custom_ai_black');
+        
+        // Fallback to legacy single bot item if missing
+        if(!customEvolutionWhiteStr && state.turn === 'white') customEvolutionWhiteStr = localStorage.getItem('chess_evolution_custom_ai');
+        if(!customEvolutionBlackStr && state.turn === 'black') customEvolutionBlackStr = localStorage.getItem('chess_evolution_custom_ai');
+    }
+
+    w.postMessage(JSONfn.stringify({
+        state:state, 
+        color:state.turn, 
+        AIPower:aiPowers[state.turn],
+        customEvolutionWhite: customEvolutionWhiteStr,
+        customEvolutionBlack: customEvolutionBlackStr
+    }));
+
+    w.onmessage = function(event){
+        let move = JSONfn.parse(event.data)
+        AIMove(move.pieceCounter, move.xClicked, move.yClicked, state.turn)
+        
+        // Wait briefly for visuals then trigger next if it's still AI turn
+        setTimeout(() => {
+            if(state.turn === AIColor || AIColor === 'all'){
+                let removedTurns = [{...move}]
+                
+                if(move.removedTurns){
+                    removedTurns = [...removedTurns, ...move.removedTurns]
+                }
+                
+                // If the game isn't over, trigger next
+                if(!state.won) {
+                    triggerAITurn(state);
+                }
+            }
+        }, 100);
+    }
 }
 
 function animate(secretState){
@@ -334,55 +391,10 @@ canvas.addEventListener('click', (e) => {
         // After move (or selection), we need to ensure the lights are drawn.
         // The 'move' function might select a piece and set 'light' flags on the board.
         // However, 'animate' loop runs constantly.
-        // The issue might be that 'animate' clears the lights implicitly or explicitly?
-        // No, 'animate' just draws squares based on flags.
         
-        // Wait, previously we added logic in 'animate' to clear lights if no hoveredPiece.
-        // If hoveredPiece is null (mouse not moving or on empty square), we clear ALL lights including selection lights?
-        // Let's check the 'animate' function again.
-        
-        state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
-        if(state.turn === AIColor){
-            
-            // Read custom evolution bot config from localStorage if playing against one
-            let customEvolutionBlackStr = undefined;
-            if (aiPowers[state.turn] === 'customEvolution') {
-                customEvolutionBlackStr = localStorage.getItem('chess_evolution_custom_ai');
-            }
-
-            w.postMessage(JSONfn.stringify({
-                state:state, 
-                color:AIColor, 
-                AIPower:aiPowers[state.turn],
-                customEvolutionBlack: customEvolutionBlackStr
-            }));
-
-            w.onmessage = function(event){
-                let move = JSONfn.parse(event.data)
-                AIMove(move.pieceCounter, move.xClicked, move.yClicked, AIColor)
-                if(state.turn === AIColor){
-                    let removedTurns = [{...move}]
-                    
-                    if(move.removedTurns){
-                        removedTurns = [...removedTurns, ...move.removedTurns]
-                    }
-                    w.postMessage(JSONfn.stringify({
-                        state:state, 
-                        color:AIColor, 
-                        AIPower:aiPowers[state.turn], 
-                        removedTurns:removedTurns,
-                        customEvolutionBlack: customEvolutionBlackStr
-                    }));
-                }
-            }
-        }
-        else if(AIColor === 'all'){
-            w.postMessage(JSONfn.stringify({state:state, color:state.turn, AIPower:aiPowers[state.turn]}));
-            w.onmessage = function(event){
-                let move = JSONfn.parse(event.data)
-                AIMove(move.pieceCounter, move.xClicked, move.yClicked, state.turn)
-                w.postMessage(JSONfn.stringify({state:state, color:state.turn, AIPower:aiPowers[state.turn]}));
-            }
+        // If it is now the AI's turn, trigger the AI logic
+        if(state.turn === AIColor && !state.won){
+            triggerAITurn(state);
         }
     }
 

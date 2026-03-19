@@ -969,11 +969,28 @@ function openEvoFightModal() {
     
     document.getElementById('evoFightStatus').innerText = '';
     document.getElementById('evoStartFightBtn').style.display = 'block';
+    document.getElementById('evoWatchFightBtn').style.display = 'block';
     document.getElementById('evoFightModal').style.display = 'flex';
 }
 
 function closeEvoFightModal() {
     document.getElementById('evoFightModal').style.display = 'none';
+}
+
+function watchEvoFight() {
+    let wId = document.getElementById('evoWhiteBotSelect').value;
+    let bId = document.getElementById('evoBlackBotSelect').value;
+    
+    let wBot = characters.find(b => b.id === wId);
+    let bBot = characters.find(b => b.id === bId);
+    
+    if(!wBot || !bBot) return;
+    
+    localStorage.setItem('chess_evolution_custom_ai_white', JSON.stringify(wBot));
+    localStorage.setItem('chess_evolution_custom_ai_black', JSON.stringify(bBot));
+    
+    let url = `/hotseat?whiteRace=${wBot.race || 'classic'}&blackRace=${bBot.race || 'classic'}&AIColor=all&AIPowerWhite=customEvolution&AIPowerBlack=customEvolution&gameType=raceChoiceChess&starts=whiteStarts`;
+    window.open(url, '_blank');
 }
 
 function startEvoFight() {
@@ -993,6 +1010,7 @@ function startEvoFight() {
     
     document.getElementById('evoFightStatus').innerText = 'Fighting... please wait.';
     document.getElementById('evoStartFightBtn').style.display = 'none';
+    document.getElementById('evoWatchFightBtn').style.display = 'none';
     
     let fightWorker = new Worker('evolutionWorker.js');
     

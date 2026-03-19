@@ -138,11 +138,28 @@ function openHofFightModal() {
     
     document.getElementById('fightStatus').innerText = '';
     document.getElementById('startFightBtn').style.display = 'block';
+    document.getElementById('watchFightBtn').style.display = 'block';
     document.getElementById('hofFightModal').style.display = 'flex';
 }
 
 function closeHofFightModal() {
     document.getElementById('hofFightModal').style.display = 'none';
+}
+
+function watchHofFight() {
+    let wId = document.getElementById('whiteBotSelect').value;
+    let bId = document.getElementById('blackBotSelect').value;
+    
+    let wBot = bots.find(b => b.id === wId);
+    let bBot = bots.find(b => b.id === bId);
+    
+    if(!wBot || !bBot) return;
+    
+    localStorage.setItem('chess_evolution_custom_ai_white', JSON.stringify(wBot));
+    localStorage.setItem('chess_evolution_custom_ai_black', JSON.stringify(bBot));
+    
+    let url = `/hotseat?whiteRace=${wBot.race || 'classic'}&blackRace=${bBot.race || 'classic'}&AIColor=all&AIPowerWhite=customEvolution&AIPowerBlack=customEvolution&gameType=raceChoiceChess&starts=whiteStarts`;
+    window.open(url, '_blank');
 }
 
 function startHofFight() {
@@ -156,6 +173,7 @@ function startHofFight() {
     
     document.getElementById('fightStatus').innerText = 'Fighting... please wait.';
     document.getElementById('startFightBtn').style.display = 'none';
+    document.getElementById('watchFightBtn').style.display = 'none';
     
     let worker = new Worker('evolutionWorker.js');
     
