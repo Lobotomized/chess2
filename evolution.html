@@ -586,7 +586,7 @@
             document.getElementById('tab-' + phaseId).classList.add('active');
         }
 
-        function addNewPhaseTab() {
+        function addNewPhaseTab(thresholdValue) {
             const id = 'p' + Math.floor(Math.random() * 10000);
             const container = document.getElementById('phase-tabs-container');
             const configContainer = document.getElementById('config-container');
@@ -595,7 +595,7 @@
             const btn = document.createElement('button');
             btn.className = 'tab-btn';
             btn.id = 'tab-' + id;
-            btn.innerHTML = `Phase (<input type="number" class="phase-thresh-input" data-id="${id}" value="10" style="width:30px; background:transparent; border:none; color:inherit; font-weight:bold;"> Pcs) <span onclick="removePhase('${id}', event)" style="color:#e5989b; margin-left:5px;">&times;</span>`;
+            btn.innerHTML = `Phase (<input type="number" class="phase-thresh-input" data-id="${id}" value="${thresholdValue !== undefined ? thresholdValue : 10}" style="width:30px; background:transparent; border:none; color:inherit; font-weight:bold;"> Pcs) <span onclick="removePhase('${id}', event)" style="color:#e5989b; margin-left:5px;">&times;</span>`;
             btn.onclick = (e) => { if(e.target.tagName !== 'INPUT' && e.target.tagName !== 'SPAN') switchTab(id); };
             container.appendChild(btn);
             
@@ -605,9 +605,8 @@
             newConfig.id = 'config-' + id;
             newConfig.classList.remove('active');
             
-            // Reset values in new config or keep defaults
-            // We need to attach event listeners for the checkboxes in the new panel
-            // Since the original event listeners were likely attached on load or inline, we need to re-init logic
+            // Clear magnifiers in cloned config to prevent duplication if base has them
+            newConfig.querySelector('.magnifiers-container').innerHTML = '';
             
             configContainer.appendChild(newConfig);
             
@@ -616,6 +615,7 @@
             
             phases.push(id);
             switchTab(id);
+            return id;
         }
 
         function removePhase(id, e) {

@@ -111,9 +111,7 @@ function northernKing(color, x, y, options){
                             {type: 'absolute', y:-i, x:i},
                             {type: 'absolute', y:i, x:-i},
                               )
-                    }
-                    piece.value = fencerPower*1.2
-                   
+                    }                   
                 }
             })
             return true;
@@ -183,10 +181,22 @@ function gargoyleFactory(color, x, y){
         color: color,
         value:2.5,
         posValue:0.1,
-        // afterEnemyPieceTaken:function(enemyPiece,state){
-        //     this.moves = enemyPiece.moves;
-        //     let iconCode = enemyPiece.icon.replace('black', '');
-        //     iconCode = iconCode.replace('white', "");
+        afterPieceMove:function(state, move, prevMove){
+            let friendlyPlagueDoctor = state.pieces.find(p => p.color === this.color && p.icon === this.color + 'PlagueDoctor.png');
+            if(!friendlyPlagueDoctor){
+                return;
+            }
+            else{
+                if(this.color === 'black'){
+                        this.value = 2.5 + 1.5*this.y;
+                        
+                }
+                else if(this.color === 'white' && this.y === 0){
+                        this.value = 2.5 + 1.5*(7-this.y)        
+                }
+                
+            }
+        }
 
         //     this.icon = this.color + iconCode;
         //     this.value = enemyPiece.value;
@@ -206,7 +216,24 @@ function fencer(color, x, y){
         color: color,
         value:1,
         posValue:0.1,
+        afterPieceMove:function(state, move, prevMove){
+            let northernKing = state.pieces.find(p => p.color === this.color && p.icon === this.color + 'NorthernKing.png');
+            if(!northernKing){
+                return;
+            }
+            else{
+                if(this.color === 'black'){
+                        this.value = 1.5 + 1.5*this.y;
+                        
+                }
+                else if(this.color === 'white' && this.y === 0){
+                        this.value = 1.5 + 1.5*(7-this.y)        
+                }
+                
+            }
+        }
     }
+    
 }
 
 function general(color, x, y){
@@ -262,7 +289,6 @@ function plagueDoctor(color, x, y){
             }
         },
         afterPieceMove:function(state, move, prevMove){
-
             if(this.color === 'black'){
                 if(this.y === 7){
                     this.value = 2000;
@@ -316,7 +342,6 @@ function plagueDoctor(color, x, y){
                             {type: 'absolute', y:0, x:-i},
                               )
                     }
-                    piece.value = kolbaPower 
                 }
             })
             return true;
