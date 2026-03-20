@@ -76,6 +76,15 @@ function generateRandomCharacter() {
     if (Math.random() > 0.5) char.magnifiers.push({name: 'PieceDefended', options: {relativeValue: 0.1}});
     if (Math.random() > 0.5) char.magnifiers.push({name: 'KingVulnerability', options: {attackValue: 1.5, proximityValue: 0.2}});
     if (Math.random() > 0.5) char.magnifiers.push({name: 'ThreatGeneration', options: {threatMultiplier: Math.random() * 1.5 + 0.5, onlyValueDifference: Math.random() > 0.5, includeDefended: Math.random() > 0.5}});
+    if (Math.random() > 0.5) char.magnifiers.push({
+        name: 'AttackingPieces', 
+        options: {
+            rewardValue: Math.random() * 1.5 + 0.1, 
+            multiplyByEnemyValue: Math.random() > 0.5,
+            onlyIfHigherValue: Math.random() > 0.5,
+            onlyIfDefendedOrNotAttacked: Math.random() > 0.5
+        }
+    });
     // Add 0-2 random phases
     let numPhases = Math.floor(Math.random() * 3);
     for (let i = 0; i < numPhases; i++) {
@@ -873,6 +882,7 @@ function updateUI() {
                 if(m.name==='KingTropism') s='Tro';
                 if(m.name==='KingVulnerability') s='Vul';
                 if(m.name==='ThreatGeneration') s='Thr';
+                if(m.name==='AttackingPieces') s='Att';
                 return s;
             }).join(', ');
         } else {

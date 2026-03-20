@@ -261,6 +261,51 @@ function evaluationMagnifierThreatGeneration(piece,pieces,board,colorPerspective
     return score;
 }
 
+function evaluationMagnifierAttackingPieces(piece,pieces,board,colorPerspective,options){
+    let score = 0;
+    
+    lightBoardFE(piece,{pieces:pieces, board:board, turn:piece.color},'allowedMove',undefined,true);
+
+    const enemyPieces = pieces.filter(p => p.color !== piece.color);
+    let isDefended = null;
+    let isAttacked = null;
+    
+    for(let i = 0; i < enemyPieces.length; i++){
+        const enemy = enemyPieces[i];
+        
+        const attacksEnemy = board.find(square => square.x === enemy.x && square.y === enemy.y && square.allowedMove);
+        if(attacksEnemy){
+            if(options.onlyIfHigherValue && enemy.value <= piece.value){
+                continue;
+            }
+            
+            if(options.onlyIfDefendedOrNotAttacked){
+                if(isDefended === null){
+                    isDefended = isPositionAttacked({board:board,pieces:pieces,turn:piece.color}, piece.color, piece.x, piece.y);
+                }
+                if(isAttacked === null){
+                    let enemyColor = piece.color === 'white' ? 'black' : 'white';
+                    isAttacked = isPositionAttacked({board:board,pieces:pieces,turn:piece.color}, enemyColor, piece.x, piece.y);
+                }
+                
+                // If it is NOT defended AND it IS attacked back, then we don't reward
+                if(!isDefended && isAttacked){
+                    continue;
+                }
+            }
+
+            let reward = options.rewardValue !== undefined ? options.rewardValue : 0.5;
+            if(options.multiplyByEnemyValue){
+                score += reward * Math.max(0, enemy.value - piece.value);
+            } else {
+                score += reward;
+            }
+        }
+    }
+
+    return score;
+}
+
 //isPositionAttacked
 
 

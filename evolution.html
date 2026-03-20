@@ -525,7 +525,23 @@
                                       <label title="Apply this logic only for YOUR King"><input type="checkbox" class="opt-onlyForMe" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').disabled = false; }"> Only Me</label>
                                       <label title="Apply this logic only for ENEMY King"><input type="checkbox" class="opt-onlyForEnemy" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForMe').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = false; }"> Only Enemy</label>
                                     </div>
-                                  </div>`
+                                  </div>`,
+            'AttackingPieces': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
+                                  <div style="font-size:11px; color:#aaa; font-style:italic; margin-bottom:2px;">
+                                    Rewards the bot for attacking enemy pieces.
+                                  </div>
+                                  <div style="display:flex; align-items:center; gap:8px;">
+                                    <span style="width:60px; font-size:12px; color:#aaa;">Reward Val:</span>
+                                    <input type="number" class="opt-rewardValue" title="Score added per attacked piece" step="0.1" value="0.5" style="width:60px; background:#333; color:#f0d9b5; border:1px solid #555; padding:2px;">
+                                  </div>
+                                  <div style="display:flex; gap:10px; font-size:12px; flex-wrap:wrap;">
+                                    <label title="Multiply the reward by the difference (Enemy Value - My Value)"><input type="checkbox" class="opt-multiplyByEnemyValue"> Mult by Value Diff</label>
+                                    <label title="Only if value of attacked piece is higher than my piece"><input type="checkbox" class="opt-onlyIfHigherValue"> Only if > Value</label>
+                                    <label title="Only if my piece is either defended OR not attacked back"><input type="checkbox" class="opt-onlyIfDefendedOrNotAttacked"> Defended OR Not Attacked Back</label>
+                                    <label title="Apply this logic only for YOUR pieces"><input type="checkbox" class="opt-onlyForMe" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').disabled = false; }"> Only Me</label>
+                                    <label title="Apply this logic only for ENEMY pieces"><input type="checkbox" class="opt-onlyForEnemy" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForMe').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = false; }"> Only Enemy</label>
+                                  </div>
+                                </div>`
         };
 
         function updateMagOptions(selectEl) {
@@ -547,6 +563,7 @@
                         <option value="PieceDefended">PieceDefended</option>
                         <option value="KingTropism">KingTropism</option>
                         <option value="KingVulnerability">KingVulnerability</option>
+                        <option value="AttackingPieces">AttackingPieces</option>
                     </select>
                     <button type="button" onclick="this.parentElement.parentElement.remove()" style="background:#e5989b; color:#fff; padding:4px 8px; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Remove</button>
                 </div>
