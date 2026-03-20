@@ -49,15 +49,15 @@ function antFactory(color,x,y, direction){
             isItLast = true;
            }
 
-            if(this.direction == 'white' && move.y == 0 || this.direction == 'black' && isItLast)
-            {
-                const me = state.pieces.find((piece) => {
-                    return piece.x == move.x && piece.y == move.y
-                })
-                state.pieces.splice(state.pieces.indexOf(me),1);
-                state.pieces.push(queenbugFactory(this.color,move.x,move.y));
-                return true;
-            }
+            // if(this.direction == 'white' && move.y == 0 || this.direction == 'black' && isItLast)
+            // {
+            //     const me = state.pieces.find((piece) => {
+            //         return piece.x == move.x && piece.y == move.y
+            //     })
+            //     state.pieces.splice(state.pieces.indexOf(me),1);
+            //     state.pieces.push(queenbugFactory(this.color,move.x,move.y));
+            //     return true;
+            // }
             return true;
         }
     }
