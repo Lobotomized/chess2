@@ -21,15 +21,9 @@ function antFactory(color,x,y, direction){
     if (direction == 'black') {
         moves = [{ type: 'blockable', repeat:true, limit:2, y: 1, x: 0 }]
     }
-    let weakMoves = [{ type: 'blockable', repeat:true, limit:1, y: -1, x: 0 }]
-
-    if (direction == 'black') {
-        weakMoves = [{ type: 'blockable', repeat:true, limit:1, y: 1, x: 0 }]
-    }
     return {
         icon: color+'Ant.png',
         moves:moves,
-        weakMoves: weakMoves,
         color:color,
         x:x,
         y:y,
@@ -49,15 +43,15 @@ function antFactory(color,x,y, direction){
             isItLast = true;
            }
 
-            // if(this.direction == 'white' && move.y == 0 || this.direction == 'black' && isItLast)
-            // {
-            //     const me = state.pieces.find((piece) => {
-            //         return piece.x == move.x && piece.y == move.y
-            //     })
-            //     state.pieces.splice(state.pieces.indexOf(me),1);
-            //     state.pieces.push(queenbugFactory(this.color,move.x,move.y));
-            //     return true;
-            // }
+            if(this.direction == 'white' && move.y == 0 || this.direction == 'black' && isItLast)
+            {
+                const me = state.pieces.find((piece) => {
+                    return piece.x == move.x && piece.y == move.y
+                })
+                state.pieces.splice(state.pieces.indexOf(me),1);
+                state.pieces.push(queenbugFactory(this.color,move.x,move.y));
+                return true;
+            }
             return true;
         }
     }
@@ -326,12 +320,6 @@ function queenbugFactory(color,x,y){
             this.y = prevMove.y;
             const ant = antFactory(color,move.x,move.y,direction)
             state.pieces.push(ant);
-            const shrooms = state.pieces.filter((shroom) => {
-                return shroom.icon === color + 'Shroom.png';
-            })
-            if(shrooms.length < 2){
-                ant.moves = ant.weakMoves;
-            }
             return true;
         }
     }

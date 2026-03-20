@@ -60,31 +60,69 @@ function generateRandomCharacter() {
         gamesPlayed: 0
     };
     
-    // Each magnifier has a 50% chance of appearing
-    if (Math.random() > 0.5) char.magnifiers.push({name: 'MaxOptions', options: {posValue: 0.1, useMask: true}});
-    if (Math.random() > 0.15) char.magnifiers.push({name: 'Piece', options: {pieceValue: Math.random() * 2.9 + 0.1}});
+    // Each magnifier has a chance of appearing, potentially splitting into Me/Enemy variants
+    let r;
+    if (Math.random() > 0.5) {
+        let opts = {posValue: 0.1, useMask: true};
+        r = Math.random();
+        if (r < 0.15) { char.magnifiers.push({name: 'MaxOptions', options: {...opts, onlyForMe: true}}); char.magnifiers.push({name: 'MaxOptions', options: {...opts, onlyForEnemy: true}}); }
+        else if (r < 0.4) char.magnifiers.push({name: 'MaxOptions', options: {...opts, onlyForMe: true}});
+        else if (r < 0.65) char.magnifiers.push({name: 'MaxOptions', options: {...opts, onlyForEnemy: true}});
+        else char.magnifiers.push({name: 'MaxOptions', options: {...opts}}); // Global
+    }
+    
+    if (Math.random() > 0.15) {
+        let opts = {pieceValue: Math.random() * 2.9 + 0.1};
+        r = Math.random();
+        if (r < 0.15) { char.magnifiers.push({name: 'Piece', options: {...opts, onlyForMe: true}}); char.magnifiers.push({name: 'Piece', options: {...opts, onlyForEnemy: true}}); }
+        else if (r < 0.4) char.magnifiers.push({name: 'Piece', options: {...opts, onlyForMe: true}});
+        else if (r < 0.65) char.magnifiers.push({name: 'Piece', options: {...opts, onlyForEnemy: true}});
+        else char.magnifiers.push({name: 'Piece', options: {...opts}}); // Global
+    }
+
     if (Math.random() > 0.5) {
         let ktOpts = {relativeValue: Math.random()*0.3, pieceValue: 1};
-        let r = Math.random();
-        if (r < 0.33) ktOpts.onlyForEnemy = true;
-        else if (r < 0.66) ktOpts.onlyForMe = true;
-        
         if (Math.random() > 0.5) ktOpts.defendersSearch = true;
-        
-        char.magnifiers.push({name: 'KingTropism', options: ktOpts});
+        r = Math.random();
+        if (r < 0.15) { char.magnifiers.push({name: 'KingTropism', options: {...ktOpts, onlyForMe: true}}); char.magnifiers.push({name: 'KingTropism', options: {...ktOpts, onlyForEnemy: true}}); }
+        else if (r < 0.4) char.magnifiers.push({name: 'KingTropism', options: {...ktOpts, onlyForMe: true}});
+        else if (r < 0.65) char.magnifiers.push({name: 'KingTropism', options: {...ktOpts, onlyForEnemy: true}});
+        else char.magnifiers.push({name: 'KingTropism', options: {...ktOpts}}); // Global
     }
-    if (Math.random() > 0.5) char.magnifiers.push({name: 'PieceDefended', options: {relativeValue: 0.1}});
-    if (Math.random() > 0.5) char.magnifiers.push({name: 'KingVulnerability', options: {attackValue: 1.5, proximityValue: 0.2}});
+
+    if (Math.random() > 0.5) {
+        let opts = {relativeValue: 0.1};
+        r = Math.random();
+        if (r < 0.15) { char.magnifiers.push({name: 'PieceDefended', options: {...opts, onlyForMe: true}}); char.magnifiers.push({name: 'PieceDefended', options: {...opts, onlyForEnemy: true}}); }
+        else if (r < 0.4) char.magnifiers.push({name: 'PieceDefended', options: {...opts, onlyForMe: true}});
+        else if (r < 0.65) char.magnifiers.push({name: 'PieceDefended', options: {...opts, onlyForEnemy: true}});
+        else char.magnifiers.push({name: 'PieceDefended', options: {...opts}}); // Global
+    }
+
+    if (Math.random() > 0.5) {
+        let opts = {attackValue: 1.5, proximityValue: 0.2};
+        r = Math.random();
+        if (r < 0.15) { char.magnifiers.push({name: 'KingVulnerability', options: {...opts, onlyForMe: true}}); char.magnifiers.push({name: 'KingVulnerability', options: {...opts, onlyForEnemy: true}}); }
+        else if (r < 0.4) char.magnifiers.push({name: 'KingVulnerability', options: {...opts, onlyForMe: true}});
+        else if (r < 0.65) char.magnifiers.push({name: 'KingVulnerability', options: {...opts, onlyForEnemy: true}});
+        else char.magnifiers.push({name: 'KingVulnerability', options: {...opts}}); // Global
+    }
+
     if (Math.random() > 0.5) char.magnifiers.push({name: 'ThreatGeneration', options: {threatMultiplier: Math.random() * 1.5 + 0.5, onlyValueDifference: Math.random() > 0.5, includeDefended: Math.random() > 0.5}});
-    if (Math.random() > 0.5) char.magnifiers.push({
-        name: 'AttackingPieces', 
-        options: {
+    
+    if (Math.random() > 0.5) {
+        let opts = {
             rewardValue: Math.random() * 1.5 + 0.1, 
             multiplyByEnemyValue: Math.random() > 0.5,
             onlyIfHigherValue: Math.random() > 0.5,
             onlyIfDefendedOrNotAttacked: Math.random() > 0.5
-        }
-    });
+        };
+        r = Math.random();
+        if (r < 0.15) { char.magnifiers.push({name: 'AttackingPieces', options: {...opts, onlyForMe: true}}); char.magnifiers.push({name: 'AttackingPieces', options: {...opts, onlyForEnemy: true}}); }
+        else if (r < 0.4) char.magnifiers.push({name: 'AttackingPieces', options: {...opts, onlyForMe: true}});
+        else if (r < 0.65) char.magnifiers.push({name: 'AttackingPieces', options: {...opts, onlyForEnemy: true}});
+        else char.magnifiers.push({name: 'AttackingPieces', options: {...opts}}); // Global
+    }
     // Add 0-2 random phases
     let numPhases = Math.floor(Math.random() * 3);
     for (let i = 0; i < numPhases; i++) {
@@ -771,15 +809,42 @@ function crossover(p1, p2) {
                     if (Math.random() < 0.05) picked.options[k] = !picked.options[k];
                 }
             }
+            if (picked.options.onlyForMe && picked.options.onlyForEnemy) {
+                if (Math.random() > 0.5) picked.options.onlyForMe = false;
+                else picked.options.onlyForEnemy = false;
+            }
             child.magnifiers.push(picked);
         }
     }
-    // ensure unique names
+    // ensure unique names, allowing one 'me' and one 'enemy' variant OR one 'global' variant
     let uniqueMags = {};
     for (let m of child.magnifiers) {
-        uniqueMags[m.name] = m;
+        let key = m.name;
+        if (m.options.onlyForMe) key += "_me";
+        else if (m.options.onlyForEnemy) key += "_enemy";
+        else key += "_global";
+        uniqueMags[key] = m;
     }
-    child.magnifiers = Object.values(uniqueMags);
+    
+    // Cleanup rule: If a global variant exists, it overrides and removes the Me/Enemy specific ones
+    // Or if Me/Enemy exist, remove global. Let's make Global mutually exclusive with Me/Enemy.
+    // If Global exists, we just keep Global and delete the split ones for that magnifier name.
+    let finalMags = {};
+    for (let key in uniqueMags) {
+        let baseName = uniqueMags[key].name;
+        if (key.endsWith("_global")) {
+            // Keep global, delete any _me or _enemy that might have been added
+            delete finalMags[baseName + "_me"];
+            delete finalMags[baseName + "_enemy"];
+            finalMags[key] = uniqueMags[key];
+        } else {
+            // Only add if global doesn't already exist in finalMags
+            if (!finalMags[baseName + "_global"]) {
+                finalMags[key] = uniqueMags[key];
+            }
+        }
+    }
+    child.magnifiers = Object.values(finalMags);
     if(child.magnifiers.length === 0) {
         child.magnifiers.push({name: 'Piece', options: {pieceValue: 1}});
     }
@@ -883,6 +948,10 @@ function updateUI() {
                 if(m.name==='KingVulnerability') s='Vul';
                 if(m.name==='ThreatGeneration') s='Thr';
                 if(m.name==='AttackingPieces') s='Att';
+                
+                if (m.options.onlyForMe) s += '(M)';
+                else if (m.options.onlyForEnemy) s += '(E)';
+                
                 return s;
             }).join(', ');
         } else {
