@@ -77,9 +77,8 @@ function northernKing(color, x, y, options){
             let fencerPower = this.color === 'black' ? this.y : 7 -this.y;
 
             let promoteCondition = (this.color === 'black' && this.y >= 3 || this.color === 'white' && this.y <= 4) &&
-                state.pieces.some(p => p.color === this.color && p.icon === this.color + 'NorthernKing.png') &&
                 state.pieces.some(p => p.color === this.color && p.icon === this.color + 'PlagueDoctor.png' && 
-                    ((this.color === 'black' && p.y >= 3) || (this.color === 'white' && p.y <= 4)));
+                    ((p.color === 'black' && p.y >= 3) || (p.color === 'white' && p.y <= 4)));
             
                 
             if(promoteCondition){
@@ -311,9 +310,8 @@ function plagueDoctor(color, x, y){
                 }            
             }
             let promoteCondition = (this.color === 'black' && this.y >= 3 || this.color === 'white' && this.y <= 4) &&
-                state.pieces.some(p => p.color === this.color && p.icon === this.color + 'NorthernKing.png') &&
-                state.pieces.some(p => p.color === this.color && p.icon === this.color + 'PlagueDoctor.png' && 
-                    ((this.color === 'black' && p.y >= 3) || (this.color === 'white' && p.y <= 4)));
+                state.pieces.some(p => p.color === this.color && p.icon === this.color + 'NorthernKing.png' && 
+                    ((p.color === 'black' && p.y >= 3) || (p.color === 'white' && p.y <= 4)));
 
                 
             let kolbaPower = this.color === 'black' ? this.y : 7-this.y;
