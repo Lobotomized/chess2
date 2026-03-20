@@ -455,8 +455,8 @@
                              </div>
                              <div style="display:flex; gap:10px; font-size:12px; flex-wrap:wrap;">
                                <label title="If checked, multiplies score by piece-specific mobility factors (e.g. Knights valued higher)"><input type="checkbox" class="opt-useMask" checked> Use Mask</label>
-                               <label title="Calculate mobility only for YOUR pieces"><input type="checkbox" class="opt-onlyForMe"> Only Me</label>
-                               <label title="Calculate mobility only for ENEMY pieces (to restrict them)"><input type="checkbox" class="opt-onlyForEnemy"> Only Enemy</label>
+                               <label title="Calculate mobility only for YOUR pieces"><input type="checkbox" class="opt-onlyForMe" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').disabled = false; }"> Only Me</label>
+                               <label title="Calculate mobility only for ENEMY pieces (to restrict them)"><input type="checkbox" class="opt-onlyForEnemy" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForMe').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = false; }"> Only Enemy</label>
                              </div>
                            </div>`,
             'Piece': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
@@ -469,8 +469,8 @@
                         </div>
                         <div style="display:flex; gap:10px; font-size:12px; flex-wrap:wrap;">
                           <label title="Only count this value if the piece is currently under attack (Safety check)"><input type="checkbox" class="opt-pieceAttacked"> Only if Attacked</label>
-                          <label title="Count material for YOU"><input type="checkbox" class="opt-onlyForMe"> Only Me</label>
-                          <label title="Count material for ENEMY"><input type="checkbox" class="opt-onlyForEnemy"> Only Enemy</label>
+                          <label title="Count material for YOU"><input type="checkbox" class="opt-onlyForMe" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').disabled = false; }"> Only Me</label>
+                          <label title="Count material for ENEMY"><input type="checkbox" class="opt-onlyForEnemy" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForMe').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = false; }"> Only Enemy</label>
                         </div>
                       </div>`,
             'PieceDefended': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
@@ -487,8 +487,8 @@
                                 </div>
                                 <div style="display:flex; gap:10px; font-size:12px; flex-wrap:wrap;">
                                   <label title="Only reward defense if the piece is actually threatened by an enemy"><input type="checkbox" class="opt-pieceAttacked"> Only if Attacked</label>
-                                  <label title="Evaluate YOUR defended pieces"><input type="checkbox" class="opt-onlyForMe"> Only Me</label>
-                                  <label title="Evaluate ENEMY defended pieces (to avoid them?)"><input type="checkbox" class="opt-onlyForEnemy"> Only Enemy</label>
+                                  <label title="Evaluate YOUR defended pieces"><input type="checkbox" class="opt-onlyForMe" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').disabled = false; }"> Only Me</label>
+                                  <label title="Evaluate ENEMY defended pieces (to avoid them?)"><input type="checkbox" class="opt-onlyForEnemy" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForMe').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = false; }"> Only Enemy</label>
                                 </div>
                               </div>`,
             'KingTropism': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
@@ -505,8 +505,8 @@
                               </div>
                               <div style="display:flex; gap:10px; font-size:12px; flex-wrap:wrap;">
                                 <label title="If CHECKED: Measure distance to YOUR King (Defense). If UNCHECKED: Measure distance to ENEMY King (Attack)."><input type="checkbox" class="opt-defendersSearch"> Search Defenders</label>
-                                <label title="Apply this logic only for YOUR pieces"><input type="checkbox" class="opt-onlyForMe"> Only Me</label>
-                                <label title="Apply this logic only for ENEMY pieces"><input type="checkbox" class="opt-onlyForEnemy"> Only Enemy</label>
+                                <label title="Apply this logic only for YOUR pieces"><input type="checkbox" class="opt-onlyForMe" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').disabled = false; }"> Only Me</label>
+                                <label title="Apply this logic only for ENEMY pieces"><input type="checkbox" class="opt-onlyForEnemy" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForMe').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = false; }"> Only Enemy</label>
                               </div>
                             </div>`,
             'KingVulnerability': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
@@ -520,6 +520,10 @@
                                     <div style="display:flex; align-items:center; gap:8px;">
                                       <span style="width:60px; font-size:12px; color:#aaa;">Prox Val:</span>
                                       <input type="number" class="opt-proximityValue" title="Score for attacking squares adjacent to the King" step="0.1" value="0.1" style="width:60px; background:#333; color:#f0d9b5; border:1px solid #555; padding:2px;">
+                                    </div>
+                                    <div style="display:flex; gap:10px; font-size:12px; flex-wrap:wrap;">
+                                      <label title="Apply this logic only for YOUR King"><input type="checkbox" class="opt-onlyForMe" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForEnemy').disabled = false; }"> Only Me</label>
+                                      <label title="Apply this logic only for ENEMY King"><input type="checkbox" class="opt-onlyForEnemy" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForMe').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = false; }"> Only Enemy</label>
                                     </div>
                                   </div>`
         };

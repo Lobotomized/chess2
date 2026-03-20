@@ -894,7 +894,6 @@ function updateUI() {
             <td style="font-size:10px;">${magsStr}</td>
             <td>${filtersHtml}</td>
             <td>
-                <button style="padding: 5px 10px; font-size: 12px; background:#f39c12; color:white; border:none;" onclick="openCreateBotModal('${c.id}')">Edit</button>
                 <button style="padding: 5px 10px; font-size: 12px;" onclick="playAgainst('${c.id}')">Play</button>
                 <button style="padding: 5px 10px; font-size: 12px; background:#e5989b;" onclick="saveBotToDb('${c.id}')">Save</button>
                 <button style="padding: 5px 10px; font-size: 12px; background:#4ecdc4;" onclick="showHistory('${c.id}')">History</button>
@@ -909,102 +908,7 @@ window.onload = init;
 
 // --- Create Bot Modal Logic ---
 
-let editingBotId = null;
-
-function resetCreateBotModal() {
-    let base = document.getElementById('config-base');
-    base.querySelector('.magnifiers-container').innerHTML = '';
-    
-    // Clear phase tabs
-    document.querySelectorAll('.tab-btn').forEach(tab => {
-        if (tab.id !== 'tab-base') tab.remove();
-    });
-    document.querySelectorAll('.config-panel').forEach(panel => {
-        if (panel.id !== 'config-base') panel.remove();
-    });
-    if (typeof phases !== 'undefined') {
-        phases.length = 0;
-    }
-    
-    // Reset base inputs
-    base.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
-    base.querySelectorAll('input[type="number"]').forEach(num => num.value = '');
-    base.querySelector('.cb_depth').value = 2;
-    base.querySelector('.cb_algorithm').value = 'minimaxAlphaBeta';
-    
-    // Trigger onchange for checkboxes to hide options
-    base.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-        if(cb.onchange) cb.onchange();
-    });
-    
-    // Switch to base tab
-    switchTab('base');
-}
-
-function populateBotConfigToContext(config, context) {
-    let setVal = (cls, val) => {
-        let el = context.querySelector('.' + cls);
-        if (el) el.value = val !== undefined ? val : '';
-    };
-    let setCheck = (cls, val) => {
-        let el = context.querySelector('.' + cls);
-        if (el) {
-            el.checked = val ? true : false;
-            if (el.onchange) el.onchange();
-        }
-    };
-    
-    setVal('cb_algorithm', config.algorithm || 'minimaxAlphaBeta');
-    setVal('cb_depth', config.depth || 2);
-    
-    setCheck('cb_useRemoveAttacked', config.useRemoveAttacked);
-    setVal('cb_raRandomException', config.raRandomException);
-    setCheck('cb_raExceptionPieceValue', config.raExceptionPieceValue);
-    setCheck('cb_raExceptionPieceValueSmaller', config.raExceptionPieceValueSmaller);
-    
-    setCheck('cb_useRemoveNonAttacking', config.useRemoveNonAttacking);
-    setVal('cb_rnaMaxPieceValue', config.rnaMaxPieceValue);
-    setVal('cb_rnaExceptionRandom', config.rnaExceptionRandom);
-    setCheck('cb_rnaExceptionPieceValue', config.rnaExceptionPieceValue);
-    setCheck('cb_rnaExceptionPieceValueSmaller', config.rnaExceptionPieceValueSmaller);
-    
-    setCheck('cb_useRandomlyRemove', config.useRandomlyRemove);
-    setVal('cb_rrN', config.rrN);
-    setVal('cb_rrExceptionRandom', config.rrExceptionRandom);
-    setCheck('cb_rrExceptionAttacked', config.rrExceptionAttacked);
-    setCheck('cb_rrExceptionPieceValueSmaller', config.rrExceptionPieceValueSmaller);
-    
-    setCheck('cb_useMaxMoves', config.useMaxMoves);
-    setVal('cb_mmMax', config.mmMax);
-    setCheck('cb_mmExceptionAttacked', config.mmExceptionAttacked);
-    
-    setCheck('cb_useNthChance', config.useNthChance);
-    setVal('cb_nthChance', config.nthChance);
-    setCheck('cb_ncExceptionAttacked', config.ncExceptionAttacked);
-    setCheck('cb_ncExceptionPieceValue', config.ncExceptionPieceValue);
-    
-    setCheck('cb_useRemoveWellPositioned', config.useRemoveWellPositioned);
-    setVal('cb_rwpN', config.rwpN);
-    setCheck('cb_rwpExceptionAttacked', config.rwpExceptionAttacked);
-    
-    let addBtn = context.querySelector('.magnifiers-container').nextElementSibling;
-    
-    if (config.magnifiers && config.magnifiers.length > 0) {
-        config.magnifiers.forEach(m => {
-            addMagnifier(addBtn, m.name, m.options);
-        });
-    } else {
-        // Handle legacy
-        if (config.posValueWeight !== undefined) addMagnifier(addBtn, 'MaxOptions', {posValue: config.posValueWeight, useMask: true});
-        if (config.pieceValueWeight !== undefined) addMagnifier(addBtn, 'Piece', {pieceValue: config.pieceValueWeight});
-        if (config.kingTropismWeight !== undefined) addMagnifier(addBtn, 'KingTropism', {relativeValue: config.kingTropismWeight, onlyForEnemy: true, pieceValue: 1});
-        if (config.defendedWeight !== undefined) addMagnifier(addBtn, 'PieceDefended', {relativeValue: config.defendedWeight});
-        if (config.kingVulnAttackWeight !== undefined) addMagnifier(addBtn, 'KingVulnerability', {attackValue: config.kingVulnAttackWeight, proximityValue: config.kingVulnProxWeight || 0});
-    }
-}
-
-function openCreateBotModal(botId) {
-    editingBotId = (typeof botId === 'string') ? botId : null;
+function openCreateBotModal() {
     let modal = document.getElementById('createBotModal');
     let raceSelect = document.getElementById('cb_race');
     
@@ -1017,38 +921,13 @@ function openCreateBotModal(botId) {
         raceSelect.appendChild(opt);
     });
 
-    let headerTitle = document.querySelector('#createBotModal .modal-header h2');
-    let submitBtn = document.querySelector('#createBotModal button[onclick="createNewBot()"]');
+    // Reset inputs (optional, or keep last values)
+    // resetCreateBotInputs();
     
-    if (headerTitle) headerTitle.innerText = editingBotId ? 'Edit Bot' : 'Create Custom Bot';
-    if (submitBtn) submitBtn.innerText = editingBotId ? 'Save Changes' : 'Create Bot';
-
-    resetCreateBotModal();
-
-    if (editingBotId) {
-        let bot = characters.find(c => c.id === editingBotId);
-        if (bot) {
-            raceSelect.value = bot.race || 'classic';
-            
-            if (bot.phases && bot.phases.length > 0) {
-                bot.phases.forEach(p => {
-                    let newPhaseId = addNewPhaseTab(p.threshold);
-                    let panel = document.getElementById('config-' + newPhaseId);
-                    populateBotConfigToContext(p, panel);
-                });
-            }
-            
-            populateBotConfigToContext(bot, document.getElementById('config-base'));
-            switchTab('base');
-        }
-    } else {
-        // default setup
-        let base = document.getElementById('config-base');
-        const addBtn = base.querySelector('.magnifiers-container').nextElementSibling;
-        addMagnifier(addBtn, 'MaxOptions', {posValue: 0.1, useMask: true});
-        addMagnifier(addBtn, 'Piece', {pieceValue: 1});
-        addMagnifier(addBtn, 'KingTropism', {relativeValue: 0.2, onlyForEnemy: true, pieceValue: 1});
-    }
+    // Bind toggle events for filter options
+    // Note: The new tab system handles binding dynamically in evolution.html
+    // We don't need to call setupCheckboxToggles() here anymore as it refers to old IDs
+    // setupCheckboxToggles(); 
 
     modal.style.display = 'flex';
 }
@@ -1393,27 +1272,12 @@ function createNewBot() {
         ...baseConfig
     };
     
-    if (editingBotId) {
-        let existingIdx = characters.findIndex(c => c.id === editingBotId);
-        if (existingIdx !== -1) {
-            let oldBot = characters[existingIdx];
-            char.id = oldBot.id;
-            char.score = oldBot.score;
-            char.gamesPlayed = oldBot.gamesPlayed;
-            if (oldBot.name) char.name = oldBot.name;
-            characters[existingIdx] = char;
-            alert(`Bot ${char.id} updated!`);
-        } else {
-            characters.push(char);
-            alert(`Custom Bot ${char.id} created!`);
-        }
-    } else {
-        // Add to pool
-        characters.push(char);
-        alert(`Custom Bot ${char.id} created!`);
-    }
-
+    // Add to pool
+    characters.push(char);
     saveData();
     updateUI();
     closeCreateBotModal();
+    
+    // Optional: Flash success or scroll to bot
+    alert(`Custom Bot ${char.id} created!`);
 }
