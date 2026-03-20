@@ -196,7 +196,9 @@ function gargoyleFactory(color, x, y){
                 }
                 
             }
+            return true
         }
+        
 
         //     this.icon = this.color + iconCode;
         //     this.value = enemyPiece.value;
@@ -231,6 +233,7 @@ function fencer(color, x, y){
                 }
                 
             }
+            return true
         }
     }
     
