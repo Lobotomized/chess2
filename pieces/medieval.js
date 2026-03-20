@@ -183,7 +183,7 @@ function gargoyleFactory(color, x, y){
         afterPieceMove:function(state, move, prevMove){
             let friendlyPlagueDoctor = state.pieces.find(p => p.color === this.color && p.icon === this.color + 'PlagueDoctor.png');
             if(!friendlyPlagueDoctor){
-                return;
+                return true
             }
             else{
                 if(this.color === 'black'){
@@ -220,7 +220,7 @@ function fencer(color, x, y){
         afterPieceMove:function(state, move, prevMove){
             let northernKing = state.pieces.find(p => p.color === this.color && p.icon === this.color + 'NorthernKing.png');
             if(!northernKing){
-                return;
+                return true;
             }
             else{
                 if(this.color === 'black'){
