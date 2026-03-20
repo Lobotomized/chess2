@@ -255,8 +255,6 @@ function prohodRaceChoiceChess(state,raceWhite,raceBlack){
 
 
 
-
-
 function raceChoiceChess(state,raceWhite,raceBlack){
     pieces = state.pieces;
     board = state.board;
@@ -3603,6 +3601,28 @@ function testingMission(state){
     ]
 
 }
+
+
+function testMate(state){
+    pieces = state.pieces;
+    board = state.board;
+    pieces.length = 0;
+    if(!board.length){
+        for (let x = 0; x <= 7; x++) {
+            for (let y = 0; y <= 7; y++) {
+                    
+                    board.push({ light: false, x: x, y: y })
+            }
+        }
+    }
+
+    pieces.push(
+        rookFactory('black', 0,0),
+        rookFactory('black', 1,0),
+        kingFactory('white', 3,3) 
+    )
+}
+
 
 
 async function customMap(state){

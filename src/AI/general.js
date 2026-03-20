@@ -158,6 +158,13 @@
                  allowedMoves = filters[f].method(options);
              }
          }
+         // If no moves are allowed after filtering, return array with 1 random move
+         if (allowedMoves.length === 0 && filters.length > 0) {
+             // Pick one random square from the board as a fallback move
+             const randomIndex = Math.floor(Math.random() * state.board.length);
+             const randomSquare = state.board[randomIndex];
+             allowedMoves = [randomSquare];
+         }
          
          // Using for loop for speed
          for(let movesCounter = 0; movesCounter < allowedMoves.length; movesCounter++){

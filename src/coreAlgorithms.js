@@ -428,7 +428,6 @@ function getMoveByValue(moves, weakest){
 function minimaxQuiescence(state, maximizer, depth, removedTurns, magnifiers, filters) {
     state.id = crypto.randomUUID();
     let enemy = getEnemy(maximizer);
-    
     // Generate moves with early filtering
     let firstGen = generateMovesFromPiecesAlphaBeta(state, maximizer, filters);
 
@@ -524,7 +523,6 @@ function minimaxQuiescence(state, maximizer, depth, removedTurns, magnifiers, fi
             }
         }
     }
-
     return bestMove;
 }
 
@@ -726,14 +724,13 @@ function quiescenceSearch(state, alpha, beta, isMaximizer, maximizerColor, filte
 }
 
 function proofNumberSearch(state, maximizer, depth, removedTurns, magnifiers, filters) {
-    const maxNodes = depth * 500; // Heuristic node limit based on depth
+    const maxNodes = depth * 50000; // Heuristic node limit based on depth
     let root = new PnsNode(state, null, null, true, maximizer);
-    
     // Initial expansion
     root.expand(maximizer, filters);
 
     let nodesCount = 1; // Root
-    
+    console.log('here?')
     // Loop until solved or node limit reached
     while(nodesCount < maxNodes && root.pn !== 0 && root.dn !== 0) {
         let mostProving = root.selectMostProvingNode();
@@ -799,7 +796,6 @@ function proofNumberSearch(state, maximizer, depth, removedTurns, magnifiers, fi
     if (bestChild && bestChild.move) {
         return bestChild.move;
     }
-    
     return undefined;
 }
 

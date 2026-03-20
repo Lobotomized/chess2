@@ -54,6 +54,7 @@ function parseMags(magsList, fallbackConfig) {
 self.addEventListener("message", async function(e) {
     
     let obj = JSONfn.parse(e.data)
+    console.log(obj.AIPower)
     if(!obj.state.won){
             
 
@@ -282,6 +283,17 @@ self.addEventListener("message", async function(e) {
                 )
                 console.timeEnd('106')
             }
+            else if(obj.AIPower === 107){
+                console.log('wtf?! what?!   ')
+                console.time('test')
+                let character = methods[obj.AICharacter];
+                move = proofNumberSearch(obj.state,obj.color,2, obj.removedTurns,
+                    character(0),
+                    [
+                    ]
+                )
+                console.timeEnd('test')
+            }
             else if(obj.AIPower === 'customEvolution'){
                 console.time('customEvolution');
                 
@@ -298,7 +310,6 @@ self.addEventListener("message", async function(e) {
                         
                         // Build magnifiers
                         let mags = parseMags(charConfig.magnifiers, charConfig);
-                        console.log(mags, charConfig, '  mags?')
                         // Build filters
                         let filters = [];
                         if (charConfig.useRemoveAttacked) {
