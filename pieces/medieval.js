@@ -60,20 +60,19 @@ function northernKing(color, x, y, options){
                     state.won = 'black';
                 }
                 else{
-                    this.value = 800 + 1*this.y;
+                    this.value = 800 + 3*this.y;
                 }
             }
-            else if(this.color === 'white'){
+            else if(this.color === 'white' && this.y === 0){
                 if(this.y === 0){
                     this.value = 2000;
                     state.won = 'white';
                 }
                 else{
-                    this.value = 800 + 1*this.y;
+                    this.value = 800 + 3*(7-this.y)
                 }            
             }
 
-            this.value += 2;
             
             let fencerPower = this.color === 'black' ? this.y : 7 -this.y;
 
@@ -270,7 +269,7 @@ function plagueDoctor(color, x, y){
                     state.won = 'black';
                 }
                 else{
-                    this.value = 800 + 1*this.y;
+                    this.value = 800 + 3*this.y;
                 }
             }
             else if(this.color === 'white' && this.y === 0){
@@ -279,10 +278,9 @@ function plagueDoctor(color, x, y){
                     state.won = 'white';
                 }
                 else{
-                    this.value = 800 + 1*this.y;
+                    this.value = 800 + 3*(7-this.y)
                 }            
             }
-            this.value += 2;
             let promoteCondition = (this.color === 'black' && this.y >= 3 || this.color === 'white' && this.y <= 4) &&
                 state.pieces.some(p => p.color === this.color && p.icon === this.color + 'NorthernKing.png') &&
                 state.pieces.some(p => p.color === this.color && p.icon === this.color + 'PlagueDoctor.png' && 

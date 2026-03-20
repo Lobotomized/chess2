@@ -284,7 +284,6 @@ self.addEventListener("message", async function(e) {
                 console.timeEnd('106')
             }
             else if(obj.AIPower === 107){
-                console.log('wtf?! what?!   ')
                 console.time('test')
                 let character = methods[obj.AICharacter];
                 move = proofNumberSearch(obj.state,obj.color,2, obj.removedTurns,
