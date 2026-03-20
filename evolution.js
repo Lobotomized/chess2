@@ -73,6 +73,8 @@ function generateRandomCharacter() {
     
     if (Math.random() > 0.15) {
         let opts = {pieceValue: Math.random() * 2.9 + 0.1};
+        if (Math.random() > 0.5) opts.whoHasMorePieces = true;
+        if (Math.random() > 0.5) opts.threshold = "defaultPieceValueThreshold";
         r = Math.random();
         if (r < 0.15) { char.magnifiers.push({name: 'Piece', options: {...opts, onlyForMe: true}}); char.magnifiers.push({name: 'Piece', options: {...opts, onlyForEnemy: true}}); }
         else if (r < 0.4) char.magnifiers.push({name: 'Piece', options: {...opts, onlyForMe: true}});
@@ -1462,7 +1464,11 @@ function createNewBot() {
             row.querySelectorAll('.mag-opts input').forEach(input => {
                 let key = input.className.replace('opt-', '');
                 if (input.type === 'checkbox') {
-                    opts[key] = input.checked;
+                    if (key === 'threshold') {
+                        if (input.checked) opts[key] = "defaultPieceValueThreshold";
+                    } else {
+                        opts[key] = input.checked;
+                    }
                 } else {
                     if (input.value !== '') opts[key] = parseFloat(input.value);
                 }

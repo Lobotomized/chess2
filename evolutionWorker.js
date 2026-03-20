@@ -38,7 +38,12 @@ function parseMags(magsList, fallbackConfig) {
     return magsList.map(m => {
         let method;
         if (m.name === 'MaxOptions') method = evaluationMagnifierMaxOptions;
-        else if (m.name === 'Piece') method = evaluationMagnifierPiece;
+        else if (m.name === 'Piece') {
+            method = evaluationMagnifierPiece;
+            if (m.options.threshold === "defaultPieceValueThreshold") {
+                opts.threshold = defaultPieceValueThreshold;
+            }
+        }
         else if (m.name === 'PieceDefended') method = evaluationMagnifierPieceDefended;
         else if (m.name === 'KingTropism') method = evaluationMagnifierKingTropism;
         else if (m.name === 'KingVulnerability') method = evaluationMagnifierKingVulnerability;
