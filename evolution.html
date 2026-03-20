@@ -261,7 +261,7 @@
     <div id="createBotModal" class="modal-overlay" style="display:none;" onclick="if(event.target === this) closeCreateBotModal()">
         <div class="modal-content" style="width: 80%; max-width: 900px; height: 90%; overflow-y: auto;">
             <div class="modal-header">
-                <h2>Create Custom Bot</h2>
+                <h2 id="createBotModalTitle">Create Custom Bot</h2>
                 <button onclick="closeCreateBotModal()" style="padding:5px 10px;">X</button>
             </div>
             <div id="createBotBody" style="padding: 20px;">
@@ -384,7 +384,7 @@
                 </div>
 
                 <div style="margin-top: 20px; text-align: center;">
-                    <button class="primary" style="padding: 10px 40px; font-size: 16px;" onclick="createNewBot()">Create Bot</button>
+                    <button id="createBotSubmitBtn" class="primary" style="padding: 10px 40px; font-size: 16px;" onclick="createNewBot()">Create Bot</button>
                 </div>
             </div>
         </div>
@@ -580,8 +580,13 @@
             for (let key in options) {
                 let input = div.querySelector('.opt-' + key);
                 if (input) {
-                    if (input.type === 'checkbox') input.checked = options[key];
-                    else input.value = options[key];
+                    if (input.type === 'checkbox') {
+                        input.checked = options[key];
+                        input.dispatchEvent(new Event('change'));
+                    }
+                    else {
+                        input.value = options[key];
+                    }
                 }
             }
             
