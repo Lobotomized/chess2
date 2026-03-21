@@ -37,6 +37,7 @@ function parseMags(magsList, fallbackConfig) {
     }
     return magsList.map(m => {
         let method;
+        let opts = {...m.options};
         if (m.name === 'MaxOptions') method = evaluationMagnifierMaxOptions;
         else if (m.name === 'Piece') {
             method = evaluationMagnifierPiece;
@@ -50,7 +51,6 @@ function parseMags(magsList, fallbackConfig) {
         else if (m.name === 'ThreatGeneration') method = evaluationMagnifierThreatGeneration;
         else if (m.name === 'AttackingPieces') method = evaluationMagnifierAttackingPieces;
 
-        let opts = {...m.options};
         if (opts.useMask) opts.mask = positionMaskDefault;
 
         return { method: method, options: opts };
@@ -276,7 +276,7 @@ self.addEventListener("message", function(e) {
             state.won = isWhite ? 'black' : 'white';
             break;
         }
-
+        console.log(movedPiece, '  wtf?!')
         let fromX = movedPiece.x;
         let fromY = movedPiece.y;
         
