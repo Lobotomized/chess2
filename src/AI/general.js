@@ -146,7 +146,11 @@
          let allowedMoves = state.board.filter((square) => {
              return square.allowedMove;
          })
-        //  let saveMove = allowedMoves[Math.floor(Math.random() * allowedMoves.length)]
+         let saveMove =  false 
+         
+         if(allowedMoves.length > 0){
+            saveMove = allowedMoves[Math.floor(Math.random() * allowedMoves.length)]
+         }
          // Apply filters early if possible
          if (filters.length > 0) {
              for (let f = 0; f < filters.length; f++) {
@@ -159,11 +163,10 @@
              }
          }
          // If no moves are allowed after filtering, return array with 1 random move
-        //  if (allowedMoves.length === 0 && filters.length > 0) {
-        //      // Pick one random move from the board as a fallback move
-        //      allowedMoves = [saveMove]
-        //  }
-         
+         if (allowedMoves.length === 0 && filters.length > 0 && saveMove) {
+             // Pick one random move from the board as a fallback move
+             allowedMoves = [saveMove]
+         }
          // Using for loop for speed
          for(let movesCounter = 0; movesCounter < allowedMoves.length; movesCounter++){
              const newPieces = new Array(state.pieces.length);
