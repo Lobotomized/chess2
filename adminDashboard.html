@@ -175,6 +175,7 @@
     <script src="/src/loadImages.js"></script>
     <script src="/src/variables.js"></script>
     <script src="/src/jsonfn.js"></script>
+    <script src="/helperFunctions.js"></script>
     <script src="/moveMethods.js"></script>
     <!-- Include specific piece factories to ensure all piece types load correctly -->
     <script src="/pieces/classic.js"></script>
@@ -187,7 +188,6 @@
     <script src="/pieces/misc.js"></script>
     <script src="/pieceDefinitions.js"></script>
     <script src="/boardGeneration.js"></script>
-    <script src="/helperFunctions.js"></script>
 </head>
 <body>
 
@@ -359,7 +359,7 @@
                 
                 // Re-hydrate piece functions if possible based on icon
                 gameState.pieces.forEach(p => {
-                    if (!p.moves && p.icon) {
+                    if (p.icon) {
                         const factory = window.findFactoryForIcon ? window.findFactoryForIcon(p.icon) : null;
                         if (factory) {
                             const tempPiece = factory(p.color, p.x, p.y);
@@ -372,6 +372,12 @@
                                 Object.assign(p, window[lowerFirst + 'Factory'](p.color, p.x, p.y));
                             } else if (typeof window[cleanName + 'Factory'] === 'function') {
                                 Object.assign(p, window[cleanName + 'Factory'](p.color, p.x, p.y));
+                            } else if (typeof window[cleanName.toLowerCase() + 'Factory'] === 'function') {
+                                Object.assign(p, window[cleanName.toLowerCase() + 'Factory'](p.color, p.x, p.y));
+                            } else if (typeof window[lowerFirst] === 'function') {
+                                Object.assign(p, window[lowerFirst](p.color, p.x, p.y));
+                            } else if (typeof window[cleanName] === 'function') {
+                                Object.assign(p, window[cleanName](p.color, p.x, p.y));
                             }
                         }
                     }
@@ -482,6 +488,12 @@
                             Object.assign(piece, window[lowerFirst + 'Factory'](piece.color, piece.x, piece.y));
                         } else if (typeof window[cleanName + 'Factory'] === 'function') {
                             Object.assign(piece, window[cleanName + 'Factory'](piece.color, piece.x, piece.y));
+                        } else if (typeof window[cleanName.toLowerCase() + 'Factory'] === 'function') {
+                            Object.assign(piece, window[cleanName.toLowerCase() + 'Factory'](piece.color, piece.x, piece.y));
+                        } else if (typeof window[lowerFirst] === 'function') {
+                            Object.assign(piece, window[lowerFirst](piece.color, piece.x, piece.y));
+                        } else if (typeof window[cleanName] === 'function') {
+                            Object.assign(piece, window[cleanName](piece.color, piece.x, piece.y));
                         }
                     }
                 }
@@ -554,7 +566,7 @@
                 
                 // Re-hydrate piece functions if possible based on icon
                 gameState.pieces.forEach(p => {
-                    if (!p.moves && p.icon) {
+                    if (p.icon) {
                         const factory = window.findFactoryForIcon ? window.findFactoryForIcon(p.icon) : null;
                         if (factory) {
                             const tempPiece = factory(p.color, p.x, p.y);
@@ -567,6 +579,12 @@
                                 Object.assign(p, window[lowerFirst + 'Factory'](p.color, p.x, p.y));
                             } else if (typeof window[cleanName + 'Factory'] === 'function') {
                                 Object.assign(p, window[cleanName + 'Factory'](p.color, p.x, p.y));
+                            } else if (typeof window[cleanName.toLowerCase() + 'Factory'] === 'function') {
+                                Object.assign(p, window[cleanName.toLowerCase() + 'Factory'](p.color, p.x, p.y));
+                            } else if (typeof window[lowerFirst] === 'function') {
+                                Object.assign(p, window[lowerFirst](p.color, p.x, p.y));
+                            } else if (typeof window[cleanName] === 'function') {
+                                Object.assign(p, window[cleanName](p.color, p.x, p.y));
                             }
                         }
                     }
