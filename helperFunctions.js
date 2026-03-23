@@ -511,7 +511,7 @@ function getSinglePlayerGame() {
                     state.gameType = 'minichess'
                     miniChess(state.pieces, state.board);
                 }
-                else if(roomData.mode == 'randomchess'){
+                else if(roomData.mode == 'randomchess' || roomData.mode == 'randomChess'){
                     state.gameType = 'randomchess'
                     randomChess(state.pieces,state.board)
                 }

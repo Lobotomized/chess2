@@ -605,9 +605,23 @@
             let gamesHTML = document.getElementById('games');
             gamesHTML.innerHTML = ``
             
+            const modeMap = {
+                'raceChoiceChess': 'Chess 2',
+                'minichess': 'Mini chess',
+                'mongolianChess': 'Mongolian chess',
+                'randomChess': 'Random chess',
+                'randomchess': 'Random chess',
+                'catchthedragon': 'Catch the Dragon',
+                'morphingRaceChoiceChess': 'Morphing Chess 2',
+                'Classic': 'Classic',
+                'classicChess': 'Classic',
+                'classiChess': 'Classic'
+            };
+
             allData.forEach((el,index) => {
                 const displayName = el.displayName || el.roomId;
-                const gameMode = el.mode || el.type || 'Classic'; // Fallback if not specified
+                let rawMode = el.mode || el.type || (el.roomData && el.roomData.mode) || 'Classic'; // Fallback if not specified
+                const gameMode = modeMap[rawMode] || rawMode;
                 
                 gamesHTML.innerHTML += `
                 <div class="lobbyGame" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--board-dark);"> 
@@ -620,7 +634,7 @@
                             <a class="startGame" href="/play?roomId=${el.roomId}"><img src="/static/lg/whitePawn.png" class="icon"> Join Game</a>
                         </div>
                     </div>
-                    <div style="color: var(--board-light); font-weight: bold; padding-right: 15px;">
+                    <div style="color: var(--piece-black); font-weight: bold; padding-right: 15px; font-size: 18px;">
                         ${gameMode}
                     </div>
                 </div>`

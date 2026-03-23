@@ -502,7 +502,7 @@ let lobby = newG({properties:{
                 state.board = [];
                 miniChess(state);
             }
-            else if(roomData.mode == 'randomchess'){
+            else if(roomData.mode == 'randomchess' || roomData.mode == 'randomChess'){
                 state.gameType = 'randomchess'
                 randomChess(state.pieces,state.board)
             }
