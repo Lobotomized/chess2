@@ -137,7 +137,7 @@
                 state: localState,
                 bot: localBot
             };
-            localStorage.setItem('saved_bot_game_' + localGameId, JSONfn.stringify(data));
+            localStorage.setItem('saved_match_game_' + localGameId, JSONfn.stringify(data));
         } catch (e) {
             console.error("Failed to save local state:", e);
         }
@@ -150,7 +150,7 @@
         // Try to restore saved game
         let restored = false;
         try {
-            const savedStr = localStorage.getItem('saved_bot_game_' + roomId);
+            const savedStr = localStorage.getItem('saved_match_game_' + roomId);
             if (savedStr) {
                 const saved = JSONfn.parse(savedStr);
                 const age = Date.now() - saved.timestamp;
@@ -160,7 +160,7 @@
                     restored = true;
                     console.log("Restored game state from", age, "ms ago");
                 } else {
-                    localStorage.removeItem('saved_bot_game_' + roomId);
+                    localStorage.removeItem('saved_match_game_' + roomId);
                 }
             }
         } catch(e) {
@@ -240,7 +240,7 @@
                 
                 // If 10 seconds have passed without a successful ping, drop the game
                 if (Date.now() - lastSuccessfulPing > 10000) {
-                    console.log("Connection lost for 10 seconds. Dropping local bot game.");
+                    console.log("Connection lost for 10 seconds. Dropping local game.");
                     localState.won = 'black'; // Forfeit by disconnection
                     updateLocalState();
                     setTimeout(() => {
@@ -797,11 +797,11 @@
         }
     })
 
-    if (getParams(window.location.href).roomId && getParams(window.location.href).roomId.startsWith('bot_')) {
+    if (getParams(window.location.href).roomId && getParams(window.location.href).roomId.startsWith('match_')) {
         const roomId = getParams(window.location.href).roomId;
         
         // Notify server that a fake game was joined so it can be replaced
-        fetch('/join-fake-game', {
+        fetch('/join-match', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -810,10 +810,9 @@
         });
         
         const botId = roomId.split('_')[1];
-        fetch('/bots').then(res => res.json()).then(bots => {
-            const bot = bots.find(b => b.id === botId);
-            if (bot) {
-                setupLocalBotGame(bot, roomId);
+        fetch(`/match-opponent/${botId}`).then(res => res.json()).then(opponent => {
+            if (opponent) {
+                setupLocalBotGame(opponent, roomId);
             }
         });
     } else {

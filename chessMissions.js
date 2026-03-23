@@ -65,6 +65,23 @@ mongoose.connect('mongodb+srv://Lobotomy:Micasmu4ka@cluster0.tippd.mongodb.net/c
 // app.use('/boardGeneration.js', express.static('boardGeneration.js'))
 
 
+app.get('/match-opponent/:botId', async (req, res) => {
+    try {
+        const botId = req.params.botId;
+        const query = mongoose.Types.ObjectId.isValid(botId) 
+            ? { $or: [{ id: botId }, { _id: botId }] }
+            : { id: botId };
+        const bot = await Bot.findOne(query);
+        if (bot) {
+            res.json(bot);
+        } else {
+            res.status(404).send("Opponent not found");
+        }
+    } catch (e) {
+        res.status(500).send("Error");
+    }
+});
+
 app.get('/bots', async (req, res) => {
     try {
         const bots = await Bot.find().sort({ score: -1 }).limit(100);
@@ -112,7 +129,7 @@ async function generateFakeBotGames() {
                     const randomBot = bots[Math.floor(Math.random() * bots.length)];
                     const randomName = realisticGameNames[Math.floor(Math.random() * realisticGameNames.length)];
                     fakeBotGames.push({
-                        roomId: `bot_${randomBot.id}_${randomName.replace(/ /g, '_')}_${Date.now()}_${i}`,
+                        roomId: `match_${randomBot.id}_${randomName.replace(/ /g, '_')}_${Date.now()}_${i}`,
                         displayName: randomName,
                         mode: 'Chess 2',
                         players: [{}] // 1 player visually
@@ -145,7 +162,7 @@ app.get('/ping', (req, res) => {
     res.status(200).send("pong");
 });
 
-app.post('/join-fake-game', (req, res) => {
+app.post('/join-match', (req, res) => {
     const roomId = req.body.roomId;
     if (!roomId) return res.status(400).send("No roomId");
     
