@@ -145,6 +145,52 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
         }
     }
     state.oldMove = {oldX:oldX,oldY:oldY,currentY:operatedPiece.y,currentX:operatedPiece.x}
+    if (state.recordMoves) {
+        if (!state.moveHistory) {
+            state.moveHistory = [];
+            
+            // Capture initial pieces and board exactly as they were before the first move
+            // We use JSONfn if available, otherwise fallback to deep clone via JSON
+            if (typeof JSONfn !== 'undefined') {
+                state.initialPieces = JSONfn.parse(JSONfn.stringify(state.pieces));
+                state.initialBoard = JSONfn.parse(JSONfn.stringify(state.board));
+            } else {
+                state.initialPieces = JSON.parse(JSON.stringify(state.pieces));
+                state.initialBoard = JSON.parse(JSON.stringify(state.board));
+            }
+            
+            // Restore the moved piece's original position in the snapshot
+            const initialOperatedPiece = state.initialPieces.find(p => p.x === x && p.y === y && p.color === operatedPiece.color && p.icon === operatedPiece.icon);
+            if (initialOperatedPiece) {
+                initialOperatedPiece.x = oldX;
+                initialOperatedPiece.y = oldY;
+            }
+            
+            // If a friendly piece was interacted with, restore its position in the snapshot
+            if (friendlyPiece) {
+                const initialFriendly = state.initialPieces.find(p => p.x === friendlyPiece.x && p.y === friendlyPiece.y && p.color === friendlyPiece.color && p.icon === friendlyPiece.icon);
+                if (initialFriendly) {
+                    initialFriendly.x = friendlyPieceOldX;
+                    initialFriendly.y = friendlyPieceOldY;
+                }
+            }
+            
+            // If an enemy piece was taken, it's already removed from state.pieces, so we must add it back to the snapshot
+            if (enemyPiece) {
+                // Since enemyPiece was removed, we just push it back to initialPieces
+                const enemyClone = typeof JSONfn !== 'undefined' ? JSONfn.parse(JSONfn.stringify(enemyPiece)) : JSON.parse(JSON.stringify(enemyPiece));
+                enemyClone.x = x;
+                enemyClone.y = y;
+                state.initialPieces.push(enemyClone);
+            }
+        }
+        state.moveHistory.push({
+            color: operatedPiece.color,
+            from: {x: oldX, y: oldY},
+            to: {x: x, y: y},
+            piece: operatedPiece.icon
+        });
+    }
     state.pieceSelected = undefined;
     closeLights(state.board)
 

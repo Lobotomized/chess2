@@ -421,8 +421,6 @@
             <p>
                 The ant is the basic piece of the insectoids. <br>
                 It can move and take two forward (until it is blocked). If it gets to the last square it promotes itself to a Bug Queen.
-                <br>
-                If one of your shrooms is taken the Ant will be able to move and take only one square forward.
             </p>
         </div>
 
@@ -578,6 +576,7 @@
             <img src="/static/lg/blackGargoyle.png" alt=""> 
             <p>
                 The Gargoyle moves horizontally and vertically and can jump through pieces. It's speed is equal to the rank of the Plague Archeologist.
+                <br> If the Plague Archeologist is taken the Gargoyle keeps the speed from the rank on which it was taken.
             </p>
         </div>
 
@@ -585,28 +584,30 @@
             <img src="/static/lg/whiteFencer.png" alt=""> 
             <p>
                 The Fencer moves diagonally and can jump through pieces. It's speed is equal to the rank of the Plague Archeologist.
+                <br> If the Rebel King is taken the Fencer keeps the speed from the rank on which it was taken.
             </p>
         </div>
 
         <div class="piece">
             <img src="/static/lg/blackPlagueDoctor.png" alt=""> 
             <p>
-                The Plague Archeologist moves and takes one infront of itself and one diagonally in each direction ahead.
+                The Plague Archeologist can move once in every direction (like a king).
                 <br/>
-                Every time it moves  it upgrades the Gargoyle and if it gets to rank 4 it awakes the Dragon.
+                If both him and the Norhern King get to rank 4 (if both are not taken) you will awake the dragons.
+               
                 <br/>
-                If it get's to the final rank you win the game. If you lose both the Northern King and the Plague Archeologist you lose the game.
+                If it get's to the final rank you win the game. If you lose both the Rebel King and the Plague Archeologist you lose the game.
             </p>
         </div>
 
         <div class="piece">
             <img src="/static/lg/whiteNorthernKing.png" alt=""> 
             <p>
-                The Rebel King moves and takes one infront of itself and one diagonally in each direction ahead.
+                The Rebel King moves once in every direction (like a king).
                 <br/>
-                Every time it moves  it upgrades the Fencer and if it gets to rank 4 all the swordsmen and pikemen are promoted to knights.
+                It set's the speed of the fencer to it's rank (or the rank on which it was taken)
                 <br/>
-                If it get's to the final rank you win the game. If you lose both the Northern King and the Plague Archeologist you lose the game.
+                If it get's to the final rank you win the game. If you lose both the Rebel King and the Plague Archeologist you lose the game.
             </p>
         </div>
 

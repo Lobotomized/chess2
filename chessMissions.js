@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const Map = require('./models/map'); // Import the Map model
 const Bot = require('./models/bot'); // Import the Bot model
 const GameHistory = require('./models/gameHistory'); // Import the GameHistory model
+const UserGameRecord = require('./models/UserGameRecord');
 app.use(express.json({ limit: '50mb' })); // Allow JSON body parsing with large limit
 app.use('/boardGeneration.js', express.static('./boardGeneration.js'))
 app.use('/pieceDefinitions.js', express.static('./pieceDefinitions.js'))
@@ -254,7 +255,13 @@ let lobby = newG({properties:{
         pieces: [],
         won: undefined,
         message:'',
-        started:false
+        started:false,
+        recordMoves: true,
+        gameRecordId: require('crypto').randomUUID ? require('crypto').randomUUID() : Date.now() + '_' + Math.random(),
+        gameMetadata: {
+            mode: 'multiplayer',
+            vsBot: false // Will be updated in joinBot if a bot joins
+        }
     },
     moveFunction: function (player, move, state) {
 
@@ -490,7 +497,12 @@ let lobby = newG({properties:{
             state.won = 'white'
         }
     },
-    connectFunction: function (state, playerRef,roomData) {
+    connectFunction: function (state, playerRef, roomData, socketId) {
+        // If a bot joins, update the metadata
+        if (socketId && socketId.toString().includes('thisisabot')) {
+            if (state.gameMetadata) state.gameMetadata.vsBot = true;
+        }
+
         io.emit('rooms', [...lobby.games, ...fakeBotGames]);
         if(!roomData.mode){
             roomData.mode = 'raceChoiceChess'
@@ -604,6 +616,10 @@ app.get('/hotseat', function(req,res){
     return res.status(200).sendFile(__dirname + '/hotseat.html');
 })
 
+app.get('/gameRecorder.js', function(req,res){
+    return res.status(200).sendFile(__dirname + '/gameRecorder.js');
+})
+
 app.get('/rogueLike.html', function(req,res){
     return res.status(200).sendFile(__dirname + '/rogueLike.html');
 })
@@ -611,6 +627,56 @@ app.get('/rogueLike.html', function(req,res){
 app.get('/create-board', function(req,res){
     return res.status(200).sendFile(__dirname + '/boardEditor.html');
 })
+
+app.get('/taenadmin', function(req,res){
+    return res.status(200).sendFile(__dirname + '/adminDashboard.html');
+})
+
+// POST endpoint to record games
+app.post('/api/record-games', async (req, res) => {
+    try {
+        const games = req.body.games;
+        if (!games || !Array.isArray(games)) {
+            return res.status(400).json({ error: 'Invalid payload' });
+        }
+
+        for (const game of games) {
+            // Upsert to prevent duplicates
+            await UserGameRecord.updateOne(
+                { gameRecordId: game.id },
+                {
+                    gameRecordId: game.id,
+                    date: game.date,
+                    mode: game.metadata.mode,
+                    vsBot: game.metadata.vsBot,
+                    winner: game.winner,
+                    moves: game.moves,
+                    whiteRace: game.whiteRace,
+                    blackRace: game.blackRace,
+                    initialBoard: game.initialBoard,
+                    initialPieces: game.initialPieces
+                },
+                { upsert: true }
+            );
+        }
+
+        res.status(200).json({ message: 'Games recorded successfully' });
+    } catch (error) {
+        console.error('Error saving recorded games:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// GET endpoint to retrieve all recorded games
+app.get('/api/all-recorded-games', async (req, res) => {
+    try {
+        const games = await UserGameRecord.find({}).sort({ date: -1 });
+        res.status(200).json(games);
+    } catch (error) {
+        console.error('Error fetching recorded games:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
 
 // POST endpoint to create a map
 app.use(express.json()); // Middleware to parse JSON body

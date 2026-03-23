@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Two - Admin Dashboard</title>
+    <style>
+        body {
+            font-family: 'Lucida Console', Monaco, monospace;
+            background-color: #2b2b2b;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #ffffff;
+            margin-bottom: 30px;
+        }
+        .dashboard-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #363636;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #4d4d4d;
+        }
+        th {
+            background-color: #1a1a1a;
+            color: #ffffff;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        tr:hover {
+            background-color: #404040;
+        }
+        .status-win-white { color: #8bc34a; font-weight: bold; }
+        .status-win-black { color: #e57373; font-weight: bold; }
+        .status-tie { color: #ffb74d; font-weight: bold; }
+        
+        .loading {
+            text-align: center;
+            font-size: 1.2em;
+            margin: 40px 0;
+            color: #aaaaaa;
+        }
+        
+        .btn-view {
+            background-color: #4b4747;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .btn-view:hover {
+            background-color: #5c5858;
+        }
+
+        /* Modal for moves */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+        .modal-content {
+            background-color: #363636;
+            margin: 2% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 90%;
+            max-width: 1000px;
+            border-radius: 8px;
+            max-height: 90vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .close {
+            color: #aaa;
+            align-self: flex-end;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: white;
+        }
+        .replay-container {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .board-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas {
+            border: 5px solid #1a1a1a;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            background-color: #2e2e2e;
+        }
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .controls button {
+            padding: 8px 16px;
+            background: #829769;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            font-family: inherit;
+        }
+        .controls button:hover { background: #6a7d55; }
+        
+        .moves-panel {
+            flex: 1;
+            background: #2b2b2b;
+            border-radius: 8px;
+            padding: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+        .move-list {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .move-item {
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .move-item:hover {
+            background: #404040;
+        }
+        .move-item.active {
+            background: #829769;
+            color: white;
+        }
+        #moveInfo {
+            margin-top: 10px;
+            font-size: 1.1em;
+            height: 24px;
+        }
+    </style>
+    <script src="/src/loadImages.js"></script>
+    <script src="/src/variables.js"></script>
+    <script src="/src/jsonfn.js"></script>
+    <script src="/moveMethods.js"></script>
+    <!-- Include specific piece factories to ensure all piece types load correctly -->
+    <script src="/pieces/classic.js"></script>
+    <script src="/pieces/bugs.js"></script>
+    <script src="/pieces/animals.js"></script>
+    <script src="/pieces/cats.js"></script>
+    <script src="/pieces/medieval.js"></script>
+    <script src="/pieces/machines.js"></script>
+    <script src="/pieces/rogueLike.js"></script>
+    <script src="/pieces/misc.js"></script>
+    <script src="/pieceDefinitions.js"></script>
+    <script src="/boardGeneration.js"></script>
+    <script src="/helperFunctions.js"></script>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <h1>Admin Dashboard - Game Records</h1>
+        
+        <div id="loading" class="loading">Loading game records...</div>
+        
+        <table id="gamesTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Mode</th>
+                    <th>Opponent</th>
+                    <th>Winner</th>
+                    <th>Moves</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="gamesBody">
+                <!-- Rows will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for showing moves -->
+    <div id="movesModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Game Replay (<span id="modalGameId"></span>)</h2>
+            <div id="moveInfo">Loading game data...</div>
+            <div class="replay-container">
+                <div class="board-container">
+                    <canvas id="canvas" width="600" height="600"></canvas>
+                    <div class="controls">
+                        <button onclick="prevMove()">Previous</button>
+                        <button onclick="togglePlay()" id="playBtn">Play</button>
+                        <button onclick="nextMove()">Next</button>
+                    </div>
+                </div>
+                <div class="moves-panel">
+                    <div id="movesContainer" class="move-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let allGames = [];
+        let currentGameData = null;
+        let currentMoveIndex = 0;
+        let isPlaying = false;
+        let playInterval = null;
+        let squareLength = 600 / 8;
+        let canvas, ctx;
+        let gameState = {
+            board: [],
+            pieces: [],
+            turn: 'white',
+            won: false
+        };
+
+        async function fetchGames() {
+            try {
+                const response = await fetch('/api/all-recorded-games');
+                if (!response.ok) throw new Error('Failed to fetch');
+                allGames = await response.json();
+                
+                // Sort by date descending
+                allGames.sort((a, b) => new Date(b.date) - new Date(a.date));
+                
+                renderTable();
+            } catch (error) {
+                console.error(error);
+                document.getElementById('loading').innerText = 'Error loading records. Make sure you are logged in / authorized.';
+            }
+        }
+
+        function renderTable() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('gamesTable').style.display = 'table';
+            
+            const tbody = document.getElementById('gamesBody');
+            tbody.innerHTML = '';
+            
+            allGames.forEach(game => {
+                const tr = document.createElement('tr');
+                
+                // Format Date
+                const dateObj = new Date(game.date);
+                const dateStr = dateObj.toLocaleDateString() + ' ' + dateObj.toLocaleTimeString();
+                
+                // Format Winner class
+                let winnerClass = '';
+                let winnerText = game.winner || 'Unknown';
+                if (game.winner === 'white') winnerClass = 'status-win-white';
+                else if (game.winner === 'black') winnerClass = 'status-win-black';
+                else if (game.winner === 'tie') winnerClass = 'status-tie';
+
+                const moveCount = game.moves ? game.moves.length : 0;
+
+                tr.innerHTML = `
+                    <td>${dateStr}</td>
+                    <td style="text-transform: capitalize;">${game.mode || 'Unknown'}</td>
+                    <td>${game.vsBot ? 'Bot' : 'Human'}</td>
+                    <td class="${winnerClass}" style="text-transform: capitalize;">${winnerText}</td>
+                    <td>${moveCount}</td>
+                    <td>
+                        <button class="btn-view" onclick="viewMoves('${game.gameRecordId}')">View Moves</button>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+            
+            if (allGames.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">No games recorded yet.</td></tr>';
+            }
+        }
+
+        async function viewMoves(gameId) {
+            const game = allGames.find(g => g.gameRecordId === gameId);
+            if (!game || !game.moves) return;
+
+            // Wait for images if needed
+            if (window.imagesLoaded) {
+                await window.imagesLoaded;
+            }
+
+            currentGameData = game;
+            document.getElementById('modalGameId').innerText = gameId;
+            const container = document.getElementById('movesContainer');
+            container.innerHTML = '';
+
+            game.moves.forEach((move, index) => {
+                const div = document.createElement('div');
+                div.className = 'move-item';
+                div.id = `move-${index}`;
+                div.onclick = () => jumpToMove(index);
+                
+                // Clean up icon name
+                let iconName = move.piece || 'Piece';
+                iconName = iconName.replace('.png', '').replace('white', '').replace('black', '');
+                
+                div.innerHTML = `
+                    <strong>${index + 1}.</strong> <span style="color: ${move.color === 'white' ? '#aaa' : '#777'}">${move.color}</span> ${iconName} 
+                    (${move.from.x}, ${move.from.y}) &rarr; (${move.to.x}, ${move.to.y})
+                `;
+                container.appendChild(div);
+            });
+
+            document.getElementById('movesModal').style.display = 'block';
+            
+            // Initialize Replay State
+            currentMoveIndex = 0;
+            gameState.pieces = [];
+            gameState.board = [];
+            gameState.turn = 'white';
+            gameState.won = false;
+            
+            // Initialize board based on mode
+            const wRace = game.whiteRace || 'classic';
+            const bRace = game.blackRace || 'classic';
+            
+            if (game.initialBoard && game.initialBoard.length > 0 && game.initialPieces && game.initialPieces.length > 0) {
+                // If we have custom starting state (like roguelike)
+                gameState.board = JSON.parse(JSON.stringify(game.initialBoard));
+                gameState.pieces = JSON.parse(JSON.stringify(game.initialPieces));
+                
+                // Re-hydrate piece functions if possible based on icon
+                gameState.pieces.forEach(p => {
+                    if (!p.moves && p.icon) {
+                        const factory = window.findFactoryForIcon ? window.findFactoryForIcon(p.icon) : null;
+                        if (factory) {
+                            const tempPiece = factory(p.color, p.x, p.y);
+                            Object.assign(p, tempPiece);
+                        } else {
+                            // Try global lookup by name
+                            let cleanName = p.icon.replace('.png','').replace('white','').replace('black','');
+                            let lowerFirst = cleanName.charAt(0).toLowerCase() + cleanName.slice(1);
+                            if (typeof window[lowerFirst + 'Factory'] === 'function') {
+                                Object.assign(p, window[lowerFirst + 'Factory'](p.color, p.x, p.y));
+                            } else if (typeof window[cleanName + 'Factory'] === 'function') {
+                                Object.assign(p, window[cleanName + 'Factory'](p.color, p.x, p.y));
+                            }
+                        }
+                    }
+                });
+            } else {
+                // Standard mode
+                raceChoiceChess(gameState, wRace, bRace);
+            }
+            
+            drawBoard();
+            updateMoveInfo();
+            highlightMoveItem();
+        }
+
+        function closeModal() {
+            document.getElementById('movesModal').style.display = 'none';
+            if (isPlaying) togglePlay();
+        }
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            const modal = document.getElementById('movesModal');
+            if (event.target == modal) {
+                closeModal();
+            }
+        }
+
+        // Replay Logic
+        function drawBoard() {
+            if (!ctx) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Default square variables from variables.js (if loaded) or fallbacks
+            const bSq = typeof blackSquareColor !== 'undefined' ? blackSquareColor : '#b58863';
+            const wSq = typeof whiteSquareColor !== 'undefined' ? whiteSquareColor : '#f0d9b5';
+            
+            // Use state board to draw if available, otherwise default 8x8
+            if (gameState.board && gameState.board.length > 0) {
+                gameState.board.forEach(sq => {
+                    if ((sq.x + sq.y) % 2 === 0) {
+                        ctx.fillStyle = wSq;
+                    } else {
+                        ctx.fillStyle = bSq;
+                    }
+                    ctx.fillRect(sq.x * squareLength, sq.y * squareLength, squareLength, squareLength);
+                });
+            } else {
+                for(let y=0; y<8; y++) {
+                    for(let x=0; x<8; x++) {
+                        if((x+y)%2 === 0) {
+                            ctx.fillStyle = wSq;
+                        } else {
+                            ctx.fillStyle = bSq;
+                        }
+                        ctx.fillRect(x*squareLength, y*squareLength, squareLength, squareLength);
+                    }
+                }
+            }
+            
+            // Draw pieces
+            gameState.pieces.forEach(p => {
+                if (typeof drawPiece === 'function') {
+                    // Use the game's native drawPiece function which handles the sprite sheets properly
+                    drawPiece(p.x, p.y, p.icon, squareLength);
+                } else {
+                    // Fallback
+                    let img = new Image();
+                    let icon = p.icon;
+                    if(!icon.includes('/')) icon = '/static/lg/' + icon;
+                    img.src = icon;
+                    ctx.drawImage(img, p.x * squareLength, p.y * squareLength, squareLength, squareLength);
+                }
+            });
+        }
+
+        function nextMove() {
+            if(!currentGameData || currentMoveIndex >= currentGameData.moves.length) return;
+            
+            let move = currentGameData.moves[currentMoveIndex];
+            let piece = gameState.pieces.find(p => p.x === move.from.x && p.y === move.from.y);
+            
+            if(!piece) {
+                piece = gameState.pieces.find(p => p.color === move.color && p.x === move.from.x && p.y === move.from.y);
+            }
+            
+            // If piece is still missing (e.g. custom game missing initialPieces), create it on the fly
+            if(!piece) {
+                piece = { x: move.from.x, y: move.from.y, color: move.color, icon: move.piece };
+                gameState.pieces.push(piece);
+            }
+
+            if(piece) {
+                // If the recorded move indicates a different piece icon than what we have, 
+                // it might be due to a promotion, a custom army missing initialPieces, or transformation.
+                // Or if it was just created on the fly and is missing methods.
+                if (piece.icon !== move.piece || !piece.moves) {
+                    piece.icon = move.piece;
+                    
+                    // Attempt to re-hydrate methods for the new piece type
+                    const factory = window.findFactoryForIcon ? window.findFactoryForIcon(piece.icon) : null;
+                    if (factory) {
+                        const tempPiece = factory(piece.color, piece.x, piece.y);
+                        Object.assign(piece, tempPiece);
+                    } else {
+                        let cleanName = piece.icon.replace('.png','').replace('white','').replace('black','');
+                        let lowerFirst = cleanName.charAt(0).toLowerCase() + cleanName.slice(1);
+                        if (typeof window[lowerFirst + 'Factory'] === 'function') {
+                            Object.assign(piece, window[lowerFirst + 'Factory'](piece.color, piece.x, piece.y));
+                        } else if (typeof window[cleanName + 'Factory'] === 'function') {
+                            Object.assign(piece, window[cleanName + 'Factory'](piece.color, piece.x, piece.y));
+                        }
+                    }
+                }
+
+                gameState.pieceSelected = piece;
+                
+                // Temporarily disable move recording so replay doesn't infinitely append to history
+                gameState.recordMoves = false;
+                
+                // If the move goes out of current board bounds, expand the board so playerMove doesn't fail
+                let targetSq = gameState.board.find(sq => sq.x === move.to.x && sq.y === move.to.y);
+                if (!targetSq) {
+                    gameState.board.push({ x: move.to.x, y: move.to.y, light: false });
+                }
+
+                let success = playerMove({x: move.to.x, y: move.to.y}, gameState, true);
+                
+                if (success) {
+                    if(gameState.specialOnMoveEffects && gameState.specialOnMoveEffects.length){
+                        gameState.specialOnMoveEffects.forEach((effect) => {
+                            effect(gameState);
+                        })
+                    }
+                    
+                    changeTurn(gameState);
+                    
+                    for (let i = gameState.pieces.length - 1; i >= 0; i--) {
+                        if(gameState.pieces[i].color == gameState.turn){
+                            if (gameState.pieces[i].afterEnemyPlayerMove) {
+                                // Need to pass a mock move function like the real engine does
+                                gameState.pieces[i].afterEnemyPlayerMove(gameState, playerMove)
+                            }
+                        }
+                    }
+                }
+                
+                currentMoveIndex++;
+                drawBoard();
+                updateMoveInfo();
+                highlightMoveItem();
+            } else {
+                console.error("Could not execute move", move);
+                document.getElementById('moveInfo').innerText = `ERROR: Missing piece at ${move.from.x},${move.from.y}`;
+                currentMoveIndex++; 
+            }
+        }
+
+        function prevMove() {
+            if(currentMoveIndex <= 0) return;
+            let targetIndex = currentMoveIndex - 1;
+            jumpToMove(targetIndex - 1); // jumpToMove expects the index to end up *after* executing it, so target-1 means we stop before target
+        }
+
+        function jumpToMove(targetIndex) {
+            // targetIndex is the index in the move list we want to reach.
+            // If targetIndex is 5, we want to execute moves 0 through 5, so currentMoveIndex becomes 6.
+            // Reset state
+            currentMoveIndex = 0;
+            gameState.pieces = [];
+            gameState.board = [];
+            gameState.turn = 'white';
+            gameState.won = false;
+            
+            const wRace = currentGameData.whiteRace || 'classic';
+            const bRace = currentGameData.blackRace || 'classic';
+            
+            if (currentGameData.initialBoard && currentGameData.initialBoard.length > 0 && currentGameData.initialPieces && currentGameData.initialPieces.length > 0) {
+                gameState.board = JSON.parse(JSON.stringify(currentGameData.initialBoard));
+                gameState.pieces = JSON.parse(JSON.stringify(currentGameData.initialPieces));
+                
+                // Re-hydrate piece functions if possible based on icon
+                gameState.pieces.forEach(p => {
+                    if (!p.moves && p.icon) {
+                        const factory = window.findFactoryForIcon ? window.findFactoryForIcon(p.icon) : null;
+                        if (factory) {
+                            const tempPiece = factory(p.color, p.x, p.y);
+                            Object.assign(p, tempPiece);
+                        } else {
+                            // Try global lookup by name
+                            let cleanName = p.icon.replace('.png','').replace('white','').replace('black','');
+                            let lowerFirst = cleanName.charAt(0).toLowerCase() + cleanName.slice(1);
+                            if (typeof window[lowerFirst + 'Factory'] === 'function') {
+                                Object.assign(p, window[lowerFirst + 'Factory'](p.color, p.x, p.y));
+                            } else if (typeof window[cleanName + 'Factory'] === 'function') {
+                                Object.assign(p, window[cleanName + 'Factory'](p.color, p.x, p.y));
+                            }
+                        }
+                    }
+                });
+            } else {
+                raceChoiceChess(gameState, wRace, bRace);
+            }
+            
+            // Fast forward
+            while(currentMoveIndex <= targetIndex && currentMoveIndex < currentGameData.moves.length) {
+                nextMove();
+            }
+            if (targetIndex < 0) {
+                drawBoard();
+                updateMoveInfo();
+                highlightMoveItem();
+            }
+        }
+
+        function togglePlay() {
+            if(isPlaying) {
+                clearInterval(playInterval);
+                isPlaying = false;
+                document.getElementById('playBtn').innerText = 'Play';
+            } else {
+                isPlaying = true;
+                document.getElementById('playBtn').innerText = 'Pause';
+                playInterval = setInterval(() => {
+                    if(currentMoveIndex >= currentGameData.moves.length) {
+                        togglePlay();
+                        return;
+                    }
+                    nextMove();
+                }, 500);
+            }
+        }
+
+        function updateMoveInfo() {
+            if (!currentGameData) return;
+            if (currentMoveIndex === 0) {
+                document.getElementById('moveInfo').innerText = 'Start of game';
+            } else {
+                let m = currentGameData.moves[currentMoveIndex - 1];
+                document.getElementById('moveInfo').innerText = `Move ${currentMoveIndex}: ${m.color} from ${m.from.x},${m.from.y} to ${m.to.x},${m.to.y}`;
+            }
+        }
+
+        function highlightMoveItem() {
+            document.querySelectorAll('.move-item').forEach(el => el.classList.remove('active'));
+            if (currentMoveIndex > 0) {
+                const activeEl = document.getElementById(`move-${currentMoveIndex - 1}`);
+                if (activeEl) {
+                    activeEl.classList.add('active');
+                    activeEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            }
+        }
+
+        // Initialize
+        window.onload = function() {
+            canvas = document.getElementById('canvas');
+            if (canvas) ctx = canvas.getContext('2d');
+            fetchGames();
+        };
+    </script>
+</body>
+</html>
