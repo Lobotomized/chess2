@@ -189,22 +189,36 @@
         IAM = 'white';
         playerRef = 'player1';
         
+        let lastTime = Date.now();
+        let timeAccumulator = 0;
         setInterval(() => {
             if (localState && localState.turn !== 'menu' && !localState.won) {
-                if (localState.turn === 'white') localState.whiteClock--;
-                else localState.blackClock--;
+                const now = Date.now();
+                timeAccumulator += (now - lastTime);
+                lastTime = now;
                 
-                if (localState.whiteClock <= 0) localState.won = 'black';
-                if (localState.blackClock <= 0) localState.won = 'white';
-                
-                // Also visually update clocks if it's currently a local game
-                const me = document.getElementById('blackClock');
-                const enemy = document.getElementById('whiteClock');
-                
-                if (me && enemy) {
-                    me.innerText = 'My time ' + localState.whiteClock;
-                    enemy.innerText = 'Enemy time ' + localState.blackClock;
+                const ticks = Math.floor(timeAccumulator / 100);
+                if (ticks > 0) {
+                    timeAccumulator -= ticks * 100;
+                    
+                    if (localState.turn === 'white') localState.whiteClock -= ticks;
+                    else localState.blackClock -= ticks;
+                    
+                    if (localState.whiteClock <= 0) localState.won = 'black';
+                    if (localState.blackClock <= 0) localState.won = 'white';
+                    
+                    // Also visually update clocks if it's currently a local game
+                    const me = document.getElementById('blackClock');
+                    const enemy = document.getElementById('whiteClock');
+                    
+                    if (me && enemy) {
+                        me.innerText = 'My time ' + localState.whiteClock;
+                        enemy.innerText = 'Enemy time ' + localState.blackClock;
+                    }
                 }
+            } else {
+                lastTime = Date.now();
+                timeAccumulator = 0;
             }
         }, 100);
 
