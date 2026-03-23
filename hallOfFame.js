@@ -71,12 +71,34 @@ function updateUI() {
             <td>${algStr}</td>
             <td>${c.depth}</td>
             <td>${filtersHtml}</td>
-            <td>
-                <button style="padding: 5px 10px; font-size: 12px;" onclick="playAgainst('${c.id}')">Play</button>
-            </td>
-        `;
-        tbody.appendChild(tr);
+        <td>
+            <button style="padding: 5px 10px; font-size: 12px;" onclick="playAgainst('${c.id || c._id}')">Play</button>
+            <button style="padding: 5px 10px; font-size: 12px; background-color: #e74c3c;" onclick="deleteBot('${c._id || c.id}')">Delete</button>
+        </td>
+    `;
+    tbody.appendChild(tr);
     });
+}
+
+function deleteBot(charId) {
+    if(confirm('Are you sure you want to delete this bot from the Hall of Fame?')) {
+        fetch('/bots/' + charId, {
+            method: 'DELETE'
+        })
+        .then(res => {
+            if(res.ok) {
+                init(); // Refresh the list
+            } else if(res.status === 404) {
+                alert('Endpoint not found or bot not found. Did you restart the node server?');
+            } else {
+                alert('Failed to delete bot. Server responded with: ' + res.status);
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            alert('Error connecting to server. Did you restart the node server?');
+        });
+    }
 }
 
 function playAgainst(charId) {

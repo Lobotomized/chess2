@@ -83,6 +83,24 @@ app.post('/bots', async (req, res) => {
     }
 });
 
+app.delete('/bots/:botId', async (req, res) => {
+    try {
+        const botId = req.params.botId;
+        const query = mongoose.Types.ObjectId.isValid(botId) 
+            ? { $or: [{ id: botId }, { _id: botId }] }
+            : { id: botId };
+            
+        const deletedBot = await Bot.findOneAndDelete(query);
+        if (!deletedBot) {
+            return res.status(404).send({ message: 'Bot not found' });
+        }
+        res.status(200).send({ message: 'Bot deleted successfully' });
+    } catch (err) {
+        console.error('Delete error:', err);
+        res.status(500).send(err);
+    }
+});
+
 app.post('/games', async (req, res) => {
     try {
         const game = new GameHistory(req.body);
