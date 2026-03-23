@@ -290,20 +290,27 @@ self.addEventListener("message", function(e) {
             to: {x: move.xClicked, y: move.yClicked}
         });
 
-        if (checkRemi(state)) {
+        if (state.specialOnMoveEffects && state.specialOnMoveEffects.length) {
+            state.specialOnMoveEffects.forEach(effect => effect(state));
+        }
+
+        changeTurn(state);
+
+        if (!state.won && checkRemi(state)) {
             state.won = 'tie';
+            if (state.specialOnDrawEffects) {
+                state.specialOnDrawEffects.forEach(effect => effect(state));
+            }
             break;
         }
         
         for (let i = state.pieces.length - 1; i >= 0; i--) {
-            if(state.pieces[i].color !== state.turn){
+            if(state.pieces[i].color === state.turn){
                 if (state.pieces[i].afterEnemyPlayerMove) {
-                    state.pieces[i].afterEnemyPlayerMove(state, {x: move.xClicked, y: move.yClicked});
+                    state.pieces[i].afterEnemyPlayerMove(state, playerMove);
                 }
             }
         }
-        
-        changeTurn(state);
         turns++;
     }
     

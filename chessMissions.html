@@ -314,9 +314,16 @@
         
         if (st.pieceSelected) {
             if (playerMove(move, st)) {
-                if(checkRemi(st)){
+                if(st.specialOnMoveEffects && st.specialOnMoveEffects.length){
+                    st.specialOnMoveEffects.forEach((winCondition) => { winCondition(st); });
+                }
+                changeTurn(st);
+                if(!st.won && checkRemi(st)){
                     st.won = 'tie';
-                } else {
+                    if(st.specialOnDrawEffects){
+                        st.specialOnDrawEffects.forEach((effect) => { effect(st); });
+                    }
+                } else if (!st.won) {
                     for (let i = st.pieces.length - 1; i >= 0; i--) {
                         if(st.pieces[i].color == st.turn){
                             if (st.pieces[i].afterEnemyPlayerMove) {
@@ -324,10 +331,6 @@
                             }
                         }
                     }
-                    if(st.specialOnMoveEffects && st.specialOnMoveEffects.length){
-                        st.specialOnMoveEffects.forEach((winCondition) => { winCondition(st); });
-                    }
-                    changeTurn(st);
                 }
                 saveLocalState();
                 updateLocalState();
@@ -372,9 +375,16 @@
             lightBoardFE(localState.pieceSelected, {pieces: localState.pieces, board: localState.board, turn: localState.turn});
             
             if (playerMove({x: move.xClicked, y: move.yClicked}, localState)) {
-                if(checkRemi(localState)){
+                if(localState.specialOnMoveEffects && localState.specialOnMoveEffects.length){
+                    localState.specialOnMoveEffects.forEach((winCondition) => { winCondition(localState); });
+                }
+                changeTurn(localState);
+                if(!localState.won && checkRemi(localState)){
                     localState.won = 'tie';
-                } else {
+                    if(localState.specialOnDrawEffects){
+                        localState.specialOnDrawEffects.forEach((effect) => { effect(localState); });
+                    }
+                } else if (!localState.won) {
                     for (let i = localState.pieces.length - 1; i >= 0; i--) {
                         if(localState.pieces[i].color == localState.turn){
                             if (localState.pieces[i].afterEnemyPlayerMove) {
@@ -382,10 +392,6 @@
                             }
                         }
                     }
-                    if(localState.specialOnMoveEffects && localState.specialOnMoveEffects.length){
-                        localState.specialOnMoveEffects.forEach((winCondition) => { winCondition(localState); });
-                    }
-                    changeTurn(localState);
                 }
             } else {
                 closeLights(localState.board);

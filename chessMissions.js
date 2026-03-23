@@ -345,8 +345,19 @@ let lobby = newG({properties:{
             }
             if (state.pieceSelected) {
                 if (playerMove(move, state)) {
-                    if(checkRemi(state)){
+                    if(state.specialOnMoveEffects && state.specialOnMoveEffects.length){
+                        state.specialOnMoveEffects.forEach((winCondition) => {
+                            winCondition(state);
+                        })
+                    }
+                    changeTurn(state)
+                    if(!state.won && checkRemi(state)){
                         state.won = 'tie'
+                        if(state.specialOnDrawEffects){
+                            state.specialOnDrawEffects.forEach((effect) => {
+                                effect(state);
+                            })
+                        }
                         return;
                     }
                     for (let i = state.pieces.length - 1; i >= 0; i--) {
@@ -356,12 +367,6 @@ let lobby = newG({properties:{
                             }
                         }
                     }
-                    if(state.specialOnMoveEffects && state.specialOnMoveEffects.length){
-                        state.specialOnMoveEffects.forEach((winCondition) => {
-                            winCondition(state);
-                        })
-                    }
-                    changeTurn(state)
 
                 }
                 else {

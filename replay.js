@@ -100,16 +100,22 @@ function nextMove() {
         gameState.pieceSelected = piece;
         playerMove({x: move.to.x, y: move.to.y}, gameState, true);
         
-        // Emulate worker loop
-        for (let i = gameState.pieces.length - 1; i >= 0; i--) {
-            if(gameState.pieces[i].color !== gameState.turn){
-                if (gameState.pieces[i].afterEnemyPlayerMove) {
-                    gameState.pieces[i].afterEnemyPlayerMove(gameState, {x: move.to.x, y: move.to.y});
-                }
-            }
+        if(gameState.specialOnMoveEffects && gameState.specialOnMoveEffects.length){
+            gameState.specialOnMoveEffects.forEach((effect) => {
+                effect(gameState);
+            })
         }
         
         changeTurn(gameState);
+        
+        // Emulate worker loop
+        for (let i = gameState.pieces.length - 1; i >= 0; i--) {
+            if(gameState.pieces[i].color === gameState.turn){
+                if (gameState.pieces[i].afterEnemyPlayerMove) {
+                    gameState.pieces[i].afterEnemyPlayerMove(gameState, playerMove);
+                }
+            }
+        }
         
         document.getElementById('moveInfo').innerText = `Move ${currentMoveIndex+1}: ${move.color} piece from ${move.from.x},${move.from.y} to ${move.to.x},${move.to.y}`;
         currentMoveIndex++;
