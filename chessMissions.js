@@ -563,7 +563,7 @@ let lobby = newG({properties:{
                             state.board.push({ light: false, x: x, y: y })
                     }
                 }
-                state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4), empoweredCrystalFactory('white',1,5),blindCatFactory('white',1,6))
+                state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4), empoweredCrystalFactory('white',1,5))
                 state.gameType = 'raceChoiceChess'
                 state.turn = 'menu'
             }
@@ -575,7 +575,7 @@ let lobby = newG({properties:{
                             state.board.push({ light: false, x: x, y: y })
                     }
                 }
-                state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4), empoweredCrystalFactory('white',1,5),blindCatFactory('white',1,6))
+                state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4), empoweredCrystalFactory('white',1,5))
                 state.gameType = 'morphingRaceChoiceChess'
                 state.turn = 'menu'
             }
