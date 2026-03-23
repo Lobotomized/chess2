@@ -595,49 +595,40 @@
     <script>
         const socket = io();
         
-        // Removed selectMode function as we use standard select element now
-
         socket.on('rooms', (data)=>{
-                let gamesHTML = document.getElementById('games');
-                gamesHTML.innerHTML = ``
-                data.forEach((el,index) => {
-                    gamesHTML.innerHTML += `
-                    <div class="lobbyGame"> 
-                        <a class="linkHeader" href="/play?roomId=${el.roomId}"><img src="/static/lg/whiteKnight.png" class="icon"> ${el.roomId}</a>
-                        <div class="row">
-                            <span class="span"> ${el.players.length} / 2 players</span>
-                        </div>
-                        <div class="row"> 
-                            <a class="startGame" href="/play?roomId=${el.roomId}"><img src="/static/lg/whitePawn.png" class="icon"> Join Game</a>
-                        </div>
-                    </div>`
-                })
-                if(data.length == 0){
-                    gamesHTML.innerHTML = `<h3 style="color: var(--board-light); text-align: center; margin-top: 50px;"><img src="/static/lg/whiteKing.png" class="icon"> No Games Available <img src="/static/lg/blackKing.png" class="icon"></h3>`
-                }
-        })
+            renderGames(data);
+        });
 
-        fetch('/allgames').then((data) => {
+        fetch('/allgames').then(res => res.json()).then(data => renderGames(data));
+
+        function renderGames(allData) {
             let gamesHTML = document.getElementById('games');
-                gamesHTML.innerHTML = ``
-                data.json().then((data) => {
-                    data.forEach((el,index) => {
-                    gamesHTML.innerHTML += `
-                    <div class="lobbyGame"> 
-                        <a class="linkHeader" href="/play?roomId=${el.roomId}"><img src="/static/lg/whiteKnight.png" class="icon"> ${el.roomId}</a>
+            gamesHTML.innerHTML = ``
+            
+            allData.forEach((el,index) => {
+                const displayName = el.displayName || el.roomId;
+                const gameMode = el.mode || el.type || 'Classic'; // Fallback if not specified
+                
+                gamesHTML.innerHTML += `
+                <div class="lobbyGame" style="display: flex; justify-content: space-between; align-items: center; padding: 10px; border-bottom: 1px solid var(--board-dark);"> 
+                    <div style="flex-grow: 1;">
+                        <a class="linkHeader" href="/play?roomId=${el.roomId}"><img src="/static/lg/whiteKnight.png" class="icon"> ${displayName}</a>
                         <div class="row">
                             <span class="span"> ${el.players.length} / 2 players</span>
                         </div>
                         <div class="row"> 
                             <a class="startGame" href="/play?roomId=${el.roomId}"><img src="/static/lg/whitePawn.png" class="icon"> Join Game</a>
                         </div>
-                    </div>`
-                    })
-                    if(data.length == 0){
-                        gamesHTML.innerHTML = `<h3 style="color: var(--board-light); text-align: center; margin-top: 50px;"><img src="/static/lg/whiteKing.png" class="icon"> No Games Available <img src="/static/lg/blackKing.png" class="icon"></h3>`
-                    }
-                })
-        })
+                    </div>
+                    <div style="color: var(--board-light); font-weight: bold; padding-right: 15px;">
+                        ${gameMode}
+                    </div>
+                </div>`
+            })
+            if(allData.length == 0){
+                gamesHTML.innerHTML = `<h3 style="color: var(--board-light); text-align: center; margin-top: 50px;"><img src="/static/lg/whiteKing.png" class="icon"> No Games Available <img src="/static/lg/blackKing.png" class="icon"></h3>`
+            }
+        }
 
         let startNewGame = function(){
             let gameName = document.getElementById('gameName').value;

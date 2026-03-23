@@ -3,6 +3,9 @@
 <script src="/src/variables.js"></script>
 
 <script src="/src/loadImages.js"></script>
+<script src="/src/jsonfn.js"></script>
+<script src="/moveMethods.js"></script>
+<script src="/pieceDefinitions.js"></script>
 <script src="/src/globby.js"></script>
 
 <link rel="stylesheet" href="/src/main.css">
@@ -120,7 +123,278 @@
     let hoveredPiece;
     let playerRef;
 
+    let localBot = null;
+    let localState = null;
+    let w = null;
+    let localGameId = null;
+
+    function saveLocalState() {
+        if (!localState || !localGameId) return;
+        try {
+            const data = {
+                timestamp: Date.now(),
+                state: localState,
+                bot: localBot
+            };
+            localStorage.setItem('saved_bot_game_' + localGameId, JSONfn.stringify(data));
+        } catch (e) {
+            console.error("Failed to save local state:", e);
+        }
+    }
+
+    function setupLocalBotGame(bot, roomId) {
+        localBot = bot;
+        localGameId = roomId;
+        
+        // Try to restore saved game
+        let restored = false;
+        try {
+            const savedStr = localStorage.getItem('saved_bot_game_' + roomId);
+            if (savedStr) {
+                const saved = JSONfn.parse(savedStr);
+                const age = Date.now() - saved.timestamp;
+                if (age < 10000) { // 10 seconds
+                    localState = saved.state;
+                    localBot = saved.bot;
+                    restored = true;
+                    console.log("Restored game state from", age, "ms ago");
+                } else {
+                    localStorage.removeItem('saved_bot_game_' + roomId);
+                }
+            }
+        } catch(e) {
+            console.error("Failed to parse saved state", e);
+        }
+
+        if (!restored) {
+            localState = {
+                gameType: 'raceChoiceChess',
+                board: [],
+                pieces: [],
+                turn: 'menu',
+                whiteClock: 6000,
+                blackClock: 6000,
+                whiteRace: undefined,
+                blackRace: bot.race || 'classic'
+            };
+            
+            for (let x = 0; x <= 7; x++) {
+                for (let y = 0; y <= 7; y++) {
+                    localState.board.push({ light: false, x: x, y: y })
+                }
+            }
+            localState.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4), empoweredCrystalFactory('white',1,5),blindCatFactory('white',1,6));
+        }
+        
+        IAM = 'white';
+        playerRef = 'player1';
+        
+        setInterval(() => {
+            if (localState && localState.turn !== 'menu' && !localState.won) {
+                if (localState.turn === 'white') localState.whiteClock--;
+                else localState.blackClock--;
+                
+                if (localState.whiteClock <= 0) localState.won = 'black';
+                if (localState.blackClock <= 0) localState.won = 'white';
+                
+                // Also visually update clocks if it's currently a local game
+                const me = document.getElementById('blackClock');
+                const enemy = document.getElementById('whiteClock');
+                
+                if (me && enemy) {
+                    me.innerText = 'My time ' + localState.whiteClock;
+                    enemy.innerText = 'Enemy time ' + localState.blackClock;
+                }
+            }
+        }, 100);
+
+        // Periodically save state (every second)
+        setInterval(saveLocalState, 1000);
+        
+        // Ping server to check internet connection
+        let lastSuccessfulPing = Date.now();
+        setInterval(() => {
+            if (localState && !localState.won) {
+                fetch('/ping', { method: 'GET', cache: 'no-store' })
+                    .then(res => {
+                        if (res.ok) lastSuccessfulPing = Date.now();
+                    })
+                    .catch(() => {
+                        // Request failed (likely network drop)
+                    });
+                
+                // If 10 seconds have passed without a successful ping, drop the game
+                if (Date.now() - lastSuccessfulPing > 10000) {
+                    console.log("Connection lost for 10 seconds. Dropping local bot game.");
+                    localState.won = 'black'; // Forfeit by disconnection
+                    updateLocalState();
+                    setTimeout(() => {
+                        window.location.replace('/');
+                    }, 2000);
+                }
+            }
+        }, 2000);
+
+        // Save immediately on window unload
+        window.addEventListener('beforeunload', saveLocalState);
+
+        updateLocalState();
+        
+        // If restored and it's black's turn, resume AI
+        if (restored && localState.turn === 'black' && !localState.won) {
+            triggerBotMove();
+        }
+    }
+
+    function updateLocalState() {
+        state = localState;
+        state.yourTurn = (state.turn === 'white' || state.turn === 'menu');
+        
+        const myTurnH1 = document.getElementById('turn');
+        myTurnH1.style.color = whiteSquareColor;
+        canvas.width = squareLength * 8 + squareLength;
+        canvas.height = squareLength * 8 + squareLength;
+        
+        if (state.turn === 'menu') {
+            myTurnH1.innerText = "Select your race by moving the white piece";
+            // Highlight options - removed bot's race highlighting so it remains hidden
+        } else {
+            myTurnH1.innerText = '';
+        }
+        
+        // Show exit button
+        if(exitButton.hasAttribute('style')){
+            exitButton.removeAttribute('style');
+        }
+        
+        boardWidth = 7;
+        boardHeight = 7;
+        
+        if (!window.drawLoopStarted) {
+            window.drawLoopStarted = true;
+            requestAnimationFrame(drawLoop);
+        }
+    }
+
+    function handleLocalMove(x, y) {
+        const move = {x, y};
+        const st = localState;
+        
+        if (st.turn === 'menu') {
+            if (move.x === 1 && move.y === 1) st.whiteRace = 'classic';
+            else if (move.x === 1 && move.y === 2) st.whiteRace = 'medieval';
+            else if (move.x === 1 && move.y === 3) st.whiteRace = 'bug';
+            else if (move.x === 1 && move.y === 4) st.whiteRace = 'promoters';
+            else if (move.x === 1 && move.y === 5) st.whiteRace = 'cyborgs';
+            
+            if (st.whiteRace && st.blackRace) {
+                st.turn = 'white';
+                raceChoiceChess(st, st.whiteRace, st.blackRace);
+            }
+            updateLocalState();
+            return;
+        }
+        
+        if (st.turn !== 'white') return;
+        
+        if (st.pieceSelected) {
+            if (playerMove(move, st)) {
+                if(checkRemi(st)){
+                    st.won = 'tie';
+                } else {
+                    for (let i = st.pieces.length - 1; i >= 0; i--) {
+                        if(st.pieces[i].color == st.turn){
+                            if (st.pieces[i].afterEnemyPlayerMove) {
+                                st.pieces[i].afterEnemyPlayerMove(st, playerMove)
+                            }
+                        }
+                    }
+                    if(st.specialOnMoveEffects && st.specialOnMoveEffects.length){
+                        st.specialOnMoveEffects.forEach((winCondition) => { winCondition(st); });
+                    }
+                    changeTurn(st);
+                }
+                saveLocalState();
+                updateLocalState();
+                
+                if (!st.won && st.turn === 'black') {
+                    triggerBotMove();
+                }
+            } else {
+                closeLights(st.board);
+                st.pieceSelected = undefined;
+                updateLocalState();
+            }
+        } else {
+            selectPiece(move, st);
+            if (st.pieceSelected) {
+                lightBoardFE(st.pieceSelected, st);
+            }
+            updateLocalState();
+        }
+    }
+
+    function triggerBotMove() {
+        if (!w) {
+            w = new Worker("src/webworker.js");
+        }
+        
+        localState.pieces = localState.pieces.sort((a, b) => 0.5 - Math.random());
+        
+        w.postMessage(JSONfn.stringify({
+            state: localState,
+            color: 'black',
+            AIPower: 'customEvolution',
+            customEvolutionWhite: undefined,
+            customEvolutionBlack: JSON.stringify(localBot)
+        }));
+        
+        w.onmessage = function(event) {
+            let move = JSONfn.parse(event.data);
+            
+            const myPieces = getColorPieces(localState.pieces, 'black');
+            selectPiece({x: myPieces[move.pieceCounter].x, y: myPieces[move.pieceCounter].y}, localState);
+            lightBoardFE(localState.pieceSelected, {pieces: localState.pieces, board: localState.board, turn: localState.turn});
+            
+            if (playerMove({x: move.xClicked, y: move.yClicked}, localState)) {
+                if(checkRemi(localState)){
+                    localState.won = 'tie';
+                } else {
+                    for (let i = localState.pieces.length - 1; i >= 0; i--) {
+                        if(localState.pieces[i].color == localState.turn){
+                            if (localState.pieces[i].afterEnemyPlayerMove) {
+                                localState.pieces[i].afterEnemyPlayerMove(localState, playerMove)
+                            }
+                        }
+                    }
+                    if(localState.specialOnMoveEffects && localState.specialOnMoveEffects.length){
+                        localState.specialOnMoveEffects.forEach((winCondition) => { winCondition(localState); });
+                    }
+                    changeTurn(localState);
+                }
+            } else {
+                closeLights(localState.board);
+                localState.pieceSelected = undefined;
+            }
+            
+            saveLocalState();
+            updateLocalState();
+            
+            if (!localState.won && localState.turn === 'black') {
+                setTimeout(triggerBotMove, 100);
+            }
+        };
+    }
+
     exitButton.addEventListener('click', function(){
+        if (localState) {
+            localState.won = 'black'; // Forfeit means you lose
+            updateLocalState();
+            setTimeout(() => {
+                window.location.replace('/');
+            }, 2000);
+            return;
+        }
         socket.emit('exit');
         window.location.replace('/')
     })
@@ -459,6 +733,17 @@
         
         mx = e.pageX - offsetX;
         my = e.pageY - offsetY;
+        
+        if (localState) {
+            let x = parseInt(mx / squareLength);
+            let y = parseInt(my / squareLength);
+            if (IAM === 'black' && boardHeight) {
+                y = reverseNumber(y, boardHeight);
+            }
+            handleLocalMove(x, y);
+            return;
+        }
+        
         if(IAM == 'black' && boardHeight){
 
             socket.emit('move', { x: parseInt(mx / squareLength), y: reverseNumber(parseInt(my / squareLength),boardHeight) })
@@ -474,22 +759,58 @@
         if(!state || !state.pieces){
             return;
         }
+        
+        let newHoveredPiece;
         if(IAM == 'black'){
-            hoveredPiece = pieceFromXY(parseInt(x / squareLength), reverseNumber(parseInt(y / squareLength), boardHeight),state.pieces)
+            newHoveredPiece = pieceFromXY(parseInt(x / squareLength), reverseNumber(parseInt(y / squareLength), boardHeight),state.pieces)
         }
         else{
-            hoveredPiece = pieceFromXY(parseInt(x / squareLength), parseInt(y / squareLength),state.pieces)
+            newHoveredPiece = pieceFromXY(parseInt(x / squareLength), parseInt(y / squareLength),state.pieces)
+        }
+        
+        if (newHoveredPiece !== hoveredPiece) {
+            hoveredPiece = newHoveredPiece;
+            
+            // If playing a local game, we must manually update the highlights on mouse move
+            if (localState) {
+                closeLights(state.board, 'red');
+                closeLights(state.board, 'grey');
+                if (hoveredPiece && hoveredPiece.color != IAM && IAM != undefined) {
+                    lightBoardFE(hoveredPiece, state, 'red', 'grey');
+                }
+            }
         }
     })
 
-    if(localStorage.getItem('me')){
-        socket.emit('joinRoom',{roomId:getParams(window.location.href).roomId, mode:getParams(window.location.href).mode, id:localStorage.getItem('me')});
+    if (getParams(window.location.href).roomId && getParams(window.location.href).roomId.startsWith('bot_')) {
+        const roomId = getParams(window.location.href).roomId;
+        
+        // Notify server that a fake game was joined so it can be replaced
+        fetch('/join-fake-game', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ roomId: roomId })
+        });
+        
+        const botId = roomId.split('_')[1];
+        fetch('/bots').then(res => res.json()).then(bots => {
+            const bot = bots.find(b => b.id === botId);
+            if (bot) {
+                setupLocalBotGame(bot, roomId);
+            }
+        });
+    } else {
+        if(localStorage.getItem('me')){
+            socket.emit('joinRoom',{roomId:getParams(window.location.href).roomId, mode:getParams(window.location.href).mode, id:localStorage.getItem('me')});
 
-    }
-    else{
-        localStorage.setItem('me', Math.random()+'')
-        socket.emit('joinRoom',{roomId:getParams(window.location.href).roomId, mode:getParams(window.location.href).mode, id:localStorage.getItem('me')});
+        }
+        else{
+            localStorage.setItem('me', Math.random()+'')
+            socket.emit('joinRoom',{roomId:getParams(window.location.href).roomId, mode:getParams(window.location.href).mode, id:localStorage.getItem('me')});
 
+        }
     }
     
     function drawLoop() {

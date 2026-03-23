@@ -73,6 +73,92 @@ app.get('/bots', async (req, res) => {
     }
 });
 
+let fakeBotGames = [];
+
+const realisticGameNames = [
+    "Chess 2 JOIN",
+    "Races Chess",
+    "Chess2",
+    "play me",
+    "new game",
+    "chess two game",
+    "fast game",
+    "1v1",
+    "test",
+    "anyone?",
+    "Chess 2",
+    "let's play",
+    "join up",
+    "good players only",
+    "noobs welcome",
+    "casual",
+    "quick match",
+    "fun times",
+    "chess time",
+    "epic battle"
+];
+
+async function generateFakeBotGames() {
+    try {
+        const bots = await Bot.find().sort({ score: -1 }).limit(100);
+        if(bots && bots.length > 0) {
+            const currentCount = fakeBotGames.length;
+            const targetCount = Math.floor(Math.random() * 4) + 2; // Target 2 to 5 games
+            
+            if (currentCount < targetCount) {
+                let added = false;
+                for(let i=0; i < (targetCount - currentCount); i++){
+                    const randomBot = bots[Math.floor(Math.random() * bots.length)];
+                    const randomName = realisticGameNames[Math.floor(Math.random() * realisticGameNames.length)];
+                    fakeBotGames.push({
+                        roomId: `bot_${randomBot.id}_${randomName.replace(/ /g, '_')}_${Date.now()}_${i}`,
+                        displayName: randomName,
+                        mode: 'Chess 2',
+                        players: [{}] // 1 player visually
+                    });
+                    added = true;
+                }
+                if (added && io) {
+                    io.emit('rooms', [...lobby.games, ...fakeBotGames]);
+                }
+            } else if (currentCount > targetCount) {
+                // Occasionally remove a fake game if we have too many, simulating someone joining it
+                if (Math.random() > 0.5) {
+                    fakeBotGames.pop();
+                    if (io) {
+                        io.emit('rooms', [...lobby.games, ...fakeBotGames]);
+                    }
+                }
+            }
+        }
+    } catch(err) {
+        console.error("Error generating fake bot games", err);
+    }
+}
+
+// Generate initially and maintain continuously
+setTimeout(generateFakeBotGames, 2000);
+setInterval(generateFakeBotGames, 15000); // Check and adjust every 15 seconds
+
+app.get('/ping', (req, res) => {
+    res.status(200).send("pong");
+});
+
+app.post('/join-fake-game', (req, res) => {
+    const roomId = req.body.roomId;
+    if (!roomId) return res.status(400).send("No roomId");
+    
+    const index = fakeBotGames.findIndex(g => g.roomId === roomId);
+    if (index !== -1) {
+        fakeBotGames.splice(index, 1);
+        io.emit('rooms', [...lobby.games, ...fakeBotGames]);
+        
+        // Add a new one after a few seconds to replace the taken one quickly
+        setTimeout(generateFakeBotGames, Math.floor(Math.random() * 5000) + 3000);
+    }
+    res.status(200).send("OK");
+});
+
 app.post('/bots', async (req, res) => {
     try {
         const bot = new Bot(req.body);
@@ -396,7 +482,7 @@ let lobby = newG({properties:{
         return false;
     },
     exitFunction: function(state,playerRef){
-        io.emit(lobby.games)
+        io.emit('rooms', [...lobby.games, ...fakeBotGames]);
         if(state.white == playerRef){
             state.won = 'black'
         }
@@ -405,7 +491,7 @@ let lobby = newG({properties:{
         }
     },
     connectFunction: function (state, playerRef,roomData) {
-        io.emit(lobby.games)
+        io.emit('rooms', [...lobby.games, ...fakeBotGames]);
         if(!roomData.mode){
             roomData.mode = 'raceChoiceChess'
         }
@@ -478,13 +564,19 @@ let lobby = newG({properties:{
 io:io,
 rooms:true})
 
+io.on('connection', (socket) => {
+    socket.on('roomUpdateNeeded', () => {
+        io.emit('rooms', [...lobby.games, ...fakeBotGames]);
+    });
+});
+
 app.get('/', function (req, res) {
 
     return res.status(200).sendFile(__dirname + '/lobby.html');
 });
 
 app.get('/allgames', function(req,res){
-    return res.status(200).json(lobby.games);
+    return res.status(200).json([...lobby.games, ...fakeBotGames]);
 })
 
 app.get('/play', function(req,res){

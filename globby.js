@@ -301,6 +301,7 @@ const newGame = function (properties) {
                 })
                 if (existing) {
                     existing.socketId = socketId
+                    existing.disconnectTime = undefined; // Clear the disconnect timer when they rejoin
                     this.players.push(existing);
                     this.disconnected.splice(this.disconnected.indexOf(existing), 1);
                 }
@@ -344,7 +345,9 @@ const newGame = function (properties) {
             }
             else {
                 if(!dontWrite){
-                    this.disconnected.push(this.players[this.players.indexOf(pl)])
+                    const disconnectedPlayer = this.players[this.players.indexOf(pl)];
+                    disconnectedPlayer.disconnectTime = Date.now();
+                    this.disconnected.push(disconnectedPlayer);
                 }
                 this.players.splice(this.players.indexOf(pl), 1);
             }
@@ -383,7 +386,18 @@ module.exports.newIOServer = function newServer(properties, io, hello, botConfig
     const helperFunctionDelay = function () {
         setTimeout(() => {
             lobby.games.forEach((game) => {
-                if (!game.players.length) {
+                // Check for disconnected players that have been gone for more than 10 seconds
+                for (let i = game.disconnected.length - 1; i >= 0; i--) {
+                    let dPlayer = game.disconnected[i];
+                    if (dPlayer.disconnectTime && (Date.now() - dPlayer.disconnectTime > 10000)) {
+                        // Drop the player permanently
+                        game.exit(dPlayer.socketId);
+                        game.disconnected.splice(i, 1);
+                        config.io.emit('roomUpdateNeeded');
+                    }
+                }
+
+                if (!game.players.length && !game.disconnected.length) {
                     lobby.games.splice(lobby.games.indexOf(game), 1)
                 }
                 else {
@@ -465,7 +479,18 @@ module.exports.newIOServerV2 = function newServer(config) {
     const helperFunctionDelay = function () {
         setTimeout(() => {
             lobby.games.forEach((game) => {
-                if (!game.players.length) {
+                // Check for disconnected players that have been gone for more than 10 seconds
+                for (let i = game.disconnected.length - 1; i >= 0; i--) {
+                    let dPlayer = game.disconnected[i];
+                    if (dPlayer.disconnectTime && (Date.now() - dPlayer.disconnectTime > 10000)) {
+                        // Drop the player permanently
+                        game.exit(dPlayer.socketId);
+                        game.disconnected.splice(i, 1);
+                        config.io.emit('roomUpdateNeeded');
+                    }
+                }
+
+                if (!game.players.length && !game.disconnected.length) {
                     lobby.games.splice(lobby.games.indexOf(game), 1)
                 }
                 else {
@@ -501,16 +526,16 @@ module.exports.newIOServerV2 = function newServer(config) {
                     socket.hello = id;
                 }
                 lobby.joinRoom(socket.id, data.roomId,data, id)
-                socket.broadcast.emit('rooms', lobby.games)
+                config.io.emit('roomUpdateNeeded');
             })
             socket.on('disconnect', () => {
-                lobby.disconnectGame(id,socket.hello)
-                socket.broadcast.emit('rooms', lobby.games)
+                lobby.disconnectGame(socket.id, socket.hello)
+                config.io.emit('roomUpdateNeeded');
 
             })
             socket.on('exit', () => {
-                lobby.exit(socket.id)
-                socket.broadcast.emit('rooms', lobby.games)
+                lobby.exit(socket.id, socket.hello)
+                config.io.emit('roomUpdateNeeded');
 
             })
             socket.on('move', (data) => {
