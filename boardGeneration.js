@@ -3628,16 +3628,53 @@ function testMate(state){
 async function customMap(state){
     state.pieces = [];
     state.board = [];
-    const resp = await fetch('/maps/'+state.customGameId);
+    const headers = window.Auth ? window.Auth.getAuthHeaders() : {};
+    const resp = await fetch('/maps/'+state.customGameId, { headers });
     let json;
 
     try{
+        if (!resp.ok) {
+            if (resp.status === 401 || resp.status === 403) {
+                if (window.Auth) window.Auth.showAuthModal();
+            }
+            throw new Error('Failed to fetch map');
+        }
         json = await resp.json()
     }
     catch(err){
         console.log(err, ' error4e')
+        return;
     }
     const thePieces = json.pieces.map((piece) => {
+        if (piece.isCustom) {
+            // Deep copy moves to avoid modifying the original definition
+            let adjustedMoves = JSON.parse(JSON.stringify(piece.customDef.moves));
+            
+            // If the piece is black, invert the Y axis for its moves
+            // so "forward" is relative to the player's side
+            if (piece.color === 'black') {
+                adjustedMoves = adjustedMoves.map(move => {
+                    if (move.y !== undefined) {
+                        move.y = -move.y;
+                    }
+                    if (move.offsetY !== undefined) {
+                        move.offsetY = -move.offsetY;
+                    }
+                    return move;
+                });
+            }
+
+            return {
+                x: piece.x,
+                y: piece.y,
+                color: piece.color,
+                moves: adjustedMoves,
+                name: piece.customDef.name,
+                icon: piece.color + piece.pieceType,
+                value: 3,
+                posValue: 2
+            };
+        }
         let pieceString = piece.pieceType.slice(0,-4).toLowerCase() + 'Factory'
         return window[pieceString](piece.color,piece.x,piece.y)
     })

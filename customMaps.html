@@ -380,12 +380,26 @@
         <div id="pagination" class="pagination"></div>
     </div>
 
+    <script src="/src/auth.js"></script>
     <script>
         const apiUrl = '/maps';
 
         function fetchMaps(page = 1) {
-            fetch(`${apiUrl}?page=${page}`)
-                .then(response => response.json())
+            if (!Auth.getToken()) {
+                Auth.showAuthModal();
+                return;
+            }
+
+            fetch(`${apiUrl}?page=${page}`, {
+                headers: Auth.getAuthHeaders()
+            })
+                .then(response => {
+                    if (response.status === 401 || response.status === 403) {
+                        Auth.showAuthModal();
+                        throw new Error('Unauthorized');
+                    }
+                    return response.json();
+                })
                 .then(data => {
                     const { maps, pageSize, pageNumber, pageCount, totalMapCount } = data;
                     const mapList = document.getElementById('mapList');

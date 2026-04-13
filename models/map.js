@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 
 const mapSchema = new mongoose.Schema({
     name:String,
+    authorId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     squares: [{
         light:Boolean,
         x:Number,
@@ -16,7 +20,11 @@ const mapSchema = new mongoose.Schema({
         // factory:String,
         pieceType:String,
         x:Number,
-        y:Number
+        y:Number,
+        isCustom:Boolean,
+        customDef:{
+            type: mongoose.Schema.Types.Mixed
+        }
     }]
 });
 

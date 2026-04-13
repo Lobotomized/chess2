@@ -290,7 +290,7 @@
             gap: 10px;
         }
 
-        #imageContainer {
+        #imageContainer, #customPiecesContainer {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 10px;
@@ -302,7 +302,7 @@
             border: 1px solid var(--board-dark);
         }
 
-        #imageContainer img {
+        #imageContainer img, #customPiecesContainer img {
             width: 100%;
             height: auto;
             cursor: pointer;
@@ -316,10 +316,35 @@
             background: rgba(255,255,255,0.8);
         }
 
-        #imageContainer img.selected {
+        #imageContainer img.selected, .custom-piece-wrapper.selected {
             background: var(--selected);
             box-shadow: 0 0 5px var(--piece-black);
             transform: scale(1.1);
+        }
+        
+        .custom-piece-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .custom-piece-wrapper:hover {
+            transform: scale(1.1);
+            background: rgba(255,255,255,0.8);
+        }
+
+        .custom-piece-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--board-dark);
+            text-align: center;
+            margin-bottom: 2px;
+            word-wrap: break-word;
+            max-width: 100%;
         }
 
         /* Scrollbar */
@@ -457,7 +482,8 @@
             <a href="/campaign"><img src="/static/lg/whiteHorse.png" class="icon"> Campaign</a>
             <a href="/pieces"><img src="/static/lg/whitePikeman.png" class="icon"> Pieces</a>
             <a href="/customMaps"><img src="/static/lg/whiteShroom.png" class="icon"> Custom Maps</a>
-            <a href="/create-board" class="active"><img src="/static/lg/whiteNorthernKing.png" class="icon"> Board Editor</a>
+            <a href="/create-board-upgraded" class="active"><img src="/static/lg/whiteNorthernKing.png" class="icon"> Board Editor Upgraded</a>
+            <a href="/create-board"><img src="/static/lg/whiteNorthernKing.png" class="icon"> Board Editor</a>
         </div>
     </nav>
     <script>
@@ -477,6 +503,7 @@
                 
                 <button id="createBoard"><img src="/static/lg/whiteKing.png" class="icon"> Settings Mode</button>
                 <button id="placePieces"><img src="/static/lg/blackKnight.png" class="icon"> Place Pieces</button>
+                <button id="createPieceModeBtn"><img src="/static/lg/whitePawn.png" class="icon"> Create Piece</button>
                 <button id="generateArray"><img src="/static/lg/whitePawn.png" class="icon"> Save Map</button>
                 <button id="generateJSON"><img src="/static/lg/blackQueen.png" class="icon"> Export JSON</button>
             </div>
@@ -509,13 +536,70 @@
                     <button id="showWhite">White</button>
                     <button id="showBlack">Black</button>
                 </div>
+                <div class="row-controls" style="margin-top: 10px;" id="pieceTypeToggleControls">
+                    <button id="showStandardPieces" class="active-mode">Standard</button>
+                    <button id="showCustomPieces" style="display: none;">Custom</button>
+                </div>
                 <div id="imageContainer"></div>
+                <div id="customPiecesContainer" style="display: none;" class="image-grid-container"></div>
+            </div>
+
+            <!-- Create Piece Panel (Toggled) -->
+            <div id="createPiecePanel" class="panel" style="display: none;">
+                <h2><img src="/static/lg/whitePawn.png" class="icon"> Create Piece</h2>
+                <input type="text" id="customPieceName" placeholder="Piece Name">
+                
+                <label>Select Image:</label>
+                <div id="customImageContainer" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; max-height: 150px; overflow-y: auto; margin-bottom: 10px; background: rgba(255,255,255,0.5); padding: 5px; border-radius: 4px; border: 1px solid var(--board-dark);">
+                    <!-- Images populated by JS -->
+                </div>
+                
+                <label>Add Move:</label>
+                <select id="moveType" style="width: 100%; padding: 8px; margin-bottom: 10px; background: var(--piece-white); border: 2px solid var(--board-dark); border-radius: 4px; font-family: 'Georgia', serif;">
+                    <option value="absolute">Absolute</option>
+                    <option value="blockable">Blockable</option>
+                    <option value="takeMove">Take Move</option>
+                </select>
+                
+                <div class="row-controls">
+                    <div>
+                        <label>X Offset:</label>
+                        <input type="number" id="moveX" value="0">
+                    </div>
+                    <div>
+                        <label>Y Offset:</label>
+                        <input type="number" id="moveY" value="0">
+                    </div>
+                </div>
+                
+                <div id="blockableOptions" style="display: none; margin-bottom: 10px;">
+                    <div style="margin-bottom: 5px;">
+                        <label style="display: inline; cursor: pointer;"><input type="checkbox" id="moveRepeat" checked> Repeat</label>
+                    </div>
+                    <div>
+                        <label>Limit (0 for no limit):</label>
+                        <input type="number" id="moveLimit" value="0" min="0">
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 10px;">
+                    <label style="display: inline; cursor: pointer;"><input type="checkbox" id="moveImpotent"> Impotent (Cannot take pieces)</label>
+                </div>
+                
+                <button id="addMoveBtn">Add Move</button>
+                
+                <label>Current Moves:</label>
+                <ul id="currentMovesList" style="max-height: 100px; overflow-y: auto; font-size: 14px; padding-left: 20px; background: rgba(255,255,255,0.5); border-radius: 4px;">
+                </ul>
+                
+                <button id="saveCustomPieceBtn" style="background: var(--highlight); color: var(--piece-white); margin-top: 10px;">Save Custom Piece</button>
             </div>
         </div>
 
         <!-- Board Area -->
         <div class="board-area">
             <div id="chessboard"></div>
+            <div id="previewBoard" style="display: none; border: 15px solid #4a3c31; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></div>
         </div>
     </div>
 
@@ -544,11 +628,30 @@
         const generateArrayButton = document.getElementById("generateArray");
         const generateJSONButton = document.getElementById("generateJSON");
         
-        
+        const previewBoard = document.getElementById("previewBoard");
+        const createPieceModeBtn = document.getElementById("createPieceModeBtn");
+        const createPiecePanel = document.getElementById("createPiecePanel");
+        const customImageContainer = document.getElementById("customImageContainer");
+        const customPieceName = document.getElementById("customPieceName");
+        const moveTypeSelect = document.getElementById("moveType");
+        const moveXInput = document.getElementById("moveX");
+        const moveYInput = document.getElementById("moveY");
+        const blockableOptions = document.getElementById("blockableOptions");
+        const moveRepeatCheckbox = document.getElementById("moveRepeat");
+        const moveLimitInput = document.getElementById("moveLimit");
+        const moveImpotentCheckbox = document.getElementById("moveImpotent");
+        const addMoveBtn = document.getElementById("addMoveBtn");
+        const currentMovesList = document.getElementById("currentMovesList");
+        const saveCustomPieceBtn = document.getElementById("saveCustomPieceBtn");
+        const customPiecesSubmenu = document.getElementById("customPiecesSubmenu");
+        const customPiecesContainer = document.getElementById("customPiecesContainer");
+
         let removeMode = false;
         let addMode = false;
         let selectedImage = null;
-        
+        let selectedCustomImage = null;
+        let customPieceMoves = [];
+        const customPieces = []; // Store custom pieces created by the user
         const piecesObjectArray = [];
         
         function generateChessboard(cols, rows) {
@@ -592,25 +695,35 @@
                     newImg.alt = selectedImage.alt;
         
                     let pieceColor = 'white';
-                    let lastPath = newImg.src.split('/').pop()
-        
-                    if(lastPath.includes('black')){
-                    pieceColor = 'black'
+                    // Determine color based on which color button was last clicked or image src
+                    if (selectedImage.src.includes('black')) {
+                        pieceColor = 'black';
                     }
+                    
                     // Clear existing content in the square and append the new image
                     square.innerHTML = '';
                     square.appendChild(newImg);
-                    let factoryString = newImg.alt;
                     
-                    factoryString = unitImages[newImg.alt].slice(0,-4);
-                    factoryString = factoryString.charAt(0).toLowerCase() + factoryString.slice(1) +`Factory('${pieceColor}'  , ${c},${r})`;
-                    piecesObjectArray.push({
-                    x:c,
-                    y:r,  
-                    color:pieceColor,
-                    pieceType:unitImages[newImg.alt],
-                    // factory:factoryString
-                    })
+                    if (selectedImage.dataset.customId) {
+                        // It's a custom piece
+                        const customPieceDef = customPieces.find(p => p.id === selectedImage.dataset.customId);
+                        piecesObjectArray.push({
+                            x: c,
+                            y: r,
+                            color: pieceColor,
+                            pieceType: unitImages[customPieceDef.imageName],
+                            isCustom: true,
+                            customDef: customPieceDef
+                        });
+                    } else {
+                        // Regular piece
+                        piecesObjectArray.push({
+                            x:c,
+                            y:r,  
+                            color:pieceColor,
+                            pieceType:unitImages[newImg.alt]
+                        });
+                    }
                 }
                 });
             }
@@ -682,6 +795,27 @@
                 }));
 
             const pieces = piecesObjectArray.map(p => {
+                if (p.isCustom) {
+                    let adjustedMoves = JSON.parse(JSON.stringify(p.customDef.moves));
+                    if (p.color === 'black') {
+                        adjustedMoves = adjustedMoves.map(move => {
+                            if (move.y !== undefined) move.y = -move.y;
+                            if (move.offsetY !== undefined) move.offsetY = -move.offsetY;
+                            return move;
+                        });
+                    }
+                    return {
+                        x: p.x,
+                        y: p.y,
+                        color: p.color,
+                        moves: adjustedMoves,
+                        name: p.customDef.name,
+                        icon: p.color + p.pieceType,
+                        value: 3,
+                        posValue: 2
+                    };
+                }
+                
                 const imageName = p.pieceType; 
                 const name = imageName.replace('.png', '');
                 const lowerName = name.charAt(0).toLowerCase() + name.slice(1);
@@ -808,7 +942,27 @@
         // Function to generate images in the container
         function generateImages(color) {
             imageContainer.innerHTML = ""; 
-        
+            if (customImageContainer.children.length === 0) {
+                // Populate custom image container only once
+                for (const unit in unitImages) {
+                    const img = document.createElement("img");
+                    img.src = '/static/white' + unitImages[unit];
+                    img.alt = unit;
+                    img.style.width = "100%";
+                    img.style.cursor = "pointer";
+                    img.style.padding = "2px";
+                    img.style.borderRadius = "4px";
+                    customImageContainer.appendChild(img);
+
+                    img.addEventListener("click", () => {
+                        if (selectedCustomImage) selectedCustomImage.style.background = "";
+                        selectedCustomImage = img;
+                        selectedCustomImage.style.background = "var(--selected)";
+                        updatePreviewBoard();
+                    });
+                }
+            }
+
             for (const unit in unitImages) {
                 const img = document.createElement("img");
                 img.src = '/static/'+color + unitImages[unit];
@@ -822,7 +976,9 @@
                 }else{
                     // Deselect the previously selected image (if any)
                     if (selectedImage) {
-                    selectedImage.classList.remove("selected");
+                        const prevWrapper = selectedImage.closest('.custom-piece-wrapper');
+                        if (prevWrapper) prevWrapper.classList.remove("selected");
+                        selectedImage.classList.remove("selected");
                     }
         
                     // Select the new image and store it in the variable
@@ -847,16 +1003,280 @@
             }
         }
         
+        // Create Piece logic
+        moveTypeSelect.addEventListener("change", (e) => {
+            if (moveTypeSelect.value === "blockable") {
+                blockableOptions.style.display = "block";
+            } else {
+                blockableOptions.style.display = "none";
+            }
+        });
+
+        addMoveBtn.addEventListener("click", () => {
+            const type = moveTypeSelect.value;
+            const x = parseInt(moveXInput.value, 10) || 0;
+            const y = parseInt(moveYInput.value, 10) || 0;
+            const impotent = moveImpotentCheckbox.checked;
+            
+            if (x === 0 && y === 0) {
+                alert("Move offset cannot be 0,0");
+                return;
+            }
+
+            let move = { type, x, y };
+            if (impotent) move.impotent = true;
+            
+            if (type === "blockable") {
+                move.repeat = moveRepeatCheckbox.checked;
+                const limit = parseInt(moveLimitInput.value, 10);
+                if (limit > 0) move.limit = limit;
+            }
+
+            customPieceMoves.push(move);
+            updateMovesList();
+            updatePreviewBoard();
+        });
+
+        function updateMovesList() {
+            currentMovesList.innerHTML = "";
+            customPieceMoves.forEach((move, index) => {
+                const li = document.createElement("li");
+                li.style.marginBottom = "5px";
+                let text = `${move.type}: x=${move.x}, y=${move.y}`;
+                if (move.type === "blockable") {
+                    text += ` (repeat: ${move.repeat}${move.limit ? `, limit: ${move.limit}` : ''})`;
+                }
+                if (move.impotent) {
+                    text += ` [Impotent]`;
+                }
+                li.textContent = text;
+                
+                const removeBtn = document.createElement("button");
+                removeBtn.textContent = "X";
+                removeBtn.style.padding = "2px 5px";
+                removeBtn.style.marginLeft = "10px";
+                removeBtn.style.background = "var(--threat)";
+                removeBtn.style.color = "white";
+                removeBtn.style.border = "none";
+                removeBtn.style.cursor = "pointer";
+                removeBtn.style.width = "auto";
+                removeBtn.style.display = "inline";
+                
+                removeBtn.addEventListener("click", () => {
+                    customPieceMoves.splice(index, 1);
+                    updateMovesList();
+                    updatePreviewBoard();
+                });
+                
+                li.appendChild(removeBtn);
+                currentMovesList.appendChild(li);
+            });
+        }
+
+        function generatePreviewBoard() {
+            previewBoard.innerHTML = "";
+            previewBoard.style.display = "grid";
+            previewBoard.style.gridTemplateColumns = `repeat(9, 1fr)`;
+            previewBoard.style.gridTemplateRows = `repeat(9, 1fr)`;
+            previewBoard.style.width = "540px"; // 9 * 60px
+            previewBoard.style.height = "540px";
+            
+            for (let r = 0; r < 9; r++) {
+                for (let c = 0; c < 9; c++) {
+                    const square = document.createElement("div");
+                    square.classList.add("square");
+                    square.classList.add((r + c) % 2 === 0 ? "white" : "black");
+                    square.dataset.x = c;
+                    square.dataset.y = r;
+                    previewBoard.appendChild(square);
+                    
+                    // Allow clicking on squares to add moves quickly
+                    square.addEventListener("click", () => {
+                        const dx = c - 4;
+                        const dy = r - 4;
+                        if (dx === 0 && dy === 0) return;
+                        
+                        moveXInput.value = dx;
+                        moveYInput.value = dy;
+                    });
+                }
+            }
+        }
+
+        function updatePreviewBoard() {
+            if (previewBoard.innerHTML === "") generatePreviewBoard();
+            
+            // Clear previous highlights and piece
+            Array.from(previewBoard.children).forEach(square => {
+                square.innerHTML = "";
+                square.style.boxShadow = "";
+                square.style.background = "";
+                // Restore original color
+                const r = parseInt(square.dataset.y);
+                const c = parseInt(square.dataset.x);
+                if ((r + c) % 2 === 0) {
+                    square.classList.add("white");
+                    square.classList.remove("black");
+                } else {
+                    square.classList.add("black");
+                    square.classList.remove("white");
+                }
+            });
+            
+            // Place piece in center
+            const centerSquare = previewBoard.children[4 * 9 + 4];
+            if (selectedCustomImage) {
+                const img = document.createElement("img");
+                img.src = selectedCustomImage.src;
+                img.alt = selectedCustomImage.alt;
+                centerSquare.appendChild(img);
+            }
+            
+            // Highlight moves
+            customPieceMoves.forEach(move => {
+                if (move.type === "absolute" || move.type === "takeMove") {
+                    const targetX = 4 + move.x;
+                    const targetY = 4 + move.y;
+                    if (targetX >= 0 && targetX < 9 && targetY >= 0 && targetY < 9) {
+                        const targetSquare = previewBoard.children[targetY * 9 + targetX];
+                        targetSquare.style.background = move.type === "takeMove" ? "rgba(229, 62, 62, 0.5)" : "rgba(130, 151, 105, 0.5)";
+                    }
+                } else if (move.type === "blockable") {
+                    let limit = move.limit || (move.repeat ? 9 : 1);
+                    let currX = 4 + move.x;
+                    let currY = 4 + move.y;
+                    let step = 1;
+                    
+                    while (currX >= 0 && currX < 9 && currY >= 0 && currY < 9 && step <= limit) {
+                        const targetSquare = previewBoard.children[currY * 9 + currX];
+                        targetSquare.style.background = "rgba(130, 151, 105, 0.5)";
+                        currX += move.x;
+                        currY += move.y;
+                        step++;
+                        if (move.repeat === false) break;
+                    }
+                }
+            });
+        }
+
+        createPieceModeBtn.addEventListener("click", () => {
+            menu.style.display = "none";
+            pieces.style.display = "none";
+            createPiecePanel.style.display = "block";
+            chessboard.style.display = "none";
+            previewBoard.style.display = "grid";
+            updatePreviewBoard();
+        });
+
+        saveCustomPieceBtn.addEventListener("click", () => {
+            const name = customPieceName.value.trim();
+            if (!name) {
+                alert("Please enter a name for your custom piece");
+                return;
+            }
+            if (!selectedCustomImage) {
+                alert("Please select an image for your custom piece");
+                return;
+            }
+            if (customPieceMoves.length === 0) {
+                alert("Please add at least one move");
+                return;
+            }
+
+            const customPiece = {
+                name: name,
+                imageName: selectedCustomImage.alt,
+                moves: JSON.parse(JSON.stringify(customPieceMoves)),
+                id: "custom_" + Date.now()
+            };
+
+            customPieces.push(customPiece);
+            updateCustomPiecesMenu();
+            
+            // Reset form
+            customPieceName.value = "";
+            customPieceMoves = [];
+            updateMovesList();
+            updatePreviewBoard();
+            alert(`Custom piece '${name}' saved! It is now available in the Place Pieces menu.`);
+        });
+
+        // Event listeners for piece type toggle
+        const showStandardPiecesBtn = document.getElementById("showStandardPieces");
+        const showCustomPiecesBtn = document.getElementById("showCustomPieces");
+        const pieceTypeToggleControls = document.getElementById("pieceTypeToggleControls");
+
+        showStandardPiecesBtn.addEventListener("click", () => {
+            showStandardPiecesBtn.classList.add("active-mode");
+            showCustomPiecesBtn.classList.remove("active-mode");
+            imageContainer.style.display = "grid";
+            customPiecesContainer.style.display = "none";
+        });
+
+        showCustomPiecesBtn.addEventListener("click", () => {
+            showCustomPiecesBtn.classList.add("active-mode");
+            showStandardPiecesBtn.classList.remove("active-mode");
+            imageContainer.style.display = "none";
+            customPiecesContainer.style.display = "grid";
+        });
+
+        function updateCustomPiecesMenu(color = 'white') {
+            if (customPieces.length > 0) {
+                showCustomPiecesBtn.style.display = "inline-block";
+            }
+            customPiecesContainer.innerHTML = "";
+            
+            customPieces.forEach(piece => {
+                const wrapper = document.createElement("div");
+                wrapper.classList.add("custom-piece-wrapper");
+                
+                const nameLabel = document.createElement("div");
+                nameLabel.classList.add("custom-piece-name");
+                nameLabel.textContent = piece.name;
+                
+                const img = document.createElement("img");
+                img.src = '/static/' + color + unitImages[piece.imageName];
+                img.alt = piece.name;
+                img.title = piece.name;
+                img.dataset.customId = piece.id;
+                
+                wrapper.appendChild(nameLabel);
+                wrapper.appendChild(img);
+                
+                wrapper.addEventListener("click", () => {
+                    if (selectedImage == img) {
+                        wrapper.classList.remove("selected");
+                        selectedImage = null;
+                    } else {
+                        // Find previously selected wrapper if it exists and remove class
+                        if (selectedImage) {
+                            const prevWrapper = selectedImage.closest('.custom-piece-wrapper');
+                            if (prevWrapper) prevWrapper.classList.remove("selected");
+                            selectedImage.classList.remove("selected"); // Remove from standard image if any
+                        }
+                        selectedImage = img;
+                        wrapper.classList.add("selected");
+                    }
+                });
+                
+                customPiecesContainer.appendChild(wrapper);
+            });
+        }
+        
         // Initial display (show white images)
         generateImages("white");
         
         // Event listeners for color buttons
-        showWhiteButton.addEventListener("click", () => generateImages("white"));
-        showBlackButton.addEventListener("click", () => generateImages("black"));
+        showWhiteButton.addEventListener("click", () => { generateImages("white"); updateCustomPiecesMenu("white"); });
+        showBlackButton.addEventListener("click", () => { generateImages("black"); updateCustomPiecesMenu("black"); });
         
         createBoardButton.addEventListener("click", () => {
             menu.style.display = "block";
             pieces.style.display = "none";
+            createPiecePanel.style.display = "none";
+            chessboard.style.display = "grid";
+            previewBoard.style.display = "none";
+            
             if(selectedImage) {
                 selectedImage.classList.remove("selected");
                 selectedImage = null;
@@ -870,6 +1290,10 @@
         placePiecesButton.addEventListener("click", () => {
             menu.style.display = "none";
             pieces.style.display = "flex";
+            createPiecePanel.style.display = "none";
+            chessboard.style.display = "grid";
+            previewBoard.style.display = "none";
+            
             addMode = false;
             removeMode = false;
             addSquaresButton.classList.remove("active-mode");

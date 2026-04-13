@@ -374,7 +374,6 @@
         }
 
         .map-cell.woods {
-            background: #a5d6a7; 
             color: #1b5e20;
         }
         
@@ -396,7 +395,6 @@
         }
 
         .map-cell.fountain {
-            background: #81d4fa;
             color: #01579b;
         }
         
@@ -410,7 +408,6 @@
         }
 
         .map-cell.desert {
-            background: #f4a460;
             color: #8b4513;
         }
 
@@ -564,7 +561,7 @@
     </dialog>
 
     <!-- Map Modal -->
-    <dialog id="mapDialog" style="max-width: 90vw; width: 90vw;">
+    <dialog id="mapDialog" style="max-width: 90vw; width: 90vw;" oncancel="event.preventDefault();">
         <h2>World Map</h2>
         <p>Drag to scroll</p>
         <div id="mapContainer" class="map-modal-content">
@@ -584,16 +581,16 @@
     </dialog>
 
     <!-- Game Won Modal -->
-    <dialog id="gameWonDialog">
+    <dialog id="gameWonDialog" oncancel="event.preventDefault(); closeWinScreen();">
         <h2>Victory!</h2>
         <img src="/static/youWin.jpg" alt="You Win" style="max-width: 100%; height: auto; margin-bottom: 15px; border-radius: 8px;">
         <p>Your army is victorious.</p>
         <p id="goldEarnedText" style="font-weight:bold; color:#e5b53e; font-size:24px; text-shadow: 1px 1px 0 #000;"></p>
-        <button onclick="document.getElementById('gameWonDialog').close(); showMapModal();" style="padding: 10px 20px; cursor: pointer;">Return to Map</button>
+        <button onclick="closeWinScreen()" style="padding: 10px 20px; cursor: pointer;">Return to Map</button>
     </dialog>
 
     <!-- Shop Modal -->
-    <dialog id="shopDialog">
+    <dialog id="shopDialog" oncancel="event.preventDefault(); document.getElementById('shopDialog').close(); showMapModal();">
         <h2>Mercenary Market</h2>
         <p>Current 🪙: <span id="playerGold" style="color:#e5b53e; font-weight:bold;">0</span></p>
         <div id="shopOptions" class="army-choice"></div>

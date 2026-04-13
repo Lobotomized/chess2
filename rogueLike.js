@@ -162,6 +162,31 @@ function updateGoldDisplay() {
 
 // Initialize Game
 function initRogueGame() {
+    // Bind cancel events to dialogs so Escape key behaves correctly
+    const mapDialog = document.getElementById('mapDialog');
+    if (mapDialog) {
+        mapDialog.addEventListener('cancel', (e) => {
+            e.preventDefault(); // Prevent closing the map
+        });
+    }
+
+    const winDialog = document.getElementById('gameWonDialog');
+    if (winDialog) {
+        winDialog.addEventListener('cancel', (e) => {
+            e.preventDefault();
+            closeWinScreen(); // Close and route to map
+        });
+    }
+
+    const shopDialog = document.getElementById('shopDialog');
+    if (shopDialog) {
+        shopDialog.addEventListener('cancel', (e) => {
+            e.preventDefault();
+            shopDialog.close();
+            if (typeof showMapModal === 'function') showMapModal();
+        });
+    }
+
     hotseatGame = getSinglePlayerGame();
     hotseatGame.join('white', 'white');
     hotseatGame.join('black', 'black');
@@ -230,12 +255,9 @@ function loadGame() {
                  // Shop was open or pending
                  // We should reopen the shop
                  showShopModal(true); // Pass true to indicate restoring
-            } else if (rogueState.showWinScreen) {
-                 // Show win screen if it was active
-                 // We need to recalculate gold earned for display? Or store it?
-                 // Let's assume standard calculation or generic message.
-                 // "Your army is victorious."
-                 const goldEarned = Math.floor(10 + rogueState.level * 2); // Re-calc for display
+            } else if (parsed.showWinScreen && !parsed.gameActive) {
+                 // Show win screen if it was active AND game is not active
+                 const goldEarned = rogueState.currentRewardContent || 0; // Re-calc for display
                  const goldText = document.getElementById('goldEarnedText');
                  if(goldText) goldText.innerText = `+${goldEarned} Gold`;
                  
@@ -246,13 +268,24 @@ function loadGame() {
                  if (rogueState.savedBoard && rogueState.savedBoard.pieces && rogueState.savedBoard.pieces.length > 0) {
                     restoreBoard(rogueState.savedBoard);
                  }
-            } else if (rogueState.savedBoard && rogueState.savedBoard.pieces && rogueState.savedBoard.pieces.length > 0) {
+            } else if (rogueState.savedBoard && rogueState.savedBoard.pieces && rogueState.savedBoard.pieces.length > 0 && parsed.gameActive) {
                 restoreBoard(rogueState.savedBoard);
-                rogueState.gameActive = true;
+                // rogueState.gameActive is already true
             } else {
-                // Re-setup board with saved rosters
-                setupBoard();
-                rogueState.gameActive = true;
+                // Not in battle, show map
+                // First call showMapModal which does all the drawing and initialization
+                if (typeof showMapModal === 'function') {
+                    showMapModal();
+                } else {
+                    const mapDialog = document.getElementById('mapDialog');
+                    if (mapDialog) mapDialog.showModal();
+                }
+                
+                // Clear any stray win screen flags
+                rogueState.showWinScreen = false;
+                
+                // Set gameActive to false since we're just on the map
+                rogueState.gameActive = false;
             }
 
             // rogueState.gameActive = true; // Moved inside conditions
@@ -331,6 +364,9 @@ function saveProgress() {
             won: hotseatGame.state.won,
             message: hotseatGame.state.message
         };
+    } else if (!rogueState.gameActive) {
+        // If game is not active, ensure we don't save a broken board state
+        rogueState.savedBoard = null;
     }
     
     // Explicitly include gold and food in the object being saved
@@ -447,7 +483,15 @@ function aniLoop() {
 }
 
 function ani() {
-    if (!hotseatGame) return;
+    if (!hotseatGame || (typeof rogueState !== 'undefined' && !rogueState.gameActive)) {
+        // Clear canvas if we are skipping animation to prevent ghost images
+        const canvas = document.getElementById('canvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+        return;
+    }
     // Use direct state reference to persist animation properties
     animate(hotseatGame.state);
 }
@@ -1465,7 +1509,7 @@ function showStartModal() {
     }
 }
 
-function showReorderModal(army, onConfirm) {
+function showReorderModal(army, onConfirm, forceConfirmText = false) {
     const modal = document.getElementById('reorderDialog');
     const frontContainer = document.getElementById('reorderFrontline');
     const backContainer = document.getElementById('reorderBackline');
@@ -1474,7 +1518,11 @@ function showReorderModal(army, onConfirm) {
     const deleteBtn = document.getElementById('deleteReserveBtn');
 
     if(confirmBtn) {
-        confirmBtn.innerText = onConfirm ? "Begin Journey" : "Confirm Army";
+        if (forceConfirmText) {
+            confirmBtn.innerText = "Confirm Army";
+        } else {
+            confirmBtn.innerText = onConfirm ? "Begin Journey" : "Confirm Army";
+        }
     }
     
     frontContainer.innerHTML = '';
@@ -2176,6 +2224,15 @@ function checkGameOver(state) {
     }
 }
 
+function closeWinScreen() {
+    const modal = document.getElementById('gameWonDialog');
+    if (modal) modal.close();
+    rogueState.showWinScreen = false;
+    saveProgress();
+    if (typeof showMapModal === 'function') {
+        showMapModal();
+    }
+}
 
 // --- Interaction / Game Loop (Adapted) ---
 

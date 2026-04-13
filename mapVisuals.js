@@ -3,9 +3,18 @@
 
 // --- Map Modal ---
 function showMapModal() {
+    // Clear the game canvas so we don't see a "ghost" game behind the modal
+    const canvas = document.getElementById('canvas');
+    if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
     if (typeof grandMap === 'undefined') return;
     
     const modal = document.getElementById('mapDialog');
+    if (!modal) return;
+    
     const grid = document.getElementById('mapGrid');
     const container = document.getElementById('mapContainer');
     
@@ -32,7 +41,7 @@ function showMapModal() {
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
-            transition: all 0.2s ease-out;
+            transition: all 0.4s ease-out;
             border-radius: 0px;
             overflow: hidden;
             box-shadow: 
@@ -43,17 +52,108 @@ function showMapModal() {
             padding: 0px;
             box-sizing: border-box;
         }
-        .map-cell:hover {
-            filter: brightness(1.2) saturate(1.3);
-            /* Keep base shadow + add gold ring. Remove z-index popping or keep it low. */
-            box-shadow: 
-                0 0 0 3px #ffd700,
-                0 15px 25px rgba(0,0,0,0.4), 
-                inset 0 0 50px rgba(0,0,0,0.1),
-                inset 0 2px 0 rgba(255,255,255,0.4);
-            z-index: 10;
-            border-color: #ffd700;
+        
+        /* The Fire Effect Container */
+        .map-cell .fire-container {
+            position: absolute;
+            top: 25px; /* Shift to top right */
+            right: 25px; /* Shift to top right */
+            width: 40px; /* Make the container much smaller */
+            height: 40px;
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.3s ease-in;
+            mix-blend-mode: screen;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
+
+        /* Base Glow */
+        .map-cell .fire-container::before {
+            content: '';
+            position: absolute;
+            width: 0px;
+            height: 0px;
+            background: radial-gradient(circle, rgba(255, 140, 0, 0.7) 0%, rgba(255, 69, 0, 0.4) 30%, rgba(139, 0, 0, 0.2) 60%, rgba(0, 0, 0, 0) 80%);
+            border-radius: 50%;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 0 20px 10px rgba(255, 69, 0, 0.4);
+        }
+
+        /* Inner intense flame / SVG Filter Fire */
+        .map-cell .fire-container::after {
+            content: '';
+            position: absolute;
+            width: 0px;
+            height: 0px;
+            /* Create a complex gradient that mimics flames */
+            background: 
+                radial-gradient(ellipse at 50% 100%, rgba(255, 255, 255, 0.9) 0%, rgba(255, 200, 50, 0.8) 20%, rgba(255, 100, 0, 0.6) 40%, rgba(200, 0, 0, 0.4) 60%, transparent 80%),
+                radial-gradient(circle at 40% 80%, rgba(255, 150, 0, 0.5) 0%, transparent 40%),
+                radial-gradient(circle at 60% 70%, rgba(255, 100, 0, 0.5) 0%, transparent 40%);
+            border-radius: 50% 50% 20% 20% / 60% 60% 30% 30%;
+            transition: all 0.4s ease-out;
+            transform-origin: bottom center;
+            /* We will use a CSS filter to create a wavy distortion for the fire */
+            filter: blur(1px) contrast(2);
+        }
+
+        .map-cell:hover {
+            filter: brightness(1.1) saturate(1.15);
+            box-shadow: 
+                0 0 0 2px rgba(255, 140, 0, 0.6),
+                0 8px 15px rgba(0,0,0,0.5), 
+                inset 0 0 50px rgba(255, 69, 0, 0.3);
+            z-index: 10;
+            border-color: rgba(255, 140, 0, 0.9);
+        }
+
+        .map-cell:hover .fire-container {
+            opacity: 1;
+        }
+
+        .map-cell:hover .fire-container::before {
+            width: 60px; /* Scaled down glow */
+            height: 60px;
+            animation: fireGlow 1.5s infinite alternate ease-in-out;
+        }
+
+        .map-cell:hover .fire-container::after {
+            width: 25px; /* Scaled down flame */
+            height: 40px; 
+            margin-top: -5px; 
+            animation: realFire 0.8s infinite alternate ease-in-out;
+        }
+        
+        @keyframes fireGlow {
+            0% { transform: scale(0.95); opacity: 0.6; filter: hue-rotate(-5deg); }
+            50% { transform: scale(1.02); opacity: 0.8; filter: hue-rotate(2deg); }
+            100% { transform: scale(0.98); opacity: 0.7; filter: hue-rotate(-2deg); }
+        }
+
+        @keyframes realFire {
+            0% { 
+                transform: scale(0.9) scaleY(0.9) skewX(-2deg); 
+                opacity: 0.85; 
+                background-position: 0% 0%;
+            }
+            33% {
+                transform: scale(1.0) scaleY(1.05) skewX(3deg); 
+                opacity: 0.95; 
+            }
+            66% {
+                transform: scale(0.95) scaleY(0.95) skewX(-1deg); 
+                opacity: 0.9; 
+            }
+            100% { 
+                transform: scale(1.05) scaleY(1.1) skewX(2deg); 
+                opacity: 1; 
+                background-position: 5% 5%;
+            }
+        }
+        
         .map-cell.current {
             border-color: #ffd700;
             box-shadow: 0 0 30px #ffd700, inset 0 0 20px #ffd700;
@@ -62,11 +162,11 @@ function showMapModal() {
             border-width: 1px;
         }
         .map-cell.current:hover {
-            filter: brightness(1.3) saturate(1.5);
+            filter: brightness(1.4) saturate(1.6);
             box-shadow: 
-                0 0 0 4px #ffd700,
-                0 0 40px #ffd700,
-                inset 0 0 40px #ffd700;
+                0 0 0 4px #ff8c00,
+                0 0 50px rgba(255, 140, 0, 0.8),
+                inset 0 0 50px rgba(255, 140, 0, 0.6);
         }
         
         /* Texture Overlay for all cells */
@@ -114,30 +214,19 @@ function showMapModal() {
         .map-cell.woods { 
             background-color: #0d3d0d;
             border-color: #0a2d0a;
-            /* Ultra-detailed SVG forest with multiple layers, realistic tree shapes, undergrowth, and natural lighting */
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cdefs%3E%3C!-- Complex radial gradients for different tree types --%3E%3CradialGradient id='oakCanopy' cx='45%25' cy='35%25' r='65%25'%3E%3Cstop offset='0%25' stop-color='%23a8e4a0'/%3E%3Cstop offset='25%25' stop-color='%2378c878'/%3E%3Cstop offset='50%25' stop-color='%234a7c4a'/%3E%3Cstop offset='75%25' stop-color='%232d5a2d'/%3E%3Cstop offset='100%25' stop-color='%231b3e1b'/%3E%3C/radialGradient%3E%3CradialGradient id='pineCanopy' cx='50%25' cy='30%25' r='70%25'%3E%3Cstop offset='0%25' stop-color='%2388c878'/%3E%3Cstop offset='30%25' stop-color='%2356a556'/%3E%3Cstop offset='60%25' stop-color='%233d7c3d'/%3E%3Cstop offset='100%25' stop-color='%231a4a1a'/%3E%3C/radialGradient%3E%3CradialGradient id='birchCanopy' cx='40%25' cy='40%25' r='60%25'%3E%3Cstop offset='0%25' stop-color='%23b8e8b0'/%3E%3Cstop offset='40%25' stop-color='%2390c090'/%3E%3Cstop offset='100%25' stop-color='%234a6c4a'/%3E%3C/radialGradient%3E%3ClinearGradient id='treeTrunk' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23a67c52'/%3E%3Cstop offset='50%25' stop-color='%237a5a3a'/%3E%3Cstop offset='100%25' stop-color='%235a3a1a'/%3E%3C/linearGradient%3E%3CradialGradient id='forestFloor' cx='50%25' cy='50%25' r='50%25'%3E%3Cstop offset='0%25' stop-color='%233a5a3a'/%3E%3Cstop offset='100%25' stop-color='%231a3a1a'/%3E%3C/radialGradient%3E%3C!-- Enhanced shadow filter --%3E%3Cfilter id='forestShadow' x='-30%25' y='-30%25' width='160%25' height='160%25'%3E%3CfeDropShadow dx='6' dy='8' stdDeviation='4' flood-color='%23000' flood-opacity='0.5'/%3E%3CfeGaussianBlur stdDeviation='1'/%3E%3C/filter%3E%3Cfilter id='softBlur'%3E%3CfeGaussianBlur stdDeviation='0.5'/%3E%3C/filter%3E%3C/defs%3E%3Crect width='100%25' height='100%25' fill='url(%23forestFloor)'/%3E%3Cg filter='url(%23forestShadow)'%3E%3C!-- Background Layer: Distant trees --%3E%3Cpath d='M30 25 C25 15, 35 5, 40 15 C45 5, 55 15, 50 25 C55 35, 45 45, 40 35 C35 45, 25 35, 30 25 Z' fill='%232a4a2a' opacity='0.6'/%3E%3Cpath d='M80 20 C75 10, 85 0, 90 10 C95 0, 105 10, 100 20 C105 30, 95 40, 90 30 C85 40, 75 30, 80 20 Z' fill='%232a4a2a' opacity='0.5'/%3E%3Cpath d='M160 15 C155 5, 165 -5, 170 5 C175 -5, 185 5, 180 15 C185 25, 175 35, 170 25 C165 35, 155 25, 160 15 Z' fill='%232a4a2a' opacity='0.4'/%3E%3C!-- Mid Layer: Large Oak trees with detailed canopies --%3E%3Cpath d='M60 60 C50 40, 70 20, 80 40 C90 20, 110 40, 100 60 C110 80, 90 100, 80 80 C70 100, 50 80, 60 60 Z' fill='url(%23oakCanopy)'/%3E%3Crect x='75' y='80' width='8' height='25' fill='url(%23treeTrunk)' rx='2'/%3E%3Cpath d='M140 55 C130 35, 150 15, 160 35 C170 15, 190 35, 180 55 C190 75, 170 95, 160 75 C150 95, 130 75, 140 55 Z' fill='url(%23oakCanopy)' opacity='0.9'/%3E%3Crect x='155' y='75' width='8' height='25' fill='url(%23treeTrunk)' rx='2'/%3E%3Cpath d='M200 65 C190 45, 210 25, 220 45 C230 25, 250 45, 240 65 C250 85, 230 105, 220 85 C210 105, 190 85, 200 65 Z' fill='url(%23oakCanopy)' opacity='0.8'/%3E%3Crect x='215' y='85' width='8' height='25' fill='url(%23treeTrunk)' rx='2'/%3E%3C!-- Pine Layer: Tall conifers with triangular shapes --%3E%3Cpath d='M40 30 L35 15 L45 15 L50 30 L55 50 L25 50 Z' fill='url(%23pineCanopy)'/%3E%3Crect x='37' y='50' width='6' height='20' fill='url(%23treeTrunk)' rx='1'/%3E%3Cpath d='M120 25 L115 5 L125 5 L130 25 L135 55 L105 55 Z' fill='url(%23pineCanopy)' opacity='0.9'/%3E%3Crect x='117' y='55' width='6' height='25' fill='url(%23treeTrunk)' rx='1'/%3E%3Cpath d='M25 85 L20 60 L30 60 L35 85 L40 120 L10 120 Z' fill='url(%23pineCanopy)' opacity='0.8'/%3E%3Crect x='22' y='120' width='6' height='20' fill='url(%23treeTrunk)' rx='1'/%3E%3Cpath d='M170 90 L165 65 L175 65 L180 90 L185 125 L155 125 Z' fill='url(%23pineCanopy)' opacity='0.7'/%3E%3Crect x='167' y='125' width='6' height='20' fill='url(%23treeTrunk)' rx='1'/%3E%3C!-- Birch Layer: White bark trees --%3E%3Cpath d='M95 70 C90 50, 100 30, 105 50 C110 30, 120 50, 115 70 C120 90, 110 110, 105 90 C100 110, 90 90, 95 70 Z' fill='url(%23birchCanopy)' opacity='0.8'/%3E%3Crect x='102' y='90' width='6' height='20' fill='%23f5f5f5' rx='1'/%3E%3Crect x='103' y='92' width='2' height='16' fill='%23333' rx='0.5'/%3E%3Cpath d='M185 75 C180 55, 190 35, 195 55 C200 35, 210 55, 205 75 C210 95, 200 115, 195 95 C190 115, 180 95, 185 75 Z' fill='url(%23birchCanopy)' opacity='0.7'/%3E%3Crect x='192' y='95' width='6' height='20' fill='%23f5f5f5' rx='1'/%3E%3Crect x='193' y='97' width='2' height='16' fill='%23333' rx='0.5'/%3E%3C!-- Undergrowth Layer: Bushes and small plants --%3E%3Ccircle cx='35' cy='135' r='8' fill='%234a7c4a' opacity='0.8'/%3E%3Ccircle cx='55' cy='140' r='6' fill='%23568c56' opacity='0.7'/%3E%3Ccircle cx='75' cy='145' r='7' fill='%234a7c4a' opacity='0.8'/%3E%3Ccircle cx='125' cy='150' r='9' fill='%23568c56' opacity='0.7'/%3E%3Ccircle cx='145' cy='135' r='5' fill='%234a7c4a' opacity='0.8'/%3E%3Ccircle cx='165' cy='145' r='8' fill='%23568c56' opacity='0.7'/%3E%3Ccircle cx='195' cy='140' r='6' fill='%234a7c4a' opacity='0.8'/%3E%3Ccircle cx='215' cy='150' r='7' fill='%23568c56' opacity='0.7'/%3E%3C!-- Forest Floor Details: Fallen leaves and small plants --%3E%3Cpath d='M20 160 C18 158, 22 156, 24 158 C26 156, 30 158, 28 160 C30 162, 26 164, 24 162 C22 164, 18 162, 20 160 Z' fill='%23d4a574' opacity='0.6'/%3E%3Cpath d='M45 165 C43 163, 47 161, 49 163 C51 161, 55 163, 53 165 C55 167, 51 169, 49 167 C47 169, 43 167, 45 165 Z' fill='%23c49464' opacity='0.5'/%3E%3Cpath d='M85 170 C83 168, 87 166, 89 168 C91 166, 95 168, 93 170 C95 172, 91 174, 89 172 C87 174, 83 172, 85 170 Z' fill='%23d4a574' opacity='0.6'/%3E%3Cpath d='M105 175 C103 173, 107 171, 109 173 C111 171, 115 173, 113 175 C115 177, 111 179, 109 177 C107 179, 103 177, 105 175 Z' fill='%23c49464' opacity='0.5'/%3E%3Cpath d='M135 180 C133 178, 137 176, 139 178 C141 176, 145 178, 143 180 C145 182, 141 184, 139 182 C137 184, 133 182, 135 180 Z' fill='%23d4a574' opacity='0.6'/%3E%3Cpath d='M165 185 C163 183, 167 181, 169 183 C171 181, 175 183, 173 185 C175 187, 171 189, 169 187 C167 189, 163 187, 165 185 Z' fill='%23c49464' opacity='0.5'/%3E%3Cpath d='M195 190 C193 188, 197 186, 199 188 C201 186, 205 188, 203 190 C205 192, 201 194, 199 192 C197 194, 193 192, 195 190 Z' fill='%23d4a574' opacity='0.6'/%3E%3Cpath d='M220 195 C218 193, 222 191, 224 193 C226 191, 230 193, 228 195 C230 197, 226 199, 224 197 C222 199, 218 197, 220 195 Z' fill='%23c49464' opacity='0.5'/%3E%3C!-- Additional scattered trees for density --%3E%3Cpath d='M15 100 C12 85, 18 70, 22 85 C26 70, 32 85, 28 100 C32 115, 26 130, 22 115 C18 130, 12 115, 15 100 Z' fill='%233a5a3a' opacity='0.4'/%3E%3Cpath d='M110 200 C107 185, 113 170, 117 185 C121 170, 127 185, 123 200 C127 215, 121 230, 117 215 C113 230, 107 215, 110 200 Z' fill='%233a5a3a' opacity='0.3'/%3E%3Cpath d='M230 110 C227 95, 233 80, 237 95 C241 80, 247 95, 243 110 C247 125, 241 140, 237 125 C233 140, 227 125, 230 110 Z' fill='%233a5a3a' opacity='0.35'/%3E%3C/g%3E%3C/svg%3E");
-            background-size: 240px 240px;
-              box-shadow: inset 0 0 60px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.3);
+            box-shadow: inset 0 0 60px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,0,0,0.3);
         }
 
         /* FOUNTAIN: Magical water ripples */
         .map-cell.fountain { 
             background-color: #0277bd;
             border-color: #01579b;
-            background-image: 
-                radial-gradient(circle at 50% 50%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 10%),
-                repeating-radial-gradient(circle at 50% 50%, rgba(255,255,255,0.2) 0, rgba(255,255,255,0.1) 5px, transparent 10px, transparent 20px),
-                linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.2) 100%);
         }
 
         /* DESERT: Hot dunes with grain */
         .map-cell.desert { 
             background-color: #f9a825;
             border-color: #bf360c;
-            background-image: 
-                repeating-linear-gradient(135deg, rgba(255,255,255,0.1) 0, rgba(255,255,255,0.1) 2px, transparent 4px, transparent 10px),
-                radial-gradient(ellipse at 70% 30%, rgba(255,255,255,0.4) 0%, transparent 20%),
-                linear-gradient(to bottom right, #fdd835, #f9a825, #ef6c00);
         }
 
         /* MARKET: Luxurious paved/tiled floor */
@@ -227,11 +316,33 @@ function showMapModal() {
                     cell.classList.add('cleared');
                 }
                 
-                if (node.board === 'Woods') cell.classList.add('woods');
-                else if (node.board === 'Fountain') cell.classList.add('fountain');
-                else if (node.board === 'Desert') cell.classList.add('desert');
+                if (node.board === 'Woods') {
+                    cell.classList.add('woods');
+                    const num = (node.x * 31 + node.y * 17) % 4 + 1;
+                    cell.style.backgroundImage = `url("/static/bigMap/forest${num}.png")`;
+                    cell.style.backgroundSize = 'cover';
+                    cell.style.backgroundPosition = 'center';
+                }
+                else if (node.board === 'Fountain') {
+                    cell.classList.add('fountain');
+                    cell.style.backgroundImage = `url("/static/bigMap/lake1.png")`;
+                    cell.style.backgroundSize = 'cover';
+                    cell.style.backgroundPosition = 'center';
+                }
+                else if (node.board === 'Desert') {
+                    cell.classList.add('desert');
+                    const num = (node.x * 31 + node.y * 17) % 4 + 1;
+                    cell.style.backgroundImage = `url("/static/bigMap/desert${num}.png")`;
+                    cell.style.backgroundSize = 'cover';
+                    cell.style.backgroundPosition = 'center';
+                }
                 else if (node.board === 'Market') cell.classList.add('market');
-                else cell.classList.add('standard');
+                else {
+                    cell.classList.add('standard');
+                    cell.style.backgroundImage = `url("/static/bigMap/plains1.png")`;
+                    cell.style.backgroundSize = 'cover';
+                    cell.style.backgroundPosition = 'center';
+                }
                 
                 // Determine Region if missing
                 let region = node.region;
@@ -301,15 +412,13 @@ function showMapModal() {
                 const desc = node.difficulty ? node.difficulty.description : '';
                 cell.title = `${region} Region\nDifficulty: ${diffName} (Power: ${node.enemyPower})\nReward Cap: ${node.rewardCap}\n${desc}`;
 
-                let contentHtml = `<div style="position:relative; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding: 10px; z-index: 2;">`;
+                let contentHtml = `<div class="fire-container"></div>
+                <div style="position:relative; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding: 10px; z-index: 2;">`;
                 
                 // Main Icon
                 if (isCurrent) {
                     // Player: Keep centered and prominent
                     contentHtml += `<div class="map-cell-icon" style="flex-grow:1; display:flex; align-items:center; justify-content:center; width:100%; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); transform: scale(1.0);">${icon}</div>`;
-                } else {
-                    // Others (Race/Enemies): Small, Top-Right Corner
-                    contentHtml += `<div class="map-cell-icon" style="position:absolute; top:8px; right:8px; width:60px; height:60px; display:flex; align-items:center; justify-content:center; filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6)); z-index:10; font-size:30px;">${icon}</div>`;
                 }
                 
                 // Rewards Display
@@ -355,7 +464,6 @@ function showMapModal() {
                      contentHtml += `
                      <div style="margin-top:auto; display:flex; flex-direction:column; align-items:center; width:100%; pointer-events:none;">
                         ${rewardsHtml}
-                        <div class="map-cell-level" style="font-size:14px; font-weight:bold; background:linear-gradient(180deg, #444, #222); color:#ffd700; padding:4px 12px; border-radius:12px; border: 1px solid #666; box-shadow: 0 2px 4px rgba(0,0,0,0.4);">Lv ${node.enemyPower || '?'}</div>
                      </div>`;
                 }
                 
@@ -370,7 +478,24 @@ function showMapModal() {
                     // Ignore clicks on info buttons
                     if (e.target.closest('.reward-unit-icon')) return;
                     
-                    showMapCellPopup(node, grandMap);
+                    if (isCurrent) {
+                        // Close the map modal if it's open
+                        const mapDialog = document.getElementById('mapDialog');
+                        if (mapDialog) mapDialog.close();
+                        
+                        // Open the Reorder Army modal
+                        if (typeof showReorderModal === 'function' && typeof rogueState !== 'undefined') {
+                            // Pass a callback that just re-opens the map dialog
+                            showReorderModal(rogueState.playerRoster, () => {
+                                const mDialog = document.getElementById('mapDialog');
+                                if (mDialog) mDialog.showModal();
+                            }, true); // The `true` parameter forces the button text to be "Confirm Army"
+                        } else {
+                            console.warn("Reorder army function or state not available.");
+                        }
+                    } else {
+                        showMapCellPopup(node, grandMap);
+                    }
                 };
             });
         });
@@ -395,6 +520,21 @@ function showMapModal() {
     
     modal.showModal();
     
+    // Center scroll on current node
+    setTimeout(() => {
+        const currentCell = grid.querySelector('.current');
+        if (currentCell && container) {
+            const scrollX = currentCell.offsetLeft - (container.clientWidth / 2) + (currentCell.offsetWidth / 2);
+            const scrollY = currentCell.offsetTop - (container.clientHeight / 2) + (currentCell.offsetHeight / 2);
+            
+            container.scrollTo({
+                left: scrollX,
+                top: scrollY,
+                behavior: 'smooth'
+            });
+        }
+    }, 50);
+
     // Drag to scroll logic
     let isDown = false;
     let startX, startY, scrollLeft, scrollTop;
@@ -453,14 +593,15 @@ function showMapCellPopup(node, grandMap) {
     popup.id = 'mapCellPopup';
     popup.style.cssText = `
         padding: 20px;
-        border: 2px solid #4e342e;
+        border: 4px solid #5d4037;
         border-radius: 8px;
-        background: #2b2b2b;
-        color: white;
+        background: #fdf6e3;
+        color: #4e342e;
         box-shadow: 0 0 20px rgba(0,0,0,0.8);
         text-align: center;
         min-width: 300px;
         z-index: 1000;
+        font-family: 'Georgia', serif;
     `;
     
     // Check if move is valid
@@ -474,48 +615,49 @@ function showMapCellPopup(node, grandMap) {
     const region = node.region || 'Unknown Region';
     
     let content = `
-        <h2 style="margin-top:0; color:#ffd700;">${region}</h2>
-        <h3 style="margin:5px 0;">${diffName}</h3>
-        <p>${node.difficulty ? node.difficulty.description : ''}</p>
-        <p><strong>Power Level:</strong> ${node.enemyPower}</p>
-        <div style="margin-top:20px; display:flex; justify-content:center; gap:10px;">
+        <h2 style="margin-top:0; color:#5d4037; border-bottom: 2px solid #5d4037; padding-bottom: 5px;">${region}</h2>
+        <h3 style="margin:10px 0; color: #8b4513;">${diffName}</h3>
+        <p style="font-size: 14px; font-style: italic;">${node.difficulty ? node.difficulty.description : ''}</p>
+        <div style="margin-top:20px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
     `;
     
     // Actions
     if (isCurrent) {
-        content += `<p style="color:#8bc34a;">You are here.</p>`;
+        content += `<p style="color:#8bc34a; width: 100%;">You are here.</p>`;
     } else if (node.cleared) {
-        content += `<p style="color:#aaa;">Area Cleared.</p>`;
+        content += `<p style="color:#aaa; width: 100%;">Area Cleared.</p>`;
     } else {
         // Attack Button
         const canAttack = isAdjacent;
-        const btnStyle = `padding: 10px 20px; font-weight:bold; cursor:pointer; border:none; border-radius:4px;`;
+        const btnStyle = `padding: 10px 20px; font-weight:bold; cursor:pointer; border:2px solid #4e342e; border-radius:4px; margin-bottom: 5px; font-family: 'Georgia', serif;`;
         
         if (node.board === 'Market') {
              if (canAttack) {
-                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#ffa000; color:black;">🛒 Enter Market</button>`;
+                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#ffe082; color:#ff6f00;">🛒 Enter Market</button>`;
              } else {
-                 content += `<button disabled style="${btnStyle} background:#555; color:#888; cursor:not-allowed;">🛒 Enter Market (Too Far)</button>`;
+                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;">🛒 Enter Market (Too Far)</button>`;
              }
         } else {
              if (canAttack) {
-                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#c62828; color:white;">⚔️ Attack</button>`;
+                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#ffcdd2; color:#c62828; border-color:#c62828;">⚔️ Attack</button>`;
              } else {
-                 content += `<button disabled style="${btnStyle} background:#555; color:#888; cursor:not-allowed;">⚔️ Attack (Too Far)</button>`;
+                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;">⚔️ Attack (Too Far)</button>`;
              }
         }
     }
     
     // Info Button (Rewards)
+    const infoBtnStyle = `padding: 10px 20px; font-weight:bold; cursor:pointer; border:2px solid #4e342e; border-radius:4px; margin-bottom: 5px; font-family: 'Georgia', serif;`;
     if (node.board === 'Market') {
-         content += `<button id="popupInfoBtn" style="padding: 10px 20px; font-weight:bold; cursor:pointer; border:none; border-radius:4px; background:#ffa000; color:black;">ℹ️ Market Info</button>`;
+         content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#fff9c4; color:#f57f17;">ℹ️ Market Info</button>`;
     } else {
-         content += `<button id="popupInfoBtn" style="padding: 10px 20px; font-weight:bold; cursor:pointer; border:none; border-radius:4px; background:#0277bd; color:white;">ℹ️ Rewards Info</button>`;
+         content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e1f5fe; color:#0277bd;">ℹ️ Rewards Info</button>`;
+         content += `<button id="popupEnemyBtn" style="${infoBtnStyle} background:#f3e5f5; color:#7b1fa2;">👁️ Scout Enemies</button>`;
     }
     
     content += `</div>
-        <div style="margin-top:15px;">
-            <button id="popupCloseBtn" style="padding: 5px 10px; background:none; border:1px solid #666; color:#ccc; border-radius:4px; cursor:pointer;">Close</button>
+        <div style="margin-top:15px; padding-top:15px; border-top: 1px solid rgba(93, 64, 55, 0.3);">
+            <button id="popupCloseBtn" style="padding: 8px 16px; background:#e6d5ac; border:2px solid #5d4037; color:#4e342e; border-radius:4px; cursor:pointer; font-weight:bold; font-family: 'Georgia', serif;">Close</button>
         </div>
     `;
     
@@ -589,34 +731,95 @@ function showMapCellPopup(node, grandMap) {
         
         if (node.board === 'Market') {
             rewardsText = `
-                <div style="text-align:left; background:#333; padding:10px; border-radius:4px;">
-                    <p>This is a <strong>Mercenary Market</strong>.</p>
+                <div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3);">
+                    <p style="margin-top:0;">This is a <strong>Mercenary Market</strong>.</p>
                     <p>You can spend your Gold 💰 here to hire new units for your army.</p>
-                    <p>It is a safe zone (no battle).</p>
+                    <p style="margin-bottom:0;">It is a safe zone (no battle).</p>
                 </div>
             `;
         } else if (node.rewards) {
             const r = node.rewards;
             rewardsText = `
-                <div style="text-align:left; background:#333; padding:10px; border-radius:4px;">
-                    <p><strong>Gold:</strong> ${r.gold} 💰</p>
+                <div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3);">
+                    <p style="margin-top:0;"><strong>Gold:</strong> ${r.gold} 💰</p>
                     <p><strong>Food:</strong> ${r.food} 🍎</p>
             `;
             
             if (r.pieces && r.pieces.length > 0) {
-                 rewardsText += `<p><strong>Unit:</strong> ${r.specificPiece ? r.specificPiece.replace('Factory','') : 'Unknown'} ♟️</p>`;
+                 rewardsText += `<p style="margin-bottom:0;"><strong>Unit:</strong> ${r.specificPiece ? r.specificPiece.replace('Factory','') : 'Unknown'} ♟️</p>`;
             }
             rewardsText += `</div>`;
         }
         
         popup.innerHTML = `
-            <h3 style="color:${node.board === 'Market' ? '#ffa000' : '#0277bd'};">${node.board === 'Market' ? 'Market Information' : 'Reward Information'}</h3>
+            <h3 style="color:${node.board === 'Market' ? '#f57f17' : '#0277bd'}; border-bottom: 2px solid ${node.board === 'Market' ? '#f57f17' : '#0277bd'}; padding-bottom: 5px;">${node.board === 'Market' ? 'Market Information' : 'Reward Information'}</h3>
             ${rewardsText}
-            <div style="margin-top:15px;">
-                <button onclick="document.getElementById('mapCellPopup').remove()" style="padding: 5px 10px; cursor:pointer;">Close</button>
+            <div style="margin-top:15px; padding-top:15px; border-top: 1px solid rgba(93, 64, 55, 0.3);">
+                <button onclick="document.getElementById('mapCellPopup').remove()" style="padding: 8px 16px; background:#e6d5ac; border:2px solid #5d4037; color:#4e342e; border-radius:4px; cursor:pointer; font-weight:bold; font-family: 'Georgia', serif;">Close</button>
             </div>
         `;
     };
+    
+    const enemyBtn = document.getElementById('popupEnemyBtn');
+    if (enemyBtn) {
+        enemyBtn.onclick = () => {
+            let enemiesHtml = `<div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3); max-height:300px; overflow-y:auto; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">`;
+            
+            // If the node doesn't have an army generated yet, generate it temporarily for preview
+            let previewArmy = node.army;
+            if (!previewArmy || previewArmy.length === 0) {
+                if (typeof generateRandomArmy === 'function') {
+                    const result = generateRandomArmy(node.enemyPower || 5, true, node.region);
+                    if (result && result.army) {
+                        previewArmy = result.army;
+                    }
+                }
+            }
+
+            if (previewArmy && previewArmy.length > 0) {
+                previewArmy.forEach(piece => {
+                    // Try to get icon
+                    let iconUrl = '';
+                    try {
+                        const p = window[piece]('black', 0, 0);
+                        if (p && p.icon) {
+                            iconUrl = `/static/${p.icon}`;
+                        }
+                    } catch(e) {
+                        console.warn('Could not load piece for enemy preview:', piece);
+                    }
+                    
+                    const name = piece.replace('Factory', '');
+                    if (iconUrl) {
+                        enemiesHtml += `
+                            <div style="display:flex; flex-direction:column; align-items:center; background:#fdf6e3; padding:5px; border-radius:4px; width:70px; border: 1px solid rgba(93, 64, 55, 0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <img src="${iconUrl}" style="width:40px; height:40px; object-fit:contain; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3));">
+                                <span style="font-size:10px; text-align:center; word-break:break-all; color:#4e342e; font-weight:bold; margin-top:2px;">${name}</span>
+                            </div>
+                        `;
+                    } else {
+                        enemiesHtml += `
+                            <div style="display:flex; flex-direction:column; align-items:center; background:#fdf6e3; padding:5px; border-radius:4px; width:70px; border: 1px solid rgba(93, 64, 55, 0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <span style="font-size:24px; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3));">♟️</span>
+                                <span style="font-size:10px; text-align:center; word-break:break-all; color:#4e342e; font-weight:bold; margin-top:2px;">${name}</span>
+                            </div>
+                        `;
+                    }
+                });
+            } else {
+                enemiesHtml += `<p style="color:#4e342e;">No enemy info available.</p>`;
+            }
+            enemiesHtml += `</div>`;
+            
+            popup.innerHTML = `
+                <h3 style="color:#7b1fa2; border-bottom: 2px solid #7b1fa2; padding-bottom: 5px;">Enemy Army</h3>
+                ${enemiesHtml}
+                <div style="margin-top:15px; padding-top:15px; border-top: 1px solid rgba(93, 64, 55, 0.3);">
+                    <button onclick="document.getElementById('mapCellPopup').remove()" style="padding: 8px 16px; background:#e6d5ac; border:2px solid #5d4037; color:#4e342e; border-radius:4px; cursor:pointer; font-weight:bold; font-family: 'Georgia', serif;">Close</button>
+                </div>
+            `;
+        };
+    }
 }
 
 // Make sure it is globally available
