@@ -549,7 +549,18 @@
                 <h2><img src="/static/lg/whitePawn.png" class="icon"> Create Piece</h2>
                 <input type="text" id="customPieceName" placeholder="Piece Name">
                 
-                <label>Select Image:</label>
+                <div class="row-controls" style="margin-top: 10px;">
+                    <div>
+                        <label>Piece Value (For AI):</label>
+                        <input type="number" id="customPieceValue" value="3" min="0">
+                    </div>
+                    <div>
+                        <label>Positional Value (For AI, adds value for possible moves):</label>
+                        <input type="number" id="customPiecePosValue" value="2" min="0">
+                    </div>
+                </div>
+
+                <label style="margin-top: 10px; display: block;">Select Image:</label>
                 <div id="customImageContainer" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; max-height: 150px; overflow-y: auto; margin-bottom: 10px; background: rgba(255,255,255,0.5); padding: 5px; border-radius: 4px; border: 1px solid var(--board-dark);">
                     <!-- Images populated by JS -->
                 </div>
@@ -633,6 +644,8 @@
         const createPiecePanel = document.getElementById("createPiecePanel");
         const customImageContainer = document.getElementById("customImageContainer");
         const customPieceName = document.getElementById("customPieceName");
+        const customPieceValue = document.getElementById("customPieceValue");
+        const customPiecePosValue = document.getElementById("customPiecePosValue");
         const moveTypeSelect = document.getElementById("moveType");
         const moveXInput = document.getElementById("moveX");
         const moveYInput = document.getElementById("moveY");
@@ -811,8 +824,8 @@
                         moves: adjustedMoves,
                         name: p.customDef.name,
                         icon: p.color + p.pieceType,
-                        value: 3,
-                        posValue: 2
+                        value: p.customDef.value !== undefined ? p.customDef.value : 3,
+                        posValue: p.customDef.posValue !== undefined ? p.customDef.posValue : 2
                     };
                 }
                 
@@ -1185,6 +1198,8 @@
 
             const customPiece = {
                 name: name,
+                value: parseInt(customPieceValue.value) || 3,
+                posValue: parseInt(customPiecePosValue.value) || 2,
                 imageName: selectedCustomImage.alt,
                 moves: JSON.parse(JSON.stringify(customPieceMoves)),
                 id: "custom_" + Date.now()
@@ -1195,6 +1210,8 @@
             
             // Reset form
             customPieceName.value = "";
+            customPieceValue.value = "3";
+            customPiecePosValue.value = "2";
             customPieceMoves = [];
             updateMovesList();
             updatePreviewBoard();

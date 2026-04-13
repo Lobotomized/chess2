@@ -3671,8 +3671,8 @@ async function customMap(state){
                 moves: adjustedMoves,
                 name: piece.customDef.name,
                 icon: piece.color + piece.pieceType,
-                value: 3,
-                posValue: 2
+                value: piece.customDef.value !== undefined ? piece.customDef.value : 3,
+                posValue: piece.customDef.posValue !== undefined ? piece.customDef.posValue : 2
             };
         }
         let pieceString = piece.pieceType.slice(0,-4).toLowerCase() + 'Factory'
