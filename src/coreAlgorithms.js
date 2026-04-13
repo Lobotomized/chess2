@@ -122,6 +122,289 @@ function alphaBeta(state, depth, alpha, beta, isMaximizer, maximizerColor, filte
     }
 }
 
+// Alpha-beta search with a total nodes evaluated budget instead of fixed depth.
+function minimaxAlphaBetaBudget(state, maximizer, exactTurnsBudget, removedTurns, magnifiers, filters) {
+    state.id = crypto.randomUUID();
+    let enemy = getEnemy(maximizer);
+    exactTurnsBudget = exactTurnsBudget * 500
+
+    // Generate moves with early filtering
+    let firstGen = generateMovesFromPiecesAlphaBeta(state, maximizer, filters);
+
+    // Filter out removed turns if specified
+    if (removedTurns && removedTurns.length) {
+        const removedSet = new Set();
+        const rtLen = removedTurns.length;
+        for (let i = 0; i < rtLen; i++) {
+            const rtm = removedTurns[i];
+            removedSet.add(`${rtm.xClicked},${rtm.yClicked},${rtm.pieceCounter}`);
+        }
+        
+        const filteredMoves = [];
+        const fgLen = firstGen.length;
+        for (let i = 0; i < fgLen; i++) {
+            const fgm = firstGen[i];
+            const key = `${fgm.xClicked},${fgm.yClicked},${fgm.pieceCounter}`;
+            if (!removedSet.has(key)) {
+                filteredMoves.push(fgm);
+            }
+        }
+        firstGen = filteredMoves;
+    }
+
+    if (!firstGen || firstGen.length === 0) return undefined;
+
+    // Fast initial evaluation and sorting - optimized version
+    const len = firstGen.length;
+    const scores = new Array(len);
+    const movesWithScores = new Array(len);
+    
+    for (let i = 0; i < len; i++) {
+        let move = firstGen[i];
+        
+        // Immediate win detection
+        if (move.won && move.won === maximizer) {
+            move.value = 9999999999999999999;
+            return move;
+        }
+        
+        // Fast material evaluation
+        let score = 0;
+        const pieces = move.pieces;
+        const pLen = pieces.length;
+        
+        for (let j = 0; j < pLen; j++) {
+            const p = pieces[j];
+            score += p.color === maximizer ? (p.value || 3) : -(p.value || 3);
+        }
+        
+        // Add positional bonuses for better move ordering
+        if (move.xClicked !== undefined && move.yClicked !== undefined) {
+            const centerDist = Math.abs(move.xClicked - 2.5) + Math.abs(move.yClicked - 2.5);
+            score -= centerDist * 0.1;
+        }
+        
+        scores[i] = score;
+        movesWithScores[i] = {move, score};
+    }
+    
+    // Sort moves by score (descending) for better alpha-beta pruning
+    movesWithScores.sort((a, b) => b.score - a.score);
+    for (let i = 0; i < len; i++) {
+        firstGen[i] = movesWithScores[i].move;
+        firstGen[i]._score = movesWithScores[i].score;
+    }
+
+    let overallBestMove = firstGen[0]; 
+    let currentDepth = 1;
+    let budgetObj = { count: 0, limit: exactTurnsBudget, exceeded: false, hitDepthLimit: false };
+    
+    // Iterative deepening
+    while (budgetObj.count < budgetObj.limit) {
+        let bestMove = undefined;
+        let maxEval = -Infinity;
+        let alpha = -Infinity;
+        let beta = Infinity;
+
+        budgetObj.exceeded = false;
+        budgetObj.hitDepthLimit = false; // Reset depth limit flag for this iteration
+        
+        for (let i = 0; i < len; i++) {
+            let move = firstGen[i];
+            
+            if (maxEval !== -Infinity && scores[i] < maxEval - 500) {
+                continue;
+            }
+            
+            budgetObj.count++;
+            if (budgetObj.count >= budgetObj.limit) {
+                budgetObj.exceeded = true;
+                break;
+            }
+            
+            let evalBoard = alphaBetaBudgetOptimized(
+                { pieces: move.pieces, board: state.board, turn: enemy, won: move.won },
+                currentDepth - 1, alpha, beta, false, maximizer, filters, magnifiers, budgetObj
+            );
+            
+            move.value = evalBoard;
+            
+            if (evalBoard > maxEval || bestMove === undefined) {
+                maxEval = evalBoard;
+                bestMove = move;
+            }
+            
+            if (evalBoard > alpha) {
+                alpha = evalBoard;
+                if (alpha >= beta) {
+                    break;
+                }
+            }
+            
+            if (budgetObj.exceeded) {
+                break;
+            }
+        }
+        
+        if (bestMove !== undefined) {
+            overallBestMove = bestMove;
+            
+            // Move best move to the front (PV move ordering)
+            const bestIndex = firstGen.findIndex(m => m === bestMove);
+            if (bestIndex > 0) {
+                firstGen.splice(bestIndex, 1);
+                firstGen.unshift(bestMove);
+                const bestScore = scores[bestIndex];
+                scores.splice(bestIndex, 1);
+                scores.unshift(bestScore);
+            }
+        }
+        
+        if (budgetObj.exceeded) {
+            break; // Stop iterative deepening if budget was exceeded
+        }
+        
+        if (!budgetObj.hitDepthLimit && !budgetObj.exceeded) {
+            // We fully searched the entire tree to terminal states without hitting depth zero limit
+            // So there's no point in searching deeper.
+            break;
+        }
+        
+        currentDepth++;
+        if (currentDepth > 100) break; // safety check
+    }
+
+    return overallBestMove;
+}
+
+function alphaBetaBudgetOptimized(state, depth, alpha, beta, isMaximizer, maximizerColor, filters, magnifiers, budgetObj) {
+    if (state.won) {
+        return state.won === maximizerColor ? 9999999999999999999 : -9999999999999999999;
+    }
+    
+    if (depth <= 0) {
+        budgetObj.hitDepthLimit = true;
+        return evaluateBoardUltraFast(maximizerColor, state.pieces, state.board, magnifiers);
+    }
+    
+    const currentColor = isMaximizer ? maximizerColor : getEnemy(maximizerColor);
+    const moves = generateMovesFromPiecesAlphaBeta(state, currentColor, filters);
+    
+    if (moves.length === 0) {
+        return evaluateBoardUltraFast(maximizerColor, state.pieces, state.board, magnifiers);
+    }
+    
+    const len = moves.length;
+    const scores = new Array(len);
+    
+    for (let i = 0; i < len; i++) {
+        const m = moves[i];
+        if (m.won) {
+            scores[i] = isMaximizer ? 100000 : -100000;
+            continue;
+        }
+        
+        let score = 0;
+        const pieces = m.pieces;
+        const pLen = pieces.length;
+        
+        for (let j = 0; j < pLen; j++) {
+            const p = pieces[j];
+            score += p.color === maximizerColor ? (p.value || 3) : -(p.value || 3);
+        }
+        scores[i] = score;
+    }
+
+    if (isMaximizer) {
+        for (let i = 1; i < len; i++) {
+            const currentScore = scores[i];
+            const currentMove = moves[i];
+            let j = i - 1;
+            while (j >= 0 && scores[j] < currentScore) {
+                scores[j + 1] = scores[j];
+                moves[j + 1] = moves[j];
+                j--;
+            }
+            scores[j + 1] = currentScore;
+            moves[j + 1] = currentMove;
+        }
+        
+        let maxEval = -Infinity;
+        for (let i = 0; i < len; i++) {
+            const m = moves[i];
+            const currentScore = scores[i];
+            
+            if (maxEval !== -Infinity && currentScore < maxEval - 500) {
+                continue;
+            }
+            
+            budgetObj.count++;
+            if (budgetObj.count >= budgetObj.limit) {
+                budgetObj.exceeded = true;
+                return evaluateBoardUltraFast(maximizerColor, state.pieces, state.board, magnifiers);
+            }
+            
+            const evalBoard = alphaBetaBudgetOptimized(
+                { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                depth - 1, alpha, beta, false, maximizerColor, filters, magnifiers, budgetObj
+            );
+            
+            if (evalBoard > maxEval) {
+                maxEval = evalBoard;
+                if (evalBoard > alpha) alpha = evalBoard;
+            }
+            
+            if (beta <= alpha) break;
+            if (budgetObj.exceeded) break;
+        }
+        return maxEval;
+    } else {
+        for (let i = 1; i < len; i++) {
+            const currentScore = scores[i];
+            const currentMove = moves[i];
+            let j = i - 1;
+            while (j >= 0 && scores[j] > currentScore) {
+                scores[j + 1] = scores[j];
+                moves[j + 1] = moves[j];
+                j--;
+            }
+            scores[j + 1] = currentScore;
+            moves[j + 1] = currentMove;
+        }
+        
+        let minEval = Infinity;
+        for (let i = 0; i < len; i++) {
+            const m = moves[i];
+            const currentScore = scores[i];
+            
+            if (minEval !== Infinity && currentScore > minEval + 500) {
+                continue;
+            }
+            
+            budgetObj.count++;
+            if (budgetObj.count >= budgetObj.limit) {
+                budgetObj.exceeded = true;
+                return evaluateBoardUltraFast(maximizerColor, state.pieces, state.board, magnifiers);
+            }
+            
+            const evalBoard = alphaBetaBudgetOptimized(
+                { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                depth - 1, alpha, beta, true, maximizerColor, filters, magnifiers, budgetObj
+            );
+            
+            if (evalBoard < minEval) {
+                minEval = evalBoard;
+                if (evalBoard < beta) beta = evalBoard;
+            }
+            
+            if (beta <= alpha) break;
+            if (budgetObj.exceeded) break;
+        }
+        return minEval;
+    }
+}
+
+
 function minimaxAlphaBeta(state, maximizer, depth, removedTurns, magnifiers, filters) {
     state.id = crypto.randomUUID();
     let enemy = getEnemy(maximizer);

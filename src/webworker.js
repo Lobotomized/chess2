@@ -461,6 +461,8 @@ self.addEventListener("message", async function(e) {
 
                         if (algorithm === 'minimaxDeep') {
                             move = minimaxDeep(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
+                        } else if (algorithm === 'minimaxAlphaBetaBudget') {
+                            move = minimaxAlphaBetaBudget(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
                         } else if (algorithm === 'minimaxQuiescence') {
                             move = minimaxQuiescence(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
                         } else if (algorithm === 'proofNumberSearch') {

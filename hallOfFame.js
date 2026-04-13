@@ -56,9 +56,9 @@ function updateUI() {
         }
         
         let tr = document.createElement('tr');
-        let algStr = c.algorithm === 'minimaxDeep' ? 'Deep' : (c.algorithm === 'minimaxQuiescence' ? 'Q' : (c.algorithm === 'proofNumberSearch' ? 'PNS' : (c.algorithm === 'bestFirstSearch' ? 'BFS' : 'AB')));
+        let algStr = c.algorithm === 'minimaxDeep' ? 'Deep' : (c.algorithm === 'minimaxAlphaBetaBudget' ? 'ABB' : (c.algorithm === 'minimaxQuiescence' ? 'Q' : (c.algorithm === 'proofNumberSearch' ? 'PNS' : (c.algorithm === 'bestFirstSearch' ? 'BFS' : 'AB'))));
         if (c.altAlgorithm) {
-            let altAlgStr = c.altAlgorithm === 'minimaxDeep' ? 'Deep' : (c.altAlgorithm === 'minimaxQuiescence' ? 'Q' : (c.altAlgorithm === 'proofNumberSearch' ? 'PNS' : (c.altAlgorithm === 'bestFirstSearch' ? 'BFS' : 'AB')));
+            let altAlgStr = c.altAlgorithm === 'minimaxDeep' ? 'Deep' : (c.altAlgorithm === 'minimaxAlphaBetaBudget' ? 'ABB' : (c.altAlgorithm === 'minimaxQuiescence' ? 'Q' : (c.altAlgorithm === 'proofNumberSearch' ? 'PNS' : (c.altAlgorithm === 'bestFirstSearch' ? 'BFS' : 'AB'))));
             algStr += ` <i>(${altAlgStr}<=${c.altPieceThreshold || 10})</i>`;
         }
 

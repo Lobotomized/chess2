@@ -250,6 +250,8 @@ self.addEventListener("message", function(e) {
         let move;
         if (algorithm === 'minimaxDeep') {
             move = minimaxDeep(state, state.turn, currentDepth, [], currentMags, currentFilters);
+        } else if (algorithm === 'minimaxAlphaBetaBudget') {
+            move = minimaxAlphaBetaBudget(state, state.turn, currentDepth, [], currentMags, currentFilters);
         } else if (algorithm === 'minimaxQuiescence') {
             move = minimaxQuiescence(state, state.turn, currentDepth, [], currentMags, currentFilters);
         } else if (algorithm === 'proofNumberSearch') {
