@@ -144,6 +144,20 @@ const effects = {
         } else {
             console.error(`customEffects morph error: Factory function '${factoryName}' not found.`);
         }
+    },
+    causeVictory: function(state, piece, settings) {
+        console.log('wtf?')
+        const param = settings.pieceType; // Re-using pieceType to store 'You' or 'Enemy'
+        if (param === 'You') {
+            state.won = piece.color;
+        } else {
+            state.won = piece.color === 'white' ? 'black' : 'white';
+        }
+        
+        if (piece.options && typeof piece.options.gameEndedEvent === 'function') {
+            piece.options.gameEndedEvent(state.won);
+        }
+        console.log(state)
     }
 };
 
@@ -153,10 +167,10 @@ function applyCustomEffects(piece, customDef) {
     customDef.specialMoves.forEach(specialMove => {
         const hookName = specialMove.hook;
         // Support legacy single condition format or new array format
-        const conditionsList = Array.isArray(specialMove.condition) ? specialMove.condition : [specialMove.condition];
+        const conditionsList = specialMove.condition ? (Array.isArray(specialMove.condition) ? specialMove.condition : [specialMove.condition]) : [];
         const effectDef = specialMove.effect;
         
-        if (!hookName || conditionsList.length === 0 || !effectDef) return;
+        if (!hookName || !effectDef) return;
         
         // Save the original hook if the piece already has one
         const originalHook = piece[hookName];

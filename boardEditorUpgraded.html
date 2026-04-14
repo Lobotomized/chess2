@@ -660,31 +660,10 @@
                             </select>
                             
                             <div id="conditionsContainer">
-                                <!-- Initial condition row -->
-                                <div class="condition-row" style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 5px; margin-bottom: 10px;">
-                                    <div>
-                                        <label style="font-size: 12px; margin-bottom: 2px;">Condition:</label>
-                                        <select class="specialCondition" style="width: 100%; padding: 6px; background: var(--piece-white); border: 1px solid var(--board-dark); border-radius: 4px; font-size: 13px; margin-bottom: 0;">
-                                            <option value="ifEmpty">ifEmpty</option>
-                                            <option value="Rank">Rank</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label style="font-size: 12px; margin-bottom: 2px;" class="specialCondXLabel">Cond X:</label>
-                                        <input type="number" class="specialCondX" value="0" style="width: 100%; padding: 6px; font-size: 13px; margin-bottom: 0;">
-                                    </div>
-                                    <div>
-                                        <label style="font-size: 12px; margin-bottom: 2px;" class="specialCondYLabel">Cond Y:</label>
-                                        <input type="number" class="specialCondY" value="1" style="width: 100%; padding: 6px; font-size: 13px; margin-bottom: 0;">
-                                        <select class="specialCondAxis" style="display: none; width: 100%; padding: 6px; font-size: 13px; margin-bottom: 0;">
-                                            <option value="Vertical">Vertical</option>
-                                            <option value="Horizontal">Horizontal</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                <!-- Conditions will be added here -->
                             </div>
                             
-                            <button id="addAnotherConditionBtn" style="background: var(--board-dark); color: white; padding: 6px 8px; font-size: 11px; margin-bottom: 15px; border: none; border-radius: 3px; cursor: pointer;">+ Add Another Condition</button>
+                            <button id="addAnotherConditionBtn" style="background: var(--board-dark); color: white; padding: 6px 8px; font-size: 11px; margin-bottom: 15px; border: none; border-radius: 3px; cursor: pointer;">+ Add Condition</button>
 
                             <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 5px; margin-bottom: 10px;">
                                 <div>
@@ -692,6 +671,7 @@
                                     <select id="specialEffect" style="width: 100%; padding: 6px; background: var(--piece-white); border: 1px solid var(--board-dark); border-radius: 4px; font-size: 13px; margin-bottom: 0;">
                                         <option value="spawn">spawn</option>
                                         <option value="morph">morph</option>
+                                        <option value="causeVictory">causeVictory</option>
                                     </select>
                                 </div>
                                 <div>
@@ -705,9 +685,13 @@
                             </div>
                             
                             <div style="margin-bottom: 15px;">
-                                <label style="font-size: 12px; margin-bottom: 2px;">Effect Param (Piece to Spawn):</label>
+                                <label id="specialEffParamLabel" style="font-size: 12px; margin-bottom: 2px;">Effect Param (Piece to Spawn):</label>
                                 <select id="specialEffParam" style="width: 100%; padding: 6px; background: var(--piece-white); border: 1px solid var(--board-dark); border-radius: 4px; font-size: 13px; margin-bottom: 0;">
                                     <!-- Options populated by JS -->
+                                </select>
+                                <select id="specialEffParamVictory" style="display: none; width: 100%; padding: 6px; background: var(--piece-white); border: 1px solid var(--board-dark); border-radius: 4px; font-size: 13px; margin-bottom: 0;">
+                                    <option value="You">You</option>
+                                    <option value="Enemy">Enemy</option>
                                 </select>
                             </div>
 
@@ -778,8 +762,22 @@
         const specialEffX = document.getElementById("specialEffX");
         const specialEffY = document.getElementById("specialEffY");
         const specialEffParam = document.getElementById("specialEffParam");
+        const specialEffParamVictory = document.getElementById("specialEffParamVictory");
+        const specialEffParamLabel = document.getElementById("specialEffParamLabel");
         const addSpecialMoveBtn = document.getElementById("addSpecialMoveBtn");
         const currentSpecialMovesList = document.getElementById("currentSpecialMovesList");
+
+        specialEffect.addEventListener("change", (e) => {
+            if (e.target.value === "causeVictory") {
+                specialEffParam.style.display = "none";
+                specialEffParamVictory.style.display = "block";
+                specialEffParamLabel.textContent = "Effect Param (Who wins):";
+            } else {
+                specialEffParam.style.display = "block";
+                specialEffParamVictory.style.display = "none";
+                specialEffParamLabel.textContent = "Effect Param (Piece to Spawn/Morph):";
+            }
+        });
 
         const customPiecesSubmenu = document.getElementById("customPiecesSubmenu");
         const customPiecesContainer = document.getElementById("customPiecesContainer");
@@ -1191,7 +1189,10 @@
         });
 
         // Attach event listener to existing first condition row
-        attachConditionRowListeners(document.querySelector('.condition-row'));
+        const firstRow = document.querySelector('.condition-row');
+        if (firstRow) {
+            attachConditionRowListeners(firstRow);
+        }
 
         function attachConditionRowListeners(row) {
             const conditionSelect = row.querySelector('.specialCondition');
@@ -1200,34 +1201,6 @@
             const condYLabel = row.querySelector('.specialCondYLabel');
             const condY = row.querySelector('.specialCondY');
             const condAxis = row.querySelector('.specialCondAxis');
-            
-            // If it's not the first row, add a remove button
-            if (row !== conditionsContainer.firstElementChild) {
-                row.style.gridTemplateColumns = '2fr 1fr 1fr 24px';
-                const removeBtnWrapper = document.createElement('div');
-                removeBtnWrapper.style.display = 'flex';
-                removeBtnWrapper.style.alignItems = 'flex-end';
-                removeBtnWrapper.style.paddingBottom = '4px';
-
-                const removeBtn = document.createElement('button');
-                removeBtn.textContent = '✖';
-                removeBtn.style.color = 'red';
-                removeBtn.style.background = 'none';
-                removeBtn.style.border = 'none';
-                removeBtn.style.cursor = 'pointer';
-                removeBtn.style.fontSize = '16px';
-                removeBtn.style.padding = '0';
-                removeBtn.style.margin = '0';
-                removeBtn.style.boxShadow = 'none';
-                removeBtn.style.width = '100%';
-                
-                removeBtnWrapper.appendChild(removeBtn);
-                row.appendChild(removeBtnWrapper);
-                
-                removeBtn.addEventListener('click', () => {
-                    row.remove();
-                });
-            }
 
             conditionSelect.addEventListener('change', () => {
                 if (conditionSelect.value === 'Rank') {
@@ -1247,22 +1220,41 @@
         }
 
         addAnotherConditionBtn.addEventListener('click', () => {
-            const firstRow = conditionsContainer.querySelector('.condition-row');
-            const newRow = firstRow.cloneNode(true);
-            // Reset values
-            newRow.querySelector('.specialCondition').value = 'ifEmpty';
-            newRow.querySelector('.specialCondX').value = '0';
-            newRow.querySelector('.specialCondY').value = '1';
-            newRow.querySelector('.specialCondAxis').value = 'Vertical';
-            
-            // Reset display based on ifEmpty
-            newRow.querySelector('.specialCondXLabel').textContent = 'Cond X:';
-            newRow.querySelector('.specialCondYLabel').textContent = 'Cond Y:';
-            newRow.querySelector('.specialCondY').style.display = 'block';
-            newRow.querySelector('.specialCondAxis').style.display = 'none';
+            const newRow = document.createElement('div');
+            newRow.className = 'condition-row';
+            newRow.style.display = 'grid';
+            newRow.style.gridTemplateColumns = '2fr 1fr 1fr';
+            newRow.style.gap = '5px';
+            newRow.style.marginBottom = '10px';
+            newRow.innerHTML = `
+                <div>
+                    <label style="font-size: 12px; margin-bottom: 2px;">Condition:</label>
+                    <select class="specialCondition" style="width: 100%; padding: 6px; background: var(--piece-white); border: 1px solid var(--board-dark); border-radius: 4px; font-size: 13px; margin-bottom: 0;">
+                        <option value="ifEmpty">ifEmpty</option>
+                        <option value="Rank">Rank</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 12px; margin-bottom: 2px;" class="specialCondXLabel">Cond X:</label>
+                    <input type="number" class="specialCondX" value="0" style="width: 100%; padding: 6px; font-size: 13px; margin-bottom: 0;">
+                </div>
+                <div>
+                    <label style="font-size: 12px; margin-bottom: 2px;" class="specialCondYLabel">Cond Y:</label>
+                    <input type="number" class="specialCondY" value="1" style="width: 100%; padding: 10px 6px; font-size: 13px; margin-bottom: 0;">
+                    <select class="specialCondAxis" style="display: none; width: 100%; padding: 6px; font-size: 13px; margin-bottom: 0;">
+                        <option value="Vertical">Vertical</option>
+                        <option value="Horizontal">Horizontal</option>
+                    </select>
+                    <button class="remove-condition-btn" style="background: var(--threat); color: white; border: none; border-radius: 3px; cursor: pointer; padding: 2px 5px; font-size: 10px; margin-top: 5px; width: 100%;">Remove</button>
+                </div>
+            `;
             
             conditionsContainer.appendChild(newRow);
             attachConditionRowListeners(newRow);
+            
+            newRow.querySelector('.remove-condition-btn').addEventListener('click', () => {
+                newRow.remove();
+            });
         });
 
         addSpecialMoveBtn.addEventListener("click", () => {
@@ -1270,7 +1262,7 @@
             const effName = specialEffect.value;
             const effX = parseInt(specialEffX.value) || 0;
             const effY = parseInt(specialEffY.value) || 0;
-            const effParam = specialEffParam.value.trim();
+            const effParam = effName === 'causeVictory' ? specialEffParamVictory.value.trim() : specialEffParam.value.trim();
 
             const conditionsList = [];
             const conditionRows = conditionsContainer.querySelectorAll('.condition-row');
@@ -1306,10 +1298,8 @@
             customPieceSpecialMoves.push(specialMove);
             updateSpecialMovesList();
             
-            // Reset conditions back to 1 row
-            while (conditionsContainer.children.length > 1) {
-                conditionsContainer.removeChild(conditionsContainer.lastChild);
-            }
+            // Reset conditions
+            conditionsContainer.innerHTML = '';
         });
 
         function updateMovesList() {
@@ -1377,9 +1367,9 @@
                         return `${cond.name}(${cond.settings.offsetX},${cond.settings.offsetY})`;
                     }
                 });
-                const conditionText = conditionStrings.join(' AND ');
+                const conditionText = conditionStrings.length > 0 ? `if ${conditionStrings.join(' AND ')} -> ` : '';
                 
-                li.textContent = `${sm.hook}: if ${conditionText} -> ${sm.effect.name}(${sm.effect.settings.offsetX},${sm.effect.settings.offsetY},${sm.effect.settings.pieceType}) `;
+                li.textContent = `${sm.hook}: ${conditionText}${sm.effect.name}(${sm.effect.settings.offsetX},${sm.effect.settings.offsetY},${sm.effect.settings.pieceType}) `;
                 
                 const removeBtn = document.createElement("button");
                 removeBtn.textContent = "✖";
