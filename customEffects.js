@@ -11,7 +11,7 @@ const conditions = {
         let direction = -1; // Assuming White moves UP the board (decreasing Y)
         if (piece.color === 'black' && settings.flipForBlack !== false) {
             direction = 1; // Black moves DOWN the board (increasing Y)
-        }
+        } 
         
         const targetX = piece.x + (settings.offsetX || 0);
         const targetY = piece.y + ((settings.offsetY || 0) * direction);
