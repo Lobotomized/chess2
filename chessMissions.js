@@ -14,6 +14,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key_here'; /
 app.use(express.json({ limit: '50mb' })); // Allow JSON body parsing with large limit
 app.use('/boardGeneration.js', express.static('./boardGeneration.js'))
 app.use('/pieceDefinitions.js', express.static('./pieceDefinitions.js'))
+app.use('/customEffects.js', express.static('./customEffects.js'))
 app.use('/pieces', express.static('./pieces'))
 app.use('/helperFunctions.js', express.static('./helperFunctions.js'))
 app.use('/moveMethods.js', express.static('./moveMethods.js'))
@@ -827,6 +828,16 @@ app.put('/maps/:id', authenticateToken, async (req, res) => {
         }
 
         res.status(200).json(map);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.delete('/maps/:id', authenticateToken, async (req, res) => {
+    try {
+        const map = await Map.findOneAndDelete({ _id: req.params.id, authorId: req.user.id });
+        if (!map) return res.status(404).json({ error: "Map not found or you don't have permission" });
+        res.status(200).json({ message: "Map deleted successfully" });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

@@ -19,6 +19,7 @@ try{
     
     } = require('./pieceDefinitions')
     var {lightBoardFE}  = require('./helperFunctions.js');
+    var {applyCustomEffects} = require('./customEffects.js');
 
 if (typeof window === 'undefined') {
     if(typeof buildPieceModal === 'undefined'){
@@ -3625,6 +3626,7 @@ function testMate(state){
 
 
 
+
 async function customMap(state){
     state.pieces = [];
     state.board = [];
@@ -3664,9 +3666,11 @@ async function customMap(state){
                 });
             }
 
-            return {
+            const newPiece = {
                 x: piece.x,
                 y: piece.y,
+                initialX: piece.x,
+                initialY: piece.y,
                 color: piece.color,
                 moves: adjustedMoves,
                 name: piece.customDef.name,
@@ -3674,6 +3678,18 @@ async function customMap(state){
                 value: piece.customDef.value !== undefined ? piece.customDef.value : 3,
                 posValue: piece.customDef.posValue !== undefined ? piece.customDef.posValue : 2
             };
+
+            console.log("Checking applyCustomEffects for", newPiece.name);
+            console.log("Is window.applyCustomEffects a function?", typeof window !== 'undefined' && typeof window.applyCustomEffects === 'function');
+            
+            if (typeof window !== 'undefined' && typeof window.applyCustomEffects === 'function') {
+                window.applyCustomEffects(newPiece, piece.customDef);
+            } else if (typeof applyCustomEffects === 'function') {
+                applyCustomEffects(newPiece, piece.customDef);
+            } else {
+                console.log("applyCustomEffects NOT FOUND!");
+            }
+            return newPiece;
         }
         let pieceString = piece.pieceType.slice(0,-4).toLowerCase() + 'Factory'
         return window[pieceString](piece.color,piece.x,piece.y)

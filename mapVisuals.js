@@ -720,7 +720,7 @@ function showMapCellPopup(node, grandMap) {
                 
                 startLevel(rogueState.level + 1, option);
             } else {
-                alert("Cannot start battle: Game state not found.");
+                showAlert("Cannot start battle: Game state not found.");
             }
         };
     }

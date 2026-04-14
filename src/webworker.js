@@ -12,6 +12,7 @@ importScripts('/pieces/medieval.js')
 importScripts('/pieces/machines.js')
 importScripts('/pieces/rogueLike.js')
 importScripts('/pieces/misc.js')
+importScripts('/customEffects.js')
 
 importScripts('/src/AI/general.js')
 

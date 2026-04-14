@@ -184,6 +184,7 @@
         }
     </style>
     <script src="/src/jsonfn.js"></script>
+<script src="/src/modal.js?v=1"></script>
 </head>
 <body>
     <div class="container">
@@ -652,9 +653,9 @@
             return id;
         }
 
-        function removePhase(id, e) {
+        async function removePhase(id, e) {
             e.stopPropagation();
-            if(confirm('Remove this phase?')) {
+            if(await showConfirm('Remove this phase?')) {
                 document.getElementById('tab-' + id).remove();
                 document.getElementById('config-' + id).remove();
                 phases = phases.filter(p => p !== id);

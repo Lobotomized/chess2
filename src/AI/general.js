@@ -85,7 +85,12 @@
                     friendlyPieceInteraction: p.friendlyPieceInteraction,
                     afterEnemyPieceTaken: p.afterEnemyPieceTaken,
                     afterPlayerMove: p.afterPlayerMove,
-                    afterEnemyPlayerMove: p.afterEnemyPlayerMove
+                    afterEnemyPlayerMove: p.afterEnemyPlayerMove,
+                    // Ensure tracking properties for dynamic pieces are cloned
+                    initialX: p.initialX,
+                    initialY: p.initialY,
+                    id: p.id,
+                    customDef: p.customDef
                 };
 
                 if(p.moves){
@@ -200,7 +205,12 @@
                     friendlyPieceInteraction: p.friendlyPieceInteraction,
                     afterEnemyPieceTaken: p.afterEnemyPieceTaken,
                     afterPlayerMove: p.afterPlayerMove,
-                    afterEnemyPlayerMove: p.afterEnemyPlayerMove
+                    afterEnemyPlayerMove: p.afterEnemyPlayerMove,
+                    // Ensure tracking properties for dynamic pieces are cloned
+                    initialX: p.initialX,
+                    initialY: p.initialY,
+                    id: p.id,
+                    customDef: p.customDef
                 };
 
                 // Deep copy moves/weakMoves arrays to prevent mutation leaks ONLY for the piece moving

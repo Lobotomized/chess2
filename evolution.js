@@ -418,11 +418,11 @@ function replayGame(gameId) {
     window.open(`/replay.html?gameId=${gameId}`, '_blank');
 }
 
-function saveBotToDb(charId) {
+async function saveBotToDb(charId) {
     let char = characters.find(c => c.id === charId);
     if(!char) return;
     
-    let name = prompt("Enter a name for this bot:", `Bot-${char.id}`);
+    let name = await showPrompt("Enter a name for this bot:", `Bot-${char.id}`);
     if(!name) return;
     
     char.name = name;
@@ -436,11 +436,11 @@ function saveBotToDb(charId) {
     })
     .then(response => response.json())
     .then(data => {
-        alert(`Bot ${name} saved to Hall of Fame!`);
+        showAlert(`Bot ${name} saved to Hall of Fame!`);
     })
     .catch((error) => {
         console.error('Error:', error);
-        alert('Failed to save bot.');
+        showAlert('Failed to save bot.');
     });
 }
 
@@ -1332,7 +1332,7 @@ function killBotsByElo() {
     
     // Ensure we don't kill everyone, keep at least 2
     if (characters.length < 2 && initialCount >= 2) {
-        alert("Cannot kill all bots! Kept the top 2.");
+        showAlert("Cannot kill all bots! Kept the top 2.");
         // We'd have to reload or sort, simpler just to alert for now
         // A better approach is to sort and slice
     }
@@ -1342,7 +1342,7 @@ function killBotsByElo() {
     closeKillBotModal();
 }
 
-function killSpecificBotImpl(idToKill) {
+async function killSpecificBotImpl(idToKill) {
     if (!idToKill) return;
     
     // Stop evolution loop if it's running
@@ -1352,12 +1352,12 @@ function killSpecificBotImpl(idToKill) {
     }
     
     if (characters.length <= 2) {
-        alert("Cannot kill bot. Minimum 2 bots required in the arena.");
+        showAlert("Cannot kill bot. Minimum 2 bots required in the arena.");
         if (wasEvolving) toggleEvolution();
         return;
     }
     
-    if(confirm(`Are you sure you want to kill bot ${idToKill}?`)) {
+    if(await showConfirm(`Are you sure you want to kill bot ${idToKill}?`)) {
         characters = characters.filter(c => c.id !== idToKill);
         saveData();
         updateUI();
@@ -1370,8 +1370,8 @@ function killSpecificBotImpl(idToKill) {
 }
 window.killSpecificBotImpl = killSpecificBotImpl;
 
-function killAllBots() {
-    if(confirm("Are you sure you want to delete ALL bots in the current generation? You will have to start over.")) {
+async function killAllBots() {
+    if(await showConfirm("Are you sure you want to delete ALL bots in the current generation? You will have to start over.")) {
         characters = [];
         saveData();
         // Force reload to trigger init() and generate new bots
@@ -1523,7 +1523,7 @@ function createNewBot() {
             delete char.kingVulnProxWeight;
 
             characters[existingIndex] = char;
-            alert(`Bot ${char.id} updated!`);
+            showAlert(`Bot ${char.id} updated!`);
         }
     } 
     
@@ -1538,7 +1538,7 @@ function createNewBot() {
         };
         // Add to pool
         characters.push(char);
-        alert(`Custom Bot ${char.id} created!`);
+        showAlert(`Custom Bot ${char.id} created!`);
     }
 
     saveData();

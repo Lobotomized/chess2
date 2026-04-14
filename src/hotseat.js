@@ -141,7 +141,7 @@ function triggerAITurn(state) {
     if(!w){
         w = new Worker("src/webworker.js");
     }
-
+    console.log(state.pieces)
     state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
     
     let customEvolutionWhiteStr = undefined;

@@ -80,8 +80,8 @@ function updateUI() {
     });
 }
 
-function deleteBot(charId) {
-    if(confirm('Are you sure you want to delete this bot from the Hall of Fame?')) {
+async function deleteBot(charId) {
+    if(await showConfirm('Are you sure you want to delete this bot from the Hall of Fame?')) {
         fetch('/bots/' + charId, {
             method: 'DELETE'
         })
@@ -89,14 +89,14 @@ function deleteBot(charId) {
             if(res.ok) {
                 init(); // Refresh the list
             } else if(res.status === 404) {
-                alert('Endpoint not found or bot not found. Did you restart the node server?');
+                showAlert('Endpoint not found or bot not found. Did you restart the node server?');
             } else {
-                alert('Failed to delete bot. Server responded with: ' + res.status);
+                showAlert('Failed to delete bot. Server responded with: ' + res.status);
             }
         })
         .catch(err => {
             console.error(err);
-            alert('Error connecting to server. Did you restart the node server?');
+            showAlert('Error connecting to server. Did you restart the node server?');
         });
     }
 }

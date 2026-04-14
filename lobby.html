@@ -647,13 +647,14 @@
         let startNewGame = function(){
             let gameName = document.getElementById('gameName').value;
             if(!gameName) {
-                alert("Please enter a game name");
+                showAlert("Please enter a game name");
                 return;
             }
             let gameType = document.querySelector('#selectMode')?.value;
             window.location.replace(`/play?roomId=${gameName}&mode=${gameType}`)
         }
     </script>
+<script src="/src/modal.js?v=1"></script>
 </head>
 
 <!-- Google tag (gtag.js) -->

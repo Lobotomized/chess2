@@ -159,6 +159,14 @@
         }
 
         /* Board Area Styling */
+        .board-column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            min-width: 0;
+        }
+
         .board-area {
             flex: 1;
             background: rgba(46, 46, 46, 0.9);
@@ -175,8 +183,18 @@
             overflow: auto;
         }
 
+        .create-piece-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+        .cp-col {
+            display: flex;
+            flex-direction: column;
+        }
+
         /* Controls & Inputs */
-        input[type="text"], input[type="number"] {
+        input[type="text"], input[type="number"], select {
             width: 100%;
             padding: 10px;
             margin-bottom: 15px;
@@ -375,10 +393,16 @@
                 grid-template-columns: 1fr 1fr;
                 gap: 20px;
             }
+            .board-column {
+                width: 100%;
+            }
             .board-area {
                 width: 100%;
                 box-sizing: border-box;
                 min-height: 500px;
+            }
+            .create-piece-grid {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -467,6 +491,7 @@
             }
         }
     </style>
+<script src="/src/modal.js?v=1"></script>
 </head>
 <body>
     <nav>
@@ -483,7 +508,6 @@
             <a href="/pieces"><img src="/static/lg/whitePikeman.png" class="icon"> Pieces</a>
             <a href="/customMaps"><img src="/static/lg/whiteShroom.png" class="icon"> Custom Maps</a>
             <a href="/create-board-upgraded" class="active"><img src="/static/lg/whiteNorthernKing.png" class="icon"> Board Editor Upgraded</a>
-            <a href="/create-board"><img src="/static/lg/whiteNorthernKing.png" class="icon"> Board Editor</a>
         </div>
     </nav>
     <script>
@@ -544,73 +568,162 @@
                 <div id="customPiecesContainer" style="display: none;" class="image-grid-container"></div>
             </div>
 
-            <!-- Create Piece Panel (Toggled) -->
-            <div id="createPiecePanel" class="panel" style="display: none;">
-                <h2><img src="/static/lg/whitePawn.png" class="icon"> Create Piece</h2>
-                <input type="text" id="customPieceName" placeholder="Piece Name">
-                
-                <div class="row-controls" style="margin-top: 10px;">
-                    <div>
-                        <label>Piece Value (For AI):</label>
-                        <input type="number" id="customPieceValue" value="3" min="0">
-                    </div>
-                    <div>
-                        <label>Positional Value (For AI, adds value for possible moves):</label>
-                        <input type="number" id="customPiecePosValue" value="2" min="0">
-                    </div>
-                </div>
-
-                <label style="margin-top: 10px; display: block;">Select Image:</label>
-                <div id="customImageContainer" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; max-height: 150px; overflow-y: auto; margin-bottom: 10px; background: rgba(255,255,255,0.5); padding: 5px; border-radius: 4px; border: 1px solid var(--board-dark);">
-                    <!-- Images populated by JS -->
-                </div>
-                
-                <label>Add Move:</label>
-                <select id="moveType" style="width: 100%; padding: 8px; margin-bottom: 10px; background: var(--piece-white); border: 2px solid var(--board-dark); border-radius: 4px; font-family: 'Georgia', serif;">
-                    <option value="absolute">Absolute</option>
-                    <option value="blockable">Blockable</option>
-                    <option value="takeMove">Take Move</option>
-                </select>
-                
-                <div class="row-controls">
-                    <div>
-                        <label>X Offset:</label>
-                        <input type="number" id="moveX" value="0">
-                    </div>
-                    <div>
-                        <label>Y Offset:</label>
-                        <input type="number" id="moveY" value="0">
-                    </div>
-                </div>
-                
-                <div id="blockableOptions" style="display: none; margin-bottom: 10px;">
-                    <div style="margin-bottom: 5px;">
-                        <label style="display: inline; cursor: pointer;"><input type="checkbox" id="moveRepeat" checked> Repeat</label>
-                    </div>
-                    <div>
-                        <label>Limit (0 for no limit):</label>
-                        <input type="number" id="moveLimit" value="0" min="0">
-                    </div>
-                </div>
-
-                <div style="margin-bottom: 10px;">
-                    <label style="display: inline; cursor: pointer;"><input type="checkbox" id="moveImpotent"> Impotent (Cannot take pieces)</label>
-                </div>
-                
-                <button id="addMoveBtn">Add Move</button>
-                
-                <label>Current Moves:</label>
-                <ul id="currentMovesList" style="max-height: 100px; overflow-y: auto; font-size: 14px; padding-left: 20px; background: rgba(255,255,255,0.5); border-radius: 4px;">
-                </ul>
-                
-                <button id="saveCustomPieceBtn" style="background: var(--highlight); color: var(--piece-white); margin-top: 10px;">Save Custom Piece</button>
-            </div>
         </div>
 
-        <!-- Board Area -->
-        <div class="board-area">
-            <div id="chessboard"></div>
-            <div id="previewBoard" style="display: none; border: 15px solid #4a3c31; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></div>
+        <!-- Board Column -->
+        <div class="board-column">
+            <!-- Board Area -->
+            <div class="board-area">
+                <div id="chessboard"></div>
+                <div id="previewBoard" style="display: none; border: 15px solid #4a3c31; box-shadow: 0 10px 30px rgba(0,0,0,0.5);"></div>
+            </div>
+
+            <!-- Create Piece Panel (Toggled) -->
+            <div id="createPiecePanel" class="panel" style="display: none; padding-bottom: 30px;">
+                <h2 style="width: 100%; border-bottom: none; font-size: 28px; margin-bottom: 20px;"><img src="/static/lg/whitePawn.png" class="icon" style="height: 32px;"> Create Piece</h2>
+                
+                <div style="display: flex; justify-content: center; margin-bottom: 30px;">
+                    <input type="text" id="customPieceName" placeholder="Piece Name" style="width: 50%; max-width: 400px; font-size: 24px; text-align: center; padding: 15px;">
+                </div>
+                
+                <div class="create-piece-grid">
+                    <div class="cp-col">
+                        <label style="display: block; font-size: 18px; border-bottom: 2px solid var(--board-dark); padding-bottom: 5px; margin-bottom: 15px;">1. Select Image</label>
+                        <div id="customImageContainer" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; max-height: 400px; overflow-y: auto; margin-bottom: 10px; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 4px; border: 1px solid var(--board-dark);">
+                            <!-- Images populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="cp-col">
+                        <label style="display: block; font-size: 18px; border-bottom: 2px solid var(--board-dark); padding-bottom: 5px; margin-bottom: 15px;">2. Configure Values & Moves</label>
+                        <div class="row-controls" style="margin-bottom: 20px; align-items: flex-end;">
+                            <div>
+                                <label>Piece Value (For AI):</label>
+                                <input type="number" id="customPieceValue" value="3" min="0" style="margin-bottom: 0;">
+                            </div>
+                            <div>
+                                <label>Positional Value (For AI):</label>
+                                <input type="number" id="customPiecePosValue" value="2" min="0" style="margin-bottom: 0;">
+                            </div>
+                        </div>
+
+                        <div style="background: rgba(255,255,255,0.4); padding: 15px; border-radius: 4px; border: 1px solid var(--board-dark); margin-bottom: 10px;">
+                            <label>Add Move:</label>
+                            <select id="moveType">
+                                <option value="absolute">Absolute</option>
+                                <option value="blockable">Blockable</option>
+                                <option value="takeMove">Take Move</option>
+                            </select>
+                            
+                            <div class="row-controls">
+                                <div>
+                                    <label>X Offset:</label>
+                                    <input type="number" id="moveX" value="0">
+                                </div>
+                                <div>
+                                    <label>Y Offset:</label>
+                                    <input type="number" id="moveY" value="0">
+                                </div>
+                            </div>
+                            
+                            <div id="blockableOptions" style="display: none; margin-bottom: 10px;">
+                                <div style="margin-bottom: 5px;">
+                                    <label style="display: inline; cursor: pointer;"><input type="checkbox" id="moveRepeat" checked> Repeat</label>
+                                </div>
+                                <div>
+                                    <label>Limit (0 for no limit):</label>
+                                    <input type="number" id="moveLimit" value="0" min="0">
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 15px;">
+                                <label style="display: inline; cursor: pointer;"><input type="checkbox" id="moveImpotent"> Impotent (Cannot take pieces)</label>
+                            </div>
+                            
+                            <button id="addMoveBtn" style="margin-bottom: 0;">Add Move</button>
+                        </div>
+                        
+                        <label id="currentMovesLabel" style="display: none; margin-top: 10px;">Current Moves:</label>
+                        <ul id="currentMovesList" style="display: none; max-height: 150px; overflow-y: auto; font-size: 14px; padding-left: 20px; background: rgba(255,255,255,0.5); border-radius: 4px; padding-top: 5px; padding-bottom: 5px;">
+                        </ul>
+                    </div>
+
+                    <div class="cp-col">
+                        <label style="display: block; font-size: 18px; border-bottom: 2px solid var(--board-dark); padding-bottom: 5px; margin-bottom: 15px;">3. Special Moves (Hooks/Effects)</label>
+                        <div style="background: rgba(255,255,255,0.4); padding: 15px; border-radius: 4px; border: 1px solid var(--board-dark); margin-bottom: 10px;">
+                            <label style="font-size: 12px; margin-bottom: 2px;">Trigger Hook:</label>
+                            <select id="specialHook" style="margin-bottom: 15px; font-size: 13px; padding: 8px;">
+                                <option value="afterPlayerMove">afterPlayerMove</option>
+                                <option value="afterPieceMove">afterPieceMove</option>
+                                <option value="afterThisPieceTaken">afterThisPieceTaken</option>
+                                <option value="afterEnemyPlayerMove">afterEnemyPlayerMove</option>
+                            </select>
+                            
+                            <div id="conditionsContainer">
+                                <!-- Initial condition row -->
+                                <div class="condition-row" style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 5px; margin-bottom: 10px;">
+                                    <div>
+                                        <label style="font-size: 12px; margin-bottom: 2px;">Condition:</label>
+                                        <select class="specialCondition" style="width: 100%; padding: 6px; background: var(--piece-white); border: 1px solid var(--board-dark); border-radius: 4px; font-size: 13px; margin-bottom: 0;">
+                                            <option value="ifEmpty">ifEmpty</option>
+                                            <option value="Rank">Rank</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 12px; margin-bottom: 2px;" class="specialCondXLabel">Cond X:</label>
+                                        <input type="number" class="specialCondX" value="0" style="width: 100%; padding: 6px; font-size: 13px; margin-bottom: 0;">
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 12px; margin-bottom: 2px;" class="specialCondYLabel">Cond Y:</label>
+                                        <input type="number" class="specialCondY" value="1" style="width: 100%; padding: 6px; font-size: 13px; margin-bottom: 0;">
+                                        <select class="specialCondAxis" style="display: none; width: 100%; padding: 6px; font-size: 13px; margin-bottom: 0;">
+                                            <option value="Vertical">Vertical</option>
+                                            <option value="Horizontal">Horizontal</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button id="addAnotherConditionBtn" style="background: var(--board-dark); color: white; padding: 6px 8px; font-size: 11px; margin-bottom: 15px; border: none; border-radius: 3px; cursor: pointer;">+ Add Another Condition</button>
+
+                            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 5px; margin-bottom: 10px;">
+                                <div>
+                                    <label style="font-size: 12px; margin-bottom: 2px;">Effect:</label>
+                                    <select id="specialEffect" style="width: 100%; padding: 6px; background: var(--piece-white); border: 1px solid var(--board-dark); border-radius: 4px; font-size: 13px; margin-bottom: 0;">
+                                        <option value="spawn">spawn</option>
+                                        <option value="morph">morph</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label style="font-size: 12px; margin-bottom: 2px;">Eff X:</label>
+                                    <input type="number" id="specialEffX" value="0" style="width: 100%; padding: 6px; font-size: 13px; margin-bottom: 0;">
+                                </div>
+                                <div>
+                                    <label style="font-size: 12px; margin-bottom: 2px;">Eff Y:</label>
+                                    <input type="number" id="specialEffY" value="1" style="width: 100%; padding: 6px; font-size: 13px; margin-bottom: 0;">
+                                </div>
+                            </div>
+                            
+                            <div style="margin-bottom: 15px;">
+                                <label style="font-size: 12px; margin-bottom: 2px;">Effect Param (Piece to Spawn):</label>
+                                <select id="specialEffParam" style="width: 100%; padding: 6px; background: var(--piece-white); border: 1px solid var(--board-dark); border-radius: 4px; font-size: 13px; margin-bottom: 0;">
+                                    <!-- Options populated by JS -->
+                                </select>
+                            </div>
+
+                            <button id="addSpecialMoveBtn" style="background: var(--highlight); color: white; padding: 8px 12px; font-size: 13px; margin-top: 0; margin-bottom: 0;">Add Special Move</button>
+                        </div>
+                        
+                        <label id="currentSpecialMovesLabel" style="display: none;">Current Special Moves:</label>
+                        <ul id="currentSpecialMovesList" style="display: none; max-height: 150px; overflow-y: auto; font-size: 12px; padding: 5px; background: rgba(255,255,255,0.5); border-radius: 4px; border: 1px solid var(--board-dark); list-style-type: none;">
+                        </ul>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: center; margin-top: 40px; border-top: 2px solid var(--board-dark); padding-top: 20px;">
+                    <button id="saveCustomPieceBtn" style="background: var(--highlight); color: var(--piece-white); width: 50%; max-width: 400px; font-size: 20px; padding: 15px;">Save Custom Piece</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -621,6 +734,7 @@
     <script src="/pieces/medieval.js"></script>
     <script src="/pieces/machines.js"></script>
     <script src="/pieces/misc.js"></script>
+    <script src="/customEffects.js"></script>
 
     <script src="/src/auth.js"></script>
     <script>
@@ -656,6 +770,17 @@
         const addMoveBtn = document.getElementById("addMoveBtn");
         const currentMovesList = document.getElementById("currentMovesList");
         const saveCustomPieceBtn = document.getElementById("saveCustomPieceBtn");
+
+        const specialHook = document.getElementById("specialHook");
+        const conditionsContainer = document.getElementById("conditionsContainer");
+        const addAnotherConditionBtn = document.getElementById("addAnotherConditionBtn");
+        const specialEffect = document.getElementById("specialEffect");
+        const specialEffX = document.getElementById("specialEffX");
+        const specialEffY = document.getElementById("specialEffY");
+        const specialEffParam = document.getElementById("specialEffParam");
+        const addSpecialMoveBtn = document.getElementById("addSpecialMoveBtn");
+        const currentSpecialMovesList = document.getElementById("currentSpecialMovesList");
+
         const customPiecesSubmenu = document.getElementById("customPiecesSubmenu");
         const customPiecesContainer = document.getElementById("customPiecesContainer");
 
@@ -664,6 +789,7 @@
         let selectedImage = null;
         let selectedCustomImage = null;
         let customPieceMoves = [];
+        let customPieceSpecialMoves = [];
         const customPieces = []; // Store custom pieces created by the user
         const piecesObjectArray = [];
         
@@ -753,7 +879,7 @@
             if (newCols >= 1 && newRows >= 1) {
             generateChessboard(newCols, newRows);
             } else {
-            alert("Invalid dimensions. Both values must be at least 1.");
+            showAlert("Invalid dimensions. Both values must be at least 1.");
             }
         });
         
@@ -793,7 +919,7 @@
             })
             .catch((error) => {
                 console.error('Error:', error);
-                alert('Error saving map');
+                showAlert('Error saving map');
             });
         });
 
@@ -973,6 +1099,20 @@
                         selectedCustomImage.style.background = "var(--selected)";
                         updatePreviewBoard();
                     });
+
+                    // Also populate the special effect param dropdown with factory names
+                    const name = unitImages[unit].replace('.png', '');
+                    const lowerName = name.charAt(0).toLowerCase() + name.slice(1);
+                    
+                    let factoryString = lowerName + 'Factory';
+                    if (factoryString === 'queenBugFactory') {
+                        factoryString = 'queenbugFactory';
+                    }
+                    
+                    const option = document.createElement("option");
+                    option.value = factoryString;
+                    option.textContent = name + " (" + factoryString + ")";
+                    specialEffParam.appendChild(option);
                 }
             }
 
@@ -1032,7 +1172,7 @@
             const impotent = moveImpotentCheckbox.checked;
             
             if (x === 0 && y === 0) {
-                alert("Move offset cannot be 0,0");
+                showAlert("Move offset cannot be 0,0");
                 return;
             }
 
@@ -1050,8 +1190,138 @@
             updatePreviewBoard();
         });
 
+        // Attach event listener to existing first condition row
+        attachConditionRowListeners(document.querySelector('.condition-row'));
+
+        function attachConditionRowListeners(row) {
+            const conditionSelect = row.querySelector('.specialCondition');
+            const condXLabel = row.querySelector('.specialCondXLabel');
+            const condX = row.querySelector('.specialCondX');
+            const condYLabel = row.querySelector('.specialCondYLabel');
+            const condY = row.querySelector('.specialCondY');
+            const condAxis = row.querySelector('.specialCondAxis');
+            
+            // If it's not the first row, add a remove button
+            if (row !== conditionsContainer.firstElementChild) {
+                row.style.gridTemplateColumns = '2fr 1fr 1fr 24px';
+                const removeBtnWrapper = document.createElement('div');
+                removeBtnWrapper.style.display = 'flex';
+                removeBtnWrapper.style.alignItems = 'flex-end';
+                removeBtnWrapper.style.paddingBottom = '4px';
+
+                const removeBtn = document.createElement('button');
+                removeBtn.textContent = '✖';
+                removeBtn.style.color = 'red';
+                removeBtn.style.background = 'none';
+                removeBtn.style.border = 'none';
+                removeBtn.style.cursor = 'pointer';
+                removeBtn.style.fontSize = '16px';
+                removeBtn.style.padding = '0';
+                removeBtn.style.margin = '0';
+                removeBtn.style.boxShadow = 'none';
+                removeBtn.style.width = '100%';
+                
+                removeBtnWrapper.appendChild(removeBtn);
+                row.appendChild(removeBtnWrapper);
+                
+                removeBtn.addEventListener('click', () => {
+                    row.remove();
+                });
+            }
+
+            conditionSelect.addEventListener('change', () => {
+                if (conditionSelect.value === 'Rank') {
+                    condXLabel.textContent = 'Rank:';
+                    condX.min = 0;
+                    condYLabel.textContent = 'Axis:';
+                    condY.style.display = 'none';
+                    condAxis.style.display = 'block';
+                } else {
+                    condXLabel.textContent = 'Cond X:';
+                    condX.min = '';
+                    condYLabel.textContent = 'Cond Y:';
+                    condY.style.display = 'block';
+                    condAxis.style.display = 'none';
+                }
+            });
+        }
+
+        addAnotherConditionBtn.addEventListener('click', () => {
+            const firstRow = conditionsContainer.querySelector('.condition-row');
+            const newRow = firstRow.cloneNode(true);
+            // Reset values
+            newRow.querySelector('.specialCondition').value = 'ifEmpty';
+            newRow.querySelector('.specialCondX').value = '0';
+            newRow.querySelector('.specialCondY').value = '1';
+            newRow.querySelector('.specialCondAxis').value = 'Vertical';
+            
+            // Reset display based on ifEmpty
+            newRow.querySelector('.specialCondXLabel').textContent = 'Cond X:';
+            newRow.querySelector('.specialCondYLabel').textContent = 'Cond Y:';
+            newRow.querySelector('.specialCondY').style.display = 'block';
+            newRow.querySelector('.specialCondAxis').style.display = 'none';
+            
+            conditionsContainer.appendChild(newRow);
+            attachConditionRowListeners(newRow);
+        });
+
+        addSpecialMoveBtn.addEventListener("click", () => {
+            const hook = specialHook.value;
+            const effName = specialEffect.value;
+            const effX = parseInt(specialEffX.value) || 0;
+            const effY = parseInt(specialEffY.value) || 0;
+            const effParam = specialEffParam.value.trim();
+
+            const conditionsList = [];
+            const conditionRows = conditionsContainer.querySelectorAll('.condition-row');
+            
+            conditionRows.forEach(row => {
+                const condName = row.querySelector('.specialCondition').value;
+                const condX = parseInt(row.querySelector('.specialCondX').value) || 0;
+                const condY = parseInt(row.querySelector('.specialCondY').value) || 0;
+                const condAxis = row.querySelector('.specialCondAxis').value;
+
+                let conditionSettings = {};
+                if (condName === 'Rank') {
+                    conditionSettings = { rank: condX, axis: condAxis };
+                } else {
+                    conditionSettings = { offsetX: condX, offsetY: condY };
+                }
+                
+                conditionsList.push({
+                    name: condName,
+                    settings: conditionSettings
+                });
+            });
+
+            const specialMove = {
+                hook: hook,
+                condition: conditionsList,
+                effect: {
+                    name: effName,
+                    settings: { offsetX: effX, offsetY: effY, pieceType: effParam }
+                }
+            };
+
+            customPieceSpecialMoves.push(specialMove);
+            updateSpecialMovesList();
+            
+            // Reset conditions back to 1 row
+            while (conditionsContainer.children.length > 1) {
+                conditionsContainer.removeChild(conditionsContainer.lastChild);
+            }
+        });
+
         function updateMovesList() {
             currentMovesList.innerHTML = "";
+            const currentMovesLabel = document.getElementById("currentMovesLabel");
+            if (customPieceMoves.length === 0) {
+                currentMovesLabel.style.display = "none";
+                currentMovesList.style.display = "none";
+            } else {
+                currentMovesLabel.style.display = "block";
+                currentMovesList.style.display = "block";
+            }
             customPieceMoves.forEach((move, index) => {
                 const li = document.createElement("li");
                 li.style.marginBottom = "5px";
@@ -1083,6 +1353,50 @@
                 
                 li.appendChild(removeBtn);
                 currentMovesList.appendChild(li);
+            });
+        }
+
+        function updateSpecialMovesList() {
+            currentSpecialMovesList.innerHTML = "";
+            const currentSpecialMovesLabel = document.getElementById("currentSpecialMovesLabel");
+            if (customPieceSpecialMoves.length === 0) {
+                currentSpecialMovesLabel.style.display = "none";
+                currentSpecialMovesList.style.display = "none";
+            } else {
+                currentSpecialMovesLabel.style.display = "block";
+                currentSpecialMovesList.style.display = "block";
+            }
+            customPieceSpecialMoves.forEach((sm, index) => {
+                const li = document.createElement("li");
+                li.style.marginBottom = "5px";
+                
+                const conditionStrings = sm.condition.map(cond => {
+                    if (cond.name === 'Rank') {
+                        return `Rank(${cond.settings.rank}, ${cond.settings.axis})`;
+                    } else {
+                        return `${cond.name}(${cond.settings.offsetX},${cond.settings.offsetY})`;
+                    }
+                });
+                const conditionText = conditionStrings.join(' AND ');
+                
+                li.textContent = `${sm.hook}: if ${conditionText} -> ${sm.effect.name}(${sm.effect.settings.offsetX},${sm.effect.settings.offsetY},${sm.effect.settings.pieceType}) `;
+                
+                const removeBtn = document.createElement("button");
+                removeBtn.textContent = "✖";
+                removeBtn.style.background = "none";
+                removeBtn.style.color = "red";
+                removeBtn.style.border = "none";
+                removeBtn.style.cursor = "pointer";
+                removeBtn.style.width = "auto";
+                removeBtn.style.display = "inline";
+                
+                removeBtn.addEventListener("click", () => {
+                    customPieceSpecialMoves.splice(index, 1);
+                    updateSpecialMovesList();
+                });
+                
+                li.appendChild(removeBtn);
+                currentSpecialMovesList.appendChild(li);
             });
         }
 
@@ -1184,15 +1498,15 @@
         saveCustomPieceBtn.addEventListener("click", () => {
             const name = customPieceName.value.trim();
             if (!name) {
-                alert("Please enter a name for your custom piece");
+                showAlert("Please enter a name for your custom piece");
                 return;
             }
             if (!selectedCustomImage) {
-                alert("Please select an image for your custom piece");
+                showAlert("Please select an image for your custom piece");
                 return;
             }
             if (customPieceMoves.length === 0) {
-                alert("Please add at least one move");
+                showAlert("Please add at least one move");
                 return;
             }
 
@@ -1202,10 +1516,16 @@
                 posValue: parseInt(customPiecePosValue.value) || 2,
                 imageName: selectedCustomImage.alt,
                 moves: JSON.parse(JSON.stringify(customPieceMoves)),
+                specialMoves: JSON.parse(JSON.stringify(customPieceSpecialMoves)),
                 id: "custom_" + Date.now()
             };
 
             customPieces.push(customPiece);
+            try {
+                localStorage.setItem('chessTwo_customPieces', JSON.stringify(customPieces));
+            } catch(e) {
+                console.error("Error saving custom pieces to local storage", e);
+            }
             updateCustomPiecesMenu();
             
             // Reset form
@@ -1213,9 +1533,11 @@
             customPieceValue.value = "3";
             customPiecePosValue.value = "2";
             customPieceMoves = [];
+            customPieceSpecialMoves = [];
             updateMovesList();
+            updateSpecialMovesList();
             updatePreviewBoard();
-            alert(`Custom piece '${name}' saved! It is now available in the Place Pieces menu.`);
+            showAlert(`Custom piece '${name}' saved! It is now available in the Place Pieces menu.`);
         });
 
         // Event listeners for piece type toggle
@@ -1257,8 +1579,48 @@
                 img.title = piece.name;
                 img.dataset.customId = piece.id;
                 
+                const deleteBtn = document.createElement("button");
+                deleteBtn.textContent = "🗑";
+                deleteBtn.classList.add("custom-piece-delete");
+                deleteBtn.title = "Delete this custom piece";
+                deleteBtn.style.position = "absolute";
+                deleteBtn.style.bottom = "-25px";
+                deleteBtn.style.left = "50%";
+                deleteBtn.style.transform = "translateX(-50%)";
+                deleteBtn.style.background = "rgba(255, 0, 0, 0.2)";
+                deleteBtn.style.border = "1px solid red";
+                deleteBtn.style.color = "red";
+                deleteBtn.style.cursor = "pointer";
+                deleteBtn.style.fontSize = "12px";
+                deleteBtn.style.padding = "2px 5px";
+                deleteBtn.style.borderRadius = "3px";
+                deleteBtn.style.zIndex = "10";
+                
+                deleteBtn.addEventListener("click", async (e) => {
+                    e.stopPropagation(); // Prevent selecting the piece
+                    if (await showConfirm(`Are you sure you want to delete '${piece.name}'?`)) {
+                        const index = customPieces.findIndex(p => p.id === piece.id);
+                        if (index !== -1) {
+                            customPieces.splice(index, 1);
+                            try {
+                                localStorage.setItem('chessTwo_customPieces', JSON.stringify(customPieces));
+                            } catch(err) {
+                                console.error("Error updating local storage after deletion", err);
+                            }
+                            if (selectedImage === img) {
+                                selectedImage = null;
+                            }
+                            updateCustomPiecesMenu(color);
+                        }
+                    }
+                });
+                
+                wrapper.style.position = "relative";
+                wrapper.style.marginBottom = "25px"; // Make room for the button
+                
                 wrapper.appendChild(nameLabel);
                 wrapper.appendChild(img);
+                wrapper.appendChild(deleteBtn);
                 
                 wrapper.addEventListener("click", () => {
                     if (selectedImage == img) {
@@ -1283,6 +1645,58 @@
         // Initial display (show white images)
         generateImages("white");
         
+        // Load custom pieces from local storage
+        try {
+            const storedCustomPieces = localStorage.getItem('chessTwo_customPieces');
+            if (storedCustomPieces) {
+                const parsed = JSON.parse(storedCustomPieces);
+                if (Array.isArray(parsed)) {
+                    parsed.forEach(p => {
+                        if (!customPieces.find(existing => existing.id === p.id)) {
+                            customPieces.push(p);
+                        }
+                    });
+                    updateCustomPiecesMenu();
+                }
+            }
+        } catch(e) {
+            console.error("Error loading custom pieces from local storage", e);
+        }
+
+        // Fetch user's maps to recover old custom pieces that were saved in maps
+        fetch('/maps?pageSize=50', {
+            headers: {
+                ...Auth.getAuthHeaders()
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.maps) {
+                let foundNew = false;
+                data.maps.forEach(map => {
+                    if (map.pieces) {
+                        map.pieces.forEach(p => {
+                            if (p.isCustom && p.customDef) {
+                                // check if already exists by id
+                                if (!customPieces.find(existing => existing.id === p.customDef.id)) {
+                                    customPieces.push(p.customDef);
+                                    foundNew = true;
+                                }
+                            }
+                        });
+                    }
+                });
+                if (foundNew) {
+                    updateCustomPiecesMenu();
+                    // Save the newly recovered pieces to localStorage for future use
+                    try {
+                        localStorage.setItem('chessTwo_customPieces', JSON.stringify(customPieces));
+                    } catch(e) {}
+                }
+            }
+        })
+        .catch(err => console.error('Error fetching maps for custom pieces:', err));
+
         // Event listeners for color buttons
         showWhiteButton.addEventListener("click", () => { generateImages("white"); updateCustomPiecesMenu("white"); });
         showBlackButton.addEventListener("click", () => { generateImages("black"); updateCustomPiecesMenu("black"); });

@@ -442,6 +442,7 @@
             }
         }
     </style>
+<script src="/src/modal.js?v=1"></script>
 </head>
 <body>
     <nav>
@@ -627,7 +628,7 @@
             if (newCols >= 1 && newRows >= 1) {
             generateChessboard(newCols, newRows);
             } else {
-            alert("Invalid dimensions. Both values must be at least 1.");
+            showAlert("Invalid dimensions. Both values must be at least 1.");
             }
         });
         
@@ -667,7 +668,7 @@
             })
             .catch((error) => {
                 console.error('Error:', error);
-                alert('Error saving map');
+                showAlert('Error saving map');
             });
         });
 
