@@ -21,7 +21,11 @@ const userSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    },
+    customPieces: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'CustomPiece'
+    }]
 });
 
 module.exports = mongoose.model('User', userSchema);

@@ -6,6 +6,7 @@ const Bot = require('./models/bot'); // Import the Bot model
 const GameHistory = require('./models/gameHistory'); // Import the GameHistory model
 const UserGameRecord = require('./models/UserGameRecord');
 const User = require('./models/user');
+const CustomPiece = require('./models/customPiece');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 
@@ -789,6 +790,121 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
         if (!user) return res.status(404).json({ error: 'User not found' });
         res.status(200).json(user);
     } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/custom-pieces', authenticateToken, async (req, res) => {
+    try {
+        let user = await User.findById(req.user.id).populate('customPieces');
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        res.status(200).json(user.customPieces || []);
+    } catch (err) {
+        if (err.name === 'CastError') {
+            // Handle migration: user has literal objects instead of ObjectIds
+            try {
+                const db = mongoose.connection.db;
+                const rawUser = await db.collection('users').findOne({ _id: new mongoose.Types.ObjectId(req.user.id) });
+                if (rawUser && Array.isArray(rawUser.customPieces)) {
+                    const pieceObjectIds = [];
+                    for (const p of rawUser.customPieces) {
+                        if (!p || !p.id) continue;
+                        const pieceData = { ...p, authorId: req.user.id };
+                        delete pieceData._id;
+                        delete pieceData.__v;
+                        const updatedPiece = await CustomPiece.findOneAndUpdate(
+                            { id: p.id, authorId: req.user.id },
+                            pieceData,
+                            { upsert: true, new: true, setDefaultsOnInsert: true }
+                        );
+                        pieceObjectIds.push(updatedPiece._id);
+                    }
+                    // Update user with ObjectIds
+                    await db.collection('users').updateOne(
+                        { _id: new mongoose.Types.ObjectId(req.user.id) },
+                        { $set: { customPieces: pieceObjectIds } }
+                    );
+                    
+                    // Fetch again
+                    const migratedUser = await User.findById(req.user.id).populate('customPieces');
+                    return res.status(200).json(migratedUser.customPieces || []);
+                }
+            } catch (migrationErr) {
+                console.error("Migration error:", migrationErr);
+            }
+            return res.status(200).json([]);
+        }
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/custom-pieces', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        
+        const incomingPieces = req.body;
+        if (!Array.isArray(incomingPieces)) {
+            return res.status(400).json({ error: 'Expected an array of pieces' });
+        }
+
+        const pieceObjectIds = [];
+        for (const p of incomingPieces) {
+            if (!p.id) continue;
+            const pieceData = { ...p, authorId: req.user.id };
+            delete pieceData._id;
+            delete pieceData.__v;
+
+            const updatedPiece = await CustomPiece.findOneAndUpdate(
+                { id: p.id, authorId: req.user.id },
+                pieceData,
+                { upsert: true, new: true, setDefaultsOnInsert: true }
+            );
+            pieceObjectIds.push(updatedPiece._id);
+        }
+        
+        // Remove pieces that are no longer in the list for this user
+        await CustomPiece.deleteMany({
+            authorId: req.user.id,
+            _id: { $nin: pieceObjectIds }
+        });
+
+        user.customPieces = pieceObjectIds;
+        await user.save({ validateBeforeSave: false }); // Bypass validation for old missing fields
+        
+        const populatedUser = await User.findById(req.user.id).populate('customPieces');
+        res.status(200).json(populatedUser.customPieces || []);
+    } catch (err) {
+        if (err.name === 'CastError') {
+            return res.status(400).json({ error: 'Please refresh the page to complete piece migration.' });
+        }
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/custom-pieces/:id', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id);
+        if (!user) return res.status(404).json({ error: 'User not found' });
+        
+        const pieceToDelete = await CustomPiece.findOne({ id: req.params.id, authorId: req.user.id });
+        if (pieceToDelete) {
+            await CustomPiece.deleteOne({ _id: pieceToDelete._id });
+            
+            // Because user.customPieces might contain objects if not migrated, we filter defensively
+            user.customPieces = user.customPieces.filter(ref => {
+                if (!ref) return false;
+                const refStr = ref._id ? ref._id.toString() : ref.toString();
+                return refStr !== pieceToDelete._id.toString();
+            });
+            await user.save({ validateBeforeSave: false });
+        }
+        
+        res.status(200).json({ message: 'Piece deleted successfully' });
+    } catch (err) {
+        if (err.name === 'CastError') {
+            return res.status(400).json({ error: 'Please refresh the page to complete piece migration.' });
+        }
         res.status(500).json({ error: err.message });
     }
 });

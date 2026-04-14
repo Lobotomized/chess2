@@ -582,8 +582,9 @@
             <div id="createPiecePanel" class="panel" style="display: none; padding-bottom: 30px;">
                 <h2 style="width: 100%; border-bottom: none; font-size: 28px; margin-bottom: 20px;"><img src="/static/lg/whitePawn.png" class="icon" style="height: 32px;"> Create Piece</h2>
                 
-                <div style="display: flex; justify-content: center; margin-bottom: 30px;">
-                    <input type="text" id="customPieceName" placeholder="Piece Name" style="width: 50%; max-width: 400px; font-size: 24px; text-align: center; padding: 15px;">
+                <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 30px;">
+                    <input type="text" id="customPieceName" placeholder="Piece Name" style="width: 50%; max-width: 400px; font-size: 24px; text-align: center; padding: 15px; margin-bottom: 0;">
+                    <button id="editOldPieceBtn" style="width: auto; padding: 15px; font-size: 16px; margin-bottom: 0; background: var(--board-dark); border-color: var(--piece-black);">Edit Old Piece</button>
                 </div>
                 
                 <div class="create-piece-grid">
@@ -704,9 +705,22 @@
                     </div>
                 </div>
                 
-                <div style="display: flex; justify-content: center; margin-top: 40px; border-top: 2px solid var(--board-dark); padding-top: 20px;">
+                <div style="display: flex; justify-content: center; gap: 10px; margin-top: 40px; border-top: 2px solid var(--board-dark); padding-top: 20px;">
                     <button id="saveCustomPieceBtn" style="background: var(--highlight); color: var(--piece-white); width: 50%; max-width: 400px; font-size: 20px; padding: 15px;">Save Custom Piece</button>
+                    <button id="cancelEditPieceBtn" style="display: none; background: var(--threat); color: var(--piece-white); width: 25%; max-width: 200px; font-size: 20px; padding: 15px;">Cancel</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editCustomPieceModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); justify-content: center; align-items: center; z-index: 100000;">
+        <div style="background: #f0d9b5; padding: 30px; border-radius: 8px; border: 4px solid #2e2e2e; width: 80%; max-width: 600px; max-height: 80vh; display: flex; flex-direction: column; font-family: 'Georgia', serif; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #b58863; padding-bottom: 10px; margin-bottom: 20px;">
+                <h2 style="margin: 0; color: #2e2e2e;">Select Custom Piece to Edit</h2>
+                <button id="closeEditModalBtn" style="width: auto; background: transparent; color: #2e2e2e; border: none; font-size: 24px; padding: 0; margin: 0; cursor: pointer;">&times;</button>
+            </div>
+            <div id="editModalPiecesContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 15px; overflow-y: auto; padding: 10px;">
+                <!-- Pieces will be loaded here -->
             </div>
         </div>
     </div>
@@ -754,6 +768,11 @@
         const addMoveBtn = document.getElementById("addMoveBtn");
         const currentMovesList = document.getElementById("currentMovesList");
         const saveCustomPieceBtn = document.getElementById("saveCustomPieceBtn");
+        const cancelEditPieceBtn = document.getElementById("cancelEditPieceBtn");
+        const editOldPieceBtn = document.getElementById("editOldPieceBtn");
+        const editCustomPieceModal = document.getElementById("editCustomPieceModal");
+        const closeEditModalBtn = document.getElementById("closeEditModalBtn");
+        const editModalPiecesContainer = document.getElementById("editModalPiecesContainer");
 
         const specialHook = document.getElementById("specialHook");
         const conditionsContainer = document.getElementById("conditionsContainer");
@@ -1485,6 +1504,101 @@
             updatePreviewBoard();
         });
 
+        editOldPieceBtn.addEventListener("click", () => {
+            editModalPiecesContainer.innerHTML = "";
+            if (customPieces.length === 0) {
+                showAlert("No custom pieces created yet.");
+                return;
+            }
+            
+            customPieces.forEach(piece => {
+                const wrapper = document.createElement("div");
+                wrapper.classList.add("custom-piece-wrapper");
+                
+                const nameLabel = document.createElement("div");
+                nameLabel.classList.add("custom-piece-name");
+                nameLabel.textContent = piece.name;
+                
+                const img = document.createElement("img");
+                img.src = '/static/white' + unitImages[piece.imageName];
+                img.alt = piece.name;
+                img.style.width = "100%";
+                img.style.height = "auto";
+                img.style.padding = "5px";
+                
+                wrapper.appendChild(nameLabel);
+                wrapper.appendChild(img);
+                
+                wrapper.addEventListener("click", () => {
+                    loadCustomPieceForEditing(piece);
+                    editCustomPieceModal.style.display = "none";
+                });
+                
+                editModalPiecesContainer.appendChild(wrapper);
+            });
+            
+            editCustomPieceModal.style.display = "flex";
+        });
+
+        closeEditModalBtn.addEventListener("click", () => {
+            editCustomPieceModal.style.display = "none";
+        });
+        
+        // Also close when clicking outside the modal content
+        editCustomPieceModal.addEventListener("click", (e) => {
+            if (e.target === editCustomPieceModal) {
+                editCustomPieceModal.style.display = "none";
+            }
+        });
+
+        let editingCustomPieceId = null;
+
+        function loadCustomPieceForEditing(piece) {
+            editingCustomPieceId = piece.id;
+            customPieceName.value = piece.name;
+            customPieceValue.value = piece.value || 3;
+            customPiecePosValue.value = piece.posValue || 2;
+            
+            // Select correct image
+            const images = customImageContainer.querySelectorAll("img");
+            images.forEach(img => {
+                if (img.alt === piece.imageName) {
+                    if (selectedCustomImage) selectedCustomImage.style.background = "";
+                    selectedCustomImage = img;
+                    selectedCustomImage.style.background = "var(--selected)";
+                }
+            });
+            
+            customPieceMoves = JSON.parse(JSON.stringify(piece.moves || []));
+            customPieceSpecialMoves = JSON.parse(JSON.stringify(piece.specialMoves || []));
+            
+            updateMovesList();
+            updateSpecialMovesList();
+            updatePreviewBoard();
+            
+            saveCustomPieceBtn.textContent = "Update Custom Piece";
+            cancelEditPieceBtn.style.display = "block";
+            showAlert(`Loaded '${piece.name}' for editing.`);
+        }
+
+        cancelEditPieceBtn.addEventListener("click", () => {
+            editingCustomPieceId = null;
+            customPieceName.value = "";
+            customPieceValue.value = "3";
+            customPiecePosValue.value = "2";
+            if (selectedCustomImage) {
+                selectedCustomImage.style.background = "";
+                selectedCustomImage = null;
+            }
+            customPieceMoves = [];
+            customPieceSpecialMoves = [];
+            updateMovesList();
+            updateSpecialMovesList();
+            updatePreviewBoard();
+            saveCustomPieceBtn.textContent = "Save Custom Piece";
+            cancelEditPieceBtn.style.display = "none";
+        });
+
         saveCustomPieceBtn.addEventListener("click", () => {
             const name = customPieceName.value.trim();
             if (!name) {
@@ -1507,15 +1621,21 @@
                 imageName: selectedCustomImage.alt,
                 moves: JSON.parse(JSON.stringify(customPieceMoves)),
                 specialMoves: JSON.parse(JSON.stringify(customPieceSpecialMoves)),
-                id: "custom_" + Date.now()
+                id: editingCustomPieceId ? editingCustomPieceId : "custom_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9)
             };
 
-            customPieces.push(customPiece);
-            try {
-                localStorage.setItem('chessTwo_customPieces', JSON.stringify(customPieces));
-            } catch(e) {
-                console.error("Error saving custom pieces to local storage", e);
+            if (editingCustomPieceId) {
+                const index = customPieces.findIndex(p => p.id === editingCustomPieceId);
+                if (index !== -1) {
+                    customPieces[index] = customPiece;
+                } else {
+                    customPieces.push(customPiece);
+                }
+            } else {
+                customPieces.push(customPiece);
             }
+
+            saveCustomPiecesToDB();
             updateCustomPiecesMenu();
             
             // Reset form
@@ -1524,6 +1644,13 @@
             customPiecePosValue.value = "2";
             customPieceMoves = [];
             customPieceSpecialMoves = [];
+            editingCustomPieceId = null;
+            saveCustomPieceBtn.textContent = "Save Custom Piece";
+            cancelEditPieceBtn.style.display = "none";
+            if (selectedCustomImage) {
+                selectedCustomImage.style.background = "";
+                selectedCustomImage = null;
+            }
             updateMovesList();
             updateSpecialMovesList();
             updatePreviewBoard();
@@ -1591,16 +1718,25 @@
                     if (await showConfirm(`Are you sure you want to delete '${piece.name}'?`)) {
                         const index = customPieces.findIndex(p => p.id === piece.id);
                         if (index !== -1) {
-                            customPieces.splice(index, 1);
                             try {
-                                localStorage.setItem('chessTwo_customPieces', JSON.stringify(customPieces));
-                            } catch(err) {
-                                console.error("Error updating local storage after deletion", err);
+                                const response = await fetch(`/api/custom-pieces/${piece.id}`, {
+                                    method: 'DELETE',
+                                    headers: Auth.getAuthHeaders()
+                                });
+                                
+                                if (response.ok) {
+                                    customPieces.splice(index, 1);
+                                    if (selectedImage === img) {
+                                        selectedImage = null;
+                                    }
+                                    updateCustomPiecesMenu(color);
+                                } else {
+                                    showAlert('Failed to delete custom piece from server.');
+                                }
+                            } catch (err) {
+                                console.error("Error deleting custom piece", err);
+                                showAlert('Error deleting custom piece.');
                             }
-                            if (selectedImage === img) {
-                                selectedImage = null;
-                            }
-                            updateCustomPiecesMenu(color);
                         }
                     }
                 });
@@ -1635,57 +1771,68 @@
         // Initial display (show white images)
         generateImages("white");
         
-        // Load custom pieces from local storage
-        try {
-            const storedCustomPieces = localStorage.getItem('chessTwo_customPieces');
-            if (storedCustomPieces) {
-                const parsed = JSON.parse(storedCustomPieces);
-                if (Array.isArray(parsed)) {
-                    parsed.forEach(p => {
-                        if (!customPieces.find(existing => existing.id === p.id)) {
-                            customPieces.push(p);
-                        }
-                    });
-                    updateCustomPiecesMenu();
-                }
+        // Helper function to save custom pieces to the DB
+        async function saveCustomPiecesToDB() {
+            try {
+                await fetch('/api/custom-pieces', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...Auth.getAuthHeaders()
+                    },
+                    body: JSON.stringify(customPieces)
+                });
+            } catch(e) {
+                console.error("Error saving custom pieces to DB", e);
             }
-        } catch(e) {
-            console.error("Error loading custom pieces from local storage", e);
         }
 
-        // Fetch user's maps to recover old custom pieces that were saved in maps
-        fetch('/maps?pageSize=50', {
-            headers: {
-                ...Auth.getAuthHeaders()
-            }
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (data && data.maps) {
-                let foundNew = false;
-                data.maps.forEach(map => {
-                    if (map.pieces) {
-                        map.pieces.forEach(p => {
-                            if (p.isCustom && p.customDef) {
-                                // check if already exists by id
-                                if (!customPieces.find(existing => existing.id === p.customDef.id)) {
-                                    customPieces.push(p.customDef);
-                                    foundNew = true;
-                                }
+        // Load custom pieces from DB
+        async function loadCustomPieces() {
+            try {
+                const res = await fetch('/api/custom-pieces', {
+                    headers: { ...Auth.getAuthHeaders() }
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (Array.isArray(data)) {
+                        data.forEach(p => {
+                            if (!p.id) p.id = "custom_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+                            if (!customPieces.find(existing => existing.id === p.id || (existing.name === p.name && !existing.id))) {
+                                customPieces.push(p);
                             }
                         });
+                        updateCustomPiecesMenu();
                     }
-                });
-                if (foundNew) {
-                    updateCustomPiecesMenu();
-                    // Save the newly recovered pieces to localStorage for future use
-                    try {
-                        localStorage.setItem('chessTwo_customPieces', JSON.stringify(customPieces));
-                    } catch(e) {}
                 }
+                
+                // MIGRATION: Check localStorage, if there are custom pieces, add them and save to DB
+                const storedCustomPieces = localStorage.getItem('chessTwo_customPieces');
+                if (storedCustomPieces) {
+                    const parsed = JSON.parse(storedCustomPieces);
+                    if (Array.isArray(parsed)) {
+                        let migrated = false;
+                        parsed.forEach(p => {
+                            if (!p.id) p.id = "custom_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9);
+                            if (!customPieces.find(existing => existing.id === p.id || (existing.name === p.name && !existing.id))) {
+                                customPieces.push(p);
+                                migrated = true;
+                            }
+                        });
+                        if (migrated) {
+                            await saveCustomPiecesToDB();
+                        }
+                        // Clear localStorage so migration doesn't run again
+                        localStorage.removeItem('chessTwo_customPieces');
+                        updateCustomPiecesMenu();
+                    }
+                }
+            } catch(e) {
+                console.error("Error loading custom pieces", e);
             }
-        })
-        .catch(err => console.error('Error fetching maps for custom pieces:', err));
+        }
+        
+        loadCustomPieces();
 
         // Event listeners for color buttons
         showWhiteButton.addEventListener("click", () => { generateImages("white"); updateCustomPiecesMenu("white"); });
