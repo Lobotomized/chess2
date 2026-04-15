@@ -666,7 +666,7 @@
                             <div id="uploadedImageSection" style="display: none;">
                                 <h4 style="margin: 0 0 5px 0; font-size: 14px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 3px;">Custom Images</h4>
                                 <div id="noCustomImagesMsg" style="font-size: 14px; color: var(--piece-black); font-style: italic; margin-bottom: 15px; text-align: center; padding: 10px;">No Custom Images yet</div>
-                                <div id="uploadedImageGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 15px;"></div>
+                                <div id="uploadedImageGrid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 15px;"></div>
                             </div>
                             
                             <div id="classicImageSection">
@@ -917,10 +917,18 @@
             const blackFile = customPieceImageUploadBlack.files[0];
             if (!whiteFile || !blackFile) {
                 showAlert('Please select both White and Black images to upload.');
+                customPieceImageUploadWhite.value = '';
+                fileNameDisplayWhite.textContent = 'No file chosen';
+                customPieceImageUploadBlack.value = '';
+                fileNameDisplayBlack.textContent = 'No file chosen';
                 return;
             }
             if (whiteFile.size > 500 * 1024 || blackFile.size > 500 * 1024) {
                 showAlert('Image sizes exceed the 500KB limit. Please choose smaller images.');
+                customPieceImageUploadWhite.value = '';
+                fileNameDisplayWhite.textContent = 'No file chosen';
+                customPieceImageUploadBlack.value = '';
+                fileNameDisplayBlack.textContent = 'No file chosen';
                 return;
             }
 
@@ -943,31 +951,70 @@
                 
                 const data = await res.json();
                 if (res.ok) {
-                    const img = document.createElement("img");
-                    img.src = data.whiteImageUrl;
-                    img.alt = 'UPLOADED:' + data.whiteImageUrl + '|' + data.blackImageUrl;
-                    img.dataset.url = data.whiteImageUrl;
-                    img.dataset.blackUrl = data.blackImageUrl;
-                    img.style.width = "100%";
-                    img.style.cursor = "pointer";
-                    img.style.padding = "2px";
-                    img.style.borderRadius = "4px";
+                    const pairContainer = document.createElement("div");
+                    pairContainer.style.display = "flex";
+                    pairContainer.style.gap = "5px";
+                    pairContainer.style.padding = "5px";
+                    pairContainer.style.border = "1px solid var(--board-dark)";
+                    pairContainer.style.borderRadius = "4px";
+                    pairContainer.style.background = "rgba(0,0,0,0.05)";
+
+                    const createImgWrapper = (url, label) => {
+                        const wrapper = document.createElement("div");
+                        wrapper.style.flex = "1";
+                        wrapper.style.display = "flex";
+                        wrapper.style.flexDirection = "column";
+                        wrapper.style.alignItems = "center";
+                        
+                        const lbl = document.createElement("div");
+                        lbl.textContent = label;
+                        lbl.style.fontSize = "10px";
+                        lbl.style.fontWeight = "bold";
+                        lbl.style.marginBottom = "2px";
+                        lbl.style.color = "var(--piece-black)";
+                        wrapper.appendChild(lbl);
+
+                        const img = document.createElement("img");
+                        img.src = url;
+                        img.alt = 'UPLOADED:' + data.whiteImageUrl + '|' + data.blackImageUrl;
+                        img.dataset.url = data.whiteImageUrl;
+                        img.dataset.blackUrl = data.blackImageUrl;
+                        img.style.width = "100%";
+                        img.style.cursor = "pointer";
+                        img.style.padding = "2px";
+                        img.style.borderRadius = "4px";
+                        wrapper.appendChild(img);
+
+                        return { wrapper, img };
+                    };
+
+                    const whiteObj = createImgWrapper(data.whiteImageUrl, "WHITE");
+                    const blackObj = createImgWrapper(data.blackImageUrl, "BLACK");
+
+                    pairContainer.appendChild(whiteObj.wrapper);
+                    pairContainer.appendChild(blackObj.wrapper);
+
                     const uploadedImageGrid = document.getElementById("uploadedImageGrid");
                     const noCustomImagesMsg = document.getElementById("noCustomImagesMsg");
                     if (noCustomImagesMsg) noCustomImagesMsg.style.display = "none";
-                    uploadedImageGrid.insertBefore(img, uploadedImageGrid.firstChild);
+                    
+                    uploadedImageGrid.insertBefore(pairContainer, uploadedImageGrid.firstChild);
 
-                    img.addEventListener("click", () => {
+                    const clickHandler = (clickedImg) => {
                         if (selectedCustomImage) selectedCustomImage.style.background = "";
-                        selectedCustomImage = img;
+                        selectedCustomImage = clickedImg;
                         selectedCustomImageUrl = data.whiteImageUrl;
                         selectedCustomImageBlackUrl = data.blackImageUrl;
                         selectedCustomImage.style.background = "var(--selected)";
                         updatePreviewBoard();
-                    });
+                    };
 
-                    // Auto-select
-                    img.click();
+                    whiteObj.img.addEventListener("click", () => clickHandler(whiteObj.img));
+                    blackObj.img.addEventListener("click", () => clickHandler(blackObj.img));
+
+                    // Auto-select white
+                    whiteObj.img.click();
+                    
                     showAlert('Image pair uploaded successfully!');
                     customPieceImageUploadWhite.value = '';
                     fileNameDisplayWhite.textContent = 'No file chosen';
@@ -975,10 +1022,18 @@
                     fileNameDisplayBlack.textContent = 'No file chosen';
                 } else {
                     showAlert(data.error || 'Upload failed');
+                    customPieceImageUploadWhite.value = '';
+                    fileNameDisplayWhite.textContent = 'No file chosen';
+                    customPieceImageUploadBlack.value = '';
+                    fileNameDisplayBlack.textContent = 'No file chosen';
                 }
             } catch (err) {
                 console.error(err);
                 showAlert('An error occurred during upload.');
+                customPieceImageUploadWhite.value = '';
+                fileNameDisplayWhite.textContent = 'No file chosen';
+                customPieceImageUploadBlack.value = '';
+                fileNameDisplayBlack.textContent = 'No file chosen';
             } finally {
                 uploadImageBtn.disabled = false;
                 uploadImageBtn.textContent = originalText;
@@ -1294,25 +1349,95 @@
                         if (userImages.length > 0) {
                             const noCustomImagesMsg = document.getElementById("noCustomImagesMsg");
                             if (noCustomImagesMsg) noCustomImagesMsg.style.display = "none";
-                            userImages.forEach(imageUrl => {
-                                const img = document.createElement("img");
-                                img.src = imageUrl;
-                                img.alt = 'UPLOADED:' + imageUrl;
-                                img.dataset.url = imageUrl;
-                                img.style.width = "100%";
-                                img.style.cursor = "pointer";
-                                img.style.padding = "2px";
-                                img.style.borderRadius = "4px";
-                                uploadedImageGrid.appendChild(img);
+                            
+                            // Group images into pairs (assuming they were uploaded sequentially)
+                            // The backend returns them sorted by time (descending), so typically: [black, white, black, white]
+                            for (let i = 0; i < userImages.length; i += 2) {
+                                const img1Url = userImages[i];
+                                const img2Url = userImages[i + 1];
+                                
+                                if (!img2Url) {
+                                    // Single image fallback (for old uploads before pairing was enforced)
+                                    const img = document.createElement("img");
+                                    img.src = img1Url;
+                                    img.alt = 'UPLOADED:' + img1Url;
+                                    img.dataset.url = img1Url;
+                                    img.style.width = "100%";
+                                    img.style.cursor = "pointer";
+                                    img.style.padding = "2px";
+                                    img.style.borderRadius = "4px";
+                                    uploadedImageGrid.appendChild(img);
+    
+                                    img.addEventListener("click", () => {
+                                        if (selectedCustomImage) selectedCustomImage.style.background = "";
+                                        selectedCustomImage = img;
+                                        selectedCustomImageUrl = img1Url;
+                                        selectedCustomImage.style.background = "var(--selected)";
+                                        updatePreviewBoard();
+                                    });
+                                    continue;
+                                }
 
-                                img.addEventListener("click", () => {
+                                // Try to guess which is white and which is black based on typical upload order (white then black -> black gets newer timestamp -> black is first in descending order)
+                                let whiteUrl = img2Url;
+                                let blackUrl = img1Url;
+
+                                const pairContainer = document.createElement("div");
+                                pairContainer.style.display = "flex";
+                                pairContainer.style.gap = "5px";
+                                pairContainer.style.padding = "5px";
+                                pairContainer.style.border = "1px solid var(--board-dark)";
+                                pairContainer.style.borderRadius = "4px";
+                                pairContainer.style.background = "rgba(0,0,0,0.05)";
+
+                                const createImgWrapper = (url, label) => {
+                                    const wrapper = document.createElement("div");
+                                    wrapper.style.flex = "1";
+                                    wrapper.style.display = "flex";
+                                    wrapper.style.flexDirection = "column";
+                                    wrapper.style.alignItems = "center";
+                                    
+                                    const lbl = document.createElement("div");
+                                    lbl.textContent = label;
+                                    lbl.style.fontSize = "10px";
+                                    lbl.style.fontWeight = "bold";
+                                    lbl.style.marginBottom = "2px";
+                                    lbl.style.color = "var(--piece-black)";
+                                    wrapper.appendChild(lbl);
+
+                                    const img = document.createElement("img");
+                                    img.src = url;
+                                    img.alt = 'UPLOADED:' + whiteUrl + '|' + blackUrl;
+                                    img.dataset.url = whiteUrl;
+                                    img.dataset.blackUrl = blackUrl;
+                                    img.style.width = "100%";
+                                    img.style.cursor = "pointer";
+                                    img.style.padding = "2px";
+                                    img.style.borderRadius = "4px";
+                                    wrapper.appendChild(img);
+
+                                    return { wrapper, img };
+                                };
+
+                                const whiteObj = createImgWrapper(whiteUrl, "WHITE");
+                                const blackObj = createImgWrapper(blackUrl, "BLACK");
+
+                                pairContainer.appendChild(whiteObj.wrapper);
+                                pairContainer.appendChild(blackObj.wrapper);
+                                uploadedImageGrid.appendChild(pairContainer);
+
+                                const clickHandler = (clickedImg) => {
                                     if (selectedCustomImage) selectedCustomImage.style.background = "";
-                                    selectedCustomImage = img;
-                                    selectedCustomImageUrl = imageUrl;
+                                    selectedCustomImage = clickedImg;
+                                    selectedCustomImageUrl = whiteUrl;
+                                    selectedCustomImageBlackUrl = blackUrl;
                                     selectedCustomImage.style.background = "var(--selected)";
                                     updatePreviewBoard();
-                                });
-                            });
+                                };
+
+                                whiteObj.img.addEventListener("click", () => clickHandler(whiteObj.img));
+                                blackObj.img.addEventListener("click", () => clickHandler(blackObj.img));
+                            }
                         }
                     }
                 } catch(e) {
@@ -1809,7 +1934,10 @@
             let isCustom = false;
             
             allImages.forEach(img => {
-                if (img.alt === piece.imageName || img.alt === 'UPLOADED:' + piece.imageName) {
+                const isMatch = img.alt === piece.imageName || 
+                               (img.alt.startsWith('UPLOADED:') && img.alt.split('UPLOADED:')[1].split('|')[0] === piece.imageName);
+                
+                if (isMatch) {
                     if (selectedCustomImage) selectedCustomImage.style.background = "";
                     selectedCustomImage = img;
                     selectedCustomImage.style.background = "var(--selected)";

@@ -763,16 +763,31 @@ app.post('/api/upload-image-pair', authenticateToken, (req, res) => {
     ]);
     
     uploadPair(req, res, function (err) {
+        // Helper function to clean up any files that were uploaded before an error occurred
+        const cleanupFiles = () => {
+            if (req.files) {
+                if (req.files['whiteImage'] && req.files['whiteImage'][0]) {
+                    fs.unlink(req.files['whiteImage'][0].path, (e) => { if (e) console.error(e); });
+                }
+                if (req.files['blackImage'] && req.files['blackImage'][0]) {
+                    fs.unlink(req.files['blackImage'][0].path, (e) => { if (e) console.error(e); });
+                }
+            }
+        };
+
         if (err instanceof multer.MulterError) {
+            cleanupFiles();
             if (err.code === 'LIMIT_FILE_SIZE') {
                 return res.status(400).json({ error: 'File size cannot exceed 500KB.' });
             }
             return res.status(400).json({ error: err.message });
         } else if (err) {
+            cleanupFiles();
             return res.status(400).json({ error: err.message });
         }
         
         if (!req.files || !req.files['whiteImage'] || !req.files['blackImage']) {
+            cleanupFiles();
             return res.status(400).json({ error: 'Both white and black image files are required' });
         }
         
