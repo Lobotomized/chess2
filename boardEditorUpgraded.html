@@ -346,8 +346,8 @@
             align-items: center;
             cursor: pointer;
             transition: transform 0.2s;
-            padding: 5px;
             border-radius: 4px;
+            min-width: 0;
         }
 
         .custom-piece-wrapper:hover {
@@ -361,8 +361,10 @@
             color: var(--board-dark);
             text-align: center;
             margin-bottom: 2px;
-            word-wrap: break-word;
-            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
         }
 
         /* Scrollbar */
@@ -590,8 +592,16 @@
                 <div class="create-piece-grid">
                     <div class="cp-col">
                         <label style="display: block; font-size: 18px; border-bottom: 2px solid var(--board-dark); padding-bottom: 5px; margin-bottom: 15px;">1. Select Image</label>
-                        <div id="customImageContainer" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; max-height: 400px; overflow-y: auto; margin-bottom: 10px; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 4px; border: 1px solid var(--board-dark);">
-                            <!-- Images populated by JS -->
+                        <div style="margin-bottom: 10px; display: flex; gap: 10px; align-items: center;">
+                            <input type="file" id="customPieceImageUpload" accept="image/*" style="font-size: 14px; max-width: 200px;">
+                            <button id="uploadImageBtn" style="padding: 5px 10px; font-size: 14px; width: auto; margin: 0;">Upload</button>
+                        </div>
+                        <div id="customImageContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 10px; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 4px; border: 1px solid var(--board-dark);">
+                            <h4 style="margin: 0 0 5px 0; font-size: 14px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 3px;">Custom Images</h4>
+                            <div id="uploadedImageGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 15px;"></div>
+                            
+                            <h4 style="margin: 0 0 5px 0; font-size: 14px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 3px;">Classic Images</h4>
+                            <div id="classicImageGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;"></div>
                         </div>
                     </div>
 
@@ -756,6 +766,8 @@
         const createPiecePanel = document.getElementById("createPiecePanel");
         const customImageContainer = document.getElementById("customImageContainer");
         const customPieceName = document.getElementById("customPieceName");
+        const customPieceImageUpload = document.getElementById("customPieceImageUpload");
+        const uploadImageBtn = document.getElementById("uploadImageBtn");
         const customPieceValue = document.getElementById("customPieceValue");
         const customPiecePosValue = document.getElementById("customPiecePosValue");
         const moveTypeSelect = document.getElementById("moveType");
@@ -805,7 +817,60 @@
         let addMode = false;
         let selectedImage = null;
         let selectedCustomImage = null;
+        let selectedCustomImageUrl = null;
         let customPieceMoves = [];
+
+        uploadImageBtn.addEventListener('click', async () => {
+            const file = customPieceImageUpload.files[0];
+            if (!file) {
+                showAlert('Please select a file to upload first.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            try {
+                const res = await fetch('/api/upload-image', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': Auth.getAuthHeaders()['Authorization']
+                    },
+                    body: formData
+                });
+                
+                const data = await res.json();
+                if (res.ok) {
+                    const img = document.createElement("img");
+                    img.src = data.imageUrl;
+                    img.alt = 'UPLOADED:' + data.imageUrl;
+                    img.dataset.url = data.imageUrl;
+                    img.style.width = "100%";
+                    img.style.cursor = "pointer";
+                    img.style.padding = "2px";
+                    img.style.borderRadius = "4px";
+                    const uploadedImageGrid = document.getElementById("uploadedImageGrid");
+                    uploadedImageGrid.insertBefore(img, uploadedImageGrid.firstChild);
+
+                    img.addEventListener("click", () => {
+                        if (selectedCustomImage) selectedCustomImage.style.background = "";
+                        selectedCustomImage = img;
+                        selectedCustomImageUrl = data.imageUrl;
+                        selectedCustomImage.style.background = "var(--selected)";
+                        updatePreviewBoard();
+                    });
+
+                    // Auto-select
+                    img.click();
+                    showAlert('Image uploaded successfully!');
+                } else {
+                    showAlert(data.error || 'Upload failed');
+                }
+            } catch (err) {
+                console.error(err);
+                showAlert('An error occurred during upload.');
+            }
+        });
         let customPieceSpecialMoves = [];
         const customPieces = []; // Store custom pieces created by the user
         const piecesObjectArray = [];
@@ -966,7 +1031,7 @@
                         color: p.color,
                         moves: adjustedMoves,
                         name: p.customDef.name,
-                        icon: p.color + p.pieceType,
+                        icon: p.customDef.imageUrl ? p.customDef.imageUrl : (p.color + p.pieceType),
                         value: p.customDef.value !== undefined ? p.customDef.value : 3,
                         posValue: p.customDef.posValue !== undefined ? p.customDef.posValue : 2
                     };
@@ -1096,10 +1161,46 @@
         };
         
         // Function to generate images in the container
-        function generateImages(color) {
+        async function generateImages(color) {
             imageContainer.innerHTML = ""; 
-            if (customImageContainer.children.length === 0) {
+            const classicImageGrid = document.getElementById("classicImageGrid");
+            const uploadedImageGrid = document.getElementById("uploadedImageGrid");
+
+            if (classicImageGrid.children.length === 0) {
                 // Populate custom image container only once
+                
+                // First, fetch and load any custom images the user has uploaded
+                try {
+                    const userImagesRes = await fetch('/api/user-images', {
+                        headers: Auth.getAuthHeaders()
+                    });
+                    if (userImagesRes.ok) {
+                        const userImages = await userImagesRes.json();
+                        userImages.forEach(imageUrl => {
+                            const img = document.createElement("img");
+                            img.src = imageUrl;
+                            img.alt = 'UPLOADED:' + imageUrl;
+                            img.dataset.url = imageUrl;
+                            img.style.width = "100%";
+                            img.style.cursor = "pointer";
+                            img.style.padding = "2px";
+                            img.style.borderRadius = "4px";
+                            uploadedImageGrid.appendChild(img);
+
+                            img.addEventListener("click", () => {
+                                if (selectedCustomImage) selectedCustomImage.style.background = "";
+                                selectedCustomImage = img;
+                                selectedCustomImageUrl = imageUrl;
+                                selectedCustomImage.style.background = "var(--selected)";
+                                updatePreviewBoard();
+                            });
+                        });
+                    }
+                } catch(e) {
+                    console.error('Error fetching user images:', e);
+                }
+
+                // Then populate standard piece images
                 for (const unit in unitImages) {
                     const img = document.createElement("img");
                     img.src = '/static/white' + unitImages[unit];
@@ -1108,7 +1209,7 @@
                     img.style.cursor = "pointer";
                     img.style.padding = "2px";
                     img.style.borderRadius = "4px";
-                    customImageContainer.appendChild(img);
+                    classicImageGrid.appendChild(img);
 
                     img.addEventListener("click", () => {
                         if (selectedCustomImage) selectedCustomImage.style.background = "";
@@ -1281,7 +1382,17 @@
             const effName = specialEffect.value;
             const effX = parseInt(specialEffX.value) || 0;
             const effY = parseInt(specialEffY.value) || 0;
-            const effParam = effName === 'causeVictory' ? specialEffParamVictory.value.trim() : specialEffParam.value.trim();
+            let effParam = effName === 'causeVictory' ? specialEffParamVictory.value.trim() : specialEffParam.value.trim();
+            let customDef = undefined;
+            
+            if (effName !== 'causeVictory' && effParam.startsWith('custom_')) {
+                const pieceId = effParam.replace('custom_', '');
+                const cp = customPieces.find(p => p.id === pieceId);
+                if (cp) {
+                    effParam = 'customPiece';
+                    customDef = cp;
+                }
+            }
 
             const conditionsList = [];
             const conditionRows = conditionsContainer.querySelectorAll('.condition-row');
@@ -1313,6 +1424,9 @@
                     settings: { offsetX: effX, offsetY: effY, pieceType: effParam }
                 }
             };
+            if (customDef) {
+                specialMove.effect.settings.customDef = customDef;
+            }
 
             customPieceSpecialMoves.push(specialMove);
             updateSpecialMovesList();
@@ -1388,7 +1502,11 @@
                 });
                 const conditionText = conditionStrings.length > 0 ? `if ${conditionStrings.join(' AND ')} -> ` : '';
                 
-                li.textContent = `${sm.hook}: ${conditionText}${sm.effect.name}(${sm.effect.settings.offsetX},${sm.effect.settings.offsetY},${sm.effect.settings.pieceType}) `;
+                let pieceNameDisplay = sm.effect.settings.pieceType;
+                if (sm.effect.settings.customDef) {
+                    pieceNameDisplay = "Custom: " + sm.effect.settings.customDef.name;
+                }
+                li.textContent = `${sm.hook}: ${conditionText}${sm.effect.name}(${sm.effect.settings.offsetX},${sm.effect.settings.offsetY},${pieceNameDisplay}) `;
                 
                 const removeBtn = document.createElement("button");
                 removeBtn.textContent = "✖";
@@ -1518,9 +1636,14 @@
                 const nameLabel = document.createElement("div");
                 nameLabel.classList.add("custom-piece-name");
                 nameLabel.textContent = piece.name;
+                nameLabel.title = piece.name;
                 
                 const img = document.createElement("img");
-                img.src = '/static/white' + unitImages[piece.imageName];
+                if (piece.imageUrl) {
+                    img.src = piece.imageUrl;
+                } else {
+                    img.src = '/static/white' + unitImages[piece.imageName];
+                }
                 img.alt = piece.name;
                 img.style.width = "100%";
                 img.style.height = "auto";
@@ -1618,7 +1741,8 @@
                 name: name,
                 value: parseInt(customPieceValue.value) || 3,
                 posValue: parseInt(customPiecePosValue.value) || 2,
-                imageName: selectedCustomImage.alt,
+                imageName: selectedCustomImage.alt.startsWith('UPLOADED:') ? selectedCustomImage.alt.split('UPLOADED:')[1] : selectedCustomImage.alt,
+                imageUrl: selectedCustomImage.alt.startsWith('UPLOADED:') ? selectedCustomImage.alt.split('UPLOADED:')[1] : null,
                 moves: JSON.parse(JSON.stringify(customPieceMoves)),
                 specialMoves: JSON.parse(JSON.stringify(customPieceSpecialMoves)),
                 id: editingCustomPieceId ? editingCustomPieceId : "custom_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9)
@@ -1682,6 +1806,20 @@
             }
             customPiecesContainer.innerHTML = "";
             
+            // Update special effect param dropdown with custom pieces
+            Array.from(specialEffParam.options).forEach(opt => {
+                if (opt.value.startsWith('custom_')) {
+                    opt.remove();
+                }
+            });
+            
+            customPieces.forEach(piece => {
+                const option = document.createElement("option");
+                option.value = 'custom_' + piece.id;
+                option.textContent = "Custom: " + piece.name;
+                specialEffParam.appendChild(option);
+            });
+            
             customPieces.forEach(piece => {
                 const wrapper = document.createElement("div");
                 wrapper.classList.add("custom-piece-wrapper");
@@ -1691,7 +1829,11 @@
                 nameLabel.textContent = piece.name;
                 
                 const img = document.createElement("img");
-                img.src = '/static/' + color + unitImages[piece.imageName];
+                if (piece.imageUrl) {
+                    img.src = piece.imageUrl;
+                } else {
+                    img.src = '/static/' + color + unitImages[piece.imageName];
+                }
                 img.alt = piece.name;
                 img.title = piece.name;
                 img.dataset.customId = piece.id;
@@ -1700,10 +1842,7 @@
                 deleteBtn.textContent = "🗑";
                 deleteBtn.classList.add("custom-piece-delete");
                 deleteBtn.title = "Delete this custom piece";
-                deleteBtn.style.position = "absolute";
-                deleteBtn.style.bottom = "-25px";
-                deleteBtn.style.left = "50%";
-                deleteBtn.style.transform = "translateX(-50%)";
+                deleteBtn.style.marginTop = "5px";
                 deleteBtn.style.background = "rgba(255, 0, 0, 0.2)";
                 deleteBtn.style.border = "1px solid red";
                 deleteBtn.style.color = "red";
@@ -1712,6 +1851,7 @@
                 deleteBtn.style.padding = "2px 5px";
                 deleteBtn.style.borderRadius = "3px";
                 deleteBtn.style.zIndex = "10";
+                deleteBtn.style.width = "100%";
                 
                 deleteBtn.addEventListener("click", async (e) => {
                     e.stopPropagation(); // Prevent selecting the piece
@@ -1742,7 +1882,6 @@
                 });
                 
                 wrapper.style.position = "relative";
-                wrapper.style.marginBottom = "25px"; // Make room for the button
                 
                 wrapper.appendChild(nameLabel);
                 wrapper.appendChild(img);

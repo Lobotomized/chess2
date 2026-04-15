@@ -9,10 +9,36 @@ const User = require('./models/user');
 const CustomPiece = require('./models/customPiece');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
+
+// Ensure uploads directory exists
+const uploadsDir = path.join(__dirname, 'uploads', 'custom-pieces');
+if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadsDir);
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, 'user-' + (req.user ? req.user.id : 'anon') + '-' + uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ 
+    storage: storage,
+    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+});
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key_here'; // Fallback for dev
 
 app.use(express.json({ limit: '50mb' })); // Allow JSON body parsing with large limit
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use('/boardGeneration.js', express.static('./boardGeneration.js'))
 app.use('/pieceDefinitions.js', express.static('./pieceDefinitions.js'))
 app.use('/customEffects.js', express.static('./customEffects.js'))
@@ -729,6 +755,45 @@ const authenticateToken = (req, res, next) => {
         next();
     });
 };
+
+app.post('/api/upload-image', authenticateToken, upload.single('image'), (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ error: 'No image file provided' });
+    }
+    // Return the path relative to the root, which will be accessible via the static route
+    const imageUrl = `/uploads/custom-pieces/${req.file.filename}`;
+    res.status(200).json({ imageUrl });
+});
+
+app.get('/api/user-images', authenticateToken, (req, res) => {
+    const userId = req.user.id;
+    const userUploadsDir = path.join(__dirname, 'uploads', 'custom-pieces');
+    
+    fs.readdir(userUploadsDir, (err, files) => {
+        if (err) {
+            // If the directory doesn't exist yet, return an empty array
+            if (err.code === 'ENOENT') {
+                return res.status(200).json([]);
+            }
+            return res.status(500).json({ error: 'Could not read directory' });
+        }
+        
+        // Filter for files belonging to this user based on the prefix defined in multer
+        const userFiles = files.filter(file => file.startsWith(`user-${userId}-`));
+        
+        // Sort by creation time (descending) by extracting timestamp from filename, 
+        // or by file stat if needed. The filename contains Date.now()
+        userFiles.sort((a, b) => {
+            const timeA = parseInt(a.split('-')[2]);
+            const timeB = parseInt(b.split('-')[2]);
+            return timeB - timeA;
+        });
+
+        const imageUrls = userFiles.map(file => `/uploads/custom-pieces/${file}`);
+        res.status(200).json(imageUrls);
+    });
+});
+
 
 // Auth routes
 app.post('/api/auth/register', async (req, res) => {

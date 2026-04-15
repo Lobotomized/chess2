@@ -66,6 +66,51 @@ const conditions = {
     }
 };
 
+const _ceUnitImages = {
+    queenBugImage: "QueenBug.png",
+    kingImage: "King.png",
+    shroomImage: "Shroom.png",
+    pawnImage: "Pawn.png",
+    goliathBugImage: "GoliathBug.png",
+    antImage: "Ant.png",
+    knightImage: "Knight.png",
+    rookImage: "Rook.png",
+    queenImage: "Queen.png",
+    bishopImage: "Bishop.png",
+    dragonImage: "Dragon.png",
+    ricarImage: "Ricar.png",
+    horseImage: "Horse.png",
+    ghostImage: "Ghost.png",
+    hatImage: "Hat.png",
+    clownImage: "Clown.png",
+    pigImage: "Pig.png",
+    ladyBugImage: "LadyBug.png",
+    spiderImage: "Spider.png",
+    swordsMenImage: "Swordsmen.png",
+    northernKingImage: "NorthernKing.png",
+    pikemanImage: "Pikeman.png",
+    gargoyleImage: "Gargoyle.png",
+    fencerImage: "Fencer.png",
+    generalImage: "General.png",
+    shieldImage: "Shield.png",
+    plagueDoctorImage: "PlagueDoctor.png",
+    starManImage: "StarMan.png",
+    sleepingDragonImage: "SleepingDragon.png",
+    cyborgImage: "Cyborg.png",
+    crystalImage: "Crystal.png",
+    empoweredCrystalImage: "CrystalEmpowered.png",
+    executorImage: "Executor.png",
+    juggernautImage: "Juggernaut.png",
+    bootVesselImage: "Bootvessel.png",
+
+    electricCatImage: "ElectricCat.png",
+    longCatImage: "LongCat.png",
+    scaryCatImage: "ScaryCat.png",
+    blindCatImage: "BlindCat.png",
+    fatCatImage: "FatCat.png",
+    cuteCatImage: "CuteCat.png"
+};
+
 const effects = {
     spawn: function(state, piece, settings) {
         // Assume offsetY = 1 means "1 square forward"
@@ -81,68 +126,133 @@ const effects = {
         
         // Piece type to spawn, passed in settings.pieceType (e.g., 'ghostFactory')
         const factoryName = settings.pieceType;
-        const _globalObj = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : global);
-        const factoryFunc = _globalObj[factoryName];
         
-        if (typeof factoryFunc === 'function') {
-            const spawnedPiece = factoryFunc(piece.color, targetX, targetY);
-            
-            // Ensure the spawned piece gets tracked correctly
-            // Important for logic calculating distances and preventing tracking bugs
-            spawnedPiece.initialX = targetX;
-            spawnedPiece.initialY = targetY;
-            
-            // Also ensure it gets a unique ID if it needs one so find functions don't get confused
-            if (!spawnedPiece.id) {
-                spawnedPiece.id = "spawned_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+        let spawnedPiece;
+        if (factoryName === 'customPiece' && settings.customDef) {
+            // It's a custom piece
+            let adjustedMoves = JSON.parse(JSON.stringify(settings.customDef.moves));
+            if (piece.color === 'black') {
+                adjustedMoves = adjustedMoves.map(move => {
+                    if (move.y !== undefined) move.y = -move.y;
+                    if (move.offsetY !== undefined) move.offsetY = -move.offsetY;
+                    return move;
+                });
             }
-            
-            // Re-apply custom effects logic if the spawned piece factory actually returned
-            // a custom piece definition. (Most standard factories don't have customDef).
-            if (spawnedPiece.customDef && typeof _globalObj.applyCustomEffects === 'function') {
-                _globalObj.applyCustomEffects(spawnedPiece, spawnedPiece.customDef);
+            let finalIcon = '';
+            if (settings.customDef.imageUrl) {
+                finalIcon = settings.customDef.imageUrl;
+            } else {
+                finalIcon = piece.color + (_ceUnitImages[settings.customDef.imageName] || settings.customDef.imageName);
             }
-            
-            state.pieces.push(spawnedPiece);
+
+            spawnedPiece = {
+                x: targetX,
+                y: targetY,
+                initialX: targetX,
+                initialY: targetY,
+                color: piece.color,
+                moves: adjustedMoves,
+                name: settings.customDef.name,
+                icon: finalIcon,
+                value: settings.customDef.value !== undefined ? settings.customDef.value : 3,
+                posValue: settings.customDef.posValue !== undefined ? settings.customDef.posValue : 2,
+                customDef: settings.customDef,
+                isCustom: true,
+                id: "spawned_" + Date.now() + "_" + Math.floor(Math.random() * 1000)
+            };
         } else {
-            console.error(`customEffects spawn error: Factory function '${factoryName}' not found.`);
+            const _globalObj = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : global);
+            const factoryFunc = _globalObj[factoryName];
+            
+            if (typeof factoryFunc === 'function') {
+                spawnedPiece = factoryFunc(piece.color, targetX, targetY);
+                spawnedPiece.initialX = targetX;
+                spawnedPiece.initialY = targetY;
+                if (!spawnedPiece.id) {
+                    spawnedPiece.id = "spawned_" + Date.now() + "_" + Math.floor(Math.random() * 1000);
+                }
+            } else {
+                console.error(`customEffects spawn error: Factory function '${factoryName}' not found.`);
+                return;
+            }
         }
+        
+        // Re-apply custom effects logic if the spawned piece actually returned a custom piece definition.
+        if (spawnedPiece.customDef) {
+            const _globalObj = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : global);
+            if (typeof _globalObj.applyCustomEffects === 'function') {
+                _globalObj.applyCustomEffects(spawnedPiece, spawnedPiece.customDef);
+            } else if (typeof applyCustomEffects === 'function') {
+                applyCustomEffects(spawnedPiece, spawnedPiece.customDef);
+            }
+        }
+        
+        state.pieces.push(spawnedPiece);
     },
     morph: function(state, piece, settings) {
         const factoryName = settings.pieceType;
-        const _globalObj = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : global);
-        const factoryFunc = _globalObj[factoryName];
         
-        if (typeof factoryFunc === 'function') {
-            const newPiece = factoryFunc(piece.color, piece.x, piece.y);
-            
-            // Retain tracked values
-            newPiece.initialX = piece.initialX;
-            newPiece.initialY = piece.initialY;
-            newPiece.id = piece.id || ("morphed_" + Date.now() + "_" + Math.floor(Math.random() * 1000));
-            
-            // Delete customDef to prevent infinite loop recursion (e.g. morphing into Queen every turn on rank 8)
-            delete newPiece.customDef;
-            
-            // Replace the piece in state.pieces
-            const index = state.pieces.indexOf(piece);
-            if (index !== -1) {
-                state.pieces[index] = newPiece;
+        let newPiece;
+        if (factoryName === 'customPiece' && settings.customDef) {
+            let adjustedMoves = JSON.parse(JSON.stringify(settings.customDef.moves));
+            if (piece.color === 'black') {
+                adjustedMoves = adjustedMoves.map(move => {
+                    if (move.y !== undefined) move.y = -move.y;
+                    if (move.offsetY !== undefined) move.offsetY = -move.offsetY;
+                    return move;
+                });
+            }
+            let finalIcon = '';
+            if (settings.customDef.imageUrl) {
+                finalIcon = settings.customDef.imageUrl;
             } else {
-                state.pieces.push(newPiece);
+                finalIcon = piece.color + (_ceUnitImages[settings.customDef.imageName] || settings.customDef.imageName);
             }
-            
-            // Immediately execute the hook on the new piece if it has one
-            // so things like checkmate detection can fire off the new piece
-            // This happens naturally if it replaces the piece, but we need to ensure the old piece
-            // stops processing its turn if needed.
-            
-            // If this piece was the selected one (e.g. the one the player just moved)
-            if (state.pieceSelected === piece) {
-                state.pieceSelected = newPiece;
-            }
+
+            newPiece = {
+                x: piece.x,
+                y: piece.y,
+                initialX: piece.initialX,
+                initialY: piece.initialY,
+                color: piece.color,
+                moves: adjustedMoves,
+                name: settings.customDef.name,
+                icon: finalIcon,
+                value: settings.customDef.value !== undefined ? settings.customDef.value : 3,
+                posValue: settings.customDef.posValue !== undefined ? settings.customDef.posValue : 2,
+                isCustom: true,
+                customDef: settings.customDef,
+                id: piece.id || ("morphed_" + Date.now() + "_" + Math.floor(Math.random() * 1000))
+            };
+            // Note: morph intentionally removes customDef to prevent infinite loops (see original comment)
+            // Wait, we need customDef to render custom pieces correctly. We shouldn't remove it entirely if it's a custom piece,
+            // we just need to ensure the morph effect itself doesn't infinite loop. Let's keep it.
         } else {
-            console.error(`customEffects morph error: Factory function '${factoryName}' not found.`);
+            const _globalObj = typeof window !== 'undefined' ? window : (typeof self !== 'undefined' ? self : global);
+            const factoryFunc = _globalObj[factoryName];
+            
+            if (typeof factoryFunc === 'function') {
+                newPiece = factoryFunc(piece.color, piece.x, piece.y);
+                newPiece.initialX = piece.initialX;
+                newPiece.initialY = piece.initialY;
+                newPiece.id = piece.id || ("morphed_" + Date.now() + "_" + Math.floor(Math.random() * 1000));
+                delete newPiece.customDef;
+            } else {
+                console.error(`customEffects morph error: Factory function '${factoryName}' not found.`);
+                return;
+            }
+        }
+        
+        // Replace the piece in state.pieces
+        const index = state.pieces.indexOf(piece);
+        if (index !== -1) {
+            state.pieces[index] = newPiece;
+        } else {
+            state.pieces.push(newPiece);
+        }
+        
+        if (state.pieceSelected === piece) {
+            state.pieceSelected = newPiece;
         }
     },
     causeVictory: function(state, piece, settings) {
@@ -209,10 +319,17 @@ function applyCustomEffects(piece, customDef) {
                 const effFunc = _globalObj.effects['${effectDef.name}'];
                 const effSettings = ${JSON.stringify(effectDef.settings)};
                 if (effFunc) {
-                    effFunc(state, this, effSettings);
+                    let effectReturn = effFunc(state, this, effSettings);
+                    if (effectReturn !== undefined) returnVal = effectReturn;
                 } else {
                     console.error("customEffects error: Effect function not found:", '${effectDef.name}');
                 }
+            }
+                
+            
+            // For hooks like afterPieceMove that require a truthy return value to validate the move
+            if (returnVal === undefined && '${hookName}' === 'afterPieceMove') {
+                return true;
             }
             return returnVal;
         }`;

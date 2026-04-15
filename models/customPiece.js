@@ -24,6 +24,9 @@ const customPieceSchema = new mongoose.Schema({
     imageName: {
         type: String
     },
+    imageUrl: {
+        type: String
+    },
     moves: {
         type: mongoose.Schema.Types.Mixed
     },
