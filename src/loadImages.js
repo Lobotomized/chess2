@@ -307,6 +307,30 @@ function drawPiece(x, y, img, size) {
     else{
         sizePiece = size;
     }
+    
+    // Support for custom uploaded images
+    if (img && (img.startsWith('http') || img.startsWith('/uploads/'))) {
+        if (!window.customImageCache) {
+            window.customImageCache = {};
+        }
+        
+        if (!window.customImageCache[img]) {
+            const customImg = new Image();
+            customImg.src = img;
+            window.customImageCache[img] = customImg;
+            
+            customImg.onload = () => {
+                ctx.drawImage(customImg, x * size, y * size, sizePiece, sizePiece);
+            };
+        } else {
+            const cachedImg = window.customImageCache[img];
+            if (cachedImg.complete && cachedImg.naturalHeight !== 0) {
+                ctx.drawImage(cachedImg, x * size, y * size, sizePiece, sizePiece);
+            }
+        }
+        return;
+    }
+
     switch (img) {
         case 'blackBishop.png':
             

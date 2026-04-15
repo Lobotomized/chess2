@@ -67,7 +67,13 @@
                 // Shallow copy piece object
                 let newP = {
                     icon: p.icon,
+                    name: p.name,
+                    id: p.id,
+                    initialX: p.initialX,
+                    initialY: p.initialY,
+                    customDef: p.customDef,
                     moves: p.moves, // Reference for now
+                    specialMoves: p.specialMoves,
                     weakMoves: p.weakMoves, // Reference for now
                     x: p.x,
                     y: p.y,
@@ -187,7 +193,13 @@
                 // Shallow copy piece object
                 let newP = {
                     icon: p.icon,
+                    name: p.name,
+                    id: p.id,
+                    initialX: p.initialX,
+                    initialY: p.initialY,
+                    customDef: p.customDef,
                     moves: p.moves, // Reference for now
+                    specialMoves: p.specialMoves,
                     weakMoves: p.weakMoves, // Reference for now
                     x: p.x,
                     y: p.y,

@@ -31,7 +31,7 @@ const storage = multer.diskStorage({
 
 const upload = multer({ 
     storage: storage,
-    limits: { fileSize: 5 * 1024 * 1024 } // 5MB limit
+    limits: { fileSize: 500 * 1024 } // 500KB limit
 });
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key_here'; // Fallback for dev
@@ -756,13 +756,31 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-app.post('/api/upload-image', authenticateToken, upload.single('image'), (req, res) => {
-    if (!req.file) {
-        return res.status(400).json({ error: 'No image file provided' });
-    }
-    // Return the path relative to the root, which will be accessible via the static route
-    const imageUrl = `/uploads/custom-pieces/${req.file.filename}`;
-    res.status(200).json({ imageUrl });
+app.post('/api/upload-image-pair', authenticateToken, (req, res) => {
+    const uploadPair = upload.fields([
+        { name: 'whiteImage', maxCount: 1 },
+        { name: 'blackImage', maxCount: 1 }
+    ]);
+    
+    uploadPair(req, res, function (err) {
+        if (err instanceof multer.MulterError) {
+            if (err.code === 'LIMIT_FILE_SIZE') {
+                return res.status(400).json({ error: 'File size cannot exceed 500KB.' });
+            }
+            return res.status(400).json({ error: err.message });
+        } else if (err) {
+            return res.status(400).json({ error: err.message });
+        }
+        
+        if (!req.files || !req.files['whiteImage'] || !req.files['blackImage']) {
+            return res.status(400).json({ error: 'Both white and black image files are required' });
+        }
+        
+        const whiteImageUrl = `/uploads/custom-pieces/${req.files['whiteImage'][0].filename}`;
+        const blackImageUrl = `/uploads/custom-pieces/${req.files['blackImage'][0].filename}`;
+        
+        res.status(200).json({ whiteImageUrl, blackImageUrl });
+    });
 });
 
 app.get('/api/user-images', authenticateToken, (req, res) => {

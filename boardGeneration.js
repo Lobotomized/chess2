@@ -3666,6 +3666,15 @@ async function customMap(state){
                 });
             }
 
+            let pieceIcon = piece.color + piece.pieceType;
+            if (piece.customDef.imageUrl) {
+                if (piece.color === 'black' && piece.customDef.blackImageUrl) {
+                    pieceIcon = piece.customDef.blackImageUrl;
+                } else {
+                    pieceIcon = piece.customDef.imageUrl;
+                }
+            }
+            
             const newPiece = {
                 x: piece.x,
                 y: piece.y,
@@ -3674,7 +3683,7 @@ async function customMap(state){
                 color: piece.color,
                 moves: adjustedMoves,
                 name: piece.customDef.name,
-                icon: piece.color + piece.pieceType,
+                icon: pieceIcon,
                 value: piece.customDef.value !== undefined ? piece.customDef.value : 3,
                 posValue: piece.customDef.posValue !== undefined ? piece.customDef.posValue : 2
             };

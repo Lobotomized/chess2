@@ -243,6 +243,49 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.3);
         }
 
+        .custom-file-btn, .custom-upload-btn {
+            padding: 10px 15px;
+            font-size: 14px;
+            width: auto;
+            margin: 0;
+            border: 2px solid var(--board-dark);
+            border-radius: 6px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-family: 'Georgia', serif;
+        }
+
+        .custom-file-btn {
+            background: rgba(255,255,255,0.8);
+            color: var(--piece-black);
+        }
+
+        .custom-upload-btn {
+            background: linear-gradient(135deg, var(--piece-black) 0%, #2a2a2a 100%);
+            color: var(--board-light);
+        }
+
+        .custom-file-btn:hover {
+            background: rgba(255,255,255,1);
+            color: var(--piece-black);
+            border-color: var(--piece-black);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .custom-upload-btn:hover {
+            background: linear-gradient(135deg, #2a2a2a 0%, var(--piece-black) 100%);
+            color: var(--selected);
+            border-color: var(--selected);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+        }
+
         button.active-mode {
             background: var(--threat);
             border-color: var(--piece-black);
@@ -592,16 +635,44 @@
                 <div class="create-piece-grid">
                     <div class="cp-col">
                         <label style="display: block; font-size: 18px; border-bottom: 2px solid var(--board-dark); padding-bottom: 5px; margin-bottom: 15px;">1. Select Image</label>
-                        <div style="margin-bottom: 10px; display: flex; gap: 10px; align-items: center;">
-                            <input type="file" id="customPieceImageUpload" accept="image/*" style="font-size: 14px; max-width: 200px;">
-                            <button id="uploadImageBtn" style="padding: 5px 10px; font-size: 14px; width: auto; margin: 0;">Upload</button>
+                        
+                        <div class="row-controls" style="margin-bottom: 10px;">
+                            <button id="showClassicImageSelectBtn" class="active-mode">Classic</button>
+                            <button id="showCustomImageSelectBtn">Custom</button>
                         </div>
+
+                        <div id="uploadImageControls" style="display: none;">
+                            <div style="margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px;">
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <span style="font-weight: bold; width: 60px;">White:</span>
+                                    <label for="customPieceImageUploadWhite" class="custom-file-btn">Choose File</label>
+                                    <input type="file" id="customPieceImageUploadWhite" accept="image/*" style="display: none;">
+                                    <span id="fileNameDisplayWhite" style="font-size: 14px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--piece-black);">No file chosen</span>
+                                </div>
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <span style="font-weight: bold; width: 60px;">Black:</span>
+                                    <label for="customPieceImageUploadBlack" class="custom-file-btn">Choose File</label>
+                                    <input type="file" id="customPieceImageUploadBlack" accept="image/*" style="display: none;">
+                                    <span id="fileNameDisplayBlack" style="font-size: 14px; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--piece-black);">No file chosen</span>
+                                </div>
+                                <div style="display: flex; gap: 10px; align-items: center; margin-top: 5px;">
+                                    <button id="uploadImageBtn" class="custom-upload-btn">Upload Pair</button>
+                                </div>
+                            </div>
+                            <div style="font-size: 12px; color: var(--threat); margin-top: 5px; margin-bottom: 10px;">Max file size: 500KB per image</div>
+                        </div>
+
                         <div id="customImageContainer" style="max-height: 400px; overflow-y: auto; margin-bottom: 10px; background: rgba(255,255,255,0.5); padding: 10px; border-radius: 4px; border: 1px solid var(--board-dark);">
-                            <h4 style="margin: 0 0 5px 0; font-size: 14px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 3px;">Custom Images</h4>
-                            <div id="uploadedImageGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 15px;"></div>
+                            <div id="uploadedImageSection" style="display: none;">
+                                <h4 style="margin: 0 0 5px 0; font-size: 14px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 3px;">Custom Images</h4>
+                                <div id="noCustomImagesMsg" style="font-size: 14px; color: var(--piece-black); font-style: italic; margin-bottom: 15px; text-align: center; padding: 10px;">No Custom Images yet</div>
+                                <div id="uploadedImageGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; margin-bottom: 15px;"></div>
+                            </div>
                             
-                            <h4 style="margin: 0 0 5px 0; font-size: 14px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 3px;">Classic Images</h4>
-                            <div id="classicImageGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;"></div>
+                            <div id="classicImageSection">
+                                <h4 style="margin: 0 0 5px 0; font-size: 14px; border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 3px;">Classic Images</h4>
+                                <div id="classicImageGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;"></div>
+                            </div>
                         </div>
                     </div>
 
@@ -766,7 +837,10 @@
         const createPiecePanel = document.getElementById("createPiecePanel");
         const customImageContainer = document.getElementById("customImageContainer");
         const customPieceName = document.getElementById("customPieceName");
-        const customPieceImageUpload = document.getElementById("customPieceImageUpload");
+        const customPieceImageUploadWhite = document.getElementById("customPieceImageUploadWhite");
+        const fileNameDisplayWhite = document.getElementById("fileNameDisplayWhite");
+        const customPieceImageUploadBlack = document.getElementById("customPieceImageUploadBlack");
+        const fileNameDisplayBlack = document.getElementById("fileNameDisplayBlack");
         const uploadImageBtn = document.getElementById("uploadImageBtn");
         const customPieceValue = document.getElementById("customPieceValue");
         const customPiecePosValue = document.getElementById("customPiecePosValue");
@@ -815,23 +889,51 @@
 
         let removeMode = false;
         let addMode = false;
+        let currentPieceColor = 'white';
         let selectedImage = null;
         let selectedCustomImage = null;
         let selectedCustomImageUrl = null;
+        let selectedCustomImageBlackUrl = null;
         let customPieceMoves = [];
 
+        customPieceImageUploadWhite.addEventListener('change', () => {
+            if (customPieceImageUploadWhite.files.length > 0) {
+                fileNameDisplayWhite.textContent = customPieceImageUploadWhite.files[0].name;
+            } else {
+                fileNameDisplayWhite.textContent = 'No file chosen';
+            }
+        });
+
+        customPieceImageUploadBlack.addEventListener('change', () => {
+            if (customPieceImageUploadBlack.files.length > 0) {
+                fileNameDisplayBlack.textContent = customPieceImageUploadBlack.files[0].name;
+            } else {
+                fileNameDisplayBlack.textContent = 'No file chosen';
+            }
+        });
+
         uploadImageBtn.addEventListener('click', async () => {
-            const file = customPieceImageUpload.files[0];
-            if (!file) {
-                showAlert('Please select a file to upload first.');
+            const whiteFile = customPieceImageUploadWhite.files[0];
+            const blackFile = customPieceImageUploadBlack.files[0];
+            if (!whiteFile || !blackFile) {
+                showAlert('Please select both White and Black images to upload.');
+                return;
+            }
+            if (whiteFile.size > 500 * 1024 || blackFile.size > 500 * 1024) {
+                showAlert('Image sizes exceed the 500KB limit. Please choose smaller images.');
                 return;
             }
 
+            uploadImageBtn.disabled = true;
+            const originalText = uploadImageBtn.textContent;
+            uploadImageBtn.textContent = 'Uploading Pair...';
+
             const formData = new FormData();
-            formData.append('image', file);
+            formData.append('whiteImage', whiteFile);
+            formData.append('blackImage', blackFile);
 
             try {
-                const res = await fetch('/api/upload-image', {
+                const res = await fetch('/api/upload-image-pair', {
                     method: 'POST',
                     headers: {
                         'Authorization': Auth.getAuthHeaders()['Authorization']
@@ -842,33 +944,44 @@
                 const data = await res.json();
                 if (res.ok) {
                     const img = document.createElement("img");
-                    img.src = data.imageUrl;
-                    img.alt = 'UPLOADED:' + data.imageUrl;
-                    img.dataset.url = data.imageUrl;
+                    img.src = data.whiteImageUrl;
+                    img.alt = 'UPLOADED:' + data.whiteImageUrl + '|' + data.blackImageUrl;
+                    img.dataset.url = data.whiteImageUrl;
+                    img.dataset.blackUrl = data.blackImageUrl;
                     img.style.width = "100%";
                     img.style.cursor = "pointer";
                     img.style.padding = "2px";
                     img.style.borderRadius = "4px";
                     const uploadedImageGrid = document.getElementById("uploadedImageGrid");
+                    const noCustomImagesMsg = document.getElementById("noCustomImagesMsg");
+                    if (noCustomImagesMsg) noCustomImagesMsg.style.display = "none";
                     uploadedImageGrid.insertBefore(img, uploadedImageGrid.firstChild);
 
                     img.addEventListener("click", () => {
                         if (selectedCustomImage) selectedCustomImage.style.background = "";
                         selectedCustomImage = img;
-                        selectedCustomImageUrl = data.imageUrl;
+                        selectedCustomImageUrl = data.whiteImageUrl;
+                        selectedCustomImageBlackUrl = data.blackImageUrl;
                         selectedCustomImage.style.background = "var(--selected)";
                         updatePreviewBoard();
                     });
 
                     // Auto-select
                     img.click();
-                    showAlert('Image uploaded successfully!');
+                    showAlert('Image pair uploaded successfully!');
+                    customPieceImageUploadWhite.value = '';
+                    fileNameDisplayWhite.textContent = 'No file chosen';
+                    customPieceImageUploadBlack.value = '';
+                    fileNameDisplayBlack.textContent = 'No file chosen';
                 } else {
                     showAlert(data.error || 'Upload failed');
                 }
             } catch (err) {
                 console.error(err);
                 showAlert('An error occurred during upload.');
+            } finally {
+                uploadImageBtn.disabled = false;
+                uploadImageBtn.textContent = originalText;
             }
         });
         let customPieceSpecialMoves = [];
@@ -915,10 +1028,12 @@
                     newImg.src = selectedImage.src;
                     newImg.alt = selectedImage.alt;
         
-                    let pieceColor = 'white';
+                    let pieceColor = currentPieceColor;
                     // Determine color based on which color button was last clicked or image src
-                    if (selectedImage.src.includes('black')) {
+                    if (selectedImage.src.includes('black') && !selectedImage.dataset.customId) {
                         pieceColor = 'black';
+                    } else if (selectedImage.src.includes('white') && !selectedImage.dataset.customId) {
+                        pieceColor = 'white';
                     }
                     
                     // Clear existing content in the square and append the new image
@@ -1176,25 +1291,29 @@
                     });
                     if (userImagesRes.ok) {
                         const userImages = await userImagesRes.json();
-                        userImages.forEach(imageUrl => {
-                            const img = document.createElement("img");
-                            img.src = imageUrl;
-                            img.alt = 'UPLOADED:' + imageUrl;
-                            img.dataset.url = imageUrl;
-                            img.style.width = "100%";
-                            img.style.cursor = "pointer";
-                            img.style.padding = "2px";
-                            img.style.borderRadius = "4px";
-                            uploadedImageGrid.appendChild(img);
+                        if (userImages.length > 0) {
+                            const noCustomImagesMsg = document.getElementById("noCustomImagesMsg");
+                            if (noCustomImagesMsg) noCustomImagesMsg.style.display = "none";
+                            userImages.forEach(imageUrl => {
+                                const img = document.createElement("img");
+                                img.src = imageUrl;
+                                img.alt = 'UPLOADED:' + imageUrl;
+                                img.dataset.url = imageUrl;
+                                img.style.width = "100%";
+                                img.style.cursor = "pointer";
+                                img.style.padding = "2px";
+                                img.style.borderRadius = "4px";
+                                uploadedImageGrid.appendChild(img);
 
-                            img.addEventListener("click", () => {
-                                if (selectedCustomImage) selectedCustomImage.style.background = "";
-                                selectedCustomImage = img;
-                                selectedCustomImageUrl = imageUrl;
-                                selectedCustomImage.style.background = "var(--selected)";
-                                updatePreviewBoard();
+                                img.addEventListener("click", () => {
+                                    if (selectedCustomImage) selectedCustomImage.style.background = "";
+                                    selectedCustomImage = img;
+                                    selectedCustomImageUrl = imageUrl;
+                                    selectedCustomImage.style.background = "var(--selected)";
+                                    updatePreviewBoard();
+                                });
                             });
-                        });
+                        }
                     }
                 } catch(e) {
                     console.error('Error fetching user images:', e);
@@ -1640,7 +1759,7 @@
                 
                 const img = document.createElement("img");
                 if (piece.imageUrl) {
-                    img.src = piece.imageUrl;
+                    img.src = piece.imageUrl; // Default to white image for editing view
                 } else {
                     img.src = '/static/white' + unitImages[piece.imageName];
                 }
@@ -1683,14 +1802,28 @@
             customPiecePosValue.value = piece.posValue || 2;
             
             // Select correct image
-            const images = customImageContainer.querySelectorAll("img");
-            images.forEach(img => {
-                if (img.alt === piece.imageName) {
+            const classicImages = classicImageSection.querySelectorAll("img");
+            const customImages = uploadedImageSection.querySelectorAll("img");
+            const allImages = [...classicImages, ...customImages];
+            
+            let isCustom = false;
+            
+            allImages.forEach(img => {
+                if (img.alt === piece.imageName || img.alt === 'UPLOADED:' + piece.imageName) {
                     if (selectedCustomImage) selectedCustomImage.style.background = "";
                     selectedCustomImage = img;
                     selectedCustomImage.style.background = "var(--selected)";
+                    if (img.alt.startsWith('UPLOADED:')) {
+                        isCustom = true;
+                    }
                 }
             });
+            
+            if (isCustom) {
+                showCustomImageSelectBtn.click();
+            } else {
+                showClassicImageSelectBtn.click();
+            }
             
             customPieceMoves = JSON.parse(JSON.stringify(piece.moves || []));
             customPieceSpecialMoves = JSON.parse(JSON.stringify(piece.specialMoves || []));
@@ -1709,6 +1842,8 @@
             customPieceName.value = "";
             customPieceValue.value = "3";
             customPiecePosValue.value = "2";
+            customPieceImageUpload.value = '';
+            fileNameDisplay.textContent = 'No file chosen';
             if (selectedCustomImage) {
                 selectedCustomImage.style.background = "";
                 selectedCustomImage = null;
@@ -1741,8 +1876,9 @@
                 name: name,
                 value: parseInt(customPieceValue.value) || 3,
                 posValue: parseInt(customPiecePosValue.value) || 2,
-                imageName: selectedCustomImage.alt.startsWith('UPLOADED:') ? selectedCustomImage.alt.split('UPLOADED:')[1] : selectedCustomImage.alt,
-                imageUrl: selectedCustomImage.alt.startsWith('UPLOADED:') ? selectedCustomImage.alt.split('UPLOADED:')[1] : null,
+                imageName: selectedCustomImage.alt.startsWith('UPLOADED:') ? selectedCustomImage.alt.split('UPLOADED:')[1].split('|')[0] : selectedCustomImage.alt,
+                imageUrl: selectedCustomImage.alt.startsWith('UPLOADED:') ? selectedCustomImage.alt.split('UPLOADED:')[1].split('|')[0] : null,
+                blackImageUrl: selectedCustomImage.alt.startsWith('UPLOADED:') ? selectedCustomImage.alt.split('UPLOADED:')[1].split('|')[1] : null,
                 moves: JSON.parse(JSON.stringify(customPieceMoves)),
                 specialMoves: JSON.parse(JSON.stringify(customPieceSpecialMoves)),
                 id: editingCustomPieceId ? editingCustomPieceId : "custom_" + Date.now() + "_" + Math.random().toString(36).substr(2, 9)
@@ -1766,6 +1902,8 @@
             customPieceName.value = "";
             customPieceValue.value = "3";
             customPiecePosValue.value = "2";
+            customPieceImageUpload.value = '';
+            fileNameDisplay.textContent = 'No file chosen';
             customPieceMoves = [];
             customPieceSpecialMoves = [];
             editingCustomPieceId = null;
@@ -1785,6 +1923,28 @@
         const showStandardPiecesBtn = document.getElementById("showStandardPieces");
         const showCustomPiecesBtn = document.getElementById("showCustomPieces");
         const pieceTypeToggleControls = document.getElementById("pieceTypeToggleControls");
+
+        const showClassicImageSelectBtn = document.getElementById("showClassicImageSelectBtn");
+        const showCustomImageSelectBtn = document.getElementById("showCustomImageSelectBtn");
+        const uploadImageControls = document.getElementById("uploadImageControls");
+        const uploadedImageSection = document.getElementById("uploadedImageSection");
+        const classicImageSection = document.getElementById("classicImageSection");
+
+        showClassicImageSelectBtn.addEventListener("click", () => {
+            showClassicImageSelectBtn.classList.add("active-mode");
+            showCustomImageSelectBtn.classList.remove("active-mode");
+            uploadImageControls.style.display = "none";
+            uploadedImageSection.style.display = "none";
+            classicImageSection.style.display = "block";
+        });
+
+        showCustomImageSelectBtn.addEventListener("click", () => {
+            showCustomImageSelectBtn.classList.add("active-mode");
+            showClassicImageSelectBtn.classList.remove("active-mode");
+            uploadImageControls.style.display = "block";
+            uploadedImageSection.style.display = "block";
+            classicImageSection.style.display = "none";
+        });
 
         showStandardPiecesBtn.addEventListener("click", () => {
             showStandardPiecesBtn.classList.add("active-mode");
@@ -1830,7 +1990,7 @@
                 
                 const img = document.createElement("img");
                 if (piece.imageUrl) {
-                    img.src = piece.imageUrl;
+                    img.src = color === 'black' && piece.blackImageUrl ? piece.blackImageUrl : piece.imageUrl;
                 } else {
                     img.src = '/static/' + color + unitImages[piece.imageName];
                 }
@@ -1974,8 +2134,8 @@
         loadCustomPieces();
 
         // Event listeners for color buttons
-        showWhiteButton.addEventListener("click", () => { generateImages("white"); updateCustomPiecesMenu("white"); });
-        showBlackButton.addEventListener("click", () => { generateImages("black"); updateCustomPiecesMenu("black"); });
+        showWhiteButton.addEventListener("click", () => { currentPieceColor = "white"; generateImages("white"); updateCustomPiecesMenu("white"); });
+        showBlackButton.addEventListener("click", () => { currentPieceColor = "black"; generateImages("black"); updateCustomPiecesMenu("black"); });
         
         createBoardButton.addEventListener("click", () => {
             menu.style.display = "block";
