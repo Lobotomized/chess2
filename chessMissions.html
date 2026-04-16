@@ -825,12 +825,12 @@
         });
     } else {
         if(localStorage.getItem('me')){
-            socket.emit('joinRoom',{roomId:getParams(window.location.href).roomId, mode:getParams(window.location.href).mode, id:localStorage.getItem('me')});
+            socket.emit('joinRoom',{roomId:getParams(window.location.href).roomId, mode:getParams(window.location.href).mode, customGameId:getParams(window.location.href).customGameId, id:localStorage.getItem('me')});
 
         }
         else{
             localStorage.setItem('me', Math.random()+'')
-            socket.emit('joinRoom',{roomId:getParams(window.location.href).roomId, mode:getParams(window.location.href).mode, id:localStorage.getItem('me')});
+            socket.emit('joinRoom',{roomId:getParams(window.location.href).roomId, mode:getParams(window.location.href).mode, customGameId:getParams(window.location.href).customGameId, id:localStorage.getItem('me')});
 
         }
     }

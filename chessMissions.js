@@ -62,6 +62,7 @@ const http = require('http').createServer(app);
 const io = require('socket.io')(http);
 const newG = require('./globby').newIOServerV2;
 const {miniChess, randomChess,  catchTheDragon, mongolianChess, classicChess, raceChess, raceChoiceChess, test,morphingRaceChoiceChess} = require('./boardGeneration.js')
+const { applyCustomEffects } = require('./customEffects.js');
 const { selectPiece, playerMove, checkTurn, changeTurn, closeLights } = require('./moveMethods.js')
 const pieceDefinitions = require('./pieceDefinitions.js');
 const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFactory,blindCatFactory} = pieceDefinitions;
@@ -617,6 +618,59 @@ let lobby = newG({properties:{
                 state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4), empoweredCrystalFactory('white',1,5))
                 state.gameType = 'morphingRaceChoiceChess'
                 state.turn = 'menu'
+            }
+            else if(roomData.mode == 'customMap'){
+                state.gameType = 'customMap';
+                state.customGameId = roomData.customGameId;
+                state.board.length = 0;
+                state.pieces.length = 0;
+                
+                Map.findById(state.customGameId).then(json => {
+                    if (!json) return;
+                    const thePieces = json.pieces.map((piece) => {
+                        if (piece.isCustom) {
+                            let adjustedMoves = JSON.parse(JSON.stringify(piece.customDef.moves));
+                            if (piece.color === 'black' && piece.customDef.flipForBlack !== false) {
+                                adjustedMoves = adjustedMoves.map(move => {
+                                    if (move.y !== undefined) move.y = -move.y;
+                                    if (move.offsetY !== undefined) move.offsetY = -move.offsetY;
+                                    if (move.x !== undefined) move.x = -move.x;
+                                    if (move.offsetX !== undefined) move.offsetX = -move.offsetX;
+                                    return move;
+                                });
+                            }
+                            let pieceIcon = piece.color + piece.pieceType;
+                            if (piece.customDef.imageUrl) {
+                                if (piece.color === 'black' && piece.customDef.blackImageUrl) {
+                                    pieceIcon = piece.customDef.blackImageUrl;
+                                } else {
+                                    pieceIcon = piece.customDef.imageUrl;
+                                }
+                            }
+                            const newPiece = {
+                                x: piece.x, y: piece.y, initialX: piece.x, initialY: piece.y, color: piece.color,
+                                moves: adjustedMoves, name: piece.customDef.name, icon: pieceIcon,
+                                value: piece.customDef.value !== undefined ? piece.customDef.value : 3,
+                                posValue: piece.customDef.posValue !== undefined ? piece.customDef.posValue : 2,
+                                isCustom: true,
+                                customDef: piece.customDef
+                            };
+                            
+                            if (typeof applyCustomEffects === 'function') {
+                                applyCustomEffects(newPiece, piece.customDef);
+                            }
+                            return newPiece;
+                        }
+                        let pieceString = piece.pieceType.slice(0, -4).toLowerCase() + 'Factory';
+                        if (pieceDefinitions[pieceString]) {
+                            return pieceDefinitions[pieceString](piece.color, piece.x, piece.y);
+                        } else {
+                            console.error("Factory not found:", pieceString);
+                        }
+                    });
+                    state.board.push(...json.squares);
+                    state.pieces.push(...thePieces.filter(p => p));
+                }).catch(err => console.error('Error loading custom map:', err));
             }
         }
         if (!state.white) {

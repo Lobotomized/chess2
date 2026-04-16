@@ -650,7 +650,8 @@
                 'morphingRaceChoiceChess': 'Morphing Chess 2',
                 'Classic': 'Classic',
                 'classicChess': 'Classic',
-                'classiChess': 'Classic'
+                'classiChess': 'Classic',
+                'customMap': 'Custom Map'
             };
 
             allData.forEach((el,index) => {
@@ -686,7 +687,60 @@
                 return;
             }
             let gameType = document.querySelector('#selectMode')?.value;
-            window.location.replace(`/play?roomId=${gameName}&mode=${gameType}`)
+            if (gameType === 'customMap') {
+                let mapId = document.getElementById('selectCustomMap').value;
+                if (!mapId) {
+                    showAlert("Please select a custom map");
+                    return;
+                }
+                window.location.replace(`/play?roomId=${gameName}&mode=${gameType}&customGameId=${mapId}`);
+            } else {
+                window.location.replace(`/play?roomId=${gameName}&mode=${gameType}`);
+            }
+        }
+
+        function checkCustomMap() {
+            let mode = document.getElementById('selectMode').value;
+            let mapContainer = document.getElementById('customMapSelectContainer');
+            if (mode === 'customMap') {
+                mapContainer.style.display = 'block';
+                fetchCustomMaps();
+            } else {
+                mapContainer.style.display = 'none';
+            }
+        }
+
+        let mapsLoaded = false;
+        async function fetchCustomMaps() {
+            if (mapsLoaded) return;
+            const headers = window.Auth ? window.Auth.getAuthHeaders() : {};
+            try {
+                let resp = await fetch('/maps', { headers });
+                if (!resp.ok) {
+                    if (resp.status === 401 || resp.status === 403) {
+                        if (window.Auth) window.Auth.showAuthModal();
+                    }
+                    throw new Error('Failed to fetch maps');
+                }
+                let data = await resp.json();
+                let maps = data.maps || data; 
+                let select = document.getElementById('selectCustomMap');
+                select.innerHTML = '';
+                if (maps.length === 0) {
+                    select.innerHTML = '<option value="">No custom maps found</option>';
+                } else {
+                    maps.forEach(map => {
+                        let opt = document.createElement('option');
+                        opt.value = map._id;
+                        opt.textContent = map.name;
+                        select.appendChild(opt);
+                    });
+                }
+                mapsLoaded = true;
+            } catch (err) {
+                console.error(err);
+                document.getElementById('selectCustomMap').innerHTML = '<option value="">Error loading maps</option>';
+            }
         }
     </script>
 <script src="/src/modal.js?v=1"></script>
@@ -735,13 +789,21 @@
             <input type="text" id="gameName" placeholder="Enter your game name...">
             
             <label for="selectMode"><img src="/static/lg/whiteQueen.png" class="icon"> Game Mode:</label>
-            <select name="" id="selectMode">
+            <select name="" id="selectMode" onchange="checkCustomMap()">
                 <option value="raceChoiceChess">Chess 2</option>
                 <option value="minichess">Mini chess</option>
                 <option value="mongolianChess">Mongolian chess</option>
                 <option value="randomChess">Random chess</option>
                 <option value="morphingRaceChoiceChess">Morphing Chess 2</option>
+                <option value="customMap">Custom Map</option>
             </select>
+
+            <div id="customMapSelectContainer" style="display: none;">
+                <label for="selectCustomMap"><img src="/static/lg/whiteShroom.png" class="icon"> Select Map:</label>
+                <select id="selectCustomMap">
+                    <option value="">Loading maps...</option>
+                </select>
+            </div>
 
             <button class="createButton" onclick="startNewGame()"><img src="/static/lg/whiteKing.png" class="icon"> Create Game <img src="/static/lg/blackKing.png" class="icon"></button>
         </div>
