@@ -751,7 +751,7 @@
                             
                             <button id="addAnotherConditionBtn" style="background: linear-gradient(to bottom, #8C6540, #5A3E2B); border-bottom: 6px solid #2d1b15; color: white; padding: 6px 8px; font-size: 18px; margin-bottom: 15px; border: none; border-radius: 12px; cursor: pointer;">+ Add Condition</button>
 
-                            <div style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 5px; margin-bottom: 10px;">
+                            <div id="specialEffectGrid" style="display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 5px; margin-bottom: 10px;">
                                 <div>
                                     <label style="font-size: 12px; margin-bottom: 2px;">Effect:</label>
                                     <select id="specialEffect" style="width: 100%; padding: 6px; background: #f0f0f0; border: 2px solid var(--border-color); border-radius: 12px; font-size: 13px; margin-bottom: 0;">
@@ -760,11 +760,11 @@
                                         <option value="causeVictory">causeVictory</option>
                                     </select>
                                 </div>
-                                <div>
+                                <div id="specialEffXContainer">
                                     <label style="font-size: 12px; margin-bottom: 2px;">Eff X:</label>
                                     <input type="number" id="specialEffX" value="0" style="width: 100%; padding: 6px; font-size: 13px; margin-bottom: 0;">
                                 </div>
-                                <div>
+                                <div id="specialEffYContainer">
                                     <label style="font-size: 12px; margin-bottom: 2px;">Eff Y:</label>
                                     <input type="number" id="specialEffY" value="1" style="width: 100%; padding: 6px; font-size: 13px; margin-bottom: 0;">
                                 </div>
@@ -870,6 +870,9 @@
         const conditionsContainer = document.getElementById("conditionsContainer");
         const addAnotherConditionBtn = document.getElementById("addAnotherConditionBtn");
         const specialEffect = document.getElementById("specialEffect");
+        const specialEffectGrid = document.getElementById("specialEffectGrid");
+        const specialEffXContainer = document.getElementById("specialEffXContainer");
+        const specialEffYContainer = document.getElementById("specialEffYContainer");
         const specialEffX = document.getElementById("specialEffX");
         const specialEffY = document.getElementById("specialEffY");
         const specialEffParam = document.getElementById("specialEffParam");
@@ -888,7 +891,20 @@
                 specialEffParamVictory.style.display = "none";
                 specialEffParamLabel.textContent = "Effect Param (Piece to Spawn/Morph):";
             }
+
+            if (e.target.value === "spawn") {
+                specialEffXContainer.style.display = "block";
+                specialEffYContainer.style.display = "block";
+                specialEffectGrid.style.gridTemplateColumns = "2fr 1fr 1fr";
+            } else {
+                specialEffXContainer.style.display = "none";
+                specialEffYContainer.style.display = "none";
+                specialEffectGrid.style.gridTemplateColumns = "1fr";
+            }
         });
+
+        // Initialize state on load
+        specialEffect.dispatchEvent(new Event("change"));
 
         const customPiecesSubmenu = document.getElementById("customPiecesSubmenu");
         const customPiecesContainer = document.getElementById("customPiecesContainer");
@@ -1983,7 +1999,13 @@
                 if (sm.effect.settings.customDef) {
                     pieceNameDisplay = "Custom: " + sm.effect.settings.customDef.name;
                 }
-                textSpan.textContent = `${sm.hook}: ${conditionText}${sm.effect.name}(${sm.effect.settings.offsetX},${sm.effect.settings.offsetY},${pieceNameDisplay}) `;
+                let effectText = `${sm.effect.name}(`;
+                if (sm.effect.name === "spawn") {
+                    effectText += `${sm.effect.settings.offsetX},${sm.effect.settings.offsetY},`;
+                }
+                effectText += `${pieceNameDisplay})`;
+
+                textSpan.textContent = `${sm.hook}: ${conditionText}${effectText} `;
                 
                 const removeBtn = document.createElement("button");
                 removeBtn.textContent = "✖";
