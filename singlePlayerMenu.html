@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess 2 - Single Player</title>
+    <style>
+        /* Chess-inspired variables */
+        :root {
+            --board-light: #f0d9b5;
+            --board-dark: #b58863;
+            --piece-white: #ffffff;
+            --piece-black: #2e2e2e;
+            --highlight: #829769;
+            --selected: #f7e98e;
+        }
+
+        body {
+            background: linear-gradient(45deg, var(--board-dark) 25%, var(--board-light) 25%, var(--board-light) 75%, var(--board-dark) 75%);
+            background-size: 80px 80px;
+            color: var(--piece-black);
+            font-family: 'Georgia', serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 25% 25%, rgba(0,0,0,0.1) 1px, transparent 1px),
+                radial-gradient(circle at 75% 75%, rgba(0,0,0,0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .menu-container {
+            width: 90%;
+            max-width: 500px;
+            background: rgba(240, 217, 181, 0.95);
+            border: 8px solid var(--piece-black);
+            border-radius: 12px;
+            box-shadow: 
+                0 0 0 4px var(--board-dark),
+                0 15px 40px rgba(0,0,0,0.4);
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            margin-top: 0;
+            margin-bottom: 30px;
+            color: var(--piece-black);
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .menu-button {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--piece-black) 0%, #2a2a2a 100%);
+            color: var(--board-light);
+            font-weight: bold;
+            cursor: pointer;
+            border: 3px solid var(--board-dark);
+            font-size: 24px;
+            box-sizing: border-box;
+            border-radius: 6px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .menu-button:hover {
+            background: linear-gradient(135deg, #2a2a2a 0%, var(--piece-black) 100%);
+            color: var(--selected);
+            border-color: var(--selected);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .icon {
+            height: 30px;
+            margin-right: 15px;
+        }
+        
+        .back-button {
+            margin-top: 15px;
+            font-size: 18px;
+            background: linear-gradient(135deg, var(--board-dark) 0%, #8c6746 100%);
+            padding: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="menu-container">
+        <h1>Single Player</h1>
+        <a href="/hotseat-menu" class="menu-button"><img src="/static/lg/whiteRicar.png" class="icon"> Hotseat</a>
+        <a href="/rogueLike.html" class="menu-button"><img src="/static/lg/whiteGeneral.png" class="icon"> Rogue Like</a>
+        <a href="/campaign" class="menu-button"><img src="/static/lg/whiteHorse.png" class="icon"> Campaign</a>
+        
+        <a href="/" class="menu-button back-button">Back</a>
+    </div>
+</body>
+</html>

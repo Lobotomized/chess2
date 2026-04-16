@@ -640,6 +640,14 @@ io.on('connection', (socket) => {
 
 app.get('/', function (req, res) {
 
+    return res.status(200).sendFile(__dirname + '/mainMenu.html');
+});
+
+app.get('/single-player', function(req,res){
+    return res.status(200).sendFile(__dirname + '/singlePlayerMenu.html');
+});
+
+app.get('/lobby', function(req,res){
     return res.status(200).sendFile(__dirname + '/lobby.html');
 });
 
