@@ -227,7 +227,7 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            font-family: 'Quicksand', sans-serif; font-weight: 700;
+            font-family: 'Lilita One', cursive; font-weight: normal; letter-spacing: 1px;
         }
 
         button:hover {
@@ -253,7 +253,7 @@
             font-weight: bold;
             transition: all 0.3s ease;
             text-transform: uppercase;
-            font-family: 'Quicksand', sans-serif; font-weight: 700;
+            font-family: 'Lilita One', cursive; font-weight: normal; letter-spacing: 1px;
         }
 
         .custom-file-btn {
@@ -564,7 +564,7 @@
                 <button id="placePieces"><img src="/static/lg/blackKnight.png" class="icon"> Place Pieces</button>
                 <button id="createPieceModeBtn"><img src="/static/lg/whitePawn.png" class="icon"> Create Piece</button>
                 <button id="generateArray"><img src="/static/lg/whitePawn.png" class="icon"> Save Map</button>
-                <button id="generateJSON"><img src="/static/lg/blackQueen.png" class="icon"> Export JSON</button>
+                <!-- <button id="generateJSON"><img src="/static/lg/blackQueen.png" class="icon"> Export JSON</button> -->
             </div>
 
             <!-- Settings Panel (Toggled) -->
@@ -728,8 +728,8 @@
                             </div>
                         </div>
                         
-                        <label id="currentMovesLabel" style="display: none; margin-top: 10px;">Current Moves:</label>
-                        <ul id="currentMovesList" style="display: none; max-height: 150px; overflow-y: auto; font-size: 26px; padding-left: 20px; background: rgba(255,255,255,0.5); border-radius: 12px; padding-top: 5px; padding-bottom: 5px;">
+                        <label id="currentMovesLabel" style="display: none; margin-top: 10px; text-align: center;">Current Moves:</label>
+                        <ul id="currentMovesList" style="display: none; max-height: 150px; overflow-y: auto; font-size: 26px; padding-left: 0; background: rgba(255,255,255,0.5); border-radius: 12px; padding-top: 5px; padding-bottom: 5px; list-style-type: none; text-align: center;">
                         </ul>
                     </div>
 
@@ -781,11 +781,11 @@
                                 </select>
                             </div>
 
-                            <button id="addSpecialMoveBtn" style="background: var(--highlight); color: white; padding: 8px 12px; font-size: 13px; margin-top: 0; margin-bottom: 0;">Add Special Move</button>
+                            <button id="addSpecialMoveBtn" style="margin-bottom: 0; flex: 1;">Add Special Move</button>
                         </div>
                         
-                        <label id="currentSpecialMovesLabel" style="display: none;">Current Special Moves:</label>
-                        <ul id="currentSpecialMovesList" style="display: none; max-height: 150px; overflow-y: auto; font-size: 12px; padding: 5px; background: rgba(255,255,255,0.5); border-radius: 12px; border: 2px solid var(--border-color); list-style-type: none;">
+                        <label id="currentSpecialMovesLabel" style="display: none; text-align: center;">Current Special Moves:</label>
+                        <ul id="currentSpecialMovesList" style="display: none; max-height: 150px; overflow-y: auto; font-size: 12px; padding: 5px; background: rgba(255,255,255,0.5); border-radius: 12px; border: 2px solid var(--border-color); list-style-type: none; text-align: center;">
                         </ul>
                     </div>
                 </div>
@@ -834,7 +834,6 @@
         const addSquaresButton = document.getElementById("addSquares");
         
         const generateArrayButton = document.getElementById("generateArray");
-        const generateJSONButton = document.getElementById("generateJSON");
         
         const previewBoard = document.getElementById("previewBoard");
         const createPieceModeBtn = document.getElementById("createPieceModeBtn");
@@ -1315,74 +1314,6 @@
             });
         });
 
-        generateJSONButton.addEventListener("click", () => {
-            const squaresArray = Array.from(chessboard.children)
-                .filter(square => square.style.background !== "transparent" && square.style.background !== "black")
-                .map(square => ({
-                    light: false, 
-                    x: parseInt(square.dataset.x, 10),
-                    y: parseInt(square.dataset.y, 10),
-                    _id: "generated_" + Math.random().toString(36).substr(2, 9) 
-                }));
-
-            const pieces = piecesObjectArray.map(p => {
-                if (p.isCustom) {
-                    let adjustedMoves = JSON.parse(JSON.stringify(p.customDef.moves));
-                    if (p.color === 'black' && p.customDef.flipForBlack !== false) {
-                        adjustedMoves = adjustedMoves.map(move => {
-                            if (move.y !== undefined) move.y = -move.y;
-                            if (move.offsetY !== undefined) move.offsetY = -move.offsetY;
-                            if (move.x !== undefined) move.x = -move.x;
-                            if (move.offsetX !== undefined) move.offsetX = -move.offsetX;
-                            return move;
-                        });
-                    }
-                    return {
-                        x: p.x,
-                        y: p.y,
-                        color: p.color,
-                        moves: adjustedMoves,
-                        name: p.customDef.name,
-                        icon: p.customDef.imageUrl ? p.customDef.imageUrl : (p.color + p.pieceType),
-                        value: p.customDef.value !== undefined ? p.customDef.value : 3,
-                        posValue: p.customDef.posValue !== undefined ? p.customDef.posValue : 2
-                    };
-                }
-                
-                const imageName = p.pieceType; 
-                const name = imageName.replace('.png', '');
-                const lowerName = name.charAt(0).toLowerCase() + name.slice(1);
-                
-                let factory = window[lowerName + 'Factory'];
-                if (!factory) factory = window[lowerName];
-                
-                if (factory) {
-                    return factory(p.color, p.x, p.y);
-                } else {
-                    console.error("No factory found for " + imageName);
-                    return null;
-                }
-            }).filter(p => p !== null);
-
-            const state = {
-                state: {
-                    pieces: pieces,
-                    board: squaresArray,
-                    turn: "white"
-                }
-            };
-            
-            let jsonString;
-            if (window.JSONfn) {
-                jsonString = window.JSONfn.stringify(state);
-            } else {
-                jsonString = JSON.stringify(state, null, 2);
-            }
-            
-            
-            const win = window.open("", "JSON Output", "width=800,height=600");
-            win.document.body.innerHTML = '<textarea style="width:100%;height:100%;font-family:monospace;padding:10px;">' + jsonString + '</textarea>';
-        });
         
         removeSquaresButton.addEventListener("click", () => {
             removeMode = !removeMode;
@@ -1960,6 +1891,11 @@
             customPieceMoves.forEach((move, index) => {
                 const li = document.createElement("li");
                 li.style.marginBottom = "5px";
+                li.style.display = "flex";
+                li.style.justifyContent = "center";
+                li.style.alignItems = "center";
+                
+                const textSpan = document.createElement("span");
                 let text = `${move.type}: x=${move.x}, y=${move.y}`;
                 if (move.type === "blockable") {
                     text += ` (repeat: ${move.repeat}${move.limit ? `, limit: ${move.limit}` : ''})`;
@@ -1967,7 +1903,7 @@
                 if (move.impotent) {
                     text += ` [Impotent]`;
                 }
-                li.textContent = text;
+                textSpan.textContent = text;
                 
                 const removeBtn = document.createElement("button");
                 removeBtn.textContent = "X";
@@ -1986,6 +1922,7 @@
                     updatePreviewBoard();
                 });
                 
+                li.appendChild(textSpan);
                 li.appendChild(removeBtn);
                 currentMovesList.appendChild(li);
             });
@@ -2004,7 +1941,11 @@
             customPieceSpecialMoves.forEach((sm, index) => {
                 const li = document.createElement("li");
                 li.style.marginBottom = "5px";
+                li.style.display = "flex";
+                li.style.justifyContent = "center";
+                li.style.alignItems = "center";
                 
+                const textSpan = document.createElement("span");
                 const conditionStrings = sm.condition.map(cond => {
                     if (cond.name === 'Rank') {
                         return `Rank(${cond.settings.rank}, ${cond.settings.axis})`;
@@ -2018,7 +1959,7 @@
                 if (sm.effect.settings.customDef) {
                     pieceNameDisplay = "Custom: " + sm.effect.settings.customDef.name;
                 }
-                li.textContent = `${sm.hook}: ${conditionText}${sm.effect.name}(${sm.effect.settings.offsetX},${sm.effect.settings.offsetY},${pieceNameDisplay}) `;
+                textSpan.textContent = `${sm.hook}: ${conditionText}${sm.effect.name}(${sm.effect.settings.offsetX},${sm.effect.settings.offsetY},${pieceNameDisplay}) `;
                 
                 const removeBtn = document.createElement("button");
                 removeBtn.textContent = "✖";
@@ -2034,6 +1975,7 @@
                     updateSpecialMovesList();
                 });
                 
+                li.appendChild(textSpan);
                 li.appendChild(removeBtn);
                 currentSpecialMovesList.appendChild(li);
             });
