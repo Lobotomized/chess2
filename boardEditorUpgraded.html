@@ -689,6 +689,13 @@
                             </div>
                         </div>
 
+                        <div style="margin-bottom: 20px;">
+                            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px;">
+                                <input type="checkbox" id="flipForBlack" checked style="width: auto; margin: 0; transform: scale(1.2);">
+                                Flip direction depending on piece color
+                            </label>
+                        </div>
+
                         <div style="background: rgba(255,255,255,0.4); padding: 15px; border-radius: 4px; border: 1px solid var(--board-dark); margin-bottom: 10px;">
                             <label>Add Move:</label>
                             <select id="moveType">
@@ -845,6 +852,7 @@
         const uploadImageBtn = document.getElementById("uploadImageBtn");
         const customPieceValue = document.getElementById("customPieceValue");
         const customPiecePosValue = document.getElementById("customPiecePosValue");
+        const flipForBlackCheckbox = document.getElementById("flipForBlack");
         const moveTypeSelect = document.getElementById("moveType");
         const moveXInput = document.getElementById("moveX");
         const moveYInput = document.getElementById("moveY");
@@ -1310,7 +1318,7 @@
             const pieces = piecesObjectArray.map(p => {
                 if (p.isCustom) {
                     let adjustedMoves = JSON.parse(JSON.stringify(p.customDef.moves));
-                    if (p.color === 'black') {
+                    if (p.color === 'black' && p.customDef.flipForBlack !== false) {
                         adjustedMoves = adjustedMoves.map(move => {
                             if (move.y !== undefined) move.y = -move.y;
                             if (move.offsetY !== undefined) move.offsetY = -move.offsetY;
@@ -2169,6 +2177,7 @@
             customPieceName.value = piece.name;
             customPieceValue.value = piece.value || 3;
             customPiecePosValue.value = piece.posValue || 2;
+            flipForBlackCheckbox.checked = piece.flipForBlack !== false;
             
             // Select correct image
             const classicImages = classicImageSection.querySelectorAll("img");
@@ -2214,6 +2223,7 @@
             customPieceName.value = "";
             customPieceValue.value = "3";
             customPiecePosValue.value = "2";
+            flipForBlackCheckbox.checked = true;
             customPieceImageUpload.value = '';
             fileNameDisplay.textContent = 'No file chosen';
             if (selectedCustomImage) {
@@ -2248,6 +2258,7 @@
                 name: name,
                 value: parseInt(customPieceValue.value) || 3,
                 posValue: parseInt(customPiecePosValue.value) || 2,
+                flipForBlack: flipForBlackCheckbox.checked,
                 imageName: selectedCustomImage.alt.startsWith('UPLOADED:') ? selectedCustomImage.alt.split('UPLOADED:')[1].split('|')[0] : selectedCustomImage.alt,
                 imageUrl: selectedCustomImage.alt.startsWith('UPLOADED:') ? selectedCustomImage.alt.split('UPLOADED:')[1].split('|')[0] : null,
                 blackImageUrl: selectedCustomImage.alt.startsWith('UPLOADED:') ? selectedCustomImage.alt.split('UPLOADED:')[1].split('|')[1] : null,
@@ -2274,6 +2285,7 @@
             customPieceName.value = "";
             customPieceValue.value = "3";
             customPiecePosValue.value = "2";
+            flipForBlackCheckbox.checked = true;
             customPieceImageUpload.value = '';
             fileNameDisplay.textContent = 'No file chosen';
             customPieceMoves = [];

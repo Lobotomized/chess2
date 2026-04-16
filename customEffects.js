@@ -135,7 +135,7 @@ const effects = {
         if (factoryName === 'customPiece' && settings.customDef) {
             // It's a custom piece
             let adjustedMoves = JSON.parse(JSON.stringify(settings.customDef.moves));
-            if (piece.color === 'black') {
+            if (piece.color === 'black' && settings.customDef.flipForBlack !== false) {
                 adjustedMoves = adjustedMoves.map(move => {
                     if (move.y !== undefined) move.y = -move.y;
                     if (move.offsetY !== undefined) move.offsetY = -move.offsetY;
@@ -205,7 +205,7 @@ const effects = {
         let newPiece;
         if (factoryName === 'customPiece' && settings.customDef) {
             let adjustedMoves = JSON.parse(JSON.stringify(settings.customDef.moves));
-            if (piece.color === 'black') {
+            if (piece.color === 'black' && settings.customDef.flipForBlack !== false) {
                 adjustedMoves = adjustedMoves.map(move => {
                     if (move.y !== undefined) move.y = -move.y;
                     if (move.offsetY !== undefined) move.offsetY = -move.offsetY;

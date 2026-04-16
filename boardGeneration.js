@@ -3654,7 +3654,7 @@ async function customMap(state){
             
             // If the piece is black, invert the Y axis for its moves
             // so "forward" is relative to the player's side
-            if (piece.color === 'black') {
+            if (piece.color === 'black' && piece.customDef.flipForBlack !== false) {
                 adjustedMoves = adjustedMoves.map(move => {
                     if (move.y !== undefined) {
                         move.y = -move.y;
