@@ -1,7 +1,3 @@
-const { applyCustomEffects } = require('./customEffects.js');
-const Map = require('./models/map');
-const pieceDefinitions = require('./pieceDefinitions.js');
-
 let memoizedSquares = {};
 let memoizedPieces = {};
 
@@ -573,52 +569,61 @@ function getSinglePlayerGame() {
                     state.board.length = 0;
                     state.pieces.length = 0;
                     
-                    Map.findById(state.customGameId).then(json => {
-                        if (!json) return;
-                        const thePieces = json.pieces.map((piece) => {
-                            if (piece.isCustom) {
-                                let adjustedMoves = JSON.parse(JSON.stringify(piece.customDef.moves));
-                                if (piece.color === 'black' && piece.customDef.flipForBlack !== false) {
-                                    adjustedMoves = adjustedMoves.map(move => {
-                                        if (move.y !== undefined) move.y = -move.y;
-                                        if (move.offsetY !== undefined) move.offsetY = -move.offsetY;
-                                        if (move.x !== undefined) move.x = -move.x;
-                                        if (move.offsetX !== undefined) move.offsetX = -move.offsetX;
-                                        return move;
-                                    });
-                                }
-                                let pieceIcon = piece.color + piece.pieceType;
-                                if (piece.customDef.imageUrl) {
-                                    if (piece.color === 'black' && piece.customDef.blackImageUrl) {
-                                        pieceIcon = piece.customDef.blackImageUrl;
-                                    } else {
-                                        pieceIcon = piece.customDef.imageUrl;
+                    let MapModel, pDefs, applyEffectsFunc;
+                    if (typeof module !== 'undefined' && module.exports) {
+                        MapModel = require('./models/map');
+                        pDefs = require('./pieceDefinitions.js');
+                        applyEffectsFunc = require('./customEffects.js').applyCustomEffects;
+                    }
+                    
+                    if (MapModel) {
+                        MapModel.findById(state.customGameId).then(json => {
+                            if (!json) return;
+                            const thePieces = json.pieces.map((piece) => {
+                                if (piece.isCustom) {
+                                    let adjustedMoves = JSON.parse(JSON.stringify(piece.customDef.moves));
+                                    if (piece.color === 'black' && piece.customDef.flipForBlack !== false) {
+                                        adjustedMoves = adjustedMoves.map(move => {
+                                            if (move.y !== undefined) move.y = -move.y;
+                                            if (move.offsetY !== undefined) move.offsetY = -move.offsetY;
+                                            if (move.x !== undefined) move.x = -move.x;
+                                            if (move.offsetX !== undefined) move.offsetX = -move.offsetX;
+                                            return move;
+                                        });
                                     }
+                                    let pieceIcon = piece.color + piece.pieceType;
+                                    if (piece.customDef.imageUrl) {
+                                        if (piece.color === 'black' && piece.customDef.blackImageUrl) {
+                                            pieceIcon = piece.customDef.blackImageUrl;
+                                        } else {
+                                            pieceIcon = piece.customDef.imageUrl;
+                                        }
+                                    }
+                                    const newPiece = {
+                                        x: piece.x, y: piece.y, initialX: piece.x, initialY: piece.y, color: piece.color,
+                                        moves: adjustedMoves, name: piece.customDef.name, icon: pieceIcon,
+                                        value: piece.customDef.value !== undefined ? piece.customDef.value : 3,
+                                        posValue: piece.customDef.posValue !== undefined ? piece.customDef.posValue : 2,
+                                        isCustom: true,
+                                        customDef: piece.customDef
+                                    };
+                                    
+                                    if (typeof applyEffectsFunc === 'function') {
+                                        applyEffectsFunc(newPiece, piece.customDef);
+                                    }
+                                    return newPiece;
                                 }
-                                const newPiece = {
-                                    x: piece.x, y: piece.y, initialX: piece.x, initialY: piece.y, color: piece.color,
-                                    moves: adjustedMoves, name: piece.customDef.name, icon: pieceIcon,
-                                    value: piece.customDef.value !== undefined ? piece.customDef.value : 3,
-                                    posValue: piece.customDef.posValue !== undefined ? piece.customDef.posValue : 2,
-                                    isCustom: true,
-                                    customDef: piece.customDef
-                                };
-                                
-                                if (typeof applyCustomEffects === 'function') {
-                                    applyCustomEffects(newPiece, piece.customDef);
+                                let pieceString = piece.pieceType.slice(0, -4).toLowerCase() + 'Factory';
+                                if (pDefs && pDefs[pieceString]) {
+                                    return pDefs[pieceString](piece.color, piece.x, piece.y);
+                                } else {
+                                    console.error("Factory not found:", pieceString);
                                 }
-                                return newPiece;
-                            }
-                            let pieceString = piece.pieceType.slice(0, -4).toLowerCase() + 'Factory';
-                            if (pieceDefinitions[pieceString]) {
-                                return pieceDefinitions[pieceString](piece.color, piece.x, piece.y);
-                            } else {
-                                console.error("Factory not found:", pieceString);
-                            }
-                        });
-                        state.board.push(...json.squares);
-                        state.pieces.push(...thePieces.filter(p => p));
-                    }).catch(err => console.error('Error loading custom map:', err));
+                            });
+                            state.board.push(...json.squares);
+                            state.pieces.push(...thePieces.filter(p => p));
+                        }).catch(err => console.error('Error loading custom map:', err));
+                    }
                 }
             }
         },
