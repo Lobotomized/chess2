@@ -367,20 +367,18 @@
             width: 100%;
             height: auto;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: background 0.2s;
             padding: 5px;
             border-radius: 4px;
         }
 
         #imageContainer img:hover {
-            transform: scale(1.1);
             background: rgba(255,255,255,0.8);
         }
 
         #imageContainer img.selected, .custom-piece-wrapper.selected {
             background: var(--selected);
             box-shadow: 0 0 5px var(--piece-black);
-            transform: scale(1.1);
         }
         
         .custom-piece-wrapper {
@@ -388,13 +386,12 @@
             flex-direction: column;
             align-items: center;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: background 0.2s;
             border-radius: 4px;
             min-width: 0;
         }
 
         .custom-piece-wrapper:hover {
-            transform: scale(1.1);
             background: rgba(255,255,255,0.8);
         }
 
@@ -729,7 +726,13 @@
                                 <label style="display: inline; cursor: pointer;"><input type="checkbox" id="moveImpotent"> Impotent (Cannot take pieces)</label>
                             </div>
                             
-                            <button id="addMoveBtn" style="margin-bottom: 0;">Add Move</button>
+                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 0;">
+                                <button id="addMoveBtn" style="margin-bottom: 0; flex: 1;">Add Move</button>
+                                <label id="paintOnBoardLabel" style="display: flex; align-items: center; gap: 5px; cursor: pointer; background: var(--board-light); padding: 8px 12px; border-radius: 4px; border: 1px solid var(--board-dark); flex: 1; justify-content: center; transition: all 0.2s;">
+                                    <input type="checkbox" id="paintOnBoardToggle" style="margin: 0;">
+                                    <strong>Paint on board</strong>
+                                </label>
+                            </div>
                         </div>
                         
                         <label id="currentMovesLabel" style="display: none; margin-top: 10px;">Current Moves:</label>
@@ -861,6 +864,8 @@
         const moveLimitInput = document.getElementById("moveLimit");
         const moveImpotentCheckbox = document.getElementById("moveImpotent");
         const addMoveBtn = document.getElementById("addMoveBtn");
+        const paintOnBoardToggle = document.getElementById("paintOnBoardToggle");
+        const paintOnBoardLabel = document.getElementById("paintOnBoardLabel");
         const currentMovesList = document.getElementById("currentMovesList");
         const saveCustomPieceBtn = document.getElementById("saveCustomPieceBtn");
         const cancelEditPieceBtn = document.getElementById("cancelEditPieceBtn");
@@ -918,6 +923,18 @@
                 fileNameDisplayBlack.textContent = customPieceImageUploadBlack.files[0].name;
             } else {
                 fileNameDisplayBlack.textContent = 'No file chosen';
+            }
+        });
+        
+        paintOnBoardToggle.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                paintOnBoardLabel.style.background = 'var(--highlight)';
+                paintOnBoardLabel.style.color = 'white';
+                paintOnBoardLabel.style.borderColor = 'var(--highlight)';
+            } else {
+                paintOnBoardLabel.style.background = 'var(--board-light)';
+                paintOnBoardLabel.style.color = 'inherit';
+                paintOnBoardLabel.style.borderColor = 'var(--board-dark)';
             }
         });
 
@@ -1772,10 +1789,16 @@
         
         // Create Piece logic
         moveTypeSelect.addEventListener("change", (e) => {
-            if (moveTypeSelect.value === "blockable") {
+            if (e.target.value === "blockable") {
                 blockableOptions.style.display = "block";
+                paintOnBoardLabel.style.display = "none";
+                paintOnBoardToggle.checked = false;
+                paintOnBoardLabel.style.background = 'var(--board-light)';
+                paintOnBoardLabel.style.color = 'inherit';
+                paintOnBoardLabel.style.borderColor = 'var(--board-dark)';
             } else {
                 blockableOptions.style.display = "none";
+                paintOnBoardLabel.style.display = "flex";
             }
         });
 
@@ -2048,6 +2071,29 @@
                         
                         moveXInput.value = dx;
                         moveYInput.value = dy;
+                        
+                        const paintOnBoardToggle = document.getElementById("paintOnBoardToggle");
+                        if (paintOnBoardToggle && paintOnBoardToggle.checked) {
+                            const type = moveTypeSelect.value;
+                            if (type === "absolute" || type === "takeMove") {
+                                // Check if move already exists
+                                const existingIndex = customPieceMoves.findIndex(m => m.type === type && m.x === dx && m.y === dy);
+                                if (existingIndex !== -1) {
+                                    // Toggle off (remove)
+                                    customPieceMoves.splice(existingIndex, 1);
+                                } else {
+                                    // Toggle on (add)
+                                    customPieceMoves.push({
+                                        type: type,
+                                        x: dx,
+                                        y: dy,
+                                        impotent: moveImpotentCheckbox.checked
+                                    });
+                                }
+                                updateMovesList();
+                                updatePreviewBoard();
+                            }
+                        }
                     });
                 }
             }
