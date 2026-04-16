@@ -977,6 +977,7 @@
                     pairContainer.style.borderRadius = "4px";
                     pairContainer.style.background = "rgba(0,0,0,0.05)";
                     pairContainer.style.position = "relative";
+                    pairContainer.style.marginBottom = "15px";
 
                     const deleteBtn = document.createElement("button");
                     deleteBtn.innerHTML = "X";
@@ -995,6 +996,7 @@
                     deleteBtn.style.alignItems = "center";
                     deleteBtn.style.justifyContent = "center";
                     deleteBtn.style.boxShadow = "0 2px 4px rgba(0,0,0,0.3)";
+                    deleteBtn.style.textShadow = "none";
                     deleteBtn.style.zIndex = "10";
                     deleteBtn.title = "Delete this image pair";
 
@@ -1045,17 +1047,20 @@
                     const swapBtn = document.createElement("button");
                     swapBtn.innerHTML = "⇄ Swap";
                     swapBtn.style.position = "absolute";
-                    swapBtn.style.bottom = "4px";
+                    swapBtn.style.bottom = "-12px";
                     swapBtn.style.left = "50%";
                     swapBtn.style.transform = "translateX(-50%)";
-                    swapBtn.style.background = "var(--button-bg, #eee)";
-                    swapBtn.style.color = "var(--button-text, #333)";
-                    swapBtn.style.border = "1px solid var(--board-dark)";
-                    swapBtn.style.borderRadius = "4px";
-                    swapBtn.style.padding = "2px 5px";
-                    swapBtn.style.fontSize = "10px";
+                    swapBtn.style.background = "var(--board-light)";
+                    swapBtn.style.color = "var(--piece-black)";
+                    swapBtn.style.border = "2px solid var(--border-color)";
+                    swapBtn.style.borderRadius = "8px";
+                    swapBtn.style.padding = "4px 8px";
+                    swapBtn.style.fontSize = "14px";
+                    swapBtn.style.fontWeight = "bold";
                     swapBtn.style.cursor = "pointer";
                     swapBtn.style.zIndex = "10";
+                    swapBtn.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
+                    swapBtn.style.fontFamily = "inherit"; // Use standard app font instead of stylized
                     swapBtn.title = "Swap white and black images";
 
                     pairContainer.appendChild(swapBtn);
@@ -1066,6 +1071,7 @@
                         wrapper.style.display = "flex";
                         wrapper.style.flexDirection = "column";
                         wrapper.style.alignItems = "center";
+                        wrapper.style.paddingBottom = "8px"; // Add space for swap button
                         
                         const lbl = document.createElement("div");
                         lbl.textContent = label;
@@ -1463,6 +1469,7 @@
                                 pairContainer.style.borderRadius = "4px";
                                 pairContainer.style.background = "rgba(0,0,0,0.05)";
                                 pairContainer.style.position = "relative";
+                                pairContainer.style.marginBottom = "15px";
 
                                 const deleteBtn = document.createElement("button");
                                 deleteBtn.innerHTML = "X";
@@ -1481,6 +1488,7 @@
                                 deleteBtn.style.alignItems = "center";
                                 deleteBtn.style.justifyContent = "center";
                                 deleteBtn.style.boxShadow = "0 2px 4px rgba(0,0,0,0.3)";
+                                deleteBtn.style.textShadow = "none";
                                 deleteBtn.style.zIndex = "10";
                                 deleteBtn.title = "Delete this image pair";
 
@@ -1532,17 +1540,21 @@
                                 const swapBtn = document.createElement("button");
                                 swapBtn.innerHTML = "⇄ Swap";
                                 swapBtn.style.position = "absolute";
-                                swapBtn.style.bottom = "4px";
+                                swapBtn.style.bottom = "-12px";
                                 swapBtn.style.left = "50%";
                                 swapBtn.style.transform = "translateX(-50%)";
-                                swapBtn.style.background = "var(--button-bg, #eee)";
-                                swapBtn.style.color = "var(--button-text, #333)";
-                                swapBtn.style.border = "1px solid var(--board-dark)";
-                                swapBtn.style.borderRadius = "4px";
-                                swapBtn.style.padding = "2px 5px";
-                                swapBtn.style.fontSize = "10px";
+                                swapBtn.style.background = "var(--board-light)";
+                                swapBtn.style.color = "var(--piece-black)";
+                                swapBtn.style.border = "2px solid var(--border-color)";
+                                swapBtn.style.borderRadius = "8px";
+                                swapBtn.style.padding = "4px 8px";
+                                swapBtn.style.fontSize = "14px";
+                                swapBtn.style.fontWeight = "bold";
                                 swapBtn.style.cursor = "pointer";
+                                swapBtn.style.textShadow = "none";
                                 swapBtn.style.zIndex = "10";
+                                swapBtn.style.boxShadow = "0 2px 4px rgba(0,0,0,0.2)";
+                                swapBtn.style.fontFamily = "inherit"; // Use standard app font instead of stylized
                                 swapBtn.title = "Swap white and black images";
 
                                 pairContainer.appendChild(swapBtn);
@@ -1553,6 +1565,7 @@
                                     wrapper.style.display = "flex";
                                     wrapper.style.flexDirection = "column";
                                     wrapper.style.alignItems = "center";
+                                    wrapper.style.paddingBottom = "8px"; // Add space for swap button
                                     
                                     const lbl = document.createElement("div");
                                     lbl.textContent = label;
@@ -1724,13 +1737,24 @@
                 blockableOptions.style.display = "none";
                 paintOnBoardLabel.style.display = "flex";
             }
+
+            if (e.target.value === "takeMove") {
+                moveImpotentCheckbox.checked = false;
+                moveImpotentCheckbox.disabled = true;
+                moveImpotentCheckbox.parentElement.style.opacity = "0.5";
+            } else {
+                moveImpotentCheckbox.disabled = false;
+                moveImpotentCheckbox.parentElement.style.opacity = "1";
+            }
         });
+        // Initialize state
+        moveTypeSelect.dispatchEvent(new Event("change"));
 
         addMoveBtn.addEventListener("click", () => {
             const type = moveTypeSelect.value;
             const x = parseInt(moveXInput.value, 10) || 0;
             const y = parseInt(moveYInput.value, 10) || 0;
-            const impotent = moveImpotentCheckbox.checked;
+            const impotent = type === "takeMove" ? false : moveImpotentCheckbox.checked;
             
             if (x === 0 && y === 0) {
                 showAlert("Move offset cannot be 0,0");
@@ -2022,7 +2046,7 @@
                                         type: type,
                                         x: dx,
                                         y: dy,
-                                        impotent: moveImpotentCheckbox.checked
+                                        impotent: type === "takeMove" ? false : moveImpotentCheckbox.checked
                                     });
                                 }
                                 updateMovesList();
@@ -2205,14 +2229,37 @@
             customPieceValue.value = "3";
             customPiecePosValue.value = "2";
             flipForBlackCheckbox.checked = true;
-            customPieceImageUpload.value = '';
-            fileNameDisplay.textContent = 'No file chosen';
+            customPieceImageUploadWhite.value = '';
+            customPieceImageUploadBlack.value = '';
+            fileNameDisplayWhite.textContent = 'No file chosen';
+            fileNameDisplayBlack.textContent = 'No file chosen';
             if (selectedCustomImage) {
                 selectedCustomImage.style.background = "";
                 selectedCustomImage = null;
             }
             customPieceMoves = [];
             customPieceSpecialMoves = [];
+            
+            // Clear inputs
+            moveXInput.value = "0";
+            moveYInput.value = "0";
+            moveTypeSelect.value = "absolute";
+            moveTypeSelect.dispatchEvent(new Event("change"));
+            moveRepeatCheckbox.checked = true;
+            moveLimitInput.value = "0";
+            moveImpotentCheckbox.checked = false;
+            paintOnBoardToggle.checked = false;
+            paintOnBoardToggle.dispatchEvent(new Event("change"));
+            
+            specialHook.value = "afterPlayerMove";
+            conditionsContainer.innerHTML = "";
+            specialEffect.value = "spawn";
+            specialEffect.dispatchEvent(new Event("change"));
+            specialEffX.value = "0";
+            specialEffY.value = "1";
+            if (specialEffParam.options.length > 0) specialEffParam.selectedIndex = 0;
+            specialEffParamVictory.value = "You";
+            
             updateMovesList();
             updateSpecialMovesList();
             updatePreviewBoard();
@@ -2267,8 +2314,10 @@
             customPieceValue.value = "3";
             customPiecePosValue.value = "2";
             flipForBlackCheckbox.checked = true;
-            customPieceImageUpload.value = '';
-            fileNameDisplay.textContent = 'No file chosen';
+            customPieceImageUploadWhite.value = '';
+            customPieceImageUploadBlack.value = '';
+            fileNameDisplayWhite.textContent = 'No file chosen';
+            fileNameDisplayBlack.textContent = 'No file chosen';
             customPieceMoves = [];
             customPieceSpecialMoves = [];
             editingCustomPieceId = null;
@@ -2278,6 +2327,27 @@
                 selectedCustomImage.style.background = "";
                 selectedCustomImage = null;
             }
+            
+            // Clear inputs
+            moveXInput.value = "0";
+            moveYInput.value = "0";
+            moveTypeSelect.value = "absolute";
+            moveTypeSelect.dispatchEvent(new Event("change"));
+            moveRepeatCheckbox.checked = true;
+            moveLimitInput.value = "0";
+            moveImpotentCheckbox.checked = false;
+            paintOnBoardToggle.checked = false;
+            paintOnBoardToggle.dispatchEvent(new Event("change"));
+            
+            specialHook.value = "afterPlayerMove";
+            conditionsContainer.innerHTML = "";
+            specialEffect.value = "spawn";
+            specialEffect.dispatchEvent(new Event("change"));
+            specialEffX.value = "0";
+            specialEffY.value = "1";
+            if (specialEffParam.options.length > 0) specialEffParam.selectedIndex = 0;
+            specialEffParamVictory.value = "You";
+            
             updateMovesList();
             updateSpecialMovesList();
             updatePreviewBoard();
