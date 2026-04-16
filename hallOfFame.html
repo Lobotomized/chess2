@@ -9,28 +9,29 @@
         body {
             background-color: #2e2e2e;
             color: #f0d9b5;
-            font-family: 'Georgia', serif;
+            font-family: 'Quicksand', sans-serif; font-weight: 700;
             display: flex;
             flex-direction: column;
             align-items: center;
             padding: 20px;
-        }
+                    font-size: 18px;
+}
         .container {
             width: 95%;
             max-width: 1200px;
             background: #1a1a1a;
             padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
         }
         button {
             padding: 10px 20px;
             background: #829769;
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 16px;
+            font-size: 28px;
             font-weight: bold;
         }
         button:hover {
@@ -40,7 +41,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
-            font-size: 14px;
+            font-size: 26px;
         }
         th, td {
             padding: 8px;
@@ -54,8 +55,8 @@
             display: inline-block;
             padding: 2px 4px;
             margin: 1px;
-            border-radius: 3px;
-            font-size: 10px;
+            border-radius: 12px;
+            font-size: 16px;
             font-weight: bold;
             color: #1a1a1a;
         }
@@ -65,7 +66,8 @@
     </style>
     <script src="/src/jsonfn.js"></script>
 <script src="/src/modal.js?v=1"></script>
-</head>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Quicksand:wght@500;700&display=swap');</style>
+    </head>
 <body>
     <div class="container">
         <div style="display:flex; justify-content:space-between; align-items:center;">
@@ -98,9 +100,9 @@
         </table>
 
         <div id="raceSelectionModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
-            <div style="background:#1a1a1a; padding:30px; border-radius:8px; text-align:center; min-width:300px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+            <div style="background:#1a1a1a; padding:30px; border-radius: 12px; text-align:center; min-width:300px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);">
                 <h2 style="margin-top:0;">Choose Your Race</h2>
-                <select id="playerRaceSelect" style="padding:10px; font-size:16px; margin:20px 0; width:100%; background:#333; color:#f0d9b5; border:1px solid #555; border-radius:4px;">
+                <select id="playerRaceSelect" style="padding:10px; font-size: 28px; margin:20px 0; width:100%; background:#333; color:#f0d9b5; border:1px solid #555; border-radius: 12px;">
                     <!-- Options populated by JS -->
                 </select>
                 <br>
@@ -112,7 +114,7 @@
         </div>
 
         <div id="hofFightModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
-            <div style="background:#1a1a1a; padding:30px; border-radius:8px; text-align:center; min-width:400px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+            <div style="background:#1a1a1a; padding:30px; border-radius: 12px; text-align:center; min-width:400px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);">
                 <h2 style="margin-top:0;">Hall of Fame Fight</h2>
                 <div style="display:flex; justify-content:space-between; align-items:center; gap: 20px;">
                     <div style="flex:1;">
@@ -135,7 +137,7 @@
         </div>
 
         <div id="historyModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:2000; justify-content:center; align-items:center;">
-            <div style="background:#1a1a1a; padding:20px; border-radius:8px; width:80%; max-height:80%; overflow-y:auto; position:relative;">
+            <div style="background:#1a1a1a; padding:20px; border-radius: 12px; width:80%; max-height:80%; overflow-y:auto; position:relative;">
                 <button onclick="document.getElementById('historyModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:#555;">Close</button>
                 <h2>Hall of Fame Fights History</h2>
                 <div id="historyContent">Loading...</div>

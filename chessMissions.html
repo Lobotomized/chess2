@@ -38,7 +38,8 @@
         </script>
 
 <script src="/src/modal.js?v=1"></script>
-</head>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Quicksand:wght@500;700&display=swap');</style>
+    </head>
 
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-2R833VKB2F"></script>
@@ -729,13 +730,13 @@
         else {
             myTurnH1.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; gap: 20px; margin-top: 40px; margin-bottom: 40px;">
-                <h2 style="color: var(--black-square-color, #4b4747); font-family: 'Lucida Console', Monaco, monospace; font-size: 1.5em; text-align: center;">Waiting for opponent...</h2>
+                <h2 style="color: var(--black-square-color, #4b4747); font-family: 'Quicksand', sans-serif; font-weight: 700; font-size: 1.5em; text-align: center;">Waiting for opponent...</h2>
                 <button class="createButton" onclick="copyLinkToClipboard()" style="font-size: 1.2em; display: flex; align-items: center; justify-content: center; width: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                     <img src="/static/lg/whiteKnight.png" style="height: 30px; margin-right: 15px;">
                     Copy Invite Link
                     <img src="/static/lg/blackKnight.png" style="height: 30px; margin-left: 15px;">
                 </button>
-                <div style="font-family: 'Lucida Console', Monaco, monospace; font-size: 1.1em; color: var(--black-square-color, #4b4747); text-align: center; opacity: 0.8;">Send this link to a friend, or wait for a stranger to join.</div>
+                <div style="font-family: 'Quicksand', sans-serif; font-weight: 700; font-size: 1.1em; color: var(--black-square-color, #4b4747); text-align: center; opacity: 0.8;">Send this link to a friend, or wait for a stranger to join.</div>
             </div>`;
 
         }

@@ -15,17 +15,20 @@
             align-items: center;
             padding: 40px;
             margin: 0;
-        }
+                    font-size: 18px;
+}
         .container {
             width: 95%;
             max-width: 1400px;
             background: #1e1e1e;
             padding: 30px;
             border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
         }
+        h1 .icon { height: 96px; margin-right: 20px; }
         h1 {
-            color: #f0d9b5;
+            font-family: 'Lilita One', cursive; font-weight: normal; letter-spacing: 1px;
+            color: #ffffff;
             margin-bottom: 10px;
             font-weight: 300;
             letter-spacing: 1px;
@@ -39,9 +42,9 @@
             background: #3a3a3a;
             color: #e0e0e0;
             border: 1px solid #555;
-            border-radius: 6px;
+            border-radius: 12px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 26px;
             font-weight: 600;
             transition: all 0.2s ease;
             margin-right: 5px;
@@ -65,9 +68,9 @@
             border-collapse: separate;
             border-spacing: 0;
             margin-top: 30px;
-            font-size: 14px;
+            font-size: 26px;
             background: #252525;
-            border-radius: 8px;
+            border-radius: 12px;
             overflow: hidden;
         }
         th, td {
@@ -95,8 +98,8 @@
             display: inline-block;
             padding: 3px 6px;
             margin: 2px;
-            border-radius: 4px;
-            font-size: 11px;
+            border-radius: 12px;
+            font-size: 18px;
             font-weight: 700;
             color: #1a1a1a;
             cursor: default;
@@ -107,12 +110,12 @@
         
         #status {
             margin-top: 20px;
-            font-size: 16px;
+            font-size: 28px;
             font-weight: 500;
             color: #829769;
             background: #252525;
             padding: 10px 15px;
-            border-radius: 6px;
+            border-radius: 12px;
             display: inline-block;
         }
 
@@ -134,7 +137,7 @@
             border-radius: 12px;
             min-width: 400px;
             max-width: 600px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.7);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
             border: 1px solid #333;
             text-align: left;
         }
@@ -146,7 +149,9 @@
             border-bottom: 1px solid #333;
             padding-bottom: 10px;
         }
-        .modal-header h2 { margin: 0; color: #f0d9b5; }
+        .modal-header h2 .icon { height: 72px; margin-right: 15px; }
+        h2 {
+            font-family: 'Lilita One', cursive; font-weight: normal; letter-spacing: 1px; margin: 0; color: #ffffff; }
         .detail-row {
             display: flex;
             justify-content: space-between;
@@ -185,7 +190,8 @@
     </style>
     <script src="/src/jsonfn.js"></script>
 <script src="/src/modal.js?v=1"></script>
-</head>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Quicksand:wght@500;700&display=swap');</style>
+    </head>
 <body>
     <div class="container">
         <h1>AI Evolutionary Arena</h1>
@@ -231,9 +237,9 @@
             </tbody>
         </table>
         <div id="raceSelectionModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:1000; justify-content:center; align-items:center;">
-            <div style="background:#1a1a1a; padding:30px; border-radius:8px; text-align:center; min-width:300px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+            <div style="background:#1a1a1a; padding:30px; border-radius: 12px; text-align:center; min-width:300px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);">
                 <h2 style="margin-top:0;">Choose Your Race</h2>
-                <select id="playerRaceSelect" style="padding:10px; font-size:16px; margin:20px 0; width:100%; background:#333; color:#f0d9b5; border:1px solid #555; border-radius:4px;">
+                <select id="playerRaceSelect" style="padding:10px; font-size: 28px; margin:20px 0; width:100%; background:#333; color:#f0d9b5; border:1px solid #555; border-radius: 12px;">
                     <!-- Options populated by JS -->
                 </select>
                 <br>
@@ -267,16 +273,16 @@
             </div>
             <div id="createBotBody" style="padding: 20px;">
                 
-                <div class="detail-row" style="margin-bottom: 20px;"><span class="detail-label" style="font-size: 16px; color: #fff;">Race</span>
-                    <select id="cb_race" style="background:#333; color:#f0d9b5; padding:5px; border:1px solid #555; font-size: 16px;">
+                <div class="detail-row" style="margin-bottom: 20px;"><span class="detail-label" style="font-size: 28px; color: #fff;">Race</span>
+                    <select id="cb_race" style="background:#333; color:#f0d9b5; padding:5px; border:1px solid #555; font-size: 28px;">
                         <!-- Populated by JS -->
                     </select>
                 </div>
 
                 <div class="phase-tabs" style="display:flex; gap: 5px; margin-bottom: 10px; border-bottom: 1px solid #333; padding-bottom: 5px;">
-                    <button class="tab-btn active" onclick="switchTab('base')" id="tab-base" style="padding: 8px 16px; font-size: 14px;">Base Phase (Start)</button>
+                    <button class="tab-btn active" onclick="switchTab('base')" id="tab-base" style="padding: 8px 16px; font-size: 26px;">Base Phase (Start)</button>
                     <div id="phase-tabs-container" style="display:flex; gap: 5px;"></div>
-                    <button onclick="addNewPhaseTab()" style="padding: 8px 12px; font-size: 14px; background: #333;">+</button>
+                    <button onclick="addNewPhaseTab()" style="padding: 8px 12px; font-size: 26px; background: #333;">+</button>
                 </div>
 
                 <div id="config-container">
@@ -302,14 +308,14 @@
 
                                 <h3 class="section-title" title="Modifiers that change how the board is evaluated">Magnifiers</h3>
                                 <div class="magnifiers-container" style="display:flex; flex-direction:column; gap:10px; margin-bottom:15px;"></div>
-                                <button type="button" onclick="addMagnifier(this)" style="background:#4ecdc4; border:none; padding:8px 16px; border-radius:4px; color:#111; cursor:pointer; font-size:14px; font-weight:bold; width:100%; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">+ Add Magnifier</button>
+                                <button type="button" onclick="addMagnifier(this)" style="background:#4ecdc4; border:none; padding:8px 16px; border-radius: 12px; color:#111; cursor:pointer; font-size: 26px; font-weight:bold; width:100%; box-shadow: 0 8px 16px rgba(0,0,0,0.3);">+ Add Magnifier</button>
                             </div>
 
                             <div>
                                 <h3 class="section-title" title="Pruning filters that speed up calculation by ignoring bad moves">Filters</h3>
                                 
                                 <!-- Remove Attacked -->
-                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; background:#222;">
+                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 12px; background:#222;">
                                     <div class="detail-row" style="border:none; padding:0;">
                                         <label title="Ignores moves that put pieces in immediate danger"><input type="checkbox" class="cb_useRemoveAttacked" style="transform: scale(1.2); margin-right: 8px;"> <strong>Use Remove Attacked</strong></label>
                                     </div>
@@ -321,7 +327,7 @@
                                 </div>
 
                                 <!-- Remove Non-Attacking -->
-                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; background:#222;">
+                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 12px; background:#222;">
                                     <div class="detail-row" style="border:none; padding:0;">
                                         <label title="Ignores quiet moves, focusing only on captures/checks"><input type="checkbox" class="cb_useRemoveNonAttacking" style="transform: scale(1.2); margin-right: 8px;"> <strong>Use Remove Non-Attacking</strong></label>
                                     </div>
@@ -334,7 +340,7 @@
                                 </div>
 
                                 <!-- Randomly Remove -->
-                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; background:#222;">
+                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 12px; background:#222;">
                                     <div class="detail-row" style="border:none; padding:0;">
                                         <label title="Randomly prunes moves to introduce unpredictability"><input type="checkbox" class="cb_useRandomlyRemove" style="transform: scale(1.2); margin-right: 8px;"> <strong>Use Randomly Remove</strong></label>
                                     </div>
@@ -347,7 +353,7 @@
                                 </div>
 
                                 <!-- Max Moves -->
-                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; background:#222;">
+                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 12px; background:#222;">
                                     <div class="detail-row" style="border:none; padding:0;">
                                         <label title="Limits the maximum number of moves generated per piece"><input type="checkbox" class="cb_useMaxMoves" style="transform: scale(1.2); margin-right: 8px;"> <strong>Use Max Moves</strong></label>
                                     </div>
@@ -358,7 +364,7 @@
                                 </div>
 
                                 <!-- Nth Chance -->
-                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; background:#222;">
+                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 12px; background:#222;">
                                     <div class="detail-row" style="border:none; padding:0;">
                                         <label title="Removes pieces with a specific probability"><input type="checkbox" class="cb_useNthChance" style="transform: scale(1.2); margin-right: 8px;"> <strong>Use Nth Chance</strong></label>
                                     </div>
@@ -370,7 +376,7 @@
                                 </div>
 
                                 <!-- Remove Well Positioned -->
-                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 6px; background:#222;">
+                                <div style="border: 1px solid #444; padding: 12px; margin-bottom: 12px; border-radius: 12px; background:#222;">
                                     <div class="detail-row" style="border:none; padding:0;">
                                         <label title="Prevents moving pieces that are already in strong positions"><input type="checkbox" class="cb_useRemoveWellPositioned" style="transform: scale(1.2); margin-right: 8px;"> <strong>Use Remove Well Pos</strong></label>
                                     </div>
@@ -386,7 +392,7 @@
                 </div>
 
                 <div style="margin-top: 20px; text-align: center;">
-                    <button id="createBotSubmitBtn" class="primary" style="padding: 10px 40px; font-size: 16px;" onclick="createNewBot()">Create Bot</button>
+                    <button id="createBotSubmitBtn" class="primary" style="padding: 10px 40px; font-size: 28px;" onclick="createNewBot()">Create Bot</button>
                 </div>
             </div>
         </div>
@@ -417,7 +423,7 @@
 
     <!-- Fight Bots Modal -->
     <div id="evoFightModal" class="modal-overlay" style="display:none;" onclick="if(event.target === this) closeEvoFightModal()">
-        <div class="modal-content" style="background:#1a1a1a; padding:30px; border-radius:8px; text-align:center; min-width:400px; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+        <div class="modal-content" style="background:#1a1a1a; padding:30px; border-radius: 12px; text-align:center; min-width:400px; box-shadow: 0 8px 16px rgba(0,0,0,0.3);">
             <div class="modal-header" style="justify-content: center; position: relative;">
                 <h2 style="margin-top:0;">Fight Arena Bots</h2>
                 <button onclick="closeEvoFightModal()" style="padding:5px 10px; position: absolute; right: 0;">X</button>
@@ -447,8 +453,8 @@
         let phases = [];
         
         const MAG_TEMPLATES = {
-            'MaxOptions': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
-                             <div style="font-size:11px; color:#aaa; font-style:italic; margin-bottom:2px;">
+            'MaxOptions': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius: 12px;">
+                             <div style="font-size: 18px; color:#aaa; font-style:italic; margin-bottom:2px;">
                                Rewards pieces that have many legal moves (Mobility). Good for open play.
                              </div>
                              <div style="display:flex; align-items:center; gap:8px;">
@@ -461,8 +467,8 @@
                                <label title="Calculate mobility only for ENEMY pieces (to restrict them)"><input type="checkbox" class="opt-onlyForEnemy" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForMe').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = false; }"> Only Enemy</label>
                              </div>
                            </div>`,
-            'Piece': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
-                        <div style="font-size:11px; color:#aaa; font-style:italic; margin-bottom:2px;">
+            'Piece': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius: 12px;">
+                        <div style="font-size: 18px; color:#aaa; font-style:italic; margin-bottom:2px;">
                           Standard material evaluation. Base values: Pawn=1, Knight/Bishop=3, Rook=5, Queen=9.
                         </div>
                         <div style="display:flex; align-items:center; gap:8px;">
@@ -477,8 +483,8 @@
                           <label title="Count material for ENEMY"><input type="checkbox" class="opt-onlyForEnemy" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForMe').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = false; }"> Only Enemy</label>
                         </div>
                       </div>`,
-            'PieceDefended': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
-                                <div style="font-size:11px; color:#aaa; font-style:italic; margin-bottom:2px;">
+            'PieceDefended': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius: 12px;">
+                                <div style="font-size: 18px; color:#aaa; font-style:italic; margin-bottom:2px;">
                                   Rewards pieces that are protected by other friendly pieces (Solidarity).
                                 </div>
                                 <div style="display:flex; align-items:center; gap:8px;">
@@ -495,8 +501,8 @@
                                   <label title="Evaluate ENEMY defended pieces (to avoid them?)"><input type="checkbox" class="opt-onlyForEnemy" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForMe').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = false; }"> Only Enemy</label>
                                 </div>
                               </div>`,
-            'KingTropism': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
-                              <div style="font-size:11px; color:#aaa; font-style:italic; margin-bottom:2px;">
+            'KingTropism': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius: 12px;">
+                              <div style="font-size: 18px; color:#aaa; font-style:italic; margin-bottom:2px;">
                                 Evaluates distance to a King. Closer is better. Used for Attacking (Enemy King) or Defending (My King).
                               </div>
                               <div style="display:flex; align-items:center; gap:8px;">
@@ -513,8 +519,8 @@
                                 <label title="Apply this logic only for ENEMY pieces"><input type="checkbox" class="opt-onlyForEnemy" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForMe').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = false; }"> Only Enemy</label>
                               </div>
                             </div>`,
-            'KingVulnerability': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
-                                    <div style="font-size:11px; color:#aaa; font-style:italic; margin-bottom:2px;">
+            'KingVulnerability': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius: 12px;">
+                                    <div style="font-size: 18px; color:#aaa; font-style:italic; margin-bottom:2px;">
                                       Penalties/Rewards for King Safety. Checks and square control around King.
                                     </div>
                                     <div style="display:flex; align-items:center; gap:8px;">
@@ -530,8 +536,8 @@
                                       <label title="Apply this logic only for ENEMY King"><input type="checkbox" class="opt-onlyForEnemy" onchange="if(this.checked) { this.parentElement.parentElement.querySelector('.opt-onlyForMe').checked = false; this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = true; } else { this.parentElement.parentElement.querySelector('.opt-onlyForMe').disabled = false; }"> Only Enemy</label>
                                     </div>
                                   </div>`,
-            'AttackingPieces': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius:4px;">
-                                  <div style="font-size:11px; color:#aaa; font-style:italic; margin-bottom:2px;">
+            'AttackingPieces': `<div style="display:flex; flex-direction:column; gap:4px; width:100%; padding: 4px; background:#222; border-radius: 12px;">
+                                  <div style="font-size: 18px; color:#aaa; font-style:italic; margin-bottom:2px;">
                                     Rewards the bot for attacking enemy pieces.
                                   </div>
                                   <div style="display:flex; align-items:center; gap:8px;">
@@ -557,11 +563,11 @@
             const container = btn.previousElementSibling;
             const div = document.createElement('div');
             div.className = 'mag-row';
-            div.style.cssText = 'border: 1px solid #555; padding: 8px; font-size: 12px; display:flex; flex-direction:column; gap:8px; background:#1e1e1e; border-radius:6px; margin-bottom:5px;';
+            div.style.cssText = 'border: 1px solid #555; padding: 8px; font-size: 12px; display:flex; flex-direction:column; gap:8px; background:#1e1e1e; border-radius: 12px; margin-bottom:5px;';
             
             div.innerHTML = `
                 <div style="display:flex; justify-content:space-between; align-items:center;">
-                    <select class="mag-type" onchange="updateMagOptions(this)" style="background:#333; color:#f0d9b5; border:1px solid #555; padding:4px; font-size:14px; font-weight:bold; border-radius:4px;">
+                    <select class="mag-type" onchange="updateMagOptions(this)" style="background:#333; color:#f0d9b5; border:1px solid #555; padding:4px; font-size: 26px; font-weight:bold; border-radius: 12px;">
                         <option value="MaxOptions">MaxOptions</option>
                         <option value="Piece">Piece</option>
                         <option value="PieceDefended">PieceDefended</option>
@@ -569,7 +575,7 @@
                         <option value="KingVulnerability">KingVulnerability</option>
                         <option value="AttackingPieces">AttackingPieces</option>
                     </select>
-                    <button type="button" onclick="this.parentElement.parentElement.remove()" style="background:#e5989b; color:#fff; padding:4px 8px; border:none; border-radius:4px; cursor:pointer; font-weight:bold;">Remove</button>
+                    <button type="button" onclick="this.parentElement.parentElement.remove()" style="background:#e5989b; color:#fff; padding:4px 8px; border:none; border-radius: 12px; cursor:pointer; font-weight:bold;">Remove</button>
                 </div>
                 <div class="mag-opts" style="display:flex; flex-direction:column; gap:5px; width:100%;"></div>
             `;

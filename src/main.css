@@ -7,20 +7,27 @@
     user-select: none;
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Quicksand:wght@500;700&display=swap');
+
 :root {
-    --black-square-color: #4b4747;
-    --white-square-color: #ffffff;
-    --danger-square-color:#f76176;
-    --lighted-square-color: #7aaccc;
-    --available-square-color:  #b990ca;
-    --blocked-square-color: #c25766;
-  }
+    --board-light: #e4d8a5;
+    --board-dark: #a67c52;
+    --piece-white: #ffffff;
+    --piece-black: #000000;
+    --highlight: #7ea354;
+    --threat: #cc5449;
+    --selected: #f7e98e;
+    --border-color: #000000;
+    --bg-overlay: rgba(240, 230, 200, 0.95);
+}
 
 #canvas {
     display: inline-block;
 }
-h1{
-    color:var(--white-square-color);
+h1 .icon { height: 96px; margin-right: 20px; }
+        h1 {
+            font-family: 'Lilita One', cursive; font-weight: normal; letter-spacing: 1px;
+    color: #ffffff;
 }
 .times {
     display: flex;
@@ -41,7 +48,7 @@ h1{
 .forfeitText{
     margin-top:auto;
     margin-bottom:auto;
-    font-size:20px;
+    font-size: 28px;
     font-family:monospace;
     color:#ed5e75;
     font-weight:600;
@@ -52,7 +59,7 @@ h1{
     margin-left:auto;
     margin-right:auto;
     margin-top:10px;
-    border-radius:8px;
+    border-radius: 12px;
     border:solid 2px 2px 2px 2px;
     border-color:var(--black-square-color);
     cursor:pointer;
@@ -72,15 +79,21 @@ h1{
     /* display:none; */
 }
 
-body{
+body {
     min-width:fit-content;
     margin:0;
-    background-size: 800px 800px;
-    background-position: 0 0, 0 400px, 400px -400px, -400px 0px;
-    min-height: 100%;
+    background: url('/static/bigMap/plains1.png') center center / cover fixed;
+    
+    font-family: 'Quicksand', sans-serif; font-weight: 700;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     justify-content: center;
+            font-size: 18px;
+}
+
+img, canvas {
+    
 }
 
 
@@ -157,9 +170,9 @@ html{
       background:var(--white-square-color);
       border:solid;
       padding:32px;
-      border-radius:8px;
+      border-radius: 12px;
       color:var(--black-square-color);
-      font-size:18px;   
+      font-size: 26px;   
       font-weight:600;
   }
 
@@ -169,13 +182,15 @@ html{
       text-align:center;
   }
 
-  .createButton{
+  .createButton .icon { height: 48px; margin-right: 15px; }
+        .createButton {
+            font-family: 'Lilita One', cursive; font-weight: normal; letter-spacing: 1px;
       /* background:var(--black-square-color);
       color:var(--white-square-color);
       padding:25px;
       padding-left:100px;
       padding-right:100px;
-      font-size:18px;
+      font-size: 26px;
       font-weight:600;
       border-radius:50px;
       cursor:pointer;
@@ -212,7 +227,7 @@ html{
   }   
 
   .createButton:hover{
-      color:var(--white-square-color);
+      color: #ffffff;
       background:var(--danger-square-color);
   }
  
@@ -235,7 +250,7 @@ html{
       margin-right:15px;
   }
   html{
-      font-family:"Lucida Console", Monaco, monospace ;
+      font-family: 'Quicksand', sans-serif; font-weight: 700;
       height:100vh;
       background:#B0A875;
 
@@ -283,12 +298,12 @@ html{
     margin-left:auto; margin-right:auto;
     font-size:1.5vh !important;
     padding:50px;
-    border-radius:8px;
+    border-radius: 12px;
 }
 
 
 .clock{
-    font-size:16px;
+    font-size: 28px;
     /* margin-left:50px;
     margin-right:50px; */
     margin-top:auto;
@@ -307,7 +322,7 @@ html{
     border:solid;
     border: 2px 2px 2px 2px;
     border-color:white;
-    border-radius:8px;
+    border-radius: 12px;
     padding:16px;
     color:white;
   }
@@ -315,27 +330,30 @@ html{
 
 
   .linkHeader{
+            font-family: 'Lilita One', cursive; font-weight: normal; letter-spacing: 1px;
     text-align:center;
     color:white;
     text-decoration:none;
     font-weight:bold;
     font-size:25px;
-    font-family:"Lucida Sans Unicode", "Lucida Grande", sans-serif;
+    font-family: 'Quicksand', sans-serif; font-weight: 700;
   }
 
 
-  .startGame{
+  .startGame .icon { height: 40px; margin-right: 10px; }
+        .startGame {
+            font-family: 'Lilita One', cursive; font-weight: normal; letter-spacing: 1px;
     color:white;
     border:solid;
     border-color:white;
     padding:15px;
-    font-size:18px;
+    font-size: 26px;
     border:2px 2px 2px 2px;
     cursor:pointer;
     text-decoration:none;
   }
   .startGame:hover{
-    color:black;
+    color: #ffffff;
     background:white;
   }
   .span{
@@ -351,7 +369,7 @@ html{
     justify-content:space-around;
   }
 
-  .racePickImage{
+  .racePickImage {  
       max-width:5vw;
       min-width:50px;
   }
@@ -445,7 +463,9 @@ html{
     align-items: center;
  }
 
- .campaign > h2{
+ .campaign > h2 .icon { height: 72px; margin-right: 15px; }
+        h2 {
+            font-family: 'Lilita One', cursive; font-weight: normal; letter-spacing: 1px;
     margin-bottom:0px;
  }
  .campaign > a{
@@ -513,7 +533,7 @@ html{
     align-items: center;
     z-index: 9999;
     font-size: 2em;
-    font-family: "Lucida Console", Monaco, monospace;
+    font-family: 'Quicksand', sans-serif; font-weight: 700;
 }
 
 /* Spinner Animation */

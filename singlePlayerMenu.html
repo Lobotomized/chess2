@@ -6,20 +6,24 @@
     <title>Chess 2 - Single Player</title>
     <style>
         /* Chess-inspired variables */
-        :root {
-            --board-light: #f0d9b5;
-            --board-dark: #b58863;
-            --piece-white: #ffffff;
-            --piece-black: #2e2e2e;
-            --highlight: #829769;
-            --selected: #f7e98e;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Quicksand:wght@500;700&display=swap');
+
+:root {
+    --board-light: #e4d8a5;
+    --board-dark: #a67c52;
+    --piece-white: #ffffff;
+    --piece-black: #000000;
+    --highlight: #7ea354;
+    --threat: #cc5449;
+    --selected: #f7e98e;
+    --border-color: #000000;
+    --bg-overlay: rgba(240, 230, 200, 0.95);
+}
 
         body {
-            background: linear-gradient(45deg, var(--board-dark) 25%, var(--board-light) 25%, var(--board-light) 75%, var(--board-dark) 75%);
-            background-size: 80px 80px;
-            color: var(--piece-black);
-            font-family: 'Georgia', serif;
+            background: url('/static/bigMap/forest2.png') center center / cover fixed;
+            
+            color: #000000; font-weight: bold; font-family: 'Quicksand', sans-serif; font-weight: 700;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -27,32 +31,18 @@
             margin: 0;
             padding: 0;
             min-height: 100vh;
-        }
+                    font-size: 18px;
+}
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 25% 25%, rgba(0,0,0,0.1) 1px, transparent 1px),
-                radial-gradient(circle at 75% 75%, rgba(0,0,0,0.1) 1px, transparent 1px);
-            background-size: 40px 40px;
-            pointer-events: none;
-            z-index: -1;
-        }
+        
 
         .menu-container {
             width: 90%;
             max-width: 500px;
-            background: rgba(240, 217, 181, 0.95);
-            border: 8px solid var(--piece-black);
+            background: var(--bg-overlay);
+            border: 2px solid var(--border-color);
             border-radius: 12px;
-            box-shadow: 
-                0 0 0 4px var(--board-dark),
-                0 15px 40px rgba(0,0,0,0.4);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
             padding: 40px;
             display: flex;
             flex-direction: column;
@@ -60,25 +50,31 @@
             text-align: center;
         }
 
+        h1 .icon { height: 96px; margin-right: 20px; }
         h1 {
-            font-size: 2.5em;
+            font-family: 'Lilita One', cursive; font-weight: normal; letter-spacing: 1px;
+            font-size: 4em;
             margin-top: 0;
             margin-bottom: 30px;
-            color: var(--piece-black);
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            color: #ffffff;
+            -webkit-text-stroke: 2px #000000;
+            text-shadow: 0px 4px 0px rgba(0,0,0,0.8), 0px 8px 10px rgba(0,0,0,0.4);
         }
 
+        .menu-button .icon { height: 64px; margin-right: 20px; }
         .menu-button {
+            font-family: 'Lilita One', cursive; font-weight: normal; letter-spacing: 1px;
             width: 100%;
             padding: 20px;
-            background: linear-gradient(135deg, var(--piece-black) 0%, #2a2a2a 100%);
-            color: var(--board-light);
+            background: linear-gradient(to bottom, #7D5A4A, #4A332A); border-bottom: 6px solid #2d1b15; color: #ffffff;
+            -webkit-text-stroke: 2px #000000;
+            text-shadow: 0px 4px 0px rgba(0,0,0,0.8), 0px 8px 10px rgba(0,0,0,0.4);
             font-weight: bold;
             cursor: pointer;
-            border: 3px solid var(--board-dark);
-            font-size: 24px;
+            border: 2px solid var(--border-color);
+            font-size: 36px;
             box-sizing: border-box;
-            border-radius: 6px;
+            border-radius: 12px;
             text-transform: uppercase;
             letter-spacing: 2px;
             transition: all 0.3s ease;
@@ -89,26 +85,30 @@
         }
         
         .menu-button:hover {
-            background: linear-gradient(135deg, #2a2a2a 0%, var(--piece-black) 100%);
-            color: var(--selected);
+            background: linear-gradient(to bottom, #8C6540, #5A3E2B); border-bottom: 6px solid #2d1b15;
+            color: #ffffff;
             border-color: var(--selected);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            transform: translateY(2px);
+            border-bottom-width: 4px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
         }
         
         .icon {
-            height: 30px;
-            margin-right: 15px;
-        }
+    
+    height: 64px;
+    width: auto;
+    vertical-align: middle;
+    margin-right: 15px;
+}
         
         .back-button {
             margin-top: 15px;
-            font-size: 18px;
-            background: linear-gradient(135deg, var(--board-dark) 0%, #8c6746 100%);
+            font-size: 26px;
+            background: linear-gradient(to bottom, #8C6540, #5A3E2B); border-bottom: 6px solid #2d1b15;
             padding: 15px;
         }
     </style>
-</head>
+    </head>
 <body>
     <div class="menu-container">
         <h1>Single Player</h1>
