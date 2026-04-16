@@ -3662,6 +3662,12 @@ async function customMap(state){
                     if (move.offsetY !== undefined) {
                         move.offsetY = -move.offsetY;
                     }
+                    if (move.x !== undefined) {
+                        move.x = -move.x;
+                    }
+                    if (move.offsetX !== undefined) {
+                        move.offsetX = -move.offsetX;
+                    }
                     return move;
                 });
             }

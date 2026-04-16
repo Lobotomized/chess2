@@ -738,6 +738,7 @@
                                 <option value="afterPlayerMove">afterPlayerMove</option>
                                 <option value="afterPieceMove">afterPieceMove</option>
                                 <option value="afterThisPieceTaken">afterThisPieceTaken</option>
+                                <option value="afterEnemyPieceTaken">afterEnemyPieceTaken</option>
                                 <option value="afterEnemyPlayerMove">afterEnemyPlayerMove</option>
                             </select>
                             
@@ -954,10 +955,93 @@
                     const pairContainer = document.createElement("div");
                     pairContainer.style.display = "flex";
                     pairContainer.style.gap = "5px";
-                    pairContainer.style.padding = "5px";
+                    pairContainer.style.padding = "5px 5px 25px 5px";
                     pairContainer.style.border = "1px solid var(--board-dark)";
                     pairContainer.style.borderRadius = "4px";
                     pairContainer.style.background = "rgba(0,0,0,0.05)";
+                    pairContainer.style.position = "relative";
+
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.innerHTML = "X";
+                    deleteBtn.style.position = "absolute";
+                    deleteBtn.style.top = "-5px";
+                    deleteBtn.style.right = "-5px";
+                    deleteBtn.style.background = "var(--threat)";
+                    deleteBtn.style.color = "white";
+                    deleteBtn.style.border = "none";
+                    deleteBtn.style.borderRadius = "50%";
+                    deleteBtn.style.width = "20px";
+                    deleteBtn.style.height = "20px";
+                    deleteBtn.style.fontSize = "12px";
+                    deleteBtn.style.cursor = "pointer";
+                    deleteBtn.style.display = "flex";
+                    deleteBtn.style.alignItems = "center";
+                    deleteBtn.style.justifyContent = "center";
+                    deleteBtn.style.boxShadow = "0 2px 4px rgba(0,0,0,0.3)";
+                    deleteBtn.style.zIndex = "10";
+                    deleteBtn.title = "Delete this image pair";
+
+                    deleteBtn.addEventListener("click", async (e) => {
+                        e.stopPropagation();
+                        const confirmDelete = await showConfirm("Are you sure you want to delete this custom image pair? Any custom pieces using these images might not render correctly until re-edited.");
+                        if (confirmDelete) {
+                            try {
+                                const delRes = await fetch('/api/delete-image-pair', {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': Auth.getAuthHeaders()['Authorization']
+                                    },
+                                    body: JSON.stringify({
+                                        whiteImageUrl: data.whiteImageUrl,
+                                        blackImageUrl: data.blackImageUrl
+                                    })
+                                });
+
+                                if (delRes.ok) {
+                                    pairContainer.remove();
+                                    const uploadedImageGrid = document.getElementById("uploadedImageGrid");
+                                    if (uploadedImageGrid.children.length === 0) {
+                                        const noCustomImagesMsg = document.getElementById("noCustomImagesMsg");
+                                        if (noCustomImagesMsg) noCustomImagesMsg.style.display = "block";
+                                    }
+                                    if (selectedCustomImageUrl === data.whiteImageUrl || selectedCustomImageBlackUrl === data.blackImageUrl) {
+                                        selectedCustomImage = null;
+                                        selectedCustomImageUrl = null;
+                                        selectedCustomImageBlackUrl = null;
+                                        updatePreviewBoard();
+                                    }
+                                    showAlert('Image pair deleted successfully.');
+                                } else {
+                                    const errData = await delRes.json();
+                                    showAlert(errData.error || 'Failed to delete images.');
+                                }
+                            } catch (err) {
+                                console.error('Error deleting images:', err);
+                                showAlert('An error occurred while deleting.');
+                            }
+                        }
+                    });
+
+                    pairContainer.appendChild(deleteBtn);
+
+                    const swapBtn = document.createElement("button");
+                    swapBtn.innerHTML = "⇄ Swap";
+                    swapBtn.style.position = "absolute";
+                    swapBtn.style.bottom = "4px";
+                    swapBtn.style.left = "50%";
+                    swapBtn.style.transform = "translateX(-50%)";
+                    swapBtn.style.background = "var(--button-bg, #eee)";
+                    swapBtn.style.color = "var(--button-text, #333)";
+                    swapBtn.style.border = "1px solid var(--board-dark)";
+                    swapBtn.style.borderRadius = "4px";
+                    swapBtn.style.padding = "2px 5px";
+                    swapBtn.style.fontSize = "10px";
+                    swapBtn.style.cursor = "pointer";
+                    swapBtn.style.zIndex = "10";
+                    swapBtn.title = "Swap white and black images";
+
+                    pairContainer.appendChild(swapBtn);
 
                     const createImgWrapper = (url, label) => {
                         const wrapper = document.createElement("div");
@@ -990,6 +1074,44 @@
 
                     const whiteObj = createImgWrapper(data.whiteImageUrl, "WHITE");
                     const blackObj = createImgWrapper(data.blackImageUrl, "BLACK");
+
+                    swapBtn.addEventListener("click", async (e) => {
+                        e.stopPropagation();
+                        swapBtn.disabled = true;
+                        try {
+                            const res = await fetch('/api/swap-image-pair', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': Auth.getAuthHeaders()['Authorization']
+                                },
+                                body: JSON.stringify({
+                                    whiteImageUrl: data.whiteImageUrl,
+                                    blackImageUrl: data.blackImageUrl
+                                })
+                            });
+                            
+                            if (res.ok) {
+                                // Force reload the images by appending a cache-busting timestamp
+                                const t = new Date().getTime();
+                                whiteObj.img.src = data.whiteImageUrl + '?t=' + t;
+                                blackObj.img.src = data.blackImageUrl + '?t=' + t;
+                                
+                                // Update preview board if currently selected
+                                if (selectedCustomImage === whiteObj.img || selectedCustomImage === blackObj.img) {
+                                    updatePreviewBoard();
+                                }
+                            } else {
+                                const errData = await res.json();
+                                showAlert(errData.error || 'Failed to swap images on server.');
+                            }
+                        } catch (err) {
+                            console.error('Error swapping images:', err);
+                            showAlert('An error occurred while swapping.');
+                        } finally {
+                            swapBtn.disabled = false;
+                        }
+                    });
 
                     pairContainer.appendChild(whiteObj.wrapper);
                     pairContainer.appendChild(blackObj.wrapper);
@@ -1192,6 +1314,8 @@
                         adjustedMoves = adjustedMoves.map(move => {
                             if (move.y !== undefined) move.y = -move.y;
                             if (move.offsetY !== undefined) move.offsetY = -move.offsetY;
+                            if (move.x !== undefined) move.x = -move.x;
+                            if (move.offsetX !== undefined) move.offsetX = -move.offsetX;
                             return move;
                         });
                     }
@@ -1385,10 +1509,94 @@
                                 const pairContainer = document.createElement("div");
                                 pairContainer.style.display = "flex";
                                 pairContainer.style.gap = "5px";
-                                pairContainer.style.padding = "5px";
+                                pairContainer.style.padding = "5px 5px 25px 5px";
                                 pairContainer.style.border = "1px solid var(--board-dark)";
                                 pairContainer.style.borderRadius = "4px";
                                 pairContainer.style.background = "rgba(0,0,0,0.05)";
+                                pairContainer.style.position = "relative";
+
+                                const deleteBtn = document.createElement("button");
+                                deleteBtn.innerHTML = "X";
+                                deleteBtn.style.position = "absolute";
+                                deleteBtn.style.top = "-5px";
+                                deleteBtn.style.right = "-5px";
+                                deleteBtn.style.background = "var(--threat)";
+                                deleteBtn.style.color = "white";
+                                deleteBtn.style.border = "none";
+                                deleteBtn.style.borderRadius = "50%";
+                                deleteBtn.style.width = "20px";
+                                deleteBtn.style.height = "20px";
+                                deleteBtn.style.fontSize = "12px";
+                                deleteBtn.style.cursor = "pointer";
+                                deleteBtn.style.display = "flex";
+                                deleteBtn.style.alignItems = "center";
+                                deleteBtn.style.justifyContent = "center";
+                                deleteBtn.style.boxShadow = "0 2px 4px rgba(0,0,0,0.3)";
+                                deleteBtn.style.zIndex = "10";
+                                deleteBtn.title = "Delete this image pair";
+
+                                deleteBtn.addEventListener("click", async (e) => {
+                                    e.stopPropagation();
+                                    const confirmDelete = await showConfirm("Are you sure you want to delete this custom image pair? Any custom pieces using these images might not render correctly until re-edited.");
+                                    if (confirmDelete) {
+                                        try {
+                                            const res = await fetch('/api/delete-image-pair', {
+                                                method: 'DELETE',
+                                                headers: {
+                                                    'Content-Type': 'application/json',
+                                                    'Authorization': Auth.getAuthHeaders()['Authorization']
+                                                },
+                                                body: JSON.stringify({
+                                                    whiteImageUrl: whiteUrl,
+                                                    blackImageUrl: blackUrl
+                                                })
+                                            });
+
+                                            if (res.ok) {
+                                                pairContainer.remove();
+                                                const uploadedImageGrid = document.getElementById("uploadedImageGrid");
+                                                if (uploadedImageGrid.children.length === 0) {
+                                                    const noCustomImagesMsg = document.getElementById("noCustomImagesMsg");
+                                                    if (noCustomImagesMsg) noCustomImagesMsg.style.display = "block";
+                                                }
+                                                // Check if the deleted image was currently selected
+                                                if (selectedCustomImageUrl === whiteUrl || selectedCustomImageBlackUrl === blackUrl) {
+                                                    selectedCustomImage = null;
+                                                    selectedCustomImageUrl = null;
+                                                    selectedCustomImageBlackUrl = null;
+                                                    updatePreviewBoard();
+                                                }
+                                                showAlert('Image pair deleted successfully.');
+                                            } else {
+                                                const data = await res.json();
+                                                showAlert(data.error || 'Failed to delete images.');
+                                            }
+                                        } catch (err) {
+                                            console.error('Error deleting images:', err);
+                                            showAlert('An error occurred while deleting.');
+                                        }
+                                    }
+                                });
+
+                                pairContainer.appendChild(deleteBtn);
+
+                                const swapBtn = document.createElement("button");
+                                swapBtn.innerHTML = "⇄ Swap";
+                                swapBtn.style.position = "absolute";
+                                swapBtn.style.bottom = "4px";
+                                swapBtn.style.left = "50%";
+                                swapBtn.style.transform = "translateX(-50%)";
+                                swapBtn.style.background = "var(--button-bg, #eee)";
+                                swapBtn.style.color = "var(--button-text, #333)";
+                                swapBtn.style.border = "1px solid var(--board-dark)";
+                                swapBtn.style.borderRadius = "4px";
+                                swapBtn.style.padding = "2px 5px";
+                                swapBtn.style.fontSize = "10px";
+                                swapBtn.style.cursor = "pointer";
+                                swapBtn.style.zIndex = "10";
+                                swapBtn.title = "Swap white and black images";
+
+                                pairContainer.appendChild(swapBtn);
 
                                 const createImgWrapper = (url, label) => {
                                     const wrapper = document.createElement("div");
@@ -1421,6 +1629,42 @@
 
                                 const whiteObj = createImgWrapper(whiteUrl, "WHITE");
                                 const blackObj = createImgWrapper(blackUrl, "BLACK");
+
+                                swapBtn.addEventListener("click", async (e) => {
+                                    e.stopPropagation();
+                                    swapBtn.disabled = true;
+                                    try {
+                                        const res = await fetch('/api/swap-image-pair', {
+                                            method: 'POST',
+                                            headers: {
+                                                'Content-Type': 'application/json',
+                                                'Authorization': Auth.getAuthHeaders()['Authorization']
+                                            },
+                                            body: JSON.stringify({
+                                                whiteImageUrl: whiteUrl,
+                                                blackImageUrl: blackUrl
+                                            })
+                                        });
+                                        
+                                        if (res.ok) {
+                                            const t = new Date().getTime();
+                                            whiteObj.img.src = whiteUrl + '?t=' + t;
+                                            blackObj.img.src = blackUrl + '?t=' + t;
+                                            
+                                            if (selectedCustomImage === whiteObj.img || selectedCustomImage === blackObj.img) {
+                                                updatePreviewBoard();
+                                            }
+                                        } else {
+                                            const errData = await res.json();
+                                            showAlert(errData.error || 'Failed to swap images on server.');
+                                        }
+                                    } catch (err) {
+                                        console.error('Error swapping images:', err);
+                                        showAlert('An error occurred while swapping.');
+                                    } finally {
+                                        swapBtn.disabled = false;
+                                    }
+                                });
 
                                 pairContainer.appendChild(whiteObj.wrapper);
                                 pairContainer.appendChild(blackObj.wrapper);

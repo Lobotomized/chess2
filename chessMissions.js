@@ -827,6 +827,90 @@ app.get('/api/user-images', authenticateToken, (req, res) => {
     });
 });
 
+app.delete('/api/delete-image-pair', authenticateToken, (req, res) => {
+    const { whiteImageUrl, blackImageUrl } = req.body;
+    if (!whiteImageUrl || !blackImageUrl) {
+        return res.status(400).json({ error: 'Both image URLs are required' });
+    }
+
+    const userId = req.user.id;
+    
+    // Ensure the paths belong to the current user to prevent arbitrary file deletion
+    const whiteFilename = path.basename(whiteImageUrl);
+    const blackFilename = path.basename(blackImageUrl);
+    
+    if (!whiteFilename.startsWith(`user-${userId}-`) || !blackFilename.startsWith(`user-${userId}-`)) {
+        return res.status(403).json({ error: 'Unauthorized to delete these images' });
+    }
+
+    const whitePath = path.join(__dirname, 'uploads', 'custom-pieces', whiteFilename);
+    const blackPath = path.join(__dirname, 'uploads', 'custom-pieces', blackFilename);
+
+    let deletedCount = 0;
+    let errorOccurred = false;
+
+    const checkDone = () => {
+        if (deletedCount === 2 || errorOccurred) return;
+        if (deletedCount === 2) {
+            res.status(200).json({ message: 'Images deleted successfully' });
+        }
+    };
+
+    fs.unlink(whitePath, (err) => {
+        if (err && err.code !== 'ENOENT') {
+            errorOccurred = true;
+            return res.status(500).json({ error: 'Failed to delete white image' });
+        }
+        deletedCount++;
+        if (deletedCount === 2 && !errorOccurred) res.status(200).json({ message: 'Images deleted successfully' });
+    });
+
+    fs.unlink(blackPath, (err) => {
+        if (err && err.code !== 'ENOENT') {
+            errorOccurred = true;
+            return res.status(500).json({ error: 'Failed to delete black image' });
+        }
+        deletedCount++;
+        if (deletedCount === 2 && !errorOccurred) res.status(200).json({ message: 'Images deleted successfully' });
+    });
+});
+
+app.post('/api/swap-image-pair', authenticateToken, (req, res) => {
+    const { whiteImageUrl, blackImageUrl } = req.body;
+    
+    if (!whiteImageUrl || !blackImageUrl) {
+        return res.status(400).json({ error: 'Both image URLs are required' });
+    }
+
+    const userId = req.user.id;
+    const whiteFilename = path.basename(whiteImageUrl);
+    const blackFilename = path.basename(blackImageUrl);
+    
+    if (!whiteFilename.startsWith(`user-${userId}-`) || !blackFilename.startsWith(`user-${userId}-`)) {
+        return res.status(403).json({ error: 'Unauthorized to swap these images' });
+    }
+
+    const whitePath = path.join(__dirname, 'uploads', 'custom-pieces', whiteFilename);
+    const blackPath = path.join(__dirname, 'uploads', 'custom-pieces', blackFilename);
+    const tempPath = path.join(__dirname, 'uploads', 'custom-pieces', `temp-${Date.now()}-${whiteFilename}`);
+
+    try {
+        if (!fs.existsSync(whitePath) || !fs.existsSync(blackPath)) {
+            return res.status(404).json({ error: 'One or both images not found on server' });
+        }
+        
+        // Swap the files
+        fs.renameSync(whitePath, tempPath);
+        fs.renameSync(blackPath, whitePath);
+        fs.renameSync(tempPath, blackPath);
+        
+        res.status(200).json({ message: 'Images swapped successfully' });
+    } catch (err) {
+        console.error('Swap error:', err);
+        res.status(500).json({ error: 'Failed to swap images' });
+    }
+});
+
 
 // Auth routes
 app.post('/api/auth/register', async (req, res) => {

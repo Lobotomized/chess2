@@ -8,13 +8,15 @@ const conditions = {
         // Let's match the standard convention used in animals.js where Black direction = 1, White direction = -1
         // OR we can explicitly define that "offsetY: 1" means "1 square forward relative to the piece's starting side".
         
-        let direction = -1; // Assuming White moves UP the board (decreasing Y)
+        let directionY = -1; // Assuming White moves UP the board (decreasing Y)
+        let directionX = 1;
         if (piece.color === 'black' && settings.flipForBlack !== false) {
-            direction = 1; // Black moves DOWN the board (increasing Y)
+            directionY = 1; // Black moves DOWN the board (increasing Y)
+            directionX = -1; // Black's X is mirrored
         } 
         
-        const targetX = piece.x + (settings.offsetX || 0);
-        const targetY = piece.y + ((settings.offsetY || 0) * direction);
+        const targetX = piece.x + ((settings.offsetX || 0) * directionX);
+        const targetY = piece.y + ((settings.offsetY || 0) * directionY);
 
         // Check if the target square exists on the board
         const squareExists = state.board.find(sq => sq.x === targetX && sq.y === targetY);
@@ -116,13 +118,15 @@ const effects = {
         // Assume offsetY = 1 means "1 square forward"
         // White starts at bottom (high Y), so moving forward means decreasing Y (-1).
         // Black starts at top (low Y), so moving forward means increasing Y (+1).
-        let direction = -1;
+        let directionY = -1;
+        let directionX = 1;
         if (piece.color === 'black' && settings.flipForBlack !== false) {
-            direction = 1;
+            directionY = 1;
+            directionX = -1;
         }
         
-        const targetX = piece.x + (settings.offsetX || 0);
-        const targetY = piece.y + ((settings.offsetY || 0) * direction);
+        const targetX = piece.x + ((settings.offsetX || 0) * directionX);
+        const targetY = piece.y + ((settings.offsetY || 0) * directionY);
         
         // Piece type to spawn, passed in settings.pieceType (e.g., 'ghostFactory')
         const factoryName = settings.pieceType;
@@ -135,12 +139,18 @@ const effects = {
                 adjustedMoves = adjustedMoves.map(move => {
                     if (move.y !== undefined) move.y = -move.y;
                     if (move.offsetY !== undefined) move.offsetY = -move.offsetY;
+                    if (move.x !== undefined) move.x = -move.x;
+                    if (move.offsetX !== undefined) move.offsetX = -move.offsetX;
                     return move;
                 });
             }
             let finalIcon = '';
             if (settings.customDef.imageUrl) {
-                finalIcon = settings.customDef.imageUrl;
+                if (piece.color === 'black' && settings.customDef.blackImageUrl) {
+                    finalIcon = settings.customDef.blackImageUrl;
+                } else {
+                    finalIcon = settings.customDef.imageUrl;
+                }
             } else {
                 finalIcon = piece.color + (_ceUnitImages[settings.customDef.imageName] || settings.customDef.imageName);
             }
@@ -199,12 +209,18 @@ const effects = {
                 adjustedMoves = adjustedMoves.map(move => {
                     if (move.y !== undefined) move.y = -move.y;
                     if (move.offsetY !== undefined) move.offsetY = -move.offsetY;
+                    if (move.x !== undefined) move.x = -move.x;
+                    if (move.offsetX !== undefined) move.offsetX = -move.offsetX;
                     return move;
                 });
             }
             let finalIcon = '';
             if (settings.customDef.imageUrl) {
-                finalIcon = settings.customDef.imageUrl;
+                if (piece.color === 'black' && settings.customDef.blackImageUrl) {
+                    finalIcon = settings.customDef.blackImageUrl;
+                } else {
+                    finalIcon = settings.customDef.imageUrl;
+                }
             } else {
                 finalIcon = piece.color + (_ceUnitImages[settings.customDef.imageName] || settings.customDef.imageName);
             }
@@ -287,10 +303,17 @@ function applyCustomEffects(piece, customDef) {
         
         // Create a self-contained stringified function for JSONfn serialization
         // This avoids closure scope issues when the AI worker parses the state
-        const wrapperString = `function(state, ...args) {
+        const wrapperString = `function(...args) {
+            let state;
+            if ('${hookName}' === 'afterEnemyPieceTaken') {
+                state = args[1];
+            } else {
+                state = args[0];
+            }
+
             let returnVal;
             if (typeof this._original_${hookName} === 'function') {
-                returnVal = this._original_${hookName}(state, ...args);
+                returnVal = this._original_${hookName}(...args);
             }
             
             // Re-resolve condition and effect functions from global scope during evaluation
