@@ -498,7 +498,7 @@ function ani() {
 
 // --- Army Generation ---
 
-function generateRandomArmy(targetValue, includeKing = false, region = 'Classic') {
+function generateRandomArmy(targetValue, includeKing = false, region = 'Classic', forceEqualFrontBack = false) {
     const army = [];
     let currentValue = 0;
     
@@ -525,44 +525,80 @@ function generateRandomArmy(targetValue, includeKing = false, region = 'Classic'
         regionFrontline = ['rpgPawnFactory']; 
     }
 
-    // Ensure exactly 8 frontline pieces
-    let frontlineCount = 0;
-    let attempts = 0;
-    // We want exactly 8, so we ignore targetValue constraints for the frontline if needed,
-    // or just let it overshoot to guarantee 8 pieces.
-    while (frontlineCount < 8 && attempts < 200) {
-        attempts++;
-        const randomFrontline = regionFrontline[Math.floor(Math.random() * regionFrontline.length)];
-        const val = getPieceValue(randomFrontline);
-        
-        // We must have 8 pieces, so we add them even if it overshoots slightly, but try to stay within limits if possible.
-        // To guarantee 8 pieces, we relax the constraint as we get closer to the limit.
-        if (currentValue + val <= targetValue + 2 || attempts > 50) {
-            army.push(randomFrontline);
-            currentValue += val;
-            frontlineCount++;
-        }
-    }
-    
     // Create a list of available factories that are strictly backline pieces
     const backlineFactories = regionList.filter(f => !frontLineFactories.includes(f));
 
-    // Safety break
-    let iterations = 0;
-    let backlineCount = 0;
-    while (currentValue < targetValue && iterations < 100 && backlineCount < 8) {
-        iterations++;
-        // Only pick from backline factories so we don't exceed 8 frontline pieces
-        if (backlineFactories.length === 0) break;
+    if (forceEqualFrontBack) {
+        let frontCount = 0;
+        let backCount = includeKing ? 1 : 0;
+        let iterations = 0;
         
-        const randomFactory = backlineFactories[Math.floor(Math.random() * backlineFactories.length)];
-        const val = getPieceValue(randomFactory);
+        // Add frontline to match king if needed
+        while (frontCount < backCount) {
+            const randomFrontline = regionFrontline[Math.floor(Math.random() * regionFrontline.length)];
+            army.push(randomFrontline);
+            currentValue += getPieceValue(randomFrontline);
+            frontCount++;
+        }
+
+        while (currentValue < targetValue && iterations < 100) {
+            iterations++;
+            const randomFrontline = regionFrontline[Math.floor(Math.random() * regionFrontline.length)];
+            const frontVal = getPieceValue(randomFrontline);
+            
+            if (backlineFactories.length === 0) break;
+            const randomBackline = backlineFactories[Math.floor(Math.random() * backlineFactories.length)];
+            const backVal = getPieceValue(randomBackline);
+            
+            // Allow adding pairs until combined value hits target
+            // E.g., if target is 9, we stop when currentValue + frontVal + backVal exceeds 9
+            if (currentValue + frontVal + backVal <= targetValue) {
+                army.push(randomFrontline);
+                army.push(randomBackline);
+                currentValue += frontVal + backVal;
+                frontCount++;
+                backCount++;
+            } else if (iterations > 50) {
+                break; // Stop if we can't afford a pair after many tries
+            }
+        }
+    } else {
+        // Ensure exactly 8 frontline pieces
+        let frontlineCount = 0;
+        let attempts = 0;
+        // We want exactly 8, so we ignore targetValue constraints for the frontline if needed,
+        // or just let it overshoot to guarantee 8 pieces.
+        while (frontlineCount < 8 && attempts < 200) {
+            attempts++;
+            const randomFrontline = regionFrontline[Math.floor(Math.random() * regionFrontline.length)];
+            const val = getPieceValue(randomFrontline);
+            
+            // We must have 8 pieces, so we add them even if it overshoots slightly, but try to stay within limits if possible.
+            // To guarantee 8 pieces, we relax the constraint as we get closer to the limit.
+            if (currentValue + val <= targetValue + 2 || attempts > 50) {
+                army.push(randomFrontline);
+                currentValue += val;
+                frontlineCount++;
+            }
+        }
         
-        // Add if it doesn't overshoot too much (allow +1 overshoot)
-        if (currentValue + val <= targetValue + 1) {
-            army.push(randomFactory);
-            currentValue += val;
-            backlineCount++;
+        // Safety break
+        let iterations = 0;
+        let backlineCount = includeKing ? 1 : 0;
+        while (currentValue < targetValue && iterations < 100 && backlineCount < 8) {
+            iterations++;
+            // Only pick from backline factories so we don't exceed 8 frontline pieces
+            if (backlineFactories.length === 0) break;
+            
+            const randomFactory = backlineFactories[Math.floor(Math.random() * backlineFactories.length)];
+            const val = getPieceValue(randomFactory);
+            
+            // Add if it doesn't overshoot too much (allow +1 overshoot)
+            if (currentValue + val <= targetValue + 1) {
+                army.push(randomFactory);
+                currentValue += val;
+                backlineCount++;
+            }
         }
     }
     
@@ -1309,7 +1345,7 @@ function setupBoard(shapeName = 'Standard') {
         // But if we do, we need to handle them.
         
         // However, if the roster is perfectly 16 long (8 front, 8 back), we can just split it by index
-        if (roster.length === 16) {
+        if (roster.length >= 16 || roster.includes(null)) {
             return {
                 front: roster.slice(0, 8),
                 back: roster.slice(8, 16)
@@ -1446,7 +1482,7 @@ function showStartModal() {
     for (let i = 0; i < 4; i++) {
         // Increase initial targetValue slightly so it can actually afford 8 frontline pieces + some backline, 
         // or just let it be 20 and it'll mostly just be frontline pieces.
-        const { army } = generateRandomArmy(16, true);
+        const { army } = generateRandomArmy(9, true, 'Classic', true);
         
         // Removed markPieceAsSeen(name) call to stop auto-popup
 
@@ -1546,8 +1582,60 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
     }
 
     // Pad with nulls up to 8 for front and back
+    // Pad with nulls up to 8 for front and back
+    // However, the King is immovable and at the furthest right end of the backline.
+    // The King is usually in the backline. Let's find him.
+    const kingIndex = backPieces.findIndex(u => u && u.toLowerCase().includes('king'));
+    let kingPiece = null;
+    if (kingIndex !== -1) {
+        kingPiece = backPieces.splice(kingIndex, 1)[0];
+    } else {
+        // Maybe in reserve?
+        const reserveKingIndex = reservePieces.findIndex(u => u && u.toLowerCase().includes('king'));
+        if (reserveKingIndex !== -1) {
+            kingPiece = reservePieces.splice(reserveKingIndex, 1)[0];
+        } else {
+            // Check front just in case
+            const frontKingIndex = frontPieces.findIndex(u => u && u.toLowerCase().includes('king'));
+            if (frontKingIndex !== -1) {
+                kingPiece = frontPieces.splice(frontKingIndex, 1)[0];
+            }
+        }
+    }
+
+    // Amount of frontline pieces he has
+    let totalFrontline = 0;
+    army.forEach(u => {
+        if (u && frontLineFactories.includes(u)) {
+            totalFrontline++;
+        }
+    });
+
     while(frontPieces.length < 8) frontPieces.push(null);
     while(backPieces.length < 8) backPieces.push(null);
+
+    const kingIndexTarget = Math.max(0, totalFrontline - 1);
+
+    // Place King at the furthest right covered by a frontline piece
+    if (kingPiece) {
+        // Find if there's any piece at the target index. If so, swap it out.
+        if (backPieces[kingIndexTarget]) {
+            reservePieces.push(backPieces[kingIndexTarget]);
+        }
+        backPieces[kingIndexTarget] = kingPiece;
+    }
+
+    // Move any pieces in disabled slots to the reserve
+    for (let i = 0; i < 8; i++) {
+        if (i !== kingIndexTarget && i >= Math.max(0, totalFrontline - 1) && backPieces[i]) {
+            reservePieces.push(backPieces[i]);
+            backPieces[i] = null;
+        }
+        if (i >= totalFrontline && frontPieces[i]) {
+            reservePieces.push(frontPieces[i]);
+            frontPieces[i] = null;
+        }
+    }
 
     let selectedElement = null;
     let draggedElement = null; // To keep track of the dragged item
@@ -1555,6 +1643,23 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
     function renderPieces(container, piecesArray, isReserve = false) {
         container.innerHTML = '';
         piecesArray.forEach((factoryName, index) => {
+            const isBackline = container === backContainer;
+            const isFrontline = container === frontContainer;
+            const isKing = factoryName && factoryName.toLowerCase().includes('king');
+            
+            // Check if slot is disabled
+            let isDisabled = false;
+            if (isFrontline && index >= totalFrontline) {
+                isDisabled = true;
+            }
+            if (isBackline) {
+                if (index === kingIndexTarget) {
+                    isDisabled = false; // King's slot
+                } else if (index >= Math.max(0, totalFrontline - 1)) {
+                    isDisabled = true; // Only totalFrontline - 1 slots available for other backline pieces
+                }
+            }
+
             const div = document.createElement('div');
             div.className = 'reorder-piece';
             div.style.width = '60px';
@@ -1564,12 +1669,13 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
             div.style.display = 'flex';
             div.style.justifyContent = 'center';
             div.style.alignItems = 'center';
-            div.style.cursor = 'pointer';
+            div.style.cursor = (isDisabled || isKing) ? 'not-allowed' : 'pointer';
             div.style.background = factoryName ? 'var(--board-light)' : 'rgba(0,0,0,0.1)';
+            if (isDisabled) div.style.background = 'rgba(255, 0, 0, 0.1)';
             div.style.transition = 'all 0.2s';
             div.style.position = 'relative'; // For potential badges
             
-            if (factoryName) {
+            if (factoryName && !isDisabled && !isKing) {
                 div.draggable = true;
             }
             
@@ -1582,12 +1688,13 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                 img.style.height = '50px';
                 img.title = factoryName;
                 img.draggable = false; // Prevent image dragging to allow div dragging
+                if (isDisabled || isKing) img.style.opacity = '0.7';
                 div.appendChild(img);
             }
             
             // Drag & Drop Events
             div.ondragstart = (e) => {
-                if (!factoryName) {
+                if (!factoryName || isDisabled || isKing) {
                     e.preventDefault();
                     return;
                 }
@@ -1619,7 +1726,7 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                 e.preventDefault();
                 div.style.transform = 'scale(1)';
                 
-                if (!draggedElement) return;
+                if (!draggedElement || isDisabled || isKing) return;
                 
                 const sourceArray = draggedElement.piecesArray;
                 const sourceIndex = draggedElement.index;
@@ -1651,6 +1758,8 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
             };
 
             div.onclick = () => {
+                if (isDisabled || isKing) return;
+
                 if (selectedElement === null) {
                     if (!factoryName) return; // Don't select empty slots as the first click
                     
