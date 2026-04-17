@@ -187,7 +187,7 @@
     <script src="/pieces/cats.js"></script>
     <script src="/pieces/medieval.js"></script>
     <script src="/pieces/machines.js"></script>
-    <script src="/pieces/rogueLike.js"></script>
+    <script src="/pieces/rpg.js"></script>
     <script src="/pieces/misc.js"></script>
     <script src="/pieceDefinitions.js"></script>
     <script src="/boardGeneration.js"></script>
@@ -358,7 +358,7 @@
             const bRace = game.blackRace || 'classic';
             
             if (game.initialBoard && game.initialBoard.length > 0 && game.initialPieces && game.initialPieces.length > 0) {
-                // If we have custom starting state (like roguelike)
+                // If we have custom starting state (like rpg)
                 gameState.board = JSON.parse(JSON.stringify(game.initialBoard));
                 gameState.pieces = JSON.parse(JSON.stringify(game.initialPieces));
                 

@@ -10,7 +10,7 @@ importScripts('/pieces/animals.js')
 importScripts('/pieces/cats.js')
 importScripts('/pieces/medieval.js')
 importScripts('/pieces/machines.js')
-importScripts('/pieces/rogueLike.js')
+importScripts('/pieces/rpg.js')
 importScripts('/pieces/misc.js')
 importScripts('/customEffects.js')
 
@@ -247,7 +247,7 @@ self.addEventListener("message", async function(e) {
                 console.time('105')
                 let character = methods[obj.AICharacter];
                 if(!obj.AICharacter){
-                    character = rogueLikeCharacter;
+                    character = rpgCharacter;
                 }
                 let depth = 2;
                 if(obj.state.pieces.length < 16 && obj.state.pieces.length > 8){
@@ -268,7 +268,7 @@ self.addEventListener("message", async function(e) {
                 console.time('106')
                 let character = methods[obj.AICharacter];
                 if(!obj.AICharacter){
-                    character = rogueLikeCharacter;
+                    character = rpgCharacter;
                 }
                 let depth = 3;
                  if(obj.state.pieces.length < 16  && obj.state.pieces.length > 8){

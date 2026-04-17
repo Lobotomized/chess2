@@ -1,5 +1,5 @@
 
-// Rogue Like Difficulty Configuration
+// RPG Difficulty Configuration
 // Each difficulty defines the enemy army value and potential reward cap.
 // The values are flat (not multiplied by level).
 

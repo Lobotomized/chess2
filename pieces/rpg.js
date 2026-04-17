@@ -14,7 +14,7 @@ catch(err){
 var posValue = (typeof window !== 'undefined') ? window.posValue : (typeof global !== 'undefined') ? global.posValue : self.posValue;
 
 
-function rogueLikePawnFactory(color, x, y) {
+function rpgPawnFactory(color, x, y) {
     let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'takeMove', y: -1, x: -1 }, { type: 'takeMove', y: -1, x: 1 }]
 
     if (color == 'black') {
@@ -163,7 +163,7 @@ function rogueLikePawnFactory(color, x, y) {
     }
 }
 
-function roguelikeQueenbugFactory(color,x,y){
+function rpgQueenbugFactory(color,x,y){
     return {
         icon: color+'QueenBug.png',
         moves: [{ type: 'absolute', x: 0, y: -1, impotent:true }, { type: 'absolute', x: 0, y: 1 , impotent:true},
@@ -178,7 +178,7 @@ function roguelikeQueenbugFactory(color,x,y){
             const direction = this.y == 0  || this.y == 1 || this.y == 2? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;
-            const ant = roguelikeAntFactory(color,move.x,move.y,direction)
+            const ant = rpgAntFactory(color,move.x,move.y,direction)
             state.pieces.push(ant);
             return true;
         }
@@ -186,7 +186,7 @@ function roguelikeQueenbugFactory(color,x,y){
 }
 
 
-function clownRoguelikeFactory(color,x,y){
+function clownRpgFactory(color,x,y){
     const moves= [{ type: 'blockable', repeat: true, x: 0, y: -1, impotent:true }, { type: 'blockable', repeat: true, x: 0, y: 1, impotent:true },
     { type: 'blockable', repeat: true, x: -1, y: 0, impotent:true }, { type: 'blockable', repeat: true, x: 1, y: 0, impotent:true },
     { type: 'blockable', repeat: true, x: -1, y: -1, impotent:true }, { type: 'blockable', repeat: true, x: 1, y: 1, impotent:true },
@@ -219,7 +219,7 @@ function clownRoguelikeFactory(color,x,y){
     }
 }
 
-function roguelikeAntFactory(color,x,y, direction){
+function rpgAntFactory(color,x,y, direction){
     if(!direction){
         direction =  color
     }
@@ -262,7 +262,7 @@ function roguelikeAntFactory(color,x,y, direction){
                     return piece.x == move.x && piece.y == move.y
                 })
                 state.pieces.splice(state.pieces.indexOf(me),1);
-                state.pieces.push(roguelikeQueenbugFactory(this.color,move.x,move.y));
+                state.pieces.push(rpgQueenbugFactory(this.color,move.x,move.y));
                 return true;
             }
             return true;
@@ -274,10 +274,10 @@ function roguelikeAntFactory(color,x,y, direction){
 
 try{
     module.exports = {
-        clownRoguelikeFactory,
-        rogueLikePawnFactory,
-        roguelikeAntFactory,
-        roguelikeQueenbugFactory
+        clownRpgFactory,
+        rpgPawnFactory,
+        rpgAntFactory,
+        rpgQueenbugFactory
     }
 }
 catch(err){

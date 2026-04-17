@@ -36,7 +36,7 @@
             winner: gameState.won
         };
 
-        // For roguelike or special modes, we might need to capture the starting pieces
+        // For rpg or special modes, we might need to capture the starting pieces
         if (gameState.initialPieces && gameState.initialPieces.length > 0) {
             record.initialPieces = gameState.initialPieces;
         }

@@ -7,7 +7,7 @@ if (typeof window !== 'undefined') {
         '/pieces/medieval.js',
         '/pieces/machines.js',
         '/pieces/misc.js',
-        '/pieces/rogueLike.js'
+        '/pieces/rpg.js'
     ];
 
     scripts.forEach(function(scriptUrl) {
@@ -22,7 +22,7 @@ if (typeof window !== 'undefined') {
         var medieval = require('./pieces/medieval.js');
         var machines = require('./pieces/machines.js');
         var misc = require('./pieces/misc.js');
-        var rogueLike = require('./pieces/rogueLike.js');
+        var rpg = require('./pieces/rpg.js');
 
         module.exports = {
             ...classic,
@@ -32,7 +32,7 @@ if (typeof window !== 'undefined') {
             ...medieval,
             ...machines,
             ...misc,
-            ...rogueLike
+            ...rpg
         };
     } catch (e) {
     }

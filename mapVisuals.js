@@ -484,9 +484,9 @@ function showMapModal() {
                         if (mapDialog) mapDialog.close();
                         
                         // Open the Reorder Army modal
-                        if (typeof showReorderModal === 'function' && typeof rogueState !== 'undefined') {
+                        if (typeof showReorderModal === 'function' && typeof rpgState !== 'undefined') {
                             // Pass a callback that just re-opens the map dialog
-                            showReorderModal(rogueState.playerRoster, () => {
+                            showReorderModal(rpgState.playerRoster, () => {
                                 const mDialog = document.getElementById('mapDialog');
                                 if (mDialog) mDialog.showModal();
                             }, true); // The `true` parameter forces the button text to be "Confirm Army"
@@ -674,7 +674,7 @@ function showMapCellPopup(node, grandMap) {
         attackBtn.onclick = () => {
             popup.close();
             // Trigger Movement/Attack logic
-            if (typeof startLevel !== 'undefined' && typeof rogueState !== 'undefined') {
+            if (typeof startLevel !== 'undefined' && typeof rpgState !== 'undefined') {
                 const option = {
                     type: `${diffName}`,
                     node: node,
@@ -689,7 +689,7 @@ function showMapCellPopup(node, grandMap) {
                  if (node.board === 'Market') {
                      option.rewardType = 'none';
                  } else {
-                     const rosterFull = rogueState.playerRoster.length >= 24;
+                     const rosterFull = rpgState.playerRoster.length >= 24;
                      if (node.rewards) {
                          const r = node.rewards;
                          const hasPiece = r.pieces && r.pieces.length > 0;
@@ -718,7 +718,7 @@ function showMapCellPopup(node, grandMap) {
                 
                 grandMap.moveTo(node.x, node.y);
                 
-                startLevel(rogueState.level + 1, option);
+                startLevel(rpgState.level + 1, option);
             } else {
                 showAlert("Cannot start battle: Game state not found.");
             }

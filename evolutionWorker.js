@@ -9,7 +9,7 @@ importScripts('/pieces/animals.js')
 importScripts('/pieces/cats.js')
 importScripts('/pieces/medieval.js')
 importScripts('/pieces/machines.js')
-importScripts('/pieces/rogueLike.js')
+importScripts('/pieces/rpg.js')
 importScripts('/pieces/misc.js')
 
 importScripts('/boardGeneration.js')

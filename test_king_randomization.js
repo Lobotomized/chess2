@@ -31,7 +31,7 @@ testCases.forEach(test => {
     console.log(`\nTesting: ${test.name}`);
     let backline = [...test.roster];
     
-    // Logic from rogueLike.js
+    // Logic from rpg.js
     const kings = backline.filter(u => u && u.toLowerCase().includes('king'));
     const others = backline.filter(u => u && !u.toLowerCase().includes('king'));
 

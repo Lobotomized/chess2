@@ -561,7 +561,7 @@ function maskedDefaultCharacter(weight){
     }
 }
 
-function rogueLikeCharacter(weight){
+function rpgCharacter(weight){
     switch(weight){
         default:
         case 0:

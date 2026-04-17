@@ -1,5 +1,5 @@
 
-// Rogue Like Game Logic
+// RPG Game Logic
 
 // List of available piece factories for random generation
 const loseConditionFactories = [
@@ -22,24 +22,24 @@ const medievalFactories = [
 ]
 
 const insectFactories = [
-    "roguelikeAntFactory", "spiderFactory", 'goliathBugFactory', "roguelikeQueenbugFactory"
+    "rpgAntFactory", "spiderFactory", 'goliathBugFactory', "rpgQueenbugFactory"
 ]
 
 const classicPieceFactories = [
-    'rogueLikePawnFactory', 'rookFactory', 'knightFactory', 'bishopFactory', 'queenFactory', 
+    'rpgPawnFactory', 'rookFactory', 'knightFactory', 'bishopFactory', 'queenFactory', 
 ]
 
 // List of pieces available in the market
 const marketPieceFactories = [
-    'rogueLikePawnFactory', 'rookFactory', 'knightFactory', 'bishopFactory', 'queenFactory',
+    'rpgPawnFactory', 'rookFactory', 'knightFactory', 'bishopFactory', 'queenFactory',
     'ghostFactory',  "swordsMen", "pikeman", 
     "juggernautFactory", "ricarFactory",
      "shield", "executorFactory",  "bootvesselFactory", "clownFactory"
 ];
 
 const winnablePieceFactories = [
-    'horseFactory','roguelikeQueenbugFactory',
-    "roguelikeAntFactory", "spiderFactory", 'goliathBugFactory',"pigFactory",
+    'horseFactory','rpgQueenbugFactory',
+    "rpgAntFactory", "spiderFactory", 'goliathBugFactory',"pigFactory",
 ];
 
 const availablePieceFactories = [
@@ -58,7 +58,7 @@ const regionFactories = {
     'Promoters': pomotersFactories
 };
 
-const frontLineFactories = ['rogueLikePawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'roguelikeAntFactory', 'roguelikeQueenbugFactory'];
+const frontLineFactories = ['rpgPawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'rpgAntFactory', 'rpgQueenbugFactory'];
 
 const adjustedValues = [
 
@@ -87,7 +87,7 @@ function getPieceValue(factoryName) {
 }
 
 // Global State
-const rogueState = {
+const rpgState = {
     level: 1,
     playerRoster: [], // Array of factory names
     enemyRoster: [],
@@ -148,20 +148,20 @@ function updateGoldDisplay() {
     const foodDisplay = document.getElementById('foodDisplay');
 
     if (goldValue) {
-        goldValue.innerText = rogueState.gold || 0;
+        goldValue.innerText = rpgState.gold || 0;
     } else if (goldDisplay) {
-        goldDisplay.innerText = `Gold: ${rogueState.gold || 0}`;
+        goldDisplay.innerText = `Gold: ${rpgState.gold || 0}`;
     }
 
     if (foodValue) {
-        foodValue.innerText = rogueState.food || 0;
+        foodValue.innerText = rpgState.food || 0;
     } else if (foodDisplay) {
-        foodDisplay.innerText = `Food: ${rogueState.food || 0}`;
+        foodDisplay.innerText = `Food: ${rpgState.food || 0}`;
     }
 }
 
 // Initialize Game
-function initRogueGame() {
+function initRpgGame() {
     // Bind cancel events to dialogs so Escape key behaves correctly
     const mapDialog = document.getElementById('mapDialog');
     if (mapDialog) {
@@ -203,7 +203,7 @@ function showMainMenu() {
     const modal = document.getElementById('mainMenuDialog');
     const btnLoad = document.getElementById('btnLoadGame');
     
-    const savedState = localStorage.getItem('rogueState');
+    const savedState = localStorage.getItem('rpgState');
     if (savedState) {
         let level = '?';
         try {
@@ -231,33 +231,33 @@ function loadGame() {
     const modal = document.getElementById('mainMenuDialog');
     if(modal) modal.close();
     
-    const savedState = localStorage.getItem('rogueState');
+    const savedState = localStorage.getItem('rpgState');
     if (savedState) {
         try {
             const parsed = JSON.parse(savedState);
-            Object.assign(rogueState, parsed);
+            Object.assign(rpgState, parsed);
             
             // Initialize Grand Map
             if (typeof grandMap !== 'undefined') {
-                grandMap.init(rogueState.grandMap);
+                grandMap.init(rpgState.grandMap);
             }
 
             // Ensure gold and food is loaded
-            rogueState.gold = parsed.gold || 0;
-            rogueState.food = (typeof parsed.food === 'number') ? parsed.food : 20;
+            rpgState.gold = parsed.gold || 0;
+            rpgState.food = (typeof parsed.food === 'number') ? parsed.food : 20;
             updateGoldDisplay();
             
             // Restore level
-            document.getElementById('levelDisplay').innerText = `Level: ${rogueState.level}`;
+            document.getElementById('levelDisplay').innerText = `Level: ${rpgState.level}`;
             
             // Check if shop was active
-            if (rogueState.shopOptions && rogueState.shopOptions.length > 0) {
+            if (rpgState.shopOptions && rpgState.shopOptions.length > 0) {
                  // Shop was open or pending
                  // We should reopen the shop
                  showShopModal(true); // Pass true to indicate restoring
             } else if (parsed.showWinScreen && !parsed.gameActive) {
                  // Show win screen if it was active AND game is not active
-                 const goldEarned = rogueState.currentRewardContent || 0; // Re-calc for display
+                 const goldEarned = rpgState.currentRewardContent || 0; // Re-calc for display
                  const goldText = document.getElementById('goldEarnedText');
                  if(goldText) goldText.innerText = `+${goldEarned} Gold`;
                  
@@ -265,12 +265,12 @@ function loadGame() {
                  if(modal) modal.showModal();
                  
                  // Also restore board in background
-                 if (rogueState.savedBoard && rogueState.savedBoard.pieces && rogueState.savedBoard.pieces.length > 0) {
-                    restoreBoard(rogueState.savedBoard);
+                 if (rpgState.savedBoard && rpgState.savedBoard.pieces && rpgState.savedBoard.pieces.length > 0) {
+                    restoreBoard(rpgState.savedBoard);
                  }
-            } else if (rogueState.savedBoard && rogueState.savedBoard.pieces && rogueState.savedBoard.pieces.length > 0 && parsed.gameActive) {
-                restoreBoard(rogueState.savedBoard);
-                // rogueState.gameActive is already true
+            } else if (rpgState.savedBoard && rpgState.savedBoard.pieces && rpgState.savedBoard.pieces.length > 0 && parsed.gameActive) {
+                restoreBoard(rpgState.savedBoard);
+                // rpgState.gameActive is already true
             } else {
                 // Not in battle, show map
                 // First call showMapModal which does all the drawing and initialization
@@ -282,13 +282,13 @@ function loadGame() {
                 }
                 
                 // Clear any stray win screen flags
-                rogueState.showWinScreen = false;
+                rpgState.showWinScreen = false;
                 
                 // Set gameActive to false since we're just on the map
-                rogueState.gameActive = false;
+                rpgState.gameActive = false;
             }
 
-            // rogueState.gameActive = true; // Moved inside conditions
+            // rpgState.gameActive = true; // Moved inside conditions
             
         } catch (e) {
             console.error("Failed to load save:", e);
@@ -299,7 +299,7 @@ function loadGame() {
 }
 
 function confirmNewGame() {
-    const savedState = localStorage.getItem('rogueState');
+    const savedState = localStorage.getItem('rpgState');
     if (savedState) {
         showConfirmation("Starting a new game will overwrite your existing save. Are you sure?", () => {
             startNewGame();
@@ -314,19 +314,19 @@ function startNewGame() {
     if(modal) modal.close();
     
     // Clear State
-    localStorage.removeItem('rogueState');
+    localStorage.removeItem('rpgState');
     
-    // Reset rogueState object
-    rogueState.level = 1;
-    rogueState.playerRoster = [];
-    rogueState.enemyRoster = [];
-    rogueState.gameActive = false;
-    rogueState.gameOverSequenceStarted = false; // Reset
-    rogueState.gold = 0;
-    rogueState.food = 50;
-    rogueState.shopOptions = [];
-    rogueState.showWinScreen = false;
-    rogueState.grandMap = undefined; // Reset grand map state
+    // Reset rpgState object
+    rpgState.level = 1;
+    rpgState.playerRoster = [];
+    rpgState.enemyRoster = [];
+    rpgState.gameActive = false;
+    rpgState.gameOverSequenceStarted = false; // Reset
+    rpgState.gold = 0;
+    rpgState.food = 50;
+    rpgState.shopOptions = [];
+    rpgState.showWinScreen = false;
+    rpgState.grandMap = undefined; // Reset grand map state
     
     updateGoldDisplay();
     document.getElementById('levelDisplay').innerText = "Level: 1";
@@ -340,12 +340,12 @@ function startNewGame() {
 }
 
 function saveProgress() {
-    // Ensure rogueState.gold and food is a number
-    if (typeof rogueState.gold !== 'number') rogueState.gold = 0;
-    if (typeof rogueState.food !== 'number') rogueState.food = 20;
+    // Ensure rpgState.gold and food is a number
+    if (typeof rpgState.gold !== 'number') rpgState.gold = 0;
+    if (typeof rpgState.food !== 'number') rpgState.food = 20;
     
     if(hotseatGame && hotseatGame.state) {
-        rogueState.savedBoard = {
+        rpgState.savedBoard = {
             pieces: hotseatGame.state.pieces.map(p => {
                 // Determine factory name if possible, or save essential props
                 // Since we don't store factoryName on piece, we rely on icon mapping or properties
@@ -364,19 +364,19 @@ function saveProgress() {
             won: hotseatGame.state.won,
             message: hotseatGame.state.message
         };
-    } else if (!rogueState.gameActive) {
+    } else if (!rpgState.gameActive) {
         // If game is not active, ensure we don't save a broken board state
-        rogueState.savedBoard = null;
+        rpgState.savedBoard = null;
     }
     
     // Explicitly include gold and food in the object being saved
     
     // Save Grand Map State
     if (typeof grandMap !== 'undefined') {
-        rogueState.grandMap = grandMap.getState();
+        rpgState.grandMap = grandMap.getState();
     }
 
-    localStorage.setItem('rogueState', JSON.stringify(rogueState));
+    localStorage.setItem('rpgState', JSON.stringify(rpgState));
 }
 
 function restoreBoard(savedBoard) {
@@ -384,7 +384,7 @@ function restoreBoard(savedBoard) {
     hotseatGame.state.board = [];
     
     // Create Board Grid based on saved shape
-    const shapeName = rogueState.boardShape || 'Standard';
+    const shapeName = rpgState.boardShape || 'Standard';
     
     if (boardShapes[shapeName]) {
         boardShapes[shapeName](hotseatGame.state.board);
@@ -402,7 +402,7 @@ function restoreBoard(savedBoard) {
             // Ensure icon matches (e.g. if factory is generic)
             if (newPiece.icon !== pData.icon) {
                  // Warn? Or override?
-                 // If it's a promoted piece (e.g. Queen from Pawn), factory might be 'rogueLikePawnFactory' if we guessed wrong?
+                 // If it's a promoted piece (e.g. Queen from Pawn), factory might be 'rpgPawnFactory' if we guessed wrong?
                  // But findFactoryForIcon uses icon to find factory.
                  // So if icon is 'whiteQueen.png', it should find 'queenFactory'.
             }
@@ -473,7 +473,7 @@ function findFactoryForIcon(icon) {
 }
 
 function clearProgress() {
-    localStorage.removeItem('rogueState');
+    localStorage.removeItem('rpgState');
 }
 
 // Animation Loop
@@ -483,7 +483,7 @@ function aniLoop() {
 }
 
 function ani() {
-    if (!hotseatGame || (typeof rogueState !== 'undefined' && !rogueState.gameActive)) {
+    if (!hotseatGame || (typeof rpgState !== 'undefined' && !rpgState.gameActive)) {
         // Clear canvas if we are skipping animation to prevent ghost images
         const canvas = document.getElementById('canvas');
         if (canvas) {
@@ -522,7 +522,7 @@ function generateRandomArmy(targetValue, includeKing = false, region = 'Classic'
     
     // Fallback if no frontline found (e.g. Cyborgs)
     if (regionFrontline.length === 0) {
-        regionFrontline = ['rogueLikePawnFactory']; 
+        regionFrontline = ['rpgPawnFactory']; 
     }
 
     // Ensure exactly 8 frontline pieces
@@ -699,8 +699,8 @@ function showArmyInfo(army) {
 }
 
 function showEnemyInfo() {
-    if (rogueState.enemyRoster && rogueState.enemyRoster.length > 0) {
-        showArmyInfo(rogueState.enemyRoster);
+    if (rpgState.enemyRoster && rpgState.enemyRoster.length > 0) {
+        showArmyInfo(rpgState.enemyRoster);
     }
 }
 
@@ -713,7 +713,7 @@ function showPieceDiscoveryModal(factoryName) {
     
     // We need to construct a dummy piece to get its properties
     const dummyPiece = window[factoryName]('white', 3, 3); // Place in center of 7x7 mini board
-    const icon = dummyPiece.icon.replace('white', 'black'); // Show black version usually? or white? prompt says "rogueLike that you see for the first time in the Options menu". Maybe just show the icon.
+    const icon = dummyPiece.icon.replace('white', 'black'); // Show black version usually? or white? prompt says "rpg that you see for the first time in the Options menu". Maybe just show the icon.
     // Actually, buildPieceModal usually shows a specific piece on a mini board.
     
     // Let's create a mini board
@@ -783,7 +783,7 @@ function generateRewardOptions() {
     // It's local to setupBoard. I should move it to global or duplicate it.
     let frontCount = 0;
     let backCount = 0;
-    rogueState.playerRoster.forEach(u => {
+    rpgState.playerRoster.forEach(u => {
         if(frontLineFactories.includes(u)) frontCount++;
         else backCount++;
     });
@@ -858,7 +858,7 @@ function generateRewardOptions() {
         });
     } else {
         // Fallback: Select 3 random difficulties based on level
-        let baseIndex = rogueState.level;
+        let baseIndex = rpgState.level;
         
         let d1 = Math.min(baseIndex, window.difficulties.length - 1);
         let d2 = Math.min(baseIndex + 1, window.difficulties.length - 1);
@@ -918,7 +918,7 @@ function generateRewardOptions() {
         options.sort((a,b) => a.difficultyIndex - b.difficultyIndex);
         
         // Randomly assign piece rewards
-        const rosterFull = rogueState.playerRoster.length >= 24; // 8 Front + 8 Back + 8 Reserve
+        const rosterFull = rpgState.playerRoster.length >= 24; // 8 Front + 8 Back + 8 Reserve
         options.forEach(opt => {
             
             // Priority: Use Node Rewards if available (Consistency with Grand Map)
@@ -1036,14 +1036,14 @@ function generateRewardOptions() {
         
     } else {
         // Fallback
-        const defaultCap = 10 + rogueState.level * 2;
+        const defaultCap = 10 + rpgState.level * 2;
         const goldRatio = 0.5;
         const goldAmount = Math.floor(defaultCap * goldRatio);
         const foodAmount = Math.floor((defaultCap - goldAmount) * 2);
         
         options.push({
             type: 'Standard Battle', 
-            enemyValue: 5 + rogueState.level * 2,
+            enemyValue: 5 + rpgState.level * 2,
             rewardType: 'gold',
             rewardContent: goldAmount,
             foodReward: foodAmount,
@@ -1070,11 +1070,11 @@ function startLevel(level, difficultyOption) {
     if (overlay) {
         overlay.style.opacity = '0';
     }
-    rogueState.level = level;
-    rogueState.mapSeed = Math.random() * 10000;
-    rogueState.shopOptions = []; // Clear shop options to prevent reopening shop on refresh
-    rogueState.showWinScreen = false; // Ensure win screen is cleared
-    rogueState.gameOverSequenceStarted = false; // Reset flag for new level
+    rpgState.level = level;
+    rpgState.mapSeed = Math.random() * 10000;
+    rpgState.shopOptions = []; // Clear shop options to prevent reopening shop on refresh
+    rpgState.showWinScreen = false; // Ensure win screen is cleared
+    rpgState.gameOverSequenceStarted = false; // Reset flag for new level
     updateGoldDisplay();
 
     // Check if it's a market visit
@@ -1104,9 +1104,9 @@ function startLevel(level, difficultyOption) {
         boardShape = difficultyOption.boardShape || 'Standard';
         
         // Pass through reward type/content
-        rogueState.currentRewardType = difficultyOption.rewardType || 'gold';
-        rogueState.currentRewardContent = difficultyOption.rewardContent || rewardCap;
-        rogueState.currentFoodReward = difficultyOption.foodReward || 0;
+        rpgState.currentRewardType = difficultyOption.rewardType || 'gold';
+        rpgState.currentRewardContent = difficultyOption.rewardContent || rewardCap;
+        rpgState.currentFoodReward = difficultyOption.foodReward || 0;
 
         // Grand Map Movement
         if (difficultyOption.node && typeof grandMap !== 'undefined') {
@@ -1128,13 +1128,13 @@ function startLevel(level, difficultyOption) {
             rewardCap = 10 + level * 2;
         }
         
-        rogueState.currentRewardType = 'gold';
-        rogueState.currentRewardContent = rewardCap;
+        rpgState.currentRewardType = 'gold';
+        rpgState.currentRewardContent = rewardCap;
         // Fallback food for string call?
         // 50% split assumption
         const goldAmt = Math.floor(rewardCap * 0.5);
-        rogueState.currentRewardContent = goldAmt;
-        rogueState.currentFoodReward = (rewardCap - goldAmt) * 2;
+        rpgState.currentRewardContent = goldAmt;
+        rpgState.currentFoodReward = (rewardCap - goldAmt) * 2;
         
     } else {
         // Fallback or Initial Start
@@ -1147,13 +1147,13 @@ function startLevel(level, difficultyOption) {
              rewardCap = 10 + level * 2;
         }
         
-        rogueState.currentRewardType = 'gold';
+        rpgState.currentRewardType = 'gold';
         const goldAmt = Math.floor(rewardCap * 0.5);
-        rogueState.currentRewardContent = goldAmt;
-        rogueState.currentFoodReward = (rewardCap - goldAmt) * 2;
+        rpgState.currentRewardContent = goldAmt;
+        rpgState.currentFoodReward = (rewardCap - goldAmt) * 2;
     }
 
-    rogueState.currentReward = rewardCap; // Keep for legacy or display?
+    rpgState.currentReward = rewardCap; // Keep for legacy or display?
 
 
     document.getElementById('levelDisplay').innerText = `Level: ${level}`;
@@ -1174,17 +1174,17 @@ function startLevel(level, difficultyOption) {
         enemyArmy = result.army;
     }
     
-    rogueState.enemyRoster = enemyArmy;
-    rogueState.boardShape = boardShape;
+    rpgState.enemyRoster = enemyArmy;
+    rpgState.boardShape = boardShape;
 
     if (boardShape === 'Fountain') {
         if (difficultyOption && difficultyOption.node && typeof difficultyOption.node.fountainX !== 'undefined') {
-            rogueState.fountainX = difficultyOption.node.fountainX;
+            rpgState.fountainX = difficultyOption.node.fountainX;
         } else if (difficultyOption && typeof difficultyOption.fountainX !== 'undefined') {
-            rogueState.fountainX = difficultyOption.fountainX;
+            rpgState.fountainX = difficultyOption.fountainX;
         } else {
              // Fallback for non-map or legacy
-             rogueState.fountainX = Math.floor(Math.random() * 7);
+             rpgState.fountainX = Math.floor(Math.random() * 7);
         }
     }
     
@@ -1203,7 +1203,7 @@ function startLevel(level, difficultyOption) {
         turnDisplay.style.color = 'var(--selected)';
     }
     
-    rogueState.gameActive = true;
+    rpgState.gameActive = true;
 
     // Save state after setup to ensure new board is saved
     saveProgress();
@@ -1220,7 +1220,7 @@ const boardShapes = {
     },
     'Woods': (board) => {
         // Use mapSeed to determine pattern
-        const seed = rogueState.mapSeed || Math.random();
+        const seed = rpgState.mapSeed || Math.random();
         
         // Define candidate squares for bushes (rows 2, 3, 4, 5)
         const candidateSquares = [];
@@ -1257,8 +1257,8 @@ const boardShapes = {
         }
     },
     'Fountain': (board) => {
-        const fx = (rogueState.fountainX !== undefined) ? rogueState.fountainX : 3;
-        const fy = (rogueState.fountainY !== undefined) ? rogueState.fountainY : 3;
+        const fx = (rpgState.fountainX !== undefined) ? rpgState.fountainX : 3;
+        const fy = (rpgState.fountainY !== undefined) ? rpgState.fountainY : 3;
         
         for (let x = 0; x <= 7; x++) {
             for (let y = 0; y <= 7; y++) {
@@ -1334,14 +1334,14 @@ function setupBoard(shapeName = 'Standard') {
     // Place Player Army (White)
     // Front Line: Row maxY - 1 (Pawns)
     // Back Line: Row maxY (Rest)
-    const playerSplit = splitArmy(rogueState.playerRoster);
+    const playerSplit = splitArmy(rpgState.playerRoster);
     placeArmy(playerSplit.front, 'white', [maxY - 1], maxX); 
     placeArmy(playerSplit.back, 'white', [maxY], maxX); 
     
     // Place Enemy Army (Black)
     // Front Line: Row 1 (Pawns)
     // Back Line: Row 0 (Rest)
-    const enemySplit = splitArmy(rogueState.enemyRoster);
+    const enemySplit = splitArmy(rpgState.enemyRoster);
     placeArmy(enemySplit.front, 'black', [1], maxX);
     
     // Randomize backline (King and elite units)
@@ -1485,7 +1485,7 @@ function showStartModal() {
         div.appendChild(preview);
         
         div.onclick = () => {
-            rogueState.playerRoster = army;
+            rpgState.playerRoster = army;
             modal.close();
             showReorderModal(army, () => {
                 // Start level 1 with the easiest difficulty
@@ -1709,7 +1709,7 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
         }
 
         // Reconstruct the roster: Front (8) + Back (8) + Reserve (...)
-        rogueState.playerRoster = [...frontPieces, ...backPieces, ...reservePieces];
+        rpgState.playerRoster = [...frontPieces, ...backPieces, ...reservePieces];
         modal.close();
         if (onConfirm) onConfirm();
     };
@@ -1725,7 +1725,7 @@ function showShopModal(restore = false) {
     }
     
     // Clear win screen flag since we moved to shop
-    rogueState.showWinScreen = false;
+    rpgState.showWinScreen = false;
     // Don't save yet, we save when generating/restoring shop options below
 
     const modal = document.getElementById('shopDialog');
@@ -1733,12 +1733,12 @@ function showShopModal(restore = false) {
     container.innerHTML = '';
     
     const goldDisplay = document.getElementById('playerGold');
-    if (goldDisplay) goldDisplay.innerText = rogueState.gold;
+    if (goldDisplay) goldDisplay.innerText = rpgState.gold;
 
     // Use existing shop options if restoring, else generate new
     let shopItems = [];
-    if (restore && rogueState.shopOptions && rogueState.shopOptions.length > 0) {
-        shopItems = rogueState.shopOptions;
+    if (restore && rpgState.shopOptions && rpgState.shopOptions.length > 0) {
+        shopItems = rpgState.shopOptions;
     } else {
         // Determine available factories based on region
         let factories = marketPieceFactories; // Default fallback
@@ -1756,13 +1756,13 @@ function showShopModal(restore = false) {
             const cost =  Math.floor(val * 5);
             shopItems.push({factory: randomFactory, cost: cost, value: val, bought: false});
         }
-        rogueState.shopOptions = shopItems;
+        rpgState.shopOptions = shopItems;
         saveProgress();
     }
 
     const updateAllButtons = () => {
         const buttons = container.querySelectorAll('.buy-btn');
-        const rosterFull = rogueState.playerRoster.length >= 24; // 8 Front + 8 Back + 8 Reserve
+        const rosterFull = rpgState.playerRoster.length >= 24; // 8 Front + 8 Back + 8 Reserve
 
         buttons.forEach(btn => {
             const index = btn.dataset.index;
@@ -1777,7 +1777,7 @@ function showShopModal(restore = false) {
                 return;
             }
 
-            if (rogueState.gold < item.cost) {
+            if (rpgState.gold < item.cost) {
                 btn.disabled = true;
                 btn.style.opacity = '0.5';
                 btn.style.cursor = 'not-allowed';
@@ -1812,7 +1812,7 @@ function showShopModal(restore = false) {
         
         div.innerHTML = `
             ${icon}
-            <h3>${item.factory.replace('Factory','').replace('rogueLike','')}</h3>
+            <h3>${item.factory.replace('Factory','').replace('rpg','')}</h3>
             <p>Power: ${item.value}</p>
             <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} 🪙</p>
         `;
@@ -1843,13 +1843,13 @@ function showShopModal(restore = false) {
         
         buyBtn.onclick = (e) => {
             e.stopPropagation();
-            if (rogueState.gold >= item.cost && !item.bought && rogueState.playerRoster.length < 24) {
-                rogueState.gold -= item.cost;
-                rogueState.playerRoster.push(item.factory);
+            if (rpgState.gold >= item.cost && !item.bought && rpgState.playerRoster.length < 24) {
+                rpgState.gold -= item.cost;
+                rpgState.playerRoster.push(item.factory);
                 item.bought = true;
                 
                 if (document.getElementById('playerGold')) {
-                    document.getElementById('playerGold').innerText = rogueState.gold;
+                    document.getElementById('playerGold').innerText = rpgState.gold;
                 }
                 updateGoldDisplay();
                 saveProgress();
@@ -1876,9 +1876,9 @@ function showShopModal(restore = false) {
 
 function showRewardModal() {
     // Check if we need to show reorder screen first (e.g. after winning a unit to reserve)
-    if (rogueState.pendingReorder) {
-        rogueState.pendingReorder = false;
-        showReorderModal(rogueState.playerRoster, () => {
+    if (rpgState.pendingReorder) {
+        rpgState.pendingReorder = false;
+        showReorderModal(rpgState.playerRoster, () => {
             showRewardModal();
         });
         return;
@@ -1920,7 +1920,7 @@ function showRewardModal() {
                  modal.close();
                  saveProgress();
                  // Market counts as a level/stage visit
-                 startLevel(rogueState.level + 1, option);
+                 startLevel(rpgState.level + 1, option);
              };
              container.appendChild(div);
              return; // Skip standard rendering
@@ -1990,10 +1990,10 @@ function showRewardModal() {
         */
         
         div.onclick = () => {
-            // rogueState.pendingReward = army; // No longer needed
+            // rpgState.pendingReward = army; // No longer needed
             modal.close();
             saveProgress();
-            startLevel(rogueState.level + 1, option);
+            startLevel(rpgState.level + 1, option);
         };
         
         container.appendChild(div);
@@ -2017,7 +2017,7 @@ function checkWinCondition(state) {
         return;
     }
 
-    if (rogueState.food <= 0) {
+    if (rpgState.food <= 0) {
         state.won = 'black';
         state.message = "Starvation!";
         return;
@@ -2031,13 +2031,13 @@ function checkWinCondition(state) {
 }
 
 function checkGameOver(state) {
-    if (rogueState.gameOverSequenceStarted) return; // Prevent multiple executions
+    if (rpgState.gameOverSequenceStarted) return; // Prevent multiple executions
 
     checkWinCondition(state);
     
     if (state.won) {
-        rogueState.gameActive = false;
-        rogueState.gameOverSequenceStarted = true; // Mark as started
+        rpgState.gameActive = false;
+        rpgState.gameOverSequenceStarted = true; // Mark as started
 
         if (state.won === 'white') {
             // Player Won
@@ -2053,14 +2053,14 @@ function checkGameOver(state) {
             
             try {
                 // Earn Gold or Piece
-                let foodEarned = rogueState.currentFoodReward || 0;
+                let foodEarned = rpgState.currentFoodReward || 0;
                 
-                if (rogueState.currentRewardType === 'piece') {
-                    const pieceFactory = rogueState.currentRewardContent;
+                if (rpgState.currentRewardType === 'piece') {
+                    const pieceFactory = rpgState.currentRewardContent;
                     if (pieceFactory) {
                         // Check if frontline is full (8 pieces) and new unit is frontline
                         // Count existing frontline units (ignoring nulls)
-                        const currentFrontCount = rogueState.playerRoster.filter(u => u && frontLineFactories.includes(u)).length;
+                        const currentFrontCount = rpgState.playerRoster.filter(u => u && frontLineFactories.includes(u)).length;
                         const isFrontlineUnit = frontLineFactories.includes(pieceFactory);
                         
                         if (currentFrontCount >= 8 && isFrontlineUnit) {
@@ -2068,8 +2068,8 @@ function checkGameOver(state) {
                             
                             // We must ensure the roster is formatted (8 Front + 8 Back + Reserve) to force reserve placement
                             // Filter out existing units by type to "compact" them and remove holes
-                            let front = rogueState.playerRoster.filter(u => u && frontLineFactories.includes(u));
-                            let back = rogueState.playerRoster.filter(u => u && !frontLineFactories.includes(u));
+                            let front = rpgState.playerRoster.filter(u => u && frontLineFactories.includes(u));
+                            let back = rpgState.playerRoster.filter(u => u && !frontLineFactories.includes(u));
                             
                             // Pad to 8
                             while(front.length < 8) front.push(null);
@@ -2103,7 +2103,7 @@ function checkGameOver(state) {
                             const reserve = [];
                             // If there were existing reserves? 
                             // The current logic of "filter all front, filter all back" effectively destroys existing "Reserve" distinction if it wasn't based on type.
-                            // But `rogueState.playerRoster` is just a list.
+                            // But `rpgState.playerRoster` is just a list.
                             // If I have 9 pawns. 8 are front, 1 is back/reserve?
                             // `placeArmy` puts them in rows.
                             
@@ -2111,15 +2111,15 @@ function checkGameOver(state) {
                             // Roster = [8 Front, 8 Back, ...Reserve]
                             // If formatted, we should preserve it?
                             
-                            if (rogueState.playerRoster.length >= 16 || rogueState.playerRoster.includes(null)) {
+                            if (rpgState.playerRoster.length >= 16 || rpgState.playerRoster.includes(null)) {
                                 // Already formatted.
                                 // Just push to end (Reserve).
-                                rogueState.playerRoster.push(pieceFactory);
+                                rpgState.playerRoster.push(pieceFactory);
                             } else {
                                 // Not formatted. Format it now.
                                 // Use the same logic as above.
-                                let f = rogueState.playerRoster.filter(u => u && frontLineFactories.includes(u));
-                                let b = rogueState.playerRoster.filter(u => u && !frontLineFactories.includes(u));
+                                let f = rpgState.playerRoster.filter(u => u && frontLineFactories.includes(u));
+                                let b = rpgState.playerRoster.filter(u => u && !frontLineFactories.includes(u));
                                 
                                 // Slice to ensure max 8 in main slots
                                 const safeFront = f.slice(0, 8);
@@ -2133,17 +2133,17 @@ function checkGameOver(state) {
                                 
                                 const newReserve = [...overflowFront, ...overflowBack, pieceFactory];
                                 
-                                rogueState.playerRoster = [...safeFront, ...safeBack, ...newReserve];
+                                rpgState.playerRoster = [...safeFront, ...safeBack, ...newReserve];
                             }
 
-                            rogueState.pendingReorder = true;
+                            rpgState.pendingReorder = true;
                             
                             const pieceName = window.pieceDescriptions[pieceFactory].name;
                             console.log(window.pieceDescriptions)
                             winText = `Won Unit: ${pieceName} (Placed in Reserve)`;
                             
                         } else {
-                            rogueState.playerRoster.push(pieceFactory);
+                            rpgState.playerRoster.push(pieceFactory);
                             
                             // Show what piece was won
                             const pieceName = window.pieceDescriptions[pieceFactory].name;
@@ -2160,22 +2160,22 @@ function checkGameOver(state) {
                     
                 } else {
                     // Gold comes from currentRewardContent
-                    const goldEarned = rogueState.currentRewardContent || 0;
-                    rogueState.gold = (rogueState.gold || 0) + goldEarned;
+                    const goldEarned = rpgState.currentRewardContent || 0;
+                    rpgState.gold = (rpgState.gold || 0) + goldEarned;
                     winText = `+${goldEarned} 🪙`;
                     if (foodEarned > 0) {
                          winText += ` + ${foodEarned} 🍖`;
                     }
                 }
                 
-                rogueState.food = (rogueState.food || 0) + foodEarned;
+                rpgState.food = (rpgState.food || 0) + foodEarned;
                 updateGoldDisplay();
                 
                 // Clear pending rewards (shop replaces direct rewards)
-                rogueState.pendingReward = []; 
+                rpgState.pendingReward = []; 
                 
                 // Mark win screen as active
-                rogueState.showWinScreen = true;
+                rpgState.showWinScreen = true;
                 
                 saveProgress();
             } catch (e) {
@@ -2227,7 +2227,7 @@ function checkGameOver(state) {
 function closeWinScreen() {
     const modal = document.getElementById('gameWonDialog');
     if (modal) modal.close();
-    rogueState.showWinScreen = false;
+    rpgState.showWinScreen = false;
     saveProgress();
     if (typeof showMapModal === 'function') {
         showMapModal();
@@ -2267,7 +2267,7 @@ function AIMove(pieceIndex, xClicked, yClicked, color) {
 
 // Event Listeners
 canvas.addEventListener('click', (e) => {
-    if (!rogueState.gameActive) return;
+    if (!rpgState.gameActive) return;
     if (hotseatGame.state.turn !== 'white') return; // Player is White
     
     const state = hotseatGame.state;
@@ -2294,8 +2294,8 @@ canvas.addEventListener('click', (e) => {
     
     // Consume Food only when a move is completed (turn changes)
     if (previousTurn === 'white' && currentTurn === 'black') {
-        if (rogueState.food > 0) {
-            rogueState.food--; // Decrement by 1 as per user request
+        if (rpgState.food > 0) {
+            rpgState.food--; // Decrement by 1 as per user request
         } else {
             // Starvation handled in checkGameOver
         }
@@ -2387,7 +2387,7 @@ const waitForImages = async () => {
     const loadingScreen = document.getElementById('loadingScreen');
     if(loadingScreen) loadingScreen.style.display = 'none';
     
-    initRogueGame();
+    initRpgGame();
 };
 
 waitForImages();
@@ -2425,13 +2425,13 @@ function animate(secretState){
     }
 
     // Background
-    if (rogueState.boardShape === 'Woods') {
+    if (rpgState.boardShape === 'Woods') {
         // Deep forest green gradient for woods theme
         document.body.style.background = 'radial-gradient(circle, #556b2f 0%, #1a2f16 100%)';
-    } else if (rogueState.boardShape === 'Fountain') {
+    } else if (rpgState.boardShape === 'Fountain') {
         // Watery blue gradient for fountain theme
         document.body.style.background = 'radial-gradient(circle, #4fc3f7 0%, #01579b 100%)';
-    } else if (rogueState.boardShape === 'Desert') {
+    } else if (rpgState.boardShape === 'Desert') {
         // Sandy gradient for desert theme
         document.body.style.background = 'radial-gradient(circle, #f4a460 0%, #8b4513 100%)';
     } else {
@@ -2455,13 +2455,13 @@ function animate(secretState){
         let currentWhiteColor = whiteSquareColor;
         let currentBlackColor = blackSquareColor;
         
-        if (rogueState.boardShape === 'Woods') {
+        if (rpgState.boardShape === 'Woods') {
             currentWhiteColor = '#8fbc8f'; // DarkSeaGreen
             currentBlackColor = '#556b2f'; // DarkOliveGreen
-        } else if (rogueState.boardShape === 'Fountain') {
+        } else if (rpgState.boardShape === 'Fountain') {
             currentWhiteColor = '#b3e5fc'; // Light Blue
             currentBlackColor = '#0288d1'; // Dark Blue
-        } else if (rogueState.boardShape === 'Desert') {
+        } else if (rpgState.boardShape === 'Desert') {
             currentWhiteColor = '#ffdead'; // NavajoWhite
             currentBlackColor = '#cd853f'; // Peru
         }
@@ -2472,7 +2472,7 @@ function animate(secretState){
             else drawColoredSquare(x * squareLength, y * squareLength, currentWhiteColor, squareLength);
             
             if(state.pieceSelected && x === state.pieceSelected.x && y === state.pieceSelected.y){
-                if (rogueState.boardShape === 'Fountain') {
+                if (rpgState.boardShape === 'Fountain') {
                     // Darker blue for selected piece in fountain map
                     drawColoredSquare(x*squareLength, y*squareLength, 'rgba(1, 87, 155, 0.7)', squareLength);
                 } else {
@@ -2481,7 +2481,7 @@ function animate(secretState){
             }
         }
         else if (sq.light) {
-            if (rogueState.boardShape === 'Fountain') {
+            if (rpgState.boardShape === 'Fountain') {
                 // Watery blue highlight
                 drawColoredSquare(x * squareLength, y * squareLength, 'rgba(79, 195, 247, 0.8)', squareLength);
             } else {
@@ -2496,23 +2496,23 @@ function animate(secretState){
     });
 
     // Draw Trees in Empty Spaces for Woods Map
-    if (rogueState.boardShape === 'Woods') {
+    if (rpgState.boardShape === 'Woods') {
         // Draw internal void bushes
         for(let tx=0; tx<8; tx++){
             for(let ty=0; ty<8; ty++){
                 const exists = state.board.find(s => s.x === tx && s.y === ty);
                 if(!exists){
                     if (typeof drawBush === 'function') {
-                        drawBush(ctx, tx, ty, squareLength, rogueState.mapSeed);
+                        drawBush(ctx, tx, ty, squareLength, rpgState.mapSeed);
                     }
                 }
             }
         }
-    } else if (rogueState.boardShape === 'Fountain') {
+    } else if (rpgState.boardShape === 'Fountain') {
          // Draw large fountain in the center (covering 4 squares)
          if (typeof drawFountain === 'function') {
-             const fx = (rogueState.fountainX !== undefined) ? rogueState.fountainX : 3;
-             const fy = (rogueState.fountainY !== undefined) ? rogueState.fountainY : 3;
+             const fx = (rpgState.fountainX !== undefined) ? rpgState.fountainX : 3;
+             const fy = (rpgState.fountainY !== undefined) ? rpgState.fountainY : 3;
              // Calculate center of the 2x2 area
              // If fx=0, it covers x=0 and x=1. Center is 1.0? 
              // drawFountain expects tx, ty.
@@ -2526,7 +2526,7 @@ function animate(secretState){
              // So tx is expected to be in grid units.
              // If we pass fx + 0.5, cx = (fx + 0.5) * sq + sq/2 = fx*sq + sq/2 + sq/2 = (fx+1)*sq.
              // This is indeed the border between fx and fx+1. Correct.
-             drawFountain(ctx, fx + 0.5, fy + 0.5, squareLength, rogueState.mapSeed, 1);
+             drawFountain(ctx, fx + 0.5, fy + 0.5, squareLength, rpgState.mapSeed, 1);
          }
      }
 

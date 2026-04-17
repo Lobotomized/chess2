@@ -45,9 +45,9 @@ app.use('/customEffects.js', express.static('./customEffects.js'))
 app.use('/pieces', express.static('./pieces'))
 app.use('/helperFunctions.js', express.static('./helperFunctions.js'))
 app.use('/moveMethods.js', express.static('./moveMethods.js'))
-app.use('/rogueLike.js', express.static('./rogueLike.js'))
-app.use('/rogueLikeDifficulties.js', express.static('./rogueLikeDifficulties.js'))
-app.use('/rogueLikeDetails.js', express.static('./rogueLikeDetails.js'))
+app.use('/rpg.js', express.static('./rpg.js'))
+app.use('/rpgDifficulties.js', express.static('./rpgDifficulties.js'))
+app.use('/rpgDetails.js', express.static('./rpgDetails.js'))
 app.use('/grandMap.js', express.static('./grandMap.js'))
 app.use('/mapVisuals.js', express.static('./mapVisuals.js'))
 app.use('/evolution.html', express.static('./evolution.html'))
@@ -738,8 +738,8 @@ app.get('/gameRecorder.js', function(req,res){
     return res.status(200).sendFile(__dirname + '/gameRecorder.js');
 })
 
-app.get('/rogueLike.html', function(req,res){
-    return res.status(200).sendFile(__dirname + '/rogueLike.html');
+app.get('/rpg.html', function(req,res){
+    return res.status(200).sendFile(__dirname + '/rpg.html');
 })
 
 app.get('/create-board', function(req,res){

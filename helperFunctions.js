@@ -329,8 +329,8 @@ function getSinglePlayerGame() {
             recordMoves: true,
             gameRecordId: Date.now() + '_' + Math.random(),
             gameMetadata: {
-                mode: window.location.href.includes('rogueLike') ? 'roguelike' : (getParams(window.location.href).gameType ? 'campaign' : 'hotseat'),
-                vsBot: window.location.href.includes('rogueLike') ? true : (getParams(window.location.href).AIColor !== undefined && getParams(window.location.href).AIColor !== 'none')
+                mode: window.location.href.includes('rpg') ? 'rpg' : (getParams(window.location.href).gameType ? 'campaign' : 'hotseat'),
+                vsBot: window.location.href.includes('rpg') ? true : (getParams(window.location.href).AIColor !== undefined && getParams(window.location.href).AIColor !== 'none')
             }
         },
         moveFunction: function (player, move, state) {

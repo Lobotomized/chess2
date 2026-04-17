@@ -1,7 +1,7 @@
 
 const pieceDescriptions = {
     // Classic
-    "rogueLikePawnFactory": {
+    "rpgPawnFactory": {
         name: "Pawn",
         description: "Moves forward one square, attacks diagonally forward. First move can be two squares. If it get's to the end it turns into a Queen."
     },
@@ -119,13 +119,13 @@ const pieceDescriptions = {
             It can also swap places with all friendly pieces around it.
         `
     },
-    "roguelikeQueenbugFactory":{
+    "rpgQueenbugFactory":{
         name: "Queenbug",
         description: `
             The Queenbug can't move. But it can spawn ants infront, behind or to the left or right of it.
         `
     },
-    "roguelikeAntFactory":{
+    "rpgAntFactory":{
         name: "Ant",
         description: `
             The ant moves and takes two blockable squares forward. If it gets to the last square it promotes itself to a Bug Queen.

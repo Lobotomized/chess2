@@ -1,4 +1,4 @@
-// Rogue Like Details - Procedural Generation for Trees and Bushes
+// RPG Details - Procedural Generation for Trees and Bushes
 
 function drawTree(ctx, tx, ty, squareLength) {
     ctx.save();
