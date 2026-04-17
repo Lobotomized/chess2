@@ -51,6 +51,7 @@ const grandMap = {
             this.width = savedState.width || 15;
             this.height = savedState.height || 15;
             this.seed = savedState.seed || Math.random() * 10000;
+            this.generateCenters();
         } else {
             this.currentX = 0;
             this.currentY = 0;
@@ -75,6 +76,8 @@ const grandMap = {
         
         // Reset map
         this.map = [];
+        this.seed = Math.random() * 10000; // Give predefined maps a seed for generation
+        this.generateCenters();
         
         // Fill with default generated nodes first (as background/filler)
         for (let y = 0; y < this.height; y++) {
@@ -123,10 +126,27 @@ const grandMap = {
         };
     },
 
+    generateCenters() {
+        this.centers = [];
+        const regionNames = ['Classic', 'Medieval', 'Insect', 'Cyborgs', 'Promoters'];
+        // Use deterministic random based on seed for centers
+        // Calculate number of centers based on map size to aim for 4-8 squares per territory
+        const numCenters = Math.floor((this.width * this.height) / 6);
+        for (let i = 0; i < numCenters; i++) {
+            const cx = (Math.sin(this.seed + i * 123) * 0.5 + 0.5) * this.width;
+            const cy = (Math.cos(this.seed + i * 321) * 0.5 + 0.5) * this.height;
+            const region = regionNames[Math.floor((Math.sin(this.seed + i * 777) * 0.5 + 0.5) * regionNames.length)];
+            this.centers.push({ x: cx, y: cy, name: region });
+        }
+    },
+
     // Generate the full map
     generateMap() {
         this.map = [];
         this.seed = Math.random() * 10000;
+        
+        this.generateCenters();
+
         for (let y = 0; y < this.height; y++) {
             const row = [];
             for (let x = 0; x < this.width; x++) {
@@ -152,8 +172,8 @@ const grandMap = {
         
         // 1. Determine Region FIRST to influence difficulty and board type
         // Use Perlin-like noise or Distance-based Voronoi for organic shapes
-        // Center points for regions:
-        const centers = [
+        // Use the dynamically generated centers from generateMap()
+        const centers = this.centers || [
             { name: 'Classic', x: 3, y: 3 },
             { name: 'Medieval', x: 12, y: 3 },
             { name: 'Insect', x: 3, y: 12 },
@@ -163,7 +183,7 @@ const grandMap = {
         
         // Add some noise to the distance check to make borders jagged
         // Noise based on x, y
-        const noise = (getDeterministicRandom(5) * 5) - 2.5; // -2.5 to 2.5 variance
+        const noise = (getDeterministicRandom(5) * 2) - 1; // -1 to 1 variance
         
         let minDistance = Infinity;
         let region = 'Classic';

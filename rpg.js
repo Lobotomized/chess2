@@ -14,7 +14,7 @@ const cyborgsFactories = [
 ]
 
 const pomotersFactories = [
-    "shield","swordsMen","pikeman",
+    "shield","swordsMen","pikeman", "dragonFactory",
 ]
 
 const medievalFactories = [
@@ -22,7 +22,7 @@ const medievalFactories = [
 ]
 
 const insectFactories = [
-    "rpgAntFactory", "spiderFactory", 'goliathBugFactory', "rpgQueenbugFactory"
+    "rpgAntFactory", "spiderFactory", 'goliathBugFactory', "rpgQueenbugFactory", "ladyBugFactory"
 ]
 
 const classicPieceFactories = [
@@ -39,7 +39,7 @@ const marketPieceFactories = [
 
 const winnablePieceFactories = [
     'horseFactory','rpgQueenbugFactory',
-    "rpgAntFactory", "spiderFactory", 'goliathBugFactory',"pigFactory",
+    "rpgAntFactory", "spiderFactory", 'goliathBugFactory',"pigFactory", "ladyBugFactory","dragonFactory"
 ];
 
 const availablePieceFactories = [
@@ -58,7 +58,7 @@ const regionFactories = {
     'Promoters': pomotersFactories
 };
 
-const frontLineFactories = ['rpgPawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'rpgAntFactory', 'rpgQueenbugFactory'];
+const frontLineFactories = ['rpgPawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'rpgAntFactory', 'rpgQueenbugFactory', 'cyborgFactory'];
 
 const adjustedValues = [
 
@@ -500,7 +500,7 @@ function aniLoop() {
 }
 
 function ani() {
-    if (!hotseatGame || (typeof rpgState !== 'undefined' && !rpgState.gameActive)) {
+    if (!hotseatGame || (typeof rpgState !== 'undefined' && !rpgState.gameActive && !rpgState.gameOverSequenceStarted)) {
         // Clear canvas if we are skipping animation to prevent ghost images
         const canvas = document.getElementById('canvas');
         if (canvas) {
@@ -889,7 +889,8 @@ function generateRewardOptions() {
                 enemyValue: node.actualEnemyValue || node.enemyPower, // Use actual value
                 difficultyIndex: window.difficulties.indexOf(diff),
                 boardShape: node.board || 'Standard',
-                army: node.army // Pass army to option
+                army: node.army, // Pass army to option
+                region: node.region // Pass region for army generation
             };
             
             if (node.board === 'Woods') option.description += " (Woods Map)";
@@ -1117,12 +1118,14 @@ function startLevel(level, difficultyOption) {
     let enemyValue = 5;
     let rewardCap = 0;
     let boardShape = 'Standard';
+    let region = 'Classic';
 
     if (difficultyOption && typeof difficultyOption === 'object') {
         difficultyName = difficultyOption.type || 'Custom';
         enemyValue = difficultyOption.enemyValue || Math.round(1.5 + level * 0.5);
         rewardCap = difficultyOption.rewardCap || Math.round(2.5 + level * 0.5);
         boardShape = difficultyOption.boardShape || 'Standard';
+        region = difficultyOption.region || 'Classic';
         
         // Pass through reward type/content
         rpgState.currentRewardType = difficultyOption.rewardType || 'gold';
@@ -1187,7 +1190,7 @@ function startLevel(level, difficultyOption) {
          enemyArmy = difficultyOption.node.army;
     } else {
         // Fallback generation
-        const result = generateRandomArmy(enemyValue, true);
+        const result = generateRandomArmy(enemyValue, true, region);
         enemyArmy = result.army;
     }
     
@@ -2250,13 +2253,6 @@ function checkGameOver(state) {
 
         if (state.won === 'white') {
             // Player Won
-            // Fade to black
-            const overlay = document.getElementById('deathOverlay');
-            if (overlay) {
-                overlay.style.opacity = '1';
-                // Ensure it's on top of everything except modals
-                overlay.style.zIndex = '900'; 
-            }
             
             let winText = state.message === "Enemy Starvation!" ? "Enemy Starved!" : (state.message === "Enemy Army Annihilated!" ? "Army Annihilated!" : "Victory!");
             
@@ -2396,41 +2392,53 @@ function checkGameOver(state) {
             if(goldText) goldText.innerText = winText;
 
             setTimeout(() => {
-                const modal = document.getElementById('gameWonDialog');
-                if(modal) modal.showModal();
-            }, 2000);
+                // Fade to black
+                const overlay = document.getElementById('deathOverlay');
+                if (overlay) {
+                    overlay.style.opacity = '1';
+                    // Ensure it's on top of everything except modals
+                    overlay.style.zIndex = '900'; 
+                }
+
+                setTimeout(() => {
+                    const modal = document.getElementById('gameWonDialog');
+                    if(modal) modal.showModal();
+                }, 2000);
+            }, 2000); // 2 second delay to see the final board
             
         } else if (state.won === 'black') {
             // Player Lost
             clearProgress(); // Wipe save on death  
             
-            // Fade to black
-            const overlay = document.getElementById('deathOverlay');
-            if (overlay) {
-                overlay.style.opacity = '1';
-            }
-            
             setTimeout(() => {
-                const modal = document.getElementById('gameOverDialog');
-                if (modal) {
-                    const gameOverText = modal.querySelector('p');
-                    if (gameOverText) {
-                        if (state.message === "Starvation!") {
-                            gameOverText.innerText = "Your food is over";
-                        } else if (state.message === "Army Annihilated!") {
-                            gameOverText.innerText = "Your army was annihilated.";
-                        } else {
-                            gameOverText.innerText = "Your King has fallen.";
-                        }
-                    }
-                    modal.showModal();
-                }
+                // Fade to black
+                const overlay = document.getElementById('deathOverlay');
                 if (overlay) {
-                     // Ensure overlay stays but is behind modal
-                     overlay.style.zIndex = '900'; // Keep it high but below modal if possible
-                     // Dialogs are in top layer, so they should be above z-index 900
+                    overlay.style.opacity = '1';
                 }
-            }, 2000);
+                
+                setTimeout(() => {
+                    const modal = document.getElementById('gameOverDialog');
+                    if (modal) {
+                        const gameOverText = modal.querySelector('p');
+                        if (gameOverText) {
+                            if (state.message === "Starvation!") {
+                                gameOverText.innerText = "Your food is over";
+                            } else if (state.message === "Army Annihilated!") {
+                                gameOverText.innerText = "Your army was annihilated.";
+                            } else {
+                                gameOverText.innerText = "Your King has fallen.";
+                            }
+                        }
+                        modal.showModal();
+                    }
+                    if (overlay) {
+                         // Ensure overlay stays but is behind modal
+                         overlay.style.zIndex = '900'; // Keep it high but below modal if possible
+                         // Dialogs are in top layer, so they should be above z-index 900
+                    }
+                }, 2000);
+            }, 2000); // 2 second delay to see the final board
         } 
     }
 }

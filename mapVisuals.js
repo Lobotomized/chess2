@@ -352,6 +352,7 @@ function showMapModal() {
                     else if (node.x < 9) region = 'Insect';
                     else if (node.x < 12) region = 'Cyborgs';
                     else region = 'Promoters';
+                    node.region = region; // Ensure it is saved back to the node object for older saves
                 }
                 
                 cell.setAttribute('data-region', region);
@@ -362,7 +363,7 @@ function showMapModal() {
                     'Medieval': 'blackGhost.png',
                     'Insect': 'blackAnt.png',
                     'Cyborgs': 'blackCyborg.png',
-                    'Promoters': 'blackPikeman.png'
+                    'Promoters': 'blackSwordsmen.png'
                 };
                 
                 // Use global folderSrc if available, else default to 'lg'
@@ -375,6 +376,13 @@ function showMapModal() {
                 // Try to find correct path. Since we saw /static/ in loadImages.js, we use that.
                 // However, LS showed public folder. Server likely maps /static to public.
                 const iconPath = `/static/${fSrc}/${regionIconName}`;
+                
+                // Top Right Region Indicator
+                const regionIndicatorHtml = `
+                    <div style="position:absolute; top: 8px; right: 8px; width: 32px; height: 32px; background: rgba(255,255,255,0.7); border: 2px solid rgba(0,0,0,0.3); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 20;">
+                        <img src="${iconPath}" style="width: 80%; height: 80%; object-fit: contain; filter: drop-shadow(1px 1px 1px black);" title="${region} Territory">
+                    </div>
+                `;
 
                 // Difficulty Icons Mapping
                 const diffName = node.difficulty ? node.difficulty.name : '';
@@ -466,7 +474,7 @@ function showMapModal() {
                      </div>`;
                 }
                 
-                contentHtml += `</div>`;
+                contentHtml += `</div>${regionIndicatorHtml}`;
 
                 cell.innerHTML = contentHtml;
                                   
@@ -588,6 +596,11 @@ function showMapCellPopup(node, grandMap) {
     const existing = document.getElementById('mapCellPopup');
     if (existing) existing.remove();
 
+    // Ensure the node has its army and actual enemy value generated before we display its stats
+    if (typeof ensureNodeArmy === 'function' && node.board !== 'Market' && !node.cleared) {
+        ensureNodeArmy(node);
+    }
+
     const popup = document.createElement('dialog');
     popup.id = 'mapCellPopup';
     popup.style.cssText = `
@@ -679,9 +692,10 @@ function showMapCellPopup(node, grandMap) {
                     node: node,
                     description: node.difficulty.description,
                     rewardCap: node.rewardCap,
-                    enemyValue: node.enemyPower,
+                    enemyValue: node.actualEnemyValue || node.enemyPower,
                     boardShape: node.board || 'Standard',
                     army: node.army,
+                    region: node.region, // Pass the region to startLevel
                     difficultyIndex: 0
                 };
                 
