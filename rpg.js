@@ -1725,6 +1725,42 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                     return;
                 }
 
+                // Simulate Swap to check validity
+                let simFront = [...frontPieces];
+                let simBack = [...backPieces];
+                
+                if (sourceArray === frontPieces && targetArray === frontPieces) {
+                    simFront[sourceIndex] = targetArray[targetIndex];
+                    simFront[targetIndex] = sourceArray[sourceIndex];
+                } else if (sourceArray === frontPieces && targetArray === backPieces) {
+                    simFront[sourceIndex] = targetArray[targetIndex];
+                    simBack[targetIndex] = sourceArray[sourceIndex];
+                } else if (sourceArray === backPieces && targetArray === frontPieces) {
+                    simBack[sourceIndex] = targetArray[targetIndex];
+                    simFront[targetIndex] = sourceArray[sourceIndex];
+                } else if (sourceArray === frontPieces) {
+                    simFront[sourceIndex] = targetArray[targetIndex];
+                } else if (targetArray === frontPieces) {
+                    simFront[targetIndex] = sourceArray[sourceIndex];
+                } else if (sourceArray === backPieces) {
+                    simBack[sourceIndex] = targetArray[targetIndex];
+                } else if (targetArray === backPieces) {
+                    simBack[targetIndex] = sourceArray[sourceIndex];
+                }
+
+                // Validation: Cannot remove frontline piece if a backline piece is directly behind it
+                let exposed = false;
+                for (let i = 0; i < 8; i++) {
+                    if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
+                        exposed = true;
+                        break;
+                    }
+                }
+                if (exposed) {
+                    showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
+                    return;
+                }
+
                 // Perform Swap
                 const temp = sourceArray[sourceIndex];
                 sourceArray[sourceIndex] = targetArray[targetIndex];
@@ -1762,8 +1798,11 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                             // Deselect
                             selectedElement = null;
                             deleteBtn.style.display = 'none';
-                            // Re-render only reserve
-                            renderPieces(container, piecesArray, true);
+                            
+                            // Re-open modal to recalculate King position and disabled slots
+                            modal.close();
+                            const newRoster = [...frontPieces, ...backPieces, ...reservePieces];
+                            showReorderModal(newRoster, onConfirm, forceConfirmText);
                         };
                     } else if (deleteBtn) {
                         deleteBtn.style.display = 'none';
@@ -1784,6 +1823,42 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                         selectedElement.div.style.borderColor = 'var(--board-dark)';
                         selectedElement.div.style.boxShadow = 'none';
                         selectedElement = null;
+                        return;
+                    }
+
+                    // Simulate Swap to check validity
+                    let simFront = [...frontPieces];
+                    let simBack = [...backPieces];
+                    
+                    if (sourceArray === frontPieces && targetArray === frontPieces) {
+                        simFront[sourceIndex] = targetArray[targetIndex];
+                        simFront[targetIndex] = sourceArray[sourceIndex];
+                    } else if (sourceArray === frontPieces && targetArray === backPieces) {
+                        simFront[sourceIndex] = targetArray[targetIndex];
+                        simBack[targetIndex] = sourceArray[sourceIndex];
+                    } else if (sourceArray === backPieces && targetArray === frontPieces) {
+                        simBack[sourceIndex] = targetArray[targetIndex];
+                        simFront[targetIndex] = sourceArray[sourceIndex];
+                    } else if (sourceArray === frontPieces) {
+                        simFront[sourceIndex] = targetArray[targetIndex];
+                    } else if (targetArray === frontPieces) {
+                        simFront[targetIndex] = sourceArray[sourceIndex];
+                    } else if (sourceArray === backPieces) {
+                        simBack[sourceIndex] = targetArray[targetIndex];
+                    } else if (targetArray === backPieces) {
+                        simBack[targetIndex] = sourceArray[sourceIndex];
+                    }
+
+                    // Validation: Cannot remove frontline piece if a backline piece is directly behind it
+                    let exposed = false;
+                    for (let i = 0; i < 8; i++) {
+                        if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
+                            exposed = true;
+                            break;
+                        }
+                    }
+                    if (exposed) {
+                        showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
                         return;
                     }
 
@@ -1843,6 +1918,29 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                     const sourceArray = draggedElement.piecesArray;
                     const sourceIndex = draggedElement.index;
                     
+                    // Simulate Unequip to check validity
+                    let simFront = [...frontPieces];
+                    let simBack = [...backPieces];
+                    
+                    if (sourceArray === frontPieces) {
+                        simFront[sourceIndex] = null;
+                    } else if (sourceArray === backPieces) {
+                        simBack[sourceIndex] = null;
+                    }
+
+                    // Validation: Cannot remove frontline piece if a backline piece is directly behind it
+                    let exposed = false;
+                    for (let i = 0; i < 8; i++) {
+                        if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
+                            exposed = true;
+                            break;
+                        }
+                    }
+                    if (exposed) {
+                        showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
+                        return;
+                    }
+                    
                     const piece = sourceArray[sourceIndex];
                     if (piece) {
                         reservePieces.push(piece);
@@ -1863,6 +1961,29 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                     // Moving from Board to Reserve (Unequip)
                     const sourceArray = selectedElement.piecesArray;
                     const sourceIndex = selectedElement.index;
+                    
+                    // Simulate Unequip to check validity
+                    let simFront = [...frontPieces];
+                    let simBack = [...backPieces];
+                    
+                    if (sourceArray === frontPieces) {
+                        simFront[sourceIndex] = null;
+                    } else if (sourceArray === backPieces) {
+                        simBack[sourceIndex] = null;
+                    }
+
+                    // Validation: Cannot remove frontline piece if a backline piece is directly behind it
+                    let exposed = false;
+                    for (let i = 0; i < 8; i++) {
+                        if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
+                            exposed = true;
+                            break;
+                        }
+                    }
+                    if (exposed) {
+                        showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
+                        return;
+                    }
                     
                     // Move piece to reserve
                     const piece = sourceArray[sourceIndex];
@@ -1896,6 +2017,19 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
         if (!frontHasKing && !backHasKing) {
             showNotification("The King must be in the active army (Frontline or Backline)!", "error");
             return;
+        }
+
+        // Validation: Frontline must be a straight line without holes
+        const requiredFrontline = Math.min(8, totalFrontline);
+        for (let i = 0; i < requiredFrontline; i++) {
+            if (!frontPieces[i]) {
+                showNotification("Frontline cannot have empty slots or holes! Please fill all active frontline slots.", "error");
+                return;
+            }
+            if (!frontLineFactories.includes(frontPieces[i])) {
+                showNotification("Only frontline units can be placed in the frontline!", "error");
+                return;
+            }
         }
 
         // Reconstruct the roster: Front (8) + Back (8) + Reserve (...)
