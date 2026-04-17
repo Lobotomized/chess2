@@ -244,17 +244,11 @@ const grandMap = {
         const goldBase = (difficultyProfile.enemyValue || 1);
         rewards.gold = goldBase
         
-        // Food - higher chance in Woods/Fountain/Market
-        // Woods/Fountain: 60% chance. Market: 90% chance. Others: 20%
-        let foodChance = 0.2;
-        if (board === 'Woods' || board === 'Fountain') foodChance = 0.6;
-        if (board === 'Market') foodChance = 0.9;
-
-        if (getDeterministicRandom(7) < foodChance) {
-            rewards.food = Math.floor(15 + getDeterministicRandom(8) * 15);
-        } else {
-            rewards.food = 15;
-        }
+        // Food mechanics
+        // Generate enemyFood based on gold reward and some randomness
+        let baseGold = rewards.gold || 10;
+        let baseFood = Math.floor(baseGold * 0.8) + 5;
+        node.enemyFood = baseFood + Math.floor(getDeterministicRandom(8) * (baseFood * 0.5));
         
         // Pieces - small chance
         // Market always has a unit (Mercenary)

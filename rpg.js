@@ -448,6 +448,8 @@ function restoreBoard(savedBoard) {
             }
         }
     }
+    
+    updateGoldDisplay();
 }
 
 function findFactoryForIcon(icon) {
@@ -993,17 +995,17 @@ function generateRewardOptions() {
                       }
                       
                       if (opt.rewardType === 'piece') {
-                           opt.foodReward = r.food;
+                           opt.enemyFood = opt.node.enemyFood;
                            opt.rewardValue = getPieceValue(opt.rewardContent);
                       } else {
-                           opt.foodReward = Math.max(15, r.food || 0);
+                           opt.enemyFood = opt.node.enemyFood;
                       }
                       
                  } else {
                       // Gold Reward
                       opt.rewardType = 'gold';
                       opt.rewardContent = r.gold;
-                      opt.foodReward = Math.max(15, r.food || 0);
+                      opt.enemyFood = opt.node.enemyFood;
                  }
                  return; // Done with this option
             }
@@ -1039,53 +1041,33 @@ function generateRewardOptions() {
                     const budget = opt.rewardCap;
                     const pieceVal = getPieceValue(randomPiece);
                     const diff = Math.max(0, budget - pieceVal);
-                    opt.foodReward = Math.max(15, Math.floor(diff * 5));
+                    opt.enemyFood = Math.max(15, Math.floor(diff * 5));
                     
                 } else {
                     opt.rewardType = 'gold';
-                    opt.rewardContent = opt.rewardCap;
-                    // Will calculate split later or now?
-                    // Let's do it now.
-                    // "Food/gold should be in random proportions for every mission."
-                    // 2 food = 1 gold.
-                    
                     const budget = opt.rewardCap;
-                    // Random split: 10% to 90% gold?
-                    const goldRatio = 0.1 + Math.random() * 0.8;
-                    const goldAmount = Math.floor(budget * goldRatio);
-                    const remainingBudget = budget - goldAmount;
-                    const foodAmount = Math.floor(remainingBudget * 2);
-                    
-                    opt.rewardContent = goldAmount; // Gold amount
-                    opt.foodReward = foodAmount;
+                    opt.rewardContent = budget; // Gold is full budget
+                    opt.enemyFood = Math.max(15, Math.floor(budget * 0.8) + 5);
                 }
             } else {
                 opt.rewardType = 'gold';
-                // Same logic for Gold Split
                 const budget = opt.rewardCap;
-                const goldRatio = 0.1 + Math.random() * 0.8;
-                const goldAmount = Math.floor(budget * goldRatio);
-                const remainingBudget = budget - goldAmount;
-                const foodAmount = Math.floor(remainingBudget * 2);
-                
-                opt.rewardContent = goldAmount;
-                opt.foodReward = foodAmount;
+                opt.rewardContent = budget;
+                opt.enemyFood = Math.max(15, Math.floor(budget * 0.8) + 5);
             }
         });
         
     } else {
         // Fallback
-        const defaultCap = 10 + rpgState.level * 2;
-        const goldRatio = 0.5;
-        const goldAmount = Math.floor(defaultCap * goldRatio);
-        const foodAmount = Math.floor((defaultCap - goldAmount) * 2);
+        const defaultCap = Math.round(2.5 + rpgState.level * 0.5);
+        const goldAmount = defaultCap;
         
         options.push({
             type: 'Standard Battle', 
-            enemyValue: 5 + rpgState.level * 2,
+            enemyValue: Math.round(1.5 + rpgState.level * 0.5),
             rewardType: 'gold',
             rewardContent: goldAmount,
-            foodReward: Math.max(15, foodAmount),
+            enemyFood: Math.max(15, Math.floor(goldAmount * 0.8) + 5),
             rewardCap: defaultCap
         });
     }
@@ -1138,14 +1120,14 @@ function startLevel(level, difficultyOption) {
 
     if (difficultyOption && typeof difficultyOption === 'object') {
         difficultyName = difficultyOption.type || 'Custom';
-        enemyValue = difficultyOption.enemyValue || (5 + level * 2);
-        rewardCap = difficultyOption.rewardCap || (10 + level * 2);
+        enemyValue = difficultyOption.enemyValue || Math.round(1.5 + level * 0.5);
+        rewardCap = difficultyOption.rewardCap || Math.round(2.5 + level * 0.5);
         boardShape = difficultyOption.boardShape || 'Standard';
         
         // Pass through reward type/content
         rpgState.currentRewardType = difficultyOption.rewardType || 'gold';
         rpgState.currentRewardContent = difficultyOption.rewardContent || rewardCap;
-        rpgState.currentFoodReward = Math.max(15, difficultyOption.foodReward || 0);
+        rpgState.currentFoodReward = difficultyOption.enemyFood || Math.max(15, Math.floor((difficultyOption.rewardContent || rewardCap) * 0.8) + 5);
 
         // Grand Map Movement
         if (difficultyOption.node && typeof grandMap !== 'undefined') {
@@ -1163,17 +1145,14 @@ function startLevel(level, difficultyOption) {
             rewardCap = found.rewardCap;
             boardShape = found.boardShape || 'Standard';
         } else {
-            enemyValue = 5 + level * 2;
-            rewardCap = 10 + level * 2;
+            enemyValue = Math.round(1.5 + level * 0.5);
+            rewardCap = Math.round(2.5 + level * 0.5);
         }
         
         rpgState.currentRewardType = 'gold';
         rpgState.currentRewardContent = rewardCap;
-        // Fallback food for string call?
-        // 50% split assumption
-        const goldAmt = Math.floor(rewardCap * 0.5);
-        rpgState.currentRewardContent = goldAmt;
-        rpgState.currentFoodReward = Math.max(15, (rewardCap - goldAmt) * 2);
+        // Fallback food for string call
+        rpgState.currentFoodReward = Math.max(15, Math.floor(rewardCap * 0.8) + 5);
         
     } else {
         // Fallback or Initial Start
@@ -1183,13 +1162,12 @@ function startLevel(level, difficultyOption) {
             rewardCap = window.difficulties[0].rewardCap;
             boardShape = window.difficulties[0].boardShape || 'Standard';
         } else {
-             rewardCap = 10 + level * 2;
+             rewardCap = Math.round(2.5 + level * 0.5);
         }
         
         rpgState.currentRewardType = 'gold';
-        const goldAmt = Math.floor(rewardCap * 0.5);
-        rpgState.currentRewardContent = goldAmt;
-        rpgState.currentFoodReward = Math.max(15, (rewardCap - goldAmt) * 2);
+        rpgState.currentRewardContent = rewardCap;
+        rpgState.currentFoodReward = Math.max(15, Math.floor(rewardCap * 0.8) + 5);
     }
 
     rpgState.currentReward = rewardCap; // Keep for legacy or display?
@@ -1243,6 +1221,7 @@ function startLevel(level, difficultyOption) {
     }
     
     rpgState.gameActive = true;
+    updateGoldDisplay();
 
     // Save state after setup to ensure new board is saved
     saveProgress();
@@ -2219,6 +2198,10 @@ function checkWinCondition(state) {
     const whiteKing = state.pieces.find(p => (p.icon.includes('King') || p.icon.includes('king') || p.icon.includes('SimpleKing')) && p.color === 'white');
     const blackKing = state.pieces.find(p => (p.icon.includes('King') || p.icon.includes('king') || p.icon.includes('SimpleKing')) && p.color === 'black');
     
+    // Check if all pieces except King are gone
+    const whiteOtherPieces = state.pieces.filter(p => p.color === 'white' && p !== whiteKing);
+    const blackOtherPieces = state.pieces.filter(p => p.color === 'black' && p !== blackKing);
+
     if (!whiteKing) {
         state.won = 'black';
         state.message = "White King Fallen!";
@@ -2228,6 +2211,18 @@ function checkWinCondition(state) {
     if (!blackKing) {
         state.won = 'white';
         state.message = "Black King Fallen!";
+        return;
+    }
+    
+    if (whiteOtherPieces.length === 0) {
+        state.won = 'black';
+        state.message = "Army Annihilated!";
+        return;
+    }
+    
+    if (blackOtherPieces.length === 0) {
+        state.won = 'white';
+        state.message = "Enemy Army Annihilated!";
         return;
     }
 
@@ -2263,7 +2258,7 @@ function checkGameOver(state) {
                 overlay.style.zIndex = '900'; 
             }
             
-            let winText = state.message === "Enemy Starvation!" ? "Enemy Starved!" : "Victory!";
+            let winText = state.message === "Enemy Starvation!" ? "Enemy Starved!" : (state.message === "Enemy Army Annihilated!" ? "Army Annihilated!" : "Victory!");
             
             try {
                 // Earn Gold or Piece
@@ -2422,8 +2417,10 @@ function checkGameOver(state) {
                     if (gameOverText) {
                         if (state.message === "Starvation!") {
                             gameOverText.innerText = "Your food is over";
+                        } else if (state.message === "Army Annihilated!") {
+                            gameOverText.innerText = "Your army was annihilated.";
                         } else {
-                            gameOverText.innerText = "Your army has fallen.";
+                            gameOverText.innerText = "Your King has fallen.";
                         }
                     }
                     modal.showModal();
