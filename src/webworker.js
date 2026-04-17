@@ -249,6 +249,7 @@ self.addEventListener("message", async function(e) {
                 if(!obj.AICharacter){
                     character = rpgCharacter;
                 }
+                console.log('tuka li e?')
                 let depth = 2;
                 if(obj.state.pieces.length < 16 && obj.state.pieces.length > 8){
                     depth = 4;
@@ -256,7 +257,7 @@ self.addEventListener("message", async function(e) {
                 else if(obj.state.pieces.length < 8){
                     depth = 3;
                 }
-                move = minimaxDeep(obj.state,obj.color,depth, obj.removedTurns,
+                move = minimaxAlphaBetaBudget(obj.state,obj.color,depth, obj.removedTurns,
                     character(0),
                     [
                     ]

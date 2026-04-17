@@ -251,7 +251,9 @@ const grandMap = {
         if (board === 'Market') foodChance = 0.9;
 
         if (getDeterministicRandom(7) < foodChance) {
-            rewards.food = Math.floor(5 + getDeterministicRandom(8) * 15);
+            rewards.food = Math.floor(15 + getDeterministicRandom(8) * 15);
+        } else {
+            rewards.food = 15;
         }
         
         // Pieces - small chance

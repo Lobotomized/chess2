@@ -142,10 +142,12 @@ let boardWidth, boardHeight;
 function updateGoldDisplay() {
     const goldValue = document.getElementById('goldValue');
     const foodValue = document.getElementById('foodValue');
+    const enemyFoodValue = document.getElementById('enemyFoodValue');
     
     // Fallback if spans are missing
     const goldDisplay = document.getElementById('goldDisplay');
     const foodDisplay = document.getElementById('foodDisplay');
+    const enemyFoodDisplay = document.getElementById('enemyFoodDisplay');
 
     if (goldValue) {
         goldValue.innerText = rpgState.gold || 0;
@@ -157,6 +159,19 @@ function updateGoldDisplay() {
         foodValue.innerText = rpgState.food || 0;
     } else if (foodDisplay) {
         foodDisplay.innerText = `Food: ${rpgState.food || 0}`;
+    }
+
+    if (enemyFoodDisplay) {
+        if (rpgState.gameActive) {
+            enemyFoodDisplay.style.display = 'block';
+            if (enemyFoodValue) {
+                enemyFoodValue.innerText = rpgState.currentFoodReward || 0;
+            } else {
+                enemyFoodDisplay.innerText = `Enemy Food: ${rpgState.currentFoodReward || 0}`;
+            }
+        } else {
+            enemyFoodDisplay.style.display = 'none';
+        }
     }
 }
 
@@ -563,41 +578,29 @@ function generateRandomArmy(targetValue, includeKing = false, region = 'Classic'
             }
         }
     } else {
-        // Ensure exactly 8 frontline pieces
-        let frontlineCount = 0;
-        let attempts = 0;
-        // We want exactly 8, so we ignore targetValue constraints for the frontline if needed,
-        // or just let it overshoot to guarantee 8 pieces.
-        while (frontlineCount < 8 && attempts < 200) {
-            attempts++;
-            const randomFrontline = regionFrontline[Math.floor(Math.random() * regionFrontline.length)];
-            const val = getPieceValue(randomFrontline);
-            
-            // We must have 8 pieces, so we add them even if it overshoots slightly, but try to stay within limits if possible.
-            // To guarantee 8 pieces, we relax the constraint as we get closer to the limit.
-            if (currentValue + val <= targetValue + 2 || attempts > 50) {
-                army.push(randomFrontline);
-                currentValue += val;
-                frontlineCount++;
-            }
-        }
-        
-        // Safety break
         let iterations = 0;
         let backlineCount = includeKing ? 1 : 0;
-        while (currentValue < targetValue && iterations < 100 && backlineCount < 8) {
+        
+        while (currentValue < targetValue && iterations < 200) {
             iterations++;
-            // Only pick from backline factories so we don't exceed 8 frontline pieces
-            if (backlineFactories.length === 0) break;
+            // Randomly decide between frontline and backline
+            const pickFrontline = Math.random() > 0.5 || backlineFactories.length === 0;
             
-            const randomFactory = backlineFactories[Math.floor(Math.random() * backlineFactories.length)];
-            const val = getPieceValue(randomFactory);
-            
-            // Add if it doesn't overshoot too much (allow +1 overshoot)
-            if (currentValue + val <= targetValue + 1) {
-                army.push(randomFactory);
-                currentValue += val;
-                backlineCount++;
+            if (pickFrontline) {
+                const randomFrontline = regionFrontline[Math.floor(Math.random() * regionFrontline.length)];
+                const val = getPieceValue(randomFrontline);
+                if (currentValue + val <= targetValue + 1 || iterations > 100) {
+                    army.push(randomFrontline);
+                    currentValue += val;
+                }
+            } else {
+                const randomFactory = backlineFactories[Math.floor(Math.random() * backlineFactories.length)];
+                const val = getPieceValue(randomFactory);
+                if (currentValue + val <= targetValue + 1 || iterations > 100) {
+                    army.push(randomFactory);
+                    currentValue += val;
+                    backlineCount++;
+                }
             }
         }
     }
@@ -993,14 +996,14 @@ function generateRewardOptions() {
                            opt.foodReward = r.food;
                            opt.rewardValue = getPieceValue(opt.rewardContent);
                       } else {
-                           opt.foodReward = r.food;
+                           opt.foodReward = Math.max(15, r.food || 0);
                       }
                       
                  } else {
                       // Gold Reward
                       opt.rewardType = 'gold';
                       opt.rewardContent = r.gold;
-                      opt.foodReward = r.food;
+                      opt.foodReward = Math.max(15, r.food || 0);
                  }
                  return; // Done with this option
             }
@@ -1036,7 +1039,7 @@ function generateRewardOptions() {
                     const budget = opt.rewardCap;
                     const pieceVal = getPieceValue(randomPiece);
                     const diff = Math.max(0, budget - pieceVal);
-                    opt.foodReward = Math.floor(diff * 5);
+                    opt.foodReward = Math.max(15, Math.floor(diff * 5));
                     
                 } else {
                     opt.rewardType = 'gold';
@@ -1082,7 +1085,7 @@ function generateRewardOptions() {
             enemyValue: 5 + rpgState.level * 2,
             rewardType: 'gold',
             rewardContent: goldAmount,
-            foodReward: foodAmount,
+            foodReward: Math.max(15, foodAmount),
             rewardCap: defaultCap
         });
     }
@@ -1142,7 +1145,7 @@ function startLevel(level, difficultyOption) {
         // Pass through reward type/content
         rpgState.currentRewardType = difficultyOption.rewardType || 'gold';
         rpgState.currentRewardContent = difficultyOption.rewardContent || rewardCap;
-        rpgState.currentFoodReward = difficultyOption.foodReward || 0;
+        rpgState.currentFoodReward = Math.max(15, difficultyOption.foodReward || 0);
 
         // Grand Map Movement
         if (difficultyOption.node && typeof grandMap !== 'undefined') {
@@ -1170,7 +1173,7 @@ function startLevel(level, difficultyOption) {
         // 50% split assumption
         const goldAmt = Math.floor(rewardCap * 0.5);
         rpgState.currentRewardContent = goldAmt;
-        rpgState.currentFoodReward = (rewardCap - goldAmt) * 2;
+        rpgState.currentFoodReward = Math.max(15, (rewardCap - goldAmt) * 2);
         
     } else {
         // Fallback or Initial Start
@@ -1186,7 +1189,7 @@ function startLevel(level, difficultyOption) {
         rpgState.currentRewardType = 'gold';
         const goldAmt = Math.floor(rewardCap * 0.5);
         rpgState.currentRewardContent = goldAmt;
-        rpgState.currentFoodReward = (rewardCap - goldAmt) * 2;
+        rpgState.currentFoodReward = Math.max(15, (rewardCap - goldAmt) * 2);
     }
 
     rpgState.currentReward = rewardCap; // Keep for legacy or display?
@@ -1913,14 +1916,6 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
             return;
         }
 
-        // Validation: Ensure exactly 8 frontline pieces
-        // Filter out nulls to count actual pieces
-        const frontCount = frontPieces.filter(p => p !== null).length;
-        if (frontCount < 8) {
-             showNotification("The Frontline must have exactly 8 pieces!", "error");
-             return;
-        }
-
         // Reconstruct the roster: Front (8) + Back (8) + Reserve (...)
         rpgState.playerRoster = [...frontPieces, ...backPieces, ...reservePieces];
         modal.close();
@@ -2157,12 +2152,12 @@ function showRewardModal() {
                           </div>`;
             
             if (option.foodReward > 0) {
-                 rewardText += ` + ${option.foodReward} 🍖`;
+                 rewardText += ` (Max ${option.foodReward} 🍖)`;
             }
         } else {
             rewardText = `${option.rewardContent || '?'} 🪙`;
             if (option.foodReward > 0) {
-                 rewardText += ` + ${option.foodReward} 🍖`;
+                 rewardText += ` (Max ${option.foodReward} 🍖)`;
             }
         }
         
@@ -2230,15 +2225,21 @@ function checkWinCondition(state) {
         return;
     }
 
+    if (!blackKing) {
+        state.won = 'white';
+        state.message = "Black King Fallen!";
+        return;
+    }
+
     if (rpgState.food <= 0) {
         state.won = 'black';
         state.message = "Starvation!";
         return;
     }
     
-    if (!blackKing) {
+    if (rpgState.currentFoodReward <= 0 && rpgState.gameActive) {
         state.won = 'white';
-        state.message = "Black King Fallen!";
+        state.message = "Enemy Starvation!";
         return;
     }
 }
@@ -2262,7 +2263,7 @@ function checkGameOver(state) {
                 overlay.style.zIndex = '900'; 
             }
             
-            let winText = "Victory!";
+            let winText = state.message === "Enemy Starvation!" ? "Enemy Starved!" : "Victory!";
             
             try {
                 // Earn Gold or Piece
@@ -2556,10 +2557,17 @@ function triggerAI(color) {
         let move = JSONfn.parse(event.data);
         AIMove(move.pieceCounter, move.xClicked, move.yClicked, 'black');
         
+        // Enemy wastes food each turn
+        if (rpgState.currentFoodReward > 0) {
+            rpgState.currentFoodReward--;
+        }
+        
         // Save progress after AI move
         if (!hotseatGame.state.won) {
             saveProgress();
         }
+        
+        updateGoldDisplay();
         
         // Update Turn Display
         const turnDisplay = document.getElementById('turn');

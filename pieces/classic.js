@@ -237,6 +237,7 @@ function simpleKingFactory(color, x, y){
         x: x,
         y: y,
         color:color,
+        maxY:0,
         moves: [ 
             { type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
             { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },

@@ -742,7 +742,7 @@ function showMapCellPopup(node, grandMap) {
             rewardsText = `
                 <div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3);">
                     <p style="margin-top:0;"><strong>Gold:</strong> ${r.gold} 💰</p>
-                    <p><strong>Food:</strong> ${r.food} 🍎</p>
+                    <p><strong>Food:</strong> ${r.food || 0} 🍎</p>
             `;
             
             if (r.pieces && r.pieces.length > 0) {
