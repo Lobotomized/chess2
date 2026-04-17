@@ -1550,6 +1550,7 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
     while(backPieces.length < 8) backPieces.push(null);
 
     let selectedElement = null;
+    let draggedElement = null; // To keep track of the dragged item
 
     function renderPieces(container, piecesArray, isReserve = false) {
         container.innerHTML = '';
@@ -1568,6 +1569,10 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
             div.style.transition = 'all 0.2s';
             div.style.position = 'relative'; // For potential badges
             
+            if (factoryName) {
+                div.draggable = true;
+            }
+            
             if (factoryName && typeof window[factoryName] === 'function') {
                 div.style.border = '2px solid var(--board-dark)';
                 const p = window[factoryName]('white', 0, 0);
@@ -1576,9 +1581,75 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                 img.style.width = '50px';
                 img.style.height = '50px';
                 img.title = factoryName;
+                img.draggable = false; // Prevent image dragging to allow div dragging
                 div.appendChild(img);
             }
             
+            // Drag & Drop Events
+            div.ondragstart = (e) => {
+                if (!factoryName) {
+                    e.preventDefault();
+                    return;
+                }
+                draggedElement = { div, container, index, piecesArray, isReserve };
+                e.dataTransfer.effectAllowed = 'move';
+                // Slight delay to allow the drag image to be captured before we modify the element
+                setTimeout(() => {
+                    div.style.opacity = '0.5';
+                }, 0);
+            };
+            
+            div.ondragover = (e) => {
+                e.preventDefault(); // Necessary to allow dropping
+                e.dataTransfer.dropEffect = 'move';
+                div.style.transform = 'scale(1.05)';
+            };
+            
+            div.ondragleave = () => {
+                div.style.transform = 'scale(1)';
+            };
+            
+            div.ondragend = () => {
+                div.style.opacity = '1';
+                div.style.transform = 'scale(1)';
+                draggedElement = null;
+            };
+            
+            div.ondrop = (e) => {
+                e.preventDefault();
+                div.style.transform = 'scale(1)';
+                
+                if (!draggedElement) return;
+                
+                const sourceArray = draggedElement.piecesArray;
+                const sourceIndex = draggedElement.index;
+                const targetArray = piecesArray;
+                const targetIndex = index;
+                
+                // Hide delete button
+                if(deleteBtn) deleteBtn.style.display = 'none';
+                
+                if (sourceArray === targetArray && sourceIndex === targetIndex) {
+                    return;
+                }
+
+                // Perform Swap
+                const temp = sourceArray[sourceIndex];
+                sourceArray[sourceIndex] = targetArray[targetIndex];
+                targetArray[targetIndex] = temp;
+                
+                // Post-Action Cleanup
+                for(let i=reservePieces.length-1; i>=0; i--) {
+                    if (reservePieces[i] === null) reservePieces.splice(i, 1);
+                }
+                
+                selectedElement = null;
+                draggedElement = null;
+                renderPieces(frontContainer, frontPieces, false);
+                renderPieces(backContainer, backPieces, false);
+                renderPieces(reserveContainer, reservePieces, true);
+            };
+
             div.onclick = () => {
                 if (selectedElement === null) {
                     if (!factoryName) return; // Don't select empty slots as the first click
@@ -1660,6 +1731,39 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
             div.style.background = 'rgba(0,0,0,0.05)';
             div.innerHTML = '<span style="font-size:24px; color:var(--board-dark); opacity:0.5;">+</span>';
             
+            div.ondragover = (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                div.style.transform = 'scale(1.05)';
+            };
+            
+            div.ondragleave = () => {
+                div.style.transform = 'scale(1)';
+            };
+            
+            div.ondrop = (e) => {
+                e.preventDefault();
+                div.style.transform = 'scale(1)';
+                
+                if (draggedElement && !draggedElement.isReserve) {
+                    const sourceArray = draggedElement.piecesArray;
+                    const sourceIndex = draggedElement.index;
+                    
+                    const piece = sourceArray[sourceIndex];
+                    if (piece) {
+                        reservePieces.push(piece);
+                        sourceArray[sourceIndex] = null;
+                    }
+                    
+                    draggedElement = null;
+                    selectedElement = null;
+                    if(deleteBtn) deleteBtn.style.display = 'none';
+                    renderPieces(frontContainer, frontPieces, false);
+                    renderPieces(backContainer, backPieces, false);
+                    renderPieces(reserveContainer, reservePieces, true);
+                }
+            };
+
             div.onclick = () => {
                 if (selectedElement && !selectedElement.isReserve) {
                     // Moving from Board to Reserve (Unequip)
