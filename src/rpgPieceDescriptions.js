@@ -105,6 +105,12 @@ const pieceDescriptions = {
             It moves like classic King + classic Knight
         `
     },
+    "dragonFactory":{
+        name: "Dragon",
+        description: `
+            The dragon moves like Classic Knight + Classic Rook
+        `
+    },
     "goliathBugFactory":{
         name: "Goliath Bug",
         description: `

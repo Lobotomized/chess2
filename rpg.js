@@ -1042,19 +1042,19 @@ function generateRewardOptions() {
                     const budget = opt.rewardCap;
                     const pieceVal = getPieceValue(randomPiece);
                     const diff = Math.max(0, budget - pieceVal);
-                    opt.enemyFood = Math.max(15, Math.floor(diff * 5));
+                    opt.enemyFood = Math.max(15, Math.floor(diff * 5)) * 2;
                     
                 } else {
                     opt.rewardType = 'gold';
                     const budget = opt.rewardCap;
                     opt.rewardContent = budget; // Gold is full budget
-                    opt.enemyFood = Math.max(15, Math.floor(budget * 0.8) + 5);
+                    opt.enemyFood = (Math.max(15, Math.floor(budget * 0.8) + 5)) * 2;
                 }
             } else {
                 opt.rewardType = 'gold';
                 const budget = opt.rewardCap;
                 opt.rewardContent = budget;
-                opt.enemyFood = Math.max(15, Math.floor(budget * 0.8) + 5);
+                opt.enemyFood = (Math.max(15, Math.floor(budget * 0.8) + 5)) * 2;
             }
         });
         
@@ -1068,7 +1068,7 @@ function generateRewardOptions() {
             enemyValue: Math.round(1.5 + rpgState.level * 0.5),
             rewardType: 'gold',
             rewardContent: goldAmount,
-            enemyFood: Math.max(15, Math.floor(goldAmount * 0.8) + 5),
+            enemyFood: (Math.max(15, Math.floor(goldAmount * 0.8) + 5)) * 2,
             rewardCap: defaultCap
         });
     }
@@ -1130,7 +1130,7 @@ function startLevel(level, difficultyOption) {
         // Pass through reward type/content
         rpgState.currentRewardType = difficultyOption.rewardType || 'gold';
         rpgState.currentRewardContent = difficultyOption.rewardContent || rewardCap;
-        rpgState.currentFoodReward = difficultyOption.enemyFood || Math.max(15, Math.floor((difficultyOption.rewardContent || rewardCap) * 0.8) + 5);
+        rpgState.currentFoodReward = difficultyOption.enemyFood || (Math.max(15, Math.floor((difficultyOption.rewardContent || rewardCap) * 0.8) + 5)) * 2;
 
         // Grand Map Movement
         if (difficultyOption.node && typeof grandMap !== 'undefined') {
@@ -1155,7 +1155,7 @@ function startLevel(level, difficultyOption) {
         rpgState.currentRewardType = 'gold';
         rpgState.currentRewardContent = rewardCap;
         // Fallback food for string call
-        rpgState.currentFoodReward = Math.max(15, Math.floor(rewardCap * 0.8) + 5);
+        rpgState.currentFoodReward = (Math.max(15, Math.floor(rewardCap * 0.8) + 5)) * 2;
         
     } else {
         // Fallback or Initial Start
@@ -1170,7 +1170,7 @@ function startLevel(level, difficultyOption) {
         
         rpgState.currentRewardType = 'gold';
         rpgState.currentRewardContent = rewardCap;
-        rpgState.currentFoodReward = Math.max(15, Math.floor(rewardCap * 0.8) + 5);
+        rpgState.currentFoodReward = (Math.max(15, Math.floor(rewardCap * 0.8) + 5)) * 2;
     }
 
     rpgState.currentReward = rewardCap; // Keep for legacy or display?
@@ -1593,12 +1593,16 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
 
         // Find King anywhere in the roster and move to target if needed
         let kingPiece = null;
+        let kingOldIndex = -1;
 
         // Remove King from wherever it is
         [frontPieces, backPieces, reservePieces].forEach(arr => {
             for (let i = arr.length - 1; i >= 0; i--) {
                 if (arr[i] && arr[i].toLowerCase().includes('king')) {
                     kingPiece = arr.splice(i, 1)[0];
+                    if (arr === backPieces) {
+                        kingOldIndex = i;
+                    }
                     if (arr === reservePieces) {
                         // splice already removed it, no null padding needed for reserve
                     } else {
@@ -1634,7 +1638,11 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
         // Place King at kingIndexTarget
         if (kingPiece) {
             if (backPieces[kingIndexTarget]) {
-                reservePieces.push(backPieces[kingIndexTarget]);
+                if (kingOldIndex !== -1 && kingOldIndex < 8 && backPieces[kingOldIndex] === null) {
+                    backPieces[kingOldIndex] = backPieces[kingIndexTarget];
+                } else {
+                    reservePieces.push(backPieces[kingIndexTarget]);
+                }
             }
             backPieces[kingIndexTarget] = kingPiece;
         }
@@ -2108,26 +2116,42 @@ function showShopModal(restore = false) {
 
     // Use existing shop options if restoring, else generate new
     let shopItems = [];
+    let currentNode = null;
+
+    if (typeof grandMap !== 'undefined' && grandMap.map && grandMap.map[grandMap.currentY] && grandMap.map[grandMap.currentY][grandMap.currentX]) {
+        currentNode = grandMap.map[grandMap.currentY][grandMap.currentX];
+    }
+
     if (restore && rpgState.shopOptions && rpgState.shopOptions.length > 0) {
         shopItems = rpgState.shopOptions;
+    } else if (currentNode && currentNode.shopItems && currentNode.shopItems.length > 0) {
+        // Use permanently saved shop items for this specific node
+        shopItems = currentNode.shopItems;
+        rpgState.shopOptions = shopItems;
     } else {
         // Determine available factories based on region
         let factories = marketPieceFactories; // Default fallback
-        if (typeof grandMap !== 'undefined' && grandMap.map && grandMap.map[grandMap.currentY] && grandMap.map[grandMap.currentY][grandMap.currentX]) {
-             const node = grandMap.map[grandMap.currentY][grandMap.currentX];
-             if (node.region && regionFactories[node.region]) {
-                 factories = regionFactories[node.region];
-             }
+        if (currentNode && currentNode.region && regionFactories[currentNode.region]) {
+             factories = regionFactories[currentNode.region];
         }
 
         // Generate 6 random units to buy (as requested)
         for(let i=0; i<6; i++) {
-            const randomFactory = factories[Math.floor(Math.random() * factories.length)];
-            const val = getPieceValue(randomFactory);
-            const cost =  Math.floor(val * 5);
-            shopItems.push({factory: randomFactory, cost: cost, value: val, bought: false});
+            if (Math.random() < 0.25) { // 25% chance for food
+                const goldCost = Math.floor(Math.random() * 10) + 2; // 2 to 11 gold
+                const foodAmount = goldCost * 5;
+                shopItems.push({ type: 'food', cost: goldCost, amount: foodAmount, bought: false });
+            } else {
+                const randomFactory = factories[Math.floor(Math.random() * factories.length)];
+                const val = getPieceValue(randomFactory);
+                const cost =  Math.floor(val * 5);
+                shopItems.push({ type: 'unit', factory: randomFactory, cost: cost, value: val, bought: false });
+            }
         }
         rpgState.shopOptions = shopItems;
+        if (currentNode) {
+            currentNode.shopItems = shopItems; // Save to map node permanently
+        }
         saveProgress();
     }
 
@@ -2140,12 +2164,14 @@ function showShopModal(restore = false) {
             const item = shopItems[index];
             if (item.bought) return; // Already bought state handled
 
-            if (rosterFull) {
-                btn.disabled = true;
-                btn.style.opacity = '0.5';
-                btn.style.cursor = 'not-allowed';
-                btn.innerText = "Reserve Full";
-                return;
+            if (item.type !== 'food') {
+                if (rosterFull) {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                    btn.innerText = "Reserve Full";
+                    return;
+                }
             }
 
             if (rpgState.gold < item.cost) {
@@ -2165,40 +2191,52 @@ function showShopModal(restore = false) {
         div.className = 'army-option';
         
         let icon = '';
-        if (typeof window[item.factory] === 'function') {
-             const p = window[item.factory]('white', 0, 0);
-             icon = `<img src="/static/${p.icon}" style="width:50px;height:50px;display:block;margin:0 auto 10px;cursor:help" title="Click for info">`;
-             
-             // Add click handler to icon for info
-             setTimeout(() => {
-                 const img = div.querySelector('img');
-                 if(img) {
-                     img.onclick = (e) => {
-                         e.stopPropagation();
-                         showPieceDiscoveryModal(item.factory);
-                     };
-                 }
-             }, 0);
+        const isFood = item.type === 'food';
+        
+        if (isFood) {
+            icon = `<div style="font-size: 50px; line-height: 50px; text-align: center; margin-bottom: 10px;">🍖</div>`;
+            div.innerHTML = `
+                ${icon}
+                <h3>Rations</h3>
+                <p>Amount: ${item.amount} 🍖</p>
+                <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} 🪙</p>
+            `;
+        } else {
+            if (typeof window[item.factory] === 'function') {
+                 const p = window[item.factory]('white', 0, 0);
+                 icon = `<img src="/static/${p.icon}" style="width:50px;height:50px;display:block;margin:0 auto 10px;cursor:help" title="Click for info">`;
+                 
+                 // Add click handler to icon for info
+                 setTimeout(() => {
+                     const img = div.querySelector('img');
+                     if(img) {
+                         img.onclick = (e) => {
+                             e.stopPropagation();
+                             showPieceDiscoveryModal(item.factory);
+                         };
+                     }
+                 }, 0);
+            }
+            
+            div.innerHTML = `
+                ${icon}
+                <h3>${item.factory.replace('Factory','').replace('rpg','')}</h3>
+                <p>Power: ${item.value}</p>
+                <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} 🪙</p>
+            `;
+            
+            // Info Button
+            const infoBtn = document.createElement('button');
+            infoBtn.innerText = 'Info';
+            infoBtn.style.width = '100%';
+            infoBtn.style.marginBottom = '5px';
+            infoBtn.style.fontSize = '12px';
+            infoBtn.onclick = (e) => {
+                e.stopPropagation();
+                showPieceDiscoveryModal(item.factory);
+            };
+            div.appendChild(infoBtn);
         }
-        
-        div.innerHTML = `
-            ${icon}
-            <h3>${item.factory.replace('Factory','').replace('rpg','')}</h3>
-            <p>Power: ${item.value}</p>
-            <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} 🪙</p>
-        `;
-        
-        // Info Button
-        const infoBtn = document.createElement('button');
-        infoBtn.innerText = 'Info';
-        infoBtn.style.width = '100%';
-        infoBtn.style.marginBottom = '5px';
-        infoBtn.style.fontSize = '12px';
-        infoBtn.onclick = (e) => {
-            e.stopPropagation();
-            showPieceDiscoveryModal(item.factory);
-        };
-        div.appendChild(infoBtn);
 
         // Buy Button
         const buyBtn = document.createElement('button');
@@ -2214,24 +2252,46 @@ function showShopModal(restore = false) {
         
         buyBtn.onclick = (e) => {
             e.stopPropagation();
-            if (rpgState.gold >= item.cost && !item.bought && rpgState.playerRoster.length < 24) {
-                rpgState.gold -= item.cost;
-                rpgState.playerRoster.push(item.factory);
-                item.bought = true;
-                
-                if (document.getElementById('playerGold')) {
-                    document.getElementById('playerGold').innerText = rpgState.gold;
+            if (isFood) {
+                if (rpgState.gold >= item.cost && !item.bought) {
+                    rpgState.gold -= item.cost;
+                    rpgState.food += item.amount;
+                    item.bought = true;
+                    
+                    if (document.getElementById('playerGold')) {
+                        document.getElementById('playerGold').innerText = rpgState.gold;
+                    }
+                    updateGoldDisplay();
+                    saveProgress();
+                    
+                    // Update UI
+                    buyBtn.innerText = 'Bought';
+                    buyBtn.disabled = true;
+                    div.style.opacity = '0.5';
+                    
+                    // Refresh all buttons
+                    updateAllButtons();
                 }
-                updateGoldDisplay();
-                saveProgress();
-                
-                // Update UI
-                buyBtn.innerText = 'Bought';
-                buyBtn.disabled = true;
-                div.style.opacity = '0.5';
-                
-                // Refresh all buttons
-                updateAllButtons();
+            } else {
+                if (rpgState.gold >= item.cost && !item.bought && rpgState.playerRoster.length < 24) {
+                    rpgState.gold -= item.cost;
+                    rpgState.playerRoster.push(item.factory);
+                    item.bought = true;
+                    
+                    if (document.getElementById('playerGold')) {
+                        document.getElementById('playerGold').innerText = rpgState.gold;
+                    }
+                    updateGoldDisplay();
+                    saveProgress();
+                    
+                    // Update UI
+                    buyBtn.innerText = 'Bought';
+                    buyBtn.disabled = true;
+                    div.style.opacity = '0.5';
+                    
+                    // Refresh all buttons
+                    updateAllButtons();
+                }
             }
         };
         
