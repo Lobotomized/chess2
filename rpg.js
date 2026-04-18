@@ -1568,59 +1568,98 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
 
     // Pad with nulls up to 8 for front and back
     // Pad with nulls up to 8 for front and back
-    // However, the King is immovable and at the furthest right end of the backline.
-    // The King is usually in the backline. Let's find him.
-    const kingIndex = backPieces.findIndex(u => u && u.toLowerCase().includes('king'));
-    let kingPiece = null;
-    if (kingIndex !== -1) {
-        kingPiece = backPieces.splice(kingIndex, 1)[0];
-    } else {
-        // Maybe in reserve?
-        const reserveKingIndex = reservePieces.findIndex(u => u && u.toLowerCase().includes('king'));
-        if (reserveKingIndex !== -1) {
-            kingPiece = reservePieces.splice(reserveKingIndex, 1)[0];
-        } else {
-            // Check front just in case
-            const frontKingIndex = frontPieces.findIndex(u => u && u.toLowerCase().includes('king'));
-            if (frontKingIndex !== -1) {
-                kingPiece = frontPieces.splice(frontKingIndex, 1)[0];
-            }
-        }
-    }
-
-    // Amount of frontline pieces he has
-    let totalFrontline = 0;
-    army.forEach(u => {
-        if (u && frontLineFactories.includes(u)) {
-            totalFrontline++;
-        }
-    });
-
     while(frontPieces.length < 8) frontPieces.push(null);
     while(backPieces.length < 8) backPieces.push(null);
 
-    const kingIndexTarget = Math.max(0, totalFrontline - 1);
-
-    // Place King at the furthest right covered by a frontline piece
-    if (kingPiece) {
-        // Find if there's any piece at the target index. If so, swap it out.
-        if (backPieces[kingIndexTarget]) {
-            reservePieces.push(backPieces[kingIndexTarget]);
+    let maxFrontline = 0;
+    army.forEach(u => {
+        if (u && frontLineFactories.includes(u)) {
+            maxFrontline++;
         }
-        backPieces[kingIndexTarget] = kingPiece;
+    });
+
+    let activeFrontline = 0;
+    let kingIndexTarget = 0;
+
+    function recalculateLayout() {
+        activeFrontline = 0;
+        frontPieces.forEach(u => {
+            if (u && frontLineFactories.includes(u)) {
+                activeFrontline++;
+            }
+        });
+
+        kingIndexTarget = Math.max(0, activeFrontline - 1);
+
+        // Find King anywhere in the roster and move to target if needed
+        let kingPiece = null;
+
+        // Remove King from wherever it is
+        [frontPieces, backPieces, reservePieces].forEach(arr => {
+            for (let i = arr.length - 1; i >= 0; i--) {
+                if (arr[i] && arr[i].toLowerCase().includes('king')) {
+                    kingPiece = arr.splice(i, 1)[0];
+                    if (arr === reservePieces) {
+                        // splice already removed it, no null padding needed for reserve
+                    } else {
+                        // for front/back, keep length at 8 by inserting null
+                        arr.splice(i, 0, null);
+                    }
+                }
+            }
+        });
+
+        // Any backline piece without a frontline piece protecting it gets moved to reserve
+        for (let i = 0; i < 8; i++) {
+            if (backPieces[i] !== null && (!frontPieces[i] || !frontLineFactories.includes(frontPieces[i]))) {
+                reservePieces.push(backPieces[i]);
+                backPieces[i] = null;
+            }
+        }
+
+        // Compact columns to the left
+        let newFront = [];
+        let newBack = [];
+        for (let i = 0; i < 8; i++) {
+            if (frontPieces[i] !== null || backPieces[i] !== null) {
+                newFront.push(frontPieces[i]);
+                newBack.push(backPieces[i]);
+            }
+        }
+        while (newFront.length < 8) newFront.push(null);
+        while (newBack.length < 8) newBack.push(null);
+        frontPieces = newFront;
+        backPieces = newBack;
+
+        // Place King at kingIndexTarget
+        if (kingPiece) {
+            if (backPieces[kingIndexTarget]) {
+                reservePieces.push(backPieces[kingIndexTarget]);
+            }
+            backPieces[kingIndexTarget] = kingPiece;
+        }
+
+        // Move any pieces in disabled slots to the reserve
+        // Note: We use maxFrontline for slot availability, not activeFrontline
+        for (let i = 0; i < 8; i++) {
+            if (i !== kingIndexTarget && i >= Math.max(0, maxFrontline - 1) && backPieces[i]) {
+                reservePieces.push(backPieces[i]);
+                backPieces[i] = null;
+            }
+            if (i >= maxFrontline && frontPieces[i]) {
+                reservePieces.push(frontPieces[i]);
+                frontPieces[i] = null;
+            }
+        }
+        
+        // Clean up nulls from reservePieces
+        for (let i = reservePieces.length - 1; i >= 0; i--) {
+            if (reservePieces[i] === null) reservePieces.splice(i, 1);
+        }
     }
 
-    // Move any pieces in disabled slots to the reserve
-    for (let i = 0; i < 8; i++) {
-        if (i !== kingIndexTarget && i >= Math.max(0, totalFrontline - 1) && backPieces[i]) {
-            reservePieces.push(backPieces[i]);
-            backPieces[i] = null;
-        }
-        if (i >= totalFrontline && frontPieces[i]) {
-            reservePieces.push(frontPieces[i]);
-            frontPieces[i] = null;
-        }
-    }
+    // Initial calculation
+    recalculateLayout();
 
     let selectedElement = null;
     let draggedElement = null; // To keep track of the dragged item
@@ -1634,14 +1673,14 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
             
             // Check if slot is disabled
             let isDisabled = false;
-            if (isFrontline && index >= totalFrontline) {
+            if (isFrontline && index >= maxFrontline) {
                 isDisabled = true;
             }
             if (isBackline) {
                 if (index === kingIndexTarget) {
                     isDisabled = false; // King's slot
-                } else if (index >= Math.max(0, totalFrontline - 1)) {
-                    isDisabled = true; // Only totalFrontline - 1 slots available for other backline pieces
+                } else if (index >= Math.max(0, maxFrontline - 1)) {
+                    isDisabled = true; // Only maxFrontline - 1 slots available for other backline pieces
                 }
             }
 
@@ -1771,6 +1810,8 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                     if (reservePieces[i] === null) reservePieces.splice(i, 1);
                 }
                 
+                recalculateLayout();
+                
                 selectedElement = null;
                 draggedElement = null;
                 renderPieces(frontContainer, frontPieces, false);
@@ -1874,6 +1915,8 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                         if (reservePieces[i] === null) reservePieces.splice(i, 1);
                     }
                     
+                    recalculateLayout();
+                    
                     // Re-Render All
                     selectedElement = null;
                     renderPieces(frontContainer, frontPieces, false);
@@ -1947,6 +1990,8 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                         sourceArray[sourceIndex] = null;
                     }
                     
+                    recalculateLayout();
+                    
                     draggedElement = null;
                     selectedElement = null;
                     if(deleteBtn) deleteBtn.style.display = 'none';
@@ -1992,6 +2037,8 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                         sourceArray[sourceIndex] = null; // Clear board slot
                     }
                     
+                    recalculateLayout();
+                    
                     // Deselect and Render
                     selectedElement = null;
                     if(deleteBtn) deleteBtn.style.display = 'none';
@@ -2020,7 +2067,7 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
         }
 
         // Validation: Frontline must be a straight line without holes
-        const requiredFrontline = Math.min(8, totalFrontline);
+        const requiredFrontline = Math.min(8, maxFrontline);
         for (let i = 0; i < requiredFrontline; i++) {
             if (!frontPieces[i]) {
                 showNotification("Frontline cannot have empty slots or holes! Please fill all active frontline slots.", "error");
