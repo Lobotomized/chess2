@@ -83,7 +83,7 @@ function goliathBugFactory(color,x,y){
 }
 
 
-function strongLadyBugFactory(color,x,y){
+function strongladybugFactory(color,x,y){
     let moves = [
         { type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
         { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
@@ -157,7 +157,7 @@ function strongLadyBugFactory(color,x,y){
     }
 }
 
-function ladyBugFactory(color,x,y){
+function ladybugFactory(color,x,y){
     let moves = [
         { type: 'absolute', x: 0, y: -1 }, { type: 'absolute', x: 0, y: 1 },
         { type: 'absolute', x: -1, y: 0 }, { type: 'absolute', x: 1, y: 0 },
@@ -171,7 +171,7 @@ function ladyBugFactory(color,x,y){
     return {
         conditionalMoves: function (state) {
             const arrToReturn =[]
-
+            console.log('wtf?!  ')
             const shrooms = state.pieces.filter((piece)=> {
                 return piece.color === this.color && piece.icon === this.color+'Shroom.png'
             })
@@ -346,8 +346,8 @@ try{
     module.exports = {
         antFactory,
         goliathBugFactory,
-        strongLadyBugFactory,
-        ladyBugFactory,
+        strongladybugFactory,
+        ladybugFactory,
         spiderFactory,
         shroomFactory,
         queenbugFactory,

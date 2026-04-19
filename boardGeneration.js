@@ -1,7 +1,7 @@
 try{
     var { kingFactory, knightFactory, mongolianKnightFactory, bishopFactory, rookFactory, queenFactory, pawnFactory, weakPawn, dragonFactory ,unpromotablePawn,
 
-        clownFactory, ricarFactory, horseFactory, hatFactory, ghostFactory, pigFactory, ladyBugFactory, queenbugFactory, goliathBugFactory, antFactory,
+        clownFactory, ricarFactory, horseFactory, hatFactory, ghostFactory, pigFactory, ladybugFactory, queenbugFactory, goliathBugFactory, antFactory,
         shroomFactory, spiderFactory,
     
         swordsMen, pikeman, sleepingDragon,gargoyleFactory,fencer, shield, plagueDoctor, northernKing,
@@ -10,7 +10,7 @@ try{
         fatCatFactory,
         blindCatFactory,
         cuteCatFactory,
-        strongLadyBugFactory,
+        strongladybugFactory,
         newBrainBugFactory,
         simpleKingFactory,
         kingLikeFactory
@@ -289,7 +289,7 @@ function raceChoiceChess(state,raceWhite,raceBlack){
     else if(raceBlack == 'bug'){
         pieces.push(
         antFactory('black',0,1),   queenbugFactory('black',1,1), antFactory('black',2,1),        antFactory('black',3,1),         antFactory('black',4,1),    antFactory('black',5,1),       queenbugFactory('black',6,1), antFactory('black',7,1),
-        shroomFactory('black',0,0),spiderFactory('black',1,0),   ladyBugFactory('black',2,0),    goliathBugFactory('black',3,0),   goliathBugFactory('black',4,0),ladyBugFactory('black', 5,0), spiderFactory('black',6,0), shroomFactory('black',7,0)
+        shroomFactory('black',0,0),spiderFactory('black',1,0),   ladybugFactory('black',2,0),    goliathBugFactory('black',3,0),   goliathBugFactory('black',4,0),ladybugFactory('black', 5,0), spiderFactory('black',6,0), shroomFactory('black',7,0)
         )
     }
     else if(raceBlack === 'promoters'){
@@ -343,7 +343,7 @@ function raceChoiceChess(state,raceWhite,raceBlack){
     else if(raceWhite == 'bug'){
         pieces.push(
         antFactory('white',0,6),   queenbugFactory('white',1,6),antFactory('white',2,6),        antFactory('white',3,6),    antFactory('white',4,6),      antFactory('white',5,6), queenbugFactory('white',6,6),    antFactory('white',7,6),
-        shroomFactory('white',0,7),spiderFactory('white',1,7),  ladyBugFactory('white',2,7), goliathBugFactory('white',3,7),   goliathBugFactory('white',4,7),ladyBugFactory('white', 5,7), spiderFactory('white',6,7),shroomFactory('white',7,7)
+        shroomFactory('white',0,7),spiderFactory('white',1,7),  ladybugFactory('white',2,7), goliathBugFactory('white',3,7),   goliathBugFactory('white',4,7),ladybugFactory('white', 5,7), spiderFactory('white',6,7),shroomFactory('white',7,7)
         )
     }
     else if(raceWhite === 'promoters'){
@@ -449,7 +449,7 @@ function returnMorphingPoolPiece(piece){
                 return arr[Math.floor(Math.random()*arr.length)]
             break;
         case 'Rook':
-                arr = [goliathBugFactory, strongLadyBugFactory, horseFactory, dragonFactory]
+                arr = [goliathBugFactory, strongladybugFactory, horseFactory, dragonFactory]
                 return arr[Math.floor(Math.random()*arr.length)]
             break;
         case 'Queen':
@@ -493,11 +493,11 @@ function returnMorphingPoolPiece(piece){
                 return arr[Math.floor(Math.random()*arr.length)]
             break;
         case 'Pig':
-                arr = [bishopFactory, bootvesselFactory, executorFactory, strongLadyBugFactory]
+                arr = [bishopFactory, bootvesselFactory, executorFactory, strongladybugFactory]
                 return arr[Math.floor(Math.random()*arr.length)]
             break;
         case 'Executor':
-                arr = [knightFactory, bishopFactory, spiderFactory, strongLadyBugFactory, ricarFactory, pigFactory]
+                arr = [knightFactory, bishopFactory, spiderFactory, strongladybugFactory, ricarFactory, pigFactory]
                 return arr[Math.floor(Math.random()*arr.length)]
             break;
         case 'Cyborg':
@@ -785,7 +785,7 @@ function placeRandomBug(pieces,x,y){
     const which = getRndInteger(1, 7)
 
     switch(which){
-        case 1,2: pieces.push(strongLadyBugFactory('white',x,y))
+        case 1,2: pieces.push(strongladybugFactory('white',x,y))
         break;
         case 3,4: pieces.push(spiderFactory('white',x,y))
         break;
@@ -1381,8 +1381,8 @@ function missionClassicBugsSix(state){
         antFactory('white',4,5),antFactory('white',5,5),antFactory('white',6,5),antFactory('white',7,5),antFactory('white',8,5),
         antFactory('white',0,6),antFactory('white',1,6),antFactory('white',2,6),antFactory('white',3,6),
         antFactory('white',4,6),antFactory('white',5,6),antFactory('white',6,6),antFactory('white',7,6),antFactory('white',8,6),
-        ladyBugFactory('white',0,7),queenbugFactory('white',1,7),
-        queenbugFactory('white',7,7),ladyBugFactory('white',8,7),
+        ladybugFactory('white',0,7),queenbugFactory('white',1,7),
+        queenbugFactory('white',7,7),ladybugFactory('white',8,7),
         queenbugFactory('white',2,7),queenbugFactory('white',6,7),
         goliathBugFactory('white',3,7),goliathBugFactory('white',4,7),goliathBugFactory('white',5,7),
         shroomFactory('white',3,8),shroomFactory('white',4,8),shroomFactory('white',5,8),
@@ -1548,7 +1548,7 @@ function missionClassicBugsFour(state){
      ])
 
      let miniBord = xyBoard(8,8,[]);
-     let ladybug = strongLadyBugFactory('white',4,4)
+     let ladybug = strongladybugFactory('white',4,4)
      lightBoardFE(ladybug,{board:miniBord, pieces:[ladybug],turn:"white"},'lighted')
      buildPieceModal(state, [
         {
@@ -1597,10 +1597,10 @@ function missionClassicBugsFour(state){
     )
 
     pieces.push(
-        strongLadyBugFactory('white',0,7),
-        strongLadyBugFactory('white',7,7),
-        strongLadyBugFactory('white',7,0),
-        strongLadyBugFactory('white',0,0),
+        strongladybugFactory('white',0,7),
+        strongladybugFactory('white',7,7),
+        strongladybugFactory('white',7,0),
+        strongladybugFactory('white',0,0),
     )
 
 }
@@ -3707,6 +3707,7 @@ async function customMap(state){
             return newPiece;
         }
         let pieceString = piece.pieceType.slice(0,-4).toLowerCase() + 'Factory'
+        console.log(pieceString)
         return window[pieceString](piece.color,piece.x,piece.y)
     })
     state.board = json.squares;

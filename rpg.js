@@ -10,7 +10,8 @@ const loseConditionFactories = [
 const cyborgsFactories = [
      "juggernautFactory", 
      "executorFactory", 
-     "bootvesselFactory"
+     "bootvesselFactory",
+     "cyborgFactory"
 ]
 
 const pomotersFactories = [
@@ -22,7 +23,7 @@ const medievalFactories = [
 ]
 
 const insectFactories = [
-    "rpgAntFactory", "spiderFactory", 'goliathBugFactory', "rpgQueenbugFactory", "ladyBugFactory"
+    "rpgAntFactory", "spiderFactory", 'goliathBugFactory', "rpgQueenbugFactory", "strongladybugFactory"
 ]
 
 const classicPieceFactories = [
@@ -39,7 +40,7 @@ const marketPieceFactories = [
 
 const winnablePieceFactories = [
     'horseFactory','rpgQueenbugFactory',
-    "rpgAntFactory", "spiderFactory", 'goliathBugFactory',"pigFactory", "ladyBugFactory","dragonFactory"
+    "rpgAntFactory", "spiderFactory", 'goliathBugFactory',"pigFactory", "strongladybugFactory","dragonFactory"
 ];
 
 const availablePieceFactories = [
@@ -1641,23 +1642,25 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
         let kingPiece = null;
         let kingOldIndex = -1;
 
-        // Remove King from wherever it is
-        [frontPieces, backPieces, reservePieces].forEach(arr => {
-            for (let i = arr.length - 1; i >= 0; i--) {
-                if (arr[i] && arr[i].toLowerCase().includes('king')) {
-                    kingPiece = arr.splice(i, 1)[0];
-                    if (arr === backPieces) {
-                        kingOldIndex = i;
-                    }
-                    if (arr === reservePieces) {
-                        // splice already removed it, no null padding needed for reserve
-                    } else {
-                        // for front/back, keep length at 8 by inserting null
-                        arr.splice(i, 0, null);
+        if (RPGStats.kingLockedToRight) {
+            // Remove King from wherever it is
+            [frontPieces, backPieces, reservePieces].forEach(arr => {
+                for (let i = arr.length - 1; i >= 0; i--) {
+                    if (arr[i] && arr[i].toLowerCase().includes('king')) {
+                        kingPiece = arr.splice(i, 1)[0];
+                        if (arr === backPieces) {
+                            kingOldIndex = i;
+                        }
+                        if (arr === reservePieces) {
+                            // splice already removed it, no null padding needed for reserve
+                        } else {
+                            // for front/back, keep length at 8 by inserting null
+                            arr.splice(i, 0, null);
+                        }
                     }
                 }
-            }
-        });
+            });
+        }
 
         // Any backline piece without a frontline piece protecting it gets moved to reserve
         for (let i = 0; i < 8; i++) {
@@ -1682,7 +1685,7 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
         backPieces = newBack;
 
         // Place King at kingIndexTarget
-        if (kingPiece) {
+        if (RPGStats.kingLockedToRight && kingPiece) {
             if (backPieces[kingIndexTarget]) {
                 if (kingOldIndex !== -1 && kingOldIndex < 8 && backPieces[kingOldIndex] === null) {
                     backPieces[kingOldIndex] = backPieces[kingIndexTarget];
@@ -1696,9 +1699,16 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
         // Move any pieces in disabled slots to the reserve
         // Note: We use maxFrontline for slot availability, not activeFrontline
         for (let i = 0; i < 8; i++) {
-            if (i !== kingIndexTarget && i >= Math.max(0, maxFrontline - 1) && backPieces[i]) {
-                reservePieces.push(backPieces[i]);
-                backPieces[i] = null;
+            if (RPGStats.kingLockedToRight) {
+                if (i !== kingIndexTarget && i >= Math.max(0, maxFrontline - 1) && backPieces[i]) {
+                    reservePieces.push(backPieces[i]);
+                    backPieces[i] = null;
+                }
+            } else {
+                if (i >= maxFrontline && backPieces[i]) {
+                    reservePieces.push(backPieces[i]);
+                    backPieces[i] = null;
+                }
             }
             if (i >= maxFrontline && frontPieces[i]) {
                 reservePieces.push(frontPieces[i]);
@@ -1724,6 +1734,7 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
             const isBackline = container === backContainer;
             const isFrontline = container === frontContainer;
             const isKing = factoryName && factoryName.toLowerCase().includes('king');
+            const disableKingDrag = RPGStats.kingLockedToRight && isKing;
             
             // Check if slot is disabled
             let isDisabled = false;
@@ -1731,10 +1742,16 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                 isDisabled = true;
             }
             if (isBackline) {
-                if (index === kingIndexTarget) {
-                    isDisabled = false; // King's slot
-                } else if (index >= Math.max(0, maxFrontline - 1)) {
-                    isDisabled = true; // Only maxFrontline - 1 slots available for other backline pieces
+                if (RPGStats.kingLockedToRight) {
+                    if (index === kingIndexTarget) {
+                        isDisabled = false; // King's slot
+                    } else if (index >= Math.max(0, maxFrontline - 1)) {
+                        isDisabled = true; // Only maxFrontline - 1 slots available for other backline pieces
+                    }
+                } else {
+                    if (index >= maxFrontline) {
+                        isDisabled = true; // Same availability as frontline slots
+                    }
                 }
             }
 
@@ -1747,13 +1764,13 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
             div.style.display = 'flex';
             div.style.justifyContent = 'center';
             div.style.alignItems = 'center';
-            div.style.cursor = (isDisabled || isKing) ? 'not-allowed' : 'pointer';
+            div.style.cursor = (isDisabled || disableKingDrag) ? 'not-allowed' : 'pointer';
             div.style.background = factoryName ? 'var(--board-light)' : 'rgba(0,0,0,0.1)';
             if (isDisabled) div.style.background = 'rgba(255, 0, 0, 0.1)';
             div.style.transition = 'all 0.2s';
             div.style.position = 'relative'; // For potential badges
             
-            if (factoryName && !isDisabled && !isKing) {
+            if (factoryName && !isDisabled && !disableKingDrag) {
                 div.draggable = true;
             }
             
@@ -1766,13 +1783,13 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                 img.style.height = '50px';
                 img.title = factoryName;
                 img.draggable = false; // Prevent image dragging to allow div dragging
-                if (isDisabled || isKing) img.style.opacity = '0.7';
+                if (isDisabled || disableKingDrag) img.style.opacity = '0.7';
                 div.appendChild(img);
             }
             
             // Drag & Drop Events
             div.ondragstart = (e) => {
-                if (!factoryName || isDisabled || isKing) {
+                if (!factoryName || isDisabled || disableKingDrag) {
                     e.preventDefault();
                     return;
                 }
@@ -1804,7 +1821,7 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                 e.preventDefault();
                 div.style.transform = 'scale(1)';
                 
-                if (!draggedElement || isDisabled || isKing) return;
+                if (!draggedElement || isDisabled || disableKingDrag) return;
                 
                 const sourceArray = draggedElement.piecesArray;
                 const sourceIndex = draggedElement.index;
@@ -1874,7 +1891,7 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
             };
 
             div.onclick = () => {
-                if (isDisabled || isKing) return;
+                if (isDisabled || disableKingDrag) return;
 
                 if (selectedElement === null) {
                     if (!factoryName) return; // Don't select empty slots as the first click

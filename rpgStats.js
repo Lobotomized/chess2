@@ -12,6 +12,7 @@ const RPGStats = {
     shopDiscout: 0,
     startingGold: 0,
     startingFood: 100,
+    kingLockedToRight: true,
 };
 
 const RPGSKILLS = [
@@ -44,6 +45,7 @@ function resetRPGStats() {
     RPGStats.shopDiscout = 0;
     RPGStats.startingGold = 0;
     RPGStats.startingFood = 100;
+    RPGStats.kingLockedToRight = true;
 }
 
 function applyRPGSkill(skillName) {
