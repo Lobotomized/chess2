@@ -177,6 +177,15 @@ function updateGoldDisplay() {
 
 // Initialize Game
 function initRpgGame() {
+    // Fetch Hall of Fame bots to use against the player
+    fetch('/bots')
+        .then(res => res.json())
+        .then(data => {
+            rpgState.hofBots = data;
+            console.log("Loaded Hall of Fame bots:", data.length);
+        })
+        .catch(err => console.error("Failed to load Hall of Fame bots:", err));
+
     // Bind cancel events to dialogs so Escape key behaves correctly
     const mapDialog = document.getElementById('mapDialog');
     if (mapDialog) {
@@ -1214,6 +1223,7 @@ function startLevel(level, difficultyOption) {
     
     rpgState.enemyRoster = enemyArmy;
     rpgState.boardShape = boardShape;
+    rpgState.enemyRegion = region;
 
     if (boardShape === 'Fountain') {
         if (difficultyOption && difficultyOption.node && typeof difficultyOption.node.fountainX !== 'undefined') {
@@ -2829,13 +2839,34 @@ function triggerAI(color) {
     if (!w) w = new Worker("src/webworker.js");
     const state = hotseatGame.state;
     
-    // Shuffle pieces slightly for randomness? (From hotseat.js)
-    // state.pieces = state.pieces.sort((a, b) => 0.5 - Math.random());
+    let aiPower = 105;
+    let customEvolutionBlackStr = undefined;
     
+    if (rpgState.hofBots && rpgState.hofBots.length > 0) {
+        // Map region to race string
+        let regionToRace = {
+            'Classic': 'classic',
+            'Medieval': 'medieval',
+            'Insect': 'bug',
+            'Promoters': 'promoters',
+            'Cyborgs': 'cyborgs'
+        };
+        let enemyRace = regionToRace[rpgState.enemyRegion] || 'classic';
+        
+        let raceBots = rpgState.hofBots.filter(b => b.race === enemyRace);
+        if (raceBots.length > 0) {
+            raceBots.sort((a, b) => (b.score || 0) - (a.score || 0));
+            let bestBot = raceBots[0];
+            aiPower = 'customEvolution';
+            customEvolutionBlackStr = JSON.stringify(bestBot);
+        }
+    }
+
     w.postMessage(JSONfn.stringify({
         state: state,
         color: color,
-        AIPower: 105 // Fixed power or scaled? Prompt said "Level*2" for army value, maybe AI power stays constant or increases?
+        AIPower: aiPower,
+        customEvolutionBlack: customEvolutionBlackStr
     }));
 
     w.onmessage = function(event) {
