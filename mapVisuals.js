@@ -1,6 +1,7 @@
 // Map Visuals Logic
 // Handles the rendering and interaction of the Grand Map Modal
 
+
 // --- Map Modal ---
 function showMapModal() {
     // Clear the game canvas so we don't see a "ghost" game behind the modal
@@ -20,6 +21,16 @@ function showMapModal() {
     
     // Clear existing
     grid.innerHTML = '';
+    
+    // Update Resource Displays
+    const foodDisplay = document.getElementById('mapFoodDisplay');
+    if (foodDisplay && typeof rpgState !== 'undefined') {
+        foodDisplay.innerText = rpgState.food;
+    }
+    const goldDisplay = document.getElementById('mapGoldDisplay');
+    if (goldDisplay && typeof rpgState !== 'undefined') {
+        goldDisplay.innerText = rpgState.gold || 0;
+    }
     
     // Inject or Update Styles
     let style = document.getElementById('mapVisualsStyles');
@@ -434,8 +445,16 @@ function showMapModal() {
                 if (!node.cleared && node.rewards && node.board !== 'Market') {
                      const r = node.rewards;
                      let parts = [];
-                     if (r.gold > 0) parts.push(`<span title="Gold" style="display:flex; align-items:center;">💰${r.gold}</span>`);
-                     if (r.pieces && r.pieces.length > 0) {
+                     const rosterFull = typeof rpgState !== 'undefined' && rpgState.playerRoster && rpgState.playerRoster.length >= 24;
+                     const hasPiece = r.pieces && r.pieces.length > 0;
+                     
+                     if (hasPiece && !rosterFull) {
+                         // Only piece reward is given, don't show gold
+                     } else if (r.gold > 0) {
+                         parts.push(`<span title="Gold" style="display:flex; align-items:center;">💰${r.gold}</span>`);
+                     }
+                     
+                     if (hasPiece && !rosterFull) {
                          // Check for specific piece
                          if (r.specificPiece && typeof window[r.specificPiece] === 'function') {
                              // Create temp piece to get icon
@@ -687,6 +706,9 @@ function showMapCellPopup(node, grandMap) {
             popup.close();
             // Trigger Movement/Attack logic
             if (typeof startLevel !== 'undefined' && typeof rpgState !== 'undefined') {
+                rpgState.food -= RPGStats.foodLostOnMovement;
+                if (typeof updateGoldDisplay === 'function') updateGoldDisplay();
+
                 const option = {
                     type: `${diffName}`,
                     node: node,
@@ -708,14 +730,14 @@ function showMapCellPopup(node, grandMap) {
                          const hasPiece = r.pieces && r.pieces.length > 0;
                          if (hasPiece && !rosterFull) {
                               option.rewardType = 'piece';
-                              option.rewardContent = r.specificPiece;
+                              option.rewardContent = r.specificPiece + RPGStats.additionalGoldPerWin;
                               if (typeof getPieceValue === 'function') {
                                   option.rewardValue = getPieceValue(r.specificPiece);
                               }
                               option.enemyFood = node.enemyFood;
                          } else {
                               option.rewardType = 'gold';
-                              option.rewardContent = r.gold;
+                              option.rewardContent = r.gold + RPGStats.additionalGoldPerWin;
                               option.enemyFood = node.enemyFood;
                          }
                      } else {
@@ -753,13 +775,21 @@ function showMapCellPopup(node, grandMap) {
             `;
         } else if (node.rewards) {
             const r = node.rewards;
+            const rosterFull = typeof rpgState !== 'undefined' && rpgState.playerRoster && rpgState.playerRoster.length >= 24;
+            const hasPiece = r.pieces && r.pieces.length > 0;
+            
             rewardsText = `
                 <div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3);">
-                    <p style="margin-top:0;"><strong>Gold:</strong> ${r.gold} 💰</p>
             `;
             
-            if (r.pieces && r.pieces.length > 0) {
-                 rewardsText += `<p style="margin-bottom:0;"><strong>Unit:</strong> ${r.specificPiece ? r.specificPiece.replace('Factory','') : 'Unknown'} ♟️</p>`;
+            if (hasPiece && !rosterFull) {
+                 rewardsText += `<p style="margin-top:0;"><strong>Unit:</strong> ${r.specificPiece ? r.specificPiece.replace('Factory','') : 'Unknown'} ♟️</p>`;
+            } else {
+                 rewardsText += `<p style="margin-top:0;"><strong>Gold:</strong> ${r.gold} 💰</p>`;
+                 if (hasPiece) {
+                     // If roster is full, they still see the unit they missed or it just falls back to gold?
+                     // Actually, if roster is full, they get gold instead. Let's just show Gold.
+                 }
             }
             rewardsText += `</div>`;
         }

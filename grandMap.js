@@ -1,7 +1,6 @@
 
 // Grand Map System
 // Manages the 2D grid of battles
-
 const grandMap = {
     // State
     currentX: 0,
@@ -268,7 +267,7 @@ const grandMap = {
         // Generate enemyFood based on gold reward and some randomness
         let baseGold = rewards.gold || 10;
         let baseFood = Math.floor(baseGold * 0.8) + 5;
-        node.enemyFood = baseFood + Math.floor(getDeterministicRandom(8) * (baseFood * 0.5));
+        node.enemyFood = baseFood + Math.floor(getDeterministicRandom(8) * baseFood);
         
         // Pieces - small chance
         // Market always has a unit (Mercenary)
@@ -315,12 +314,7 @@ const grandMap = {
 
     // Get available moves (North, South, East, West)
     getAvailableMoves() {
-        const directions = [
-            { name: "North", dx: 0, dy: -1 },
-            { name: "South", dx: 0, dy: 1 },
-            { name: "East", dx: 1, dy: 0 },
-            { name: "West", dx: -1, dy: 0 }
-        ];
+        const directions = RPGStats.movemetFreedom
 
         const moves = [];
         directions.forEach(dir => {

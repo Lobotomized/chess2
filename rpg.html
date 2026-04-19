@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Chess 2 - RPG</title>
+        <script src="/rpgStats.js"></script>
+
         <script src="/src/loadImages.js"></script>
         <script src="/src/variables.js"></script>
         <script src="/src/jsonfn.js"></script>
@@ -577,6 +579,10 @@
     <!-- Map Modal -->
     <dialog id="mapDialog" style="max-width: 90vw; width: 90vw;" oncancel="event.preventDefault();">
         <h2>World Map</h2>
+        <div style="display: flex; justify-content: center; gap: 30px; font-size: 24px; font-weight: bold; margin-bottom: 10px;">
+            <span style="color: #ffd700; text-shadow: 1px 1px 2px #000;"><span id="mapGoldDisplay">0</span> 💰</span>
+            <span style="color: #d32f2f; text-shadow: 1px 1px 2px #000;"><span id="mapFoodDisplay">0</span> 🍖</span>
+        </div>
         <p>Drag to scroll</p>
         <div id="mapContainer" class="map-modal-content">
             <div id="mapGrid" class="map-grid"></div>

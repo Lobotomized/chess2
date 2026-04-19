@@ -249,7 +249,6 @@ self.addEventListener("message", async function(e) {
                 if(!obj.AICharacter){
                     character = rpgCharacter;
                 }
-                console.log('tuka li e?')
                 let depth = 2;
                 if(obj.state.pieces.length < 16 && obj.state.pieces.length > 8){
                     depth = 4;

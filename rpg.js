@@ -158,7 +158,7 @@ function updateGoldDisplay() {
     if (foodValue) {
         foodValue.innerText = rpgState.food || 0;
     } else if (foodDisplay) {
-        foodDisplay.innerText = `Food: ${rpgState.food || 0}`;
+        foodDisplay.innerText = `${rpgState.food || 0}`;
     }
 
     if (enemyFoodDisplay) {
@@ -167,7 +167,7 @@ function updateGoldDisplay() {
             if (enemyFoodValue) {
                 enemyFoodValue.innerText = rpgState.currentFoodReward || 0;
             } else {
-                enemyFoodDisplay.innerText = `Enemy Food: ${rpgState.currentFoodReward || 0}`;
+                enemyFoodDisplay.innerText = `${rpgState.currentFoodReward || 0}`;
             }
         } else {
             enemyFoodDisplay.style.display = 'none';
@@ -272,9 +272,18 @@ function loadGame() {
                  showShopModal(true); // Pass true to indicate restoring
             } else if (parsed.showWinScreen && !parsed.gameActive) {
                  // Show win screen if it was active AND game is not active
-                 const goldEarned = rpgState.currentRewardContent || 0; // Re-calc for display
+                 const goldEarned = rpgState.currentRewardContent || 0 + RPGStats.additionalGoldPerWin; // Re-calc for display
                  const goldText = document.getElementById('goldEarnedText');
-                 if(goldText) goldText.innerText = `+${goldEarned} Gold`;
+                 if(goldText) {
+                     if (rpgState.currentRewardType === 'piece') {
+                         const pieceName = rpgState.currentRewardContent ? window.pieceDescriptions[rpgState.currentRewardContent]?.name || 'Unit' : 'Unit';
+                         goldText.innerText = `Won Unit: ${pieceName}`;
+                         if (rpgState.currentFoodReward > 0) goldText.innerText += ` + ${rpgState.currentFoodReward} 🍖`;
+                     } else {
+                         goldText.innerText = `+${goldEarned} 🪙`;
+                         if (rpgState.currentFoodReward > 0) goldText.innerText += ` + ${rpgState.currentFoodReward} 🍖`;
+                     }
+                 }
                  
                  const modal = document.getElementById('gameWonDialog');
                  if(modal) modal.showModal();
@@ -2138,13 +2147,16 @@ function showShopModal(restore = false) {
         // Generate 6 random units to buy (as requested)
         for(let i=0; i<6; i++) {
             if (Math.random() < 0.25) { // 25% chance for food
-                const goldCost = Math.floor(Math.random() * 10) + 2; // 2 to 11 gold
+                let goldCost = Math.floor(Math.random() * 10) + 2; // 2 to 11 gold
                 const foodAmount = goldCost * 5;
+                goldCost -= RPGStats.shopDiscout;
+                if(goldCost < 0) goldCost = 0;
                 shopItems.push({ type: 'food', cost: goldCost, amount: foodAmount, bought: false });
             } else {
                 const randomFactory = factories[Math.floor(Math.random() * factories.length)];
                 const val = getPieceValue(randomFactory);
-                const cost =  Math.floor(val * 5);
+                let cost =  Math.floor(val * 5) - RPGStats.shopDiscout;
+                if(cost < 0) cost = 0;
                 shopItems.push({ type: 'unit', factory: randomFactory, cost: cost, value: val, bought: false });
             }
         }
@@ -2499,7 +2511,7 @@ function checkGameOver(state) {
             
             try {
                 // Earn Gold or Piece
-                let foodEarned = rpgState.currentFoodReward || 0;
+                let foodEarned = rpgState.currentFoodReward || 0 + RPGStats.additionalFoodPerWin;
                 
                 if (rpgState.currentRewardType === 'piece') {
                     const pieceFactory = rpgState.currentRewardContent;
@@ -2607,7 +2619,7 @@ function checkGameOver(state) {
                 } else {
                     // Gold comes from currentRewardContent
                     const goldEarned = rpgState.currentRewardContent || 0;
-                    rpgState.gold = (rpgState.gold || 0) + goldEarned;
+                    rpgState.gold = (rpgState.gold || 0) + goldEarned + RPGStats.additionalGoldPerWin;
                     winText = `+${goldEarned} 🪙`;
                     if (foodEarned > 0) {
                          winText += ` + ${foodEarned} 🍖`;
