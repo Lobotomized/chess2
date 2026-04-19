@@ -252,6 +252,11 @@ function loadGame() {
             const parsed = JSON.parse(savedState);
             Object.assign(rpgState, parsed);
             
+            // Reapply skill if it exists
+            if (rpgState.activeSkill) {
+                applyRPGSkill(rpgState.activeSkill);
+            }
+            
             // Initialize Grand Map
             if (typeof grandMap !== 'undefined') {
                 grandMap.init(rpgState.grandMap);
@@ -340,14 +345,18 @@ function startNewGame() {
     // Clear State
     localStorage.removeItem('rpgState');
     
+    // Reset RPGStats to default
+    if (typeof resetRPGStats === 'function') resetRPGStats();
+    
     // Reset rpgState object
     rpgState.level = 1;
     rpgState.playerRoster = [];
     rpgState.enemyRoster = [];
     rpgState.gameActive = false;
     rpgState.gameOverSequenceStarted = false; // Reset
-    rpgState.gold = 0;
-    rpgState.food = 50;
+    rpgState.activeSkill = null; // Clear skill
+    rpgState.gold = RPGStats.startingGold;
+    rpgState.food = RPGStats.startingFood;
     rpgState.shopOptions = [];
     rpgState.showWinScreen = false;
     rpgState.grandMap = undefined; // Reset grand map state
@@ -1478,12 +1487,23 @@ function showStartModal() {
         // or just let it be 20 and it'll mostly just be frontline pieces.
         const { army } = generateRandomArmy(9, true, 'Classic', true);
         
+        // Pick a random skill for this army
+        const randomSkill = RPGSKILLS[Math.floor(Math.random() * RPGSKILLS.length)];
+
         // Removed markPieceAsSeen(name) call to stop auto-popup
 
         const div = document.createElement('div');
         div.className = 'army-option';
         // div.innerHTML = `<h3>Option ${i+1}</h3><p>Value: ${value.toFixed(1)}</p>`;
         
+        const skillDiv = document.createElement('div');
+        skillDiv.style.marginBottom = '10px';
+        skillDiv.style.padding = '5px';
+        skillDiv.style.background = 'rgba(255, 255, 255, 0.1)';
+        skillDiv.style.borderRadius = '5px';
+        skillDiv.innerHTML = `<strong>King's Skill: ${randomSkill.name}</strong><br><span style="font-size: 0.9em;">${randomSkill.description}</span>`;
+        div.appendChild(skillDiv);
+
         // Info Button
         const infoBtn = document.createElement('button');
         infoBtn.innerText = 'Info';
@@ -1516,6 +1536,13 @@ function showStartModal() {
         
         div.onclick = () => {
             rpgState.playerRoster = army;
+            rpgState.activeSkill = randomSkill.name; // Save the skill
+            applyRPGSkill(randomSkill.name); // Apply the skill effect
+            // We need to ensure gold and food are updated if the skill changed starting values
+            rpgState.gold = RPGStats.startingGold;
+            rpgState.food = RPGStats.startingFood;
+            updateGoldDisplay();
+            
             modal.close();
             showReorderModal(army, () => {
                 // Start level 1 with the easiest difficulty
@@ -2511,7 +2538,7 @@ function checkGameOver(state) {
             
             try {
                 // Earn Gold or Piece
-                let foodEarned = rpgState.currentFoodReward || 0 + RPGStats.additionalFoodPerWin;
+                let foodEarned = (rpgState.currentFoodReward || 0) + RPGStats.additionalFoodPerWin;
                 
                 if (rpgState.currentRewardType === 'piece') {
                     const pieceFactory = rpgState.currentRewardContent;
@@ -2618,8 +2645,8 @@ function checkGameOver(state) {
                     
                 } else {
                     // Gold comes from currentRewardContent
-                    const goldEarned = rpgState.currentRewardContent || 0;
-                    rpgState.gold = (rpgState.gold || 0) + goldEarned + RPGStats.additionalGoldPerWin;
+                    const goldEarned = (rpgState.currentRewardContent || 0) + RPGStats.additionalGoldPerWin;
+                    rpgState.gold = (rpgState.gold || 0) + goldEarned;
                     winText = `+${goldEarned} 🪙`;
                     if (foodEarned > 0) {
                          winText += ` + ${foodEarned} 🍖`;

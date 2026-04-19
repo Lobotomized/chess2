@@ -314,7 +314,7 @@ const grandMap = {
 
     // Get available moves (North, South, East, West)
     getAvailableMoves() {
-        const directions = RPGStats.movemetFreedom
+        const directions = RPGStats.movementFreedom;
 
         const moves = [];
         directions.forEach(dir => {

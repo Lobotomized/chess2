@@ -636,9 +636,11 @@ function showMapCellPopup(node, grandMap) {
     `;
     
     // Check if move is valid
-    const dx = Math.abs(node.x - grandMap.currentX);
-    const dy = Math.abs(node.y - grandMap.currentY);
-    const isAdjacent = (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
+    const dxRaw = node.x - grandMap.currentX;
+    const dyRaw = node.y - grandMap.currentY;
+    const dx = Math.abs(dxRaw);
+    const dy = Math.abs(dyRaw);
+    const isAdjacent = RPGStats.movementFreedom.some(dir => dir.dx === dxRaw && dir.dy === dyRaw);
     const isCurrent = (dx === 0 && dy === 0);
     
     // Title
@@ -730,14 +732,14 @@ function showMapCellPopup(node, grandMap) {
                          const hasPiece = r.pieces && r.pieces.length > 0;
                          if (hasPiece && !rosterFull) {
                               option.rewardType = 'piece';
-                              option.rewardContent = r.specificPiece + RPGStats.additionalGoldPerWin;
+                              option.rewardContent = r.specificPiece;
                               if (typeof getPieceValue === 'function') {
                                   option.rewardValue = getPieceValue(r.specificPiece);
                               }
                               option.enemyFood = node.enemyFood;
                          } else {
                               option.rewardType = 'gold';
-                              option.rewardContent = r.gold + RPGStats.additionalGoldPerWin;
+                              option.rewardContent = r.gold;
                               option.enemyFood = node.enemyFood;
                          }
                      } else {
