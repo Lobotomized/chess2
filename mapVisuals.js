@@ -47,7 +47,7 @@ function showMapModal() {
     const kingExpDisplay = document.getElementById('mapKingExpDisplay');
     const kingNextExpDisplay = document.getElementById('mapKingNextExpDisplay');
     if (kingExpDisplay && typeof rpgState !== 'undefined') {
-        kingExpDisplay.innerText = rpgState.kingExp || 0;
+        kingExpDisplay.innerText = Math.floor(rpgState.kingExp || 0);
     }
     if (kingNextExpDisplay && typeof rpgState !== 'undefined' && typeof KING_EXP_THRESHOLDS !== 'undefined') {
         const nextThreshold = rpgState.kingLevel < 7 ? KING_EXP_THRESHOLDS[rpgState.kingLevel] : 'Max';
@@ -775,7 +775,8 @@ function showMapCellPopup(node, grandMap) {
                      } else {
                          option.rewardType = 'gold';
                          option.rewardContent = node.rewardCap;
-                         option.enemyFood = node.enemyFood || Math.max(15, Math.floor(node.rewardCap * 0.8) + 5);
+                         const fallbackMinFood = Math.max(15, Math.floor(node.rewardCap * 0.8) + 5);
+                         option.enemyFood = node.enemyFood || (fallbackMinFood + Math.floor(Math.random() * fallbackMinFood));
                      }
                  }
                 

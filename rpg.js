@@ -297,7 +297,7 @@ function loadGame() {
             
             // Restore King leveling info
             rpgState.kingLevel = parsed.kingLevel || 1;
-            rpgState.kingExp = parsed.kingExp || 0;
+            rpgState.kingExp = Math.round(parsed.kingExp || 0);
             
             // Check if shop was active
             if (rpgState.shopOptions && rpgState.shopOptions.length > 0) {
@@ -1094,19 +1094,22 @@ function generateRewardOptions() {
                     const budget = opt.rewardCap;
                     const pieceVal = getPieceValue(randomPiece);
                     const diff = Math.max(0, budget - pieceVal);
-                    opt.enemyFood = Math.max(15, Math.floor(diff * 5)) * 2;
+                    const minFood = Math.max(15, Math.floor(diff * 5)) * 2;
+                    opt.enemyFood = minFood + Math.floor(Math.random() * minFood);
                     
                 } else {
                     opt.rewardType = 'gold';
                     const budget = opt.rewardCap;
                     opt.rewardContent = budget; // Gold is full budget
-                    opt.enemyFood = (Math.max(15, Math.floor(budget * 0.8) + 5)) * 2;
+                    const minFood = (Math.max(15, Math.floor(budget * 0.8) + 5)) * 2;
+                    opt.enemyFood = minFood + Math.floor(Math.random() * minFood);
                 }
             } else {
                 opt.rewardType = 'gold';
                 const budget = opt.rewardCap;
                 opt.rewardContent = budget;
-                opt.enemyFood = (Math.max(15, Math.floor(budget * 0.8) + 5)) * 2;
+                const minFood = (Math.max(15, Math.floor(budget * 0.8) + 5)) * 2;
+                opt.enemyFood = minFood + Math.floor(Math.random() * minFood);
             }
         });
         
@@ -1114,13 +1117,14 @@ function generateRewardOptions() {
         // Fallback
         const defaultCap = Math.round(2.5 + rpgState.level * 0.5);
         const goldAmount = defaultCap;
+        const minFood = (Math.max(15, Math.floor(goldAmount * 0.8) + 5)) * 2;
         
         options.push({
             type: 'Standard Battle', 
             enemyValue: Math.round(1.5 + rpgState.level * 0.5),
             rewardType: 'gold',
             rewardContent: goldAmount,
-            enemyFood: (Math.max(15, Math.floor(goldAmount * 0.8) + 5)) * 2,
+            enemyFood: minFood + Math.floor(Math.random() * minFood),
             rewardCap: defaultCap
         });
     }
@@ -1182,7 +1186,8 @@ function startLevel(level, difficultyOption) {
         // Pass through reward type/content
         rpgState.currentRewardType = difficultyOption.rewardType || 'gold';
         rpgState.currentRewardContent = difficultyOption.rewardContent || rewardCap;
-        rpgState.currentFoodReward = difficultyOption.enemyFood || (Math.max(15, Math.floor((difficultyOption.rewardContent || rewardCap) * 0.8) + 5)) * 2;
+        const fallbackMinFood = (Math.max(15, Math.floor((difficultyOption.rewardContent || rewardCap) * 0.8) + 5)) * 2;
+        rpgState.currentFoodReward = difficultyOption.enemyFood || (fallbackMinFood + Math.floor(Math.random() * fallbackMinFood));
 
         // Grand Map Movement
         if (difficultyOption.node && typeof grandMap !== 'undefined') {
@@ -1207,7 +1212,8 @@ function startLevel(level, difficultyOption) {
         rpgState.currentRewardType = 'gold';
         rpgState.currentRewardContent = rewardCap;
         // Fallback food for string call
-        rpgState.currentFoodReward = (Math.max(15, Math.floor(rewardCap * 0.8) + 5)) * 2;
+        const stringFallbackMinFood = (Math.max(15, Math.floor(rewardCap * 0.8) + 5)) * 2;
+        rpgState.currentFoodReward = stringFallbackMinFood + Math.floor(Math.random() * stringFallbackMinFood);
         
     } else {
         // Fallback or Initial Start
@@ -1222,7 +1228,8 @@ function startLevel(level, difficultyOption) {
         
         rpgState.currentRewardType = 'gold';
         rpgState.currentRewardContent = rewardCap;
-        rpgState.currentFoodReward = (Math.max(15, Math.floor(rewardCap * 0.8) + 5)) * 2;
+        const initialFallbackMinFood = (Math.max(15, Math.floor(rewardCap * 0.8) + 5)) * 2;
+        rpgState.currentFoodReward = initialFallbackMinFood + Math.floor(Math.random() * initialFallbackMinFood);
     }
 
     rpgState.currentReward = rewardCap; // Keep for legacy or display?
@@ -2747,7 +2754,8 @@ function checkGameOver(state) {
                 }
 
                 // Add experience and check level up
-                rpgState.kingExp += enemyExp;
+                rpgState.kingExp += Math.round(enemyExp);
+                rpgState.kingExp = Math.round(rpgState.kingExp);
                 
                 while (rpgState.kingLevel < 7 && rpgState.kingExp >= KING_EXP_THRESHOLDS[rpgState.kingLevel]) {
                     rpgState.kingLevel++;
@@ -3066,10 +3074,10 @@ function triggerAI(color) {
         
         let raceBots = rpgState.hofBots.filter(b => b.race === enemyRace);
         if (raceBots.length > 0) {
-            raceBots.sort((a, b) => (b.score || 0) - (a.score || 0));
-            let bestBot = raceBots[0];
+            let randomIndex = Math.floor(Math.random() * raceBots.length);
+            let randomBot = raceBots[randomIndex];
             aiPower = 'customEvolution';
-            customEvolutionBlackStr = JSON.stringify(bestBot);
+            customEvolutionBlackStr = JSON.stringify(randomBot);
         }
     }
 

@@ -267,7 +267,8 @@ const grandMap = {
         // Generate enemyFood based on gold reward and some randomness
         let baseGold = rewards.gold || 10;
         let baseFood = Math.floor(baseGold * 0.8) + 5;
-        node.enemyFood = baseFood + Math.floor(getDeterministicRandom(8) * baseFood);
+        // Double the range of food supplies, allowing a chance to be twice as big
+        node.enemyFood = baseFood + Math.floor(getDeterministicRandom(8) * baseFood * 2);
         
         // Pieces - small chance
         // Market always has a unit (Mercenary)
