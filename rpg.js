@@ -59,7 +59,7 @@ const regionFactories = {
     'Promoters': pomotersFactories
 };
 
-const frontLineFactories = ['rpgPawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'rpgAntFactory', 'rpgQueenbugFactory', 'cyborgFactory'];
+const frontLineFactories = ['rpgPawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'rpgAntFactory', 'rpgQueenbugFactory'];
 
 const adjustedValues = [
 
@@ -87,9 +87,13 @@ function getPieceValue(factoryName) {
     return 1;
 }
 
+const KING_EXP_THRESHOLDS = [0, 10, 30, 60, 120, 200, 300 ]; // levels 1 to 7
+
 // Global State
 const rpgState = {
     level: 1,
+    kingLevel: 1,
+    kingExp: 0,
     playerRoster: [], // Array of factory names
     enemyRoster: [],
     gameActive: false,
@@ -263,8 +267,19 @@ function loadGame() {
             Object.assign(rpgState, parsed);
             
             // Reapply skill if it exists
-            if (rpgState.activeSkill) {
-                applyRPGSkill(rpgState.activeSkill);
+            if (rpgState.activeSkills && Array.isArray(rpgState.activeSkills)) {
+                // Backward compatibility fix for string arrays to object arrays
+                rpgState.activeSkills = rpgState.activeSkills.map(skill => {
+                    if (typeof skill === 'string') {
+                        return { name: skill, level: 1 };
+                    }
+                    return skill;
+                });
+                applyAllRPGSkills();
+            } else if (rpgState.activeSkill) {
+                // backward compatibility
+                rpgState.activeSkills = [{name: rpgState.activeSkill, level: 1}];
+                applyAllRPGSkills();
             }
             
             // Initialize Grand Map
@@ -279,6 +294,10 @@ function loadGame() {
             
             // Restore level
             document.getElementById('levelDisplay').innerText = `Level: ${rpgState.level}`;
+            
+            // Restore King leveling info
+            rpgState.kingLevel = parsed.kingLevel || 1;
+            rpgState.kingExp = parsed.kingExp || 0;
             
             // Check if shop was active
             if (rpgState.shopOptions && rpgState.shopOptions.length > 0) {
@@ -311,9 +330,10 @@ function loadGame() {
                 restoreBoard(rpgState.savedBoard);
                 // rpgState.gameActive is already true
             } else {
-                // Not in battle, show map
-                // First call showMapModal which does all the drawing and initialization
-                if (typeof showMapModal === 'function') {
+                // Not in battle, check for pending skill selections or show map
+                if (rpgState.pendingSkillSelections && rpgState.pendingSkillSelections > 0) {
+                    showSkillSelectionModal();
+                } else if (typeof showMapModal === 'function') {
                     showMapModal();
                 } else {
                     const mapDialog = document.getElementById('mapDialog');
@@ -360,11 +380,15 @@ function startNewGame() {
     
     // Reset rpgState object
     rpgState.level = 1;
+    rpgState.kingLevel = 1;
+    rpgState.kingExp = 0;
     rpgState.playerRoster = [];
     rpgState.enemyRoster = [];
     rpgState.gameActive = false;
     rpgState.gameOverSequenceStarted = false; // Reset
-    rpgState.activeSkill = null; // Clear skill
+    rpgState.activeSkill = null; // Clear skill backward compatibility
+    rpgState.activeSkills = [];
+    rpgState.pendingSkillSelections = 0;
     rpgState.gold = RPGStats.startingGold;
     rpgState.food = RPGStats.startingFood;
     rpgState.shopOptions = [];
@@ -1322,7 +1346,7 @@ const boardShapes = {
     },
     'Desert': (board) => {
         for (let x = 0; x <= 8; x++) {
-            for (let y = 0; y <= 8; y++) {
+            for (let y = 0; y <= 7; y++) {
                 board.push({ light: false, x: x, y: y });
             }
         }
@@ -1512,7 +1536,8 @@ function showStartModal() {
         skillDiv.style.padding = '5px';
         skillDiv.style.background = 'rgba(255, 255, 255, 0.1)';
         skillDiv.style.borderRadius = '5px';
-        skillDiv.innerHTML = `<strong>King's Skill: ${randomSkill.name}</strong><br><span style="font-size: 0.9em;">${randomSkill.description}</span>`;
+        const desc = randomSkill.getDescription ? randomSkill.getDescription(1) : randomSkill.description;
+        skillDiv.innerHTML = `<strong>King's Skill: ${randomSkill.name}</strong><br><span style="font-size: 0.9em;">${desc}</span>`;
         div.appendChild(skillDiv);
 
         // Info Button
@@ -1547,8 +1572,8 @@ function showStartModal() {
         
         div.onclick = () => {
             rpgState.playerRoster = army;
-            rpgState.activeSkill = randomSkill.name; // Save the skill
-            applyRPGSkill(randomSkill.name); // Apply the skill effect
+            rpgState.activeSkills = [{name: randomSkill.name, level: 1}]; // Save the skill
+            applyAllRPGSkills(); // Apply the skill effect
             // We need to ensure gold and food are updated if the skill changed starting values
             rpgState.gold = RPGStats.startingGold;
             rpgState.food = RPGStats.startingFood;
@@ -1577,6 +1602,13 @@ function showStartModal() {
     }
 }
 
+function toggleHeroSkills() {
+    const list = document.getElementById('heroSkillList');
+    if (list) {
+        list.style.display = list.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
 function showReorderModal(army, onConfirm, forceConfirmText = false) {
     const modal = document.getElementById('reorderDialog');
     const frontContainer = document.getElementById('reorderFrontline');
@@ -1584,6 +1616,37 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
     const reserveContainer = document.getElementById('reorderReserve');
     const confirmBtn = document.getElementById('confirmReorderBtn');
     const deleteBtn = document.getElementById('deleteReserveBtn');
+
+    // Update Hero UI
+    const heroIcon = document.getElementById('heroIcon');
+    const heroLevelBadge = document.getElementById('heroLevelBadge');
+    const heroSkillList = document.getElementById('heroSkillList');
+    
+    if (heroIcon && heroLevelBadge && heroSkillList) {
+        let kingFactoryName = army.find(u => u && u.toLowerCase().includes('king'));
+        if (kingFactoryName && typeof window[kingFactoryName] === 'function') {
+            const kingPiece = window[kingFactoryName]('white', 0, 0);
+            heroIcon.src = `/static/${kingPiece.icon}`;
+        } else {
+            heroIcon.src = '/static/whiteKing.png';
+        }
+        
+        heroLevelBadge.innerText = rpgState.kingLevel || 1;
+        
+        if (rpgState.activeSkills && rpgState.activeSkills.length > 0) {
+            heroSkillList.innerHTML = '<strong>Active Skills:</strong><ul style="margin: 5px 0 0 15px; padding: 0;">' + 
+                rpgState.activeSkills.map(s => {
+                    const sName = typeof s === 'string' ? s : s.name;
+                    const sLevel = typeof s === 'string' ? 1 : s.level;
+                    const skillDef = RPGSKILLS.find(r => r.name === sName);
+                    const desc = skillDef && skillDef.getDescription ? skillDef.getDescription(sLevel) : (skillDef ? skillDef.description : '');
+                    return `<li><b>${sName} (Lvl ${sLevel})</b>: ${desc}</li>`;
+                }).join('') + '</ul>';
+        } else {
+            heroSkillList.innerHTML = '<em>No active skills.</em>';
+        }
+        heroSkillList.style.display = 'none'; // hide by default
+    }
 
     if(confirmBtn) {
         if (forceConfirmText) {
@@ -2371,6 +2434,102 @@ function showShopModal(restore = false) {
     modal.showModal();
 }
 
+function showSkillSelectionModal() {
+    const modal = document.getElementById('skillSelectionDialog');
+    const container = document.getElementById('skillOptions');
+    if (!modal || !container) return;
+    
+    container.innerHTML = '';
+    
+    // Filter out fully leveled skills
+    let availableSkills = RPGSKILLS.filter(s => {
+        const existing = rpgState.activeSkills.find(active => (typeof active === 'string' ? active : active.name) === s.name);
+        if (!existing) return true;
+        const currentLevel = typeof existing === 'string' ? 1 : existing.level;
+        return s.maxLevel && currentLevel < s.maxLevel;
+    });
+    
+    // Pick 3 random skills, or fewer if less than 3 available
+    let choices = [];
+    while (choices.length < 3 && availableSkills.length > 0) {
+        const idx = Math.floor(Math.random() * availableSkills.length);
+        choices.push(availableSkills[idx]);
+        availableSkills.splice(idx, 1); // remove picked skill
+    }
+    
+    if (choices.length === 0) {
+        // No skills left to pick
+        rpgState.pendingSkillSelections = 0;
+        showMapModal();
+        return;
+    }
+    
+    choices.forEach(skill => {
+        const div = document.createElement('div');
+        div.className = 'army-option'; // reuse styling
+        div.style.display = 'flex';
+        div.style.flexDirection = 'column';
+        div.style.justifyContent = 'center';
+        div.style.alignItems = 'center';
+        
+        // Find existing skill to determine level
+        const existingSkillObj = rpgState.activeSkills.find(s => (typeof s === 'string' ? s : s.name) === skill.name);
+        const currentLevel = existingSkillObj ? (typeof existingSkillObj === 'string' ? 1 : existingSkillObj.level) : 0;
+        const nextLevel = currentLevel + 1;
+
+        const skillDiv = document.createElement('div');
+        skillDiv.style.marginBottom = '10px';
+        skillDiv.style.padding = '15px';
+        skillDiv.style.background = 'rgba(255, 255, 255, 0.1)';
+        skillDiv.style.borderRadius = '8px';
+        
+        const desc = skill.getDescription ? skill.getDescription(nextLevel) : skill.description;
+        skillDiv.innerHTML = `<strong>${skill.name} ${skill.maxLevel > 1 ? `(Lvl ${nextLevel})` : ''}</strong><br><br><span style="font-size: 0.9em;">${desc}</span>`;
+        div.appendChild(skillDiv);
+        
+        div.onclick = () => {
+            if (existingSkillObj) {
+                if (typeof existingSkillObj === 'string') {
+                    // Replace string with object
+                    const idx = rpgState.activeSkills.indexOf(existingSkillObj);
+                    rpgState.activeSkills[idx] = { name: skill.name, level: nextLevel };
+                } else {
+                    existingSkillObj.level = nextLevel;
+                }
+            } else {
+                rpgState.activeSkills.push({ name: skill.name, level: 1 });
+            }
+            
+            // Handle instant rewards that should only apply once when selected
+            if (skill.name === "Rich") {
+                rpgState.gold += (nextLevel * 10);
+                updateGoldDisplay();
+            } else if (skill.name === "Inheritance") {
+                const foodReward = nextLevel === 1 ? 30 : nextLevel === 2 ? 50 : 80;
+                rpgState.food += foodReward;
+                updateGoldDisplay();
+            }
+
+            applyAllRPGSkills();
+            rpgState.pendingSkillSelections--;
+            modal.close();
+            saveProgress();
+            
+            if (rpgState.pendingSkillSelections > 0) {
+                showSkillSelectionModal();
+            } else {
+                if (typeof showMapModal === 'function') {
+                    showMapModal();
+                }
+            }
+        };
+        
+        container.appendChild(div);
+    });
+    
+    modal.showModal();
+}
+
 function showRewardModal() {
     // Check if we need to show reorder screen first (e.g. after winning a unit to reserve)
     if (rpgState.pendingReorder) {
@@ -2561,9 +2720,41 @@ function checkGameOver(state) {
         if (state.won === 'white') {
             // Player Won
             
+            // Mark current map node as cleared
+            if (typeof grandMap !== 'undefined') {
+                const currentNode = grandMap.map[grandMap.currentY][grandMap.currentX];
+                if (currentNode) {
+                    currentNode.cleared = true;
+                }
+            }
+            
             let winText = state.message === "Enemy Starvation!" ? "Enemy Starved!" : (state.message === "Enemy Army Annihilated!" ? "Army Annihilated!" : "Victory!");
             
             try {
+                // Earn King Experience
+                let enemyExp = 0;
+                if (rpgState.enemyRoster && rpgState.enemyRoster.length > 0) {
+                    rpgState.enemyRoster.forEach(piece => {
+                        // Exclude the king from experience calculation
+                        if (piece !== 'kingFactory' && piece !== 'medievalKingFactory' && piece !== 'bugKingFactory' && piece !== 'promotersKingFactory' && !piece.toLowerCase().includes('king')) {
+                            enemyExp += getPieceValue(piece);
+                        }
+                    });
+                } else if (rpgState.currentEnemyValue) {
+                    enemyExp = rpgState.currentEnemyValue;
+                } else {
+                    enemyExp = Math.round(1.5 + rpgState.level * 0.5);
+                }
+
+                // Add experience and check level up
+                rpgState.kingExp += enemyExp;
+                
+                while (rpgState.kingLevel < 7 && rpgState.kingExp >= KING_EXP_THRESHOLDS[rpgState.kingLevel]) {
+                    rpgState.kingLevel++;
+                    rpgState.pendingSkillSelections = (rpgState.pendingSkillSelections || 0) + 1;
+                    console.log(`King leveled up to ${rpgState.kingLevel}!`);
+                }
+
                 // Earn Gold or Piece
                 let foodEarned = (rpgState.currentFoodReward || 0) + RPGStats.additionalFoodPerWin;
                 
@@ -2755,7 +2946,10 @@ function closeWinScreen() {
     if (modal) modal.close();
     rpgState.showWinScreen = false;
     saveProgress();
-    if (typeof showMapModal === 'function') {
+    
+    if (rpgState.pendingSkillSelections && rpgState.pendingSkillSelections > 0) {
+        showSkillSelectionModal();
+    } else if (typeof showMapModal === 'function') {
         showMapModal();
     }
 }

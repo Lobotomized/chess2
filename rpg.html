@@ -546,6 +546,13 @@
 
     <!-- Army Reorder Modal -->
     <dialog id="reorderDialog" style="max-width: 800px; width: 90%; max-height: 90vh; overflow-y: auto;">
+        <div id="heroSkillContainer" style="text-align: center; margin-bottom: 15px; cursor: pointer;" onclick="toggleHeroSkills()">
+            <div style="display: inline-block; position: relative;">
+                <img id="heroIcon" src="/static/blackKing.png" alt="Hero" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid #e5b53e; background: rgba(0,0,0,0.2);">
+                <div style="position: absolute; bottom: -5px; right: -10px; background: #a29bfe; color: white; border-radius: 50%; width: 24px; height: 24px; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 2px solid #2d1b15;" id="heroLevelBadge">1</div>
+            </div>
+            <div id="heroSkillList" style="display: none; background: rgba(0,0,0,0.8); color: white; padding: 15px; border-radius: 8px; margin-top: 10px; text-align: left; border: 1px solid #e5b53e;"></div>
+        </div>
         <h2>Organize Your Army</h2>
         <p>Drag and drop or click to swap pieces within their lines.</p>
         <div style="margin-bottom: 20px;">
@@ -582,6 +589,7 @@
         <div style="display: flex; justify-content: center; gap: 30px; font-size: 24px; font-weight: bold; margin-bottom: 10px;">
             <span style="color: #ffd700; text-shadow: 1px 1px 2px #000;"><span id="mapGoldDisplay">0</span> 💰</span>
             <span style="color: #d32f2f; text-shadow: 1px 1px 2px #000;"><span id="mapFoodDisplay">0</span> 🍖</span>
+            <span style="color: #a29bfe; text-shadow: 1px 1px 2px #000; font-size: 20px;">Lvl <span id="mapKingLevelDisplay">1</span> (<span id="mapKingExpDisplay">0</span> / <span id="mapKingNextExpDisplay">0</span> XP) 👑</span>
         </div>
         <p>Drag to scroll</p>
         <div id="mapContainer" class="map-modal-content">
@@ -615,8 +623,16 @@
         <p>Current 🪙: <span id="playerGold" style="color:#e5b53e; font-weight:bold;">0</span></p>
         <div id="shopOptions" class="army-choice"></div>
         <div style="margin-top:20px;">
-            <button onclick="document.getElementById('shopDialog').close(); showMapModal();">Return to Map</button>
+            <button onclick="document.getElementById('shopDialog').close(); showMapModal();">Leave Market</button>
+            <button onclick="showReorderModal(rpgState.playerRoster)">Reorder Army</button>
         </div>
+    </dialog>
+
+    <!-- Skill Selection Modal -->
+    <dialog id="skillSelectionDialog" oncancel="event.preventDefault();">
+        <h2>King Leveled Up!</h2>
+        <p>Choose a new skill for your King:</p>
+        <div id="skillOptions" class="army-choice"></div>
     </dialog>
 
     <dialog class="pieceModal displayNone"></dialog>

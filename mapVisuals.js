@@ -31,6 +31,28 @@ function showMapModal() {
     if (goldDisplay && typeof rpgState !== 'undefined') {
         goldDisplay.innerText = rpgState.gold || 0;
     }
+    const kingLevelDisplay = document.getElementById('mapKingLevelDisplay');
+    if (kingLevelDisplay && typeof rpgState !== 'undefined') {
+        kingLevelDisplay.innerText = rpgState.kingLevel || 1;
+        // Add tooltip for active skills
+        if (rpgState.activeSkills && rpgState.activeSkills.length > 0) {
+            kingLevelDisplay.parentElement.title = "Active Skills: " + rpgState.activeSkills.map(s => {
+                const sName = typeof s === 'string' ? s : s.name;
+                const sLevel = typeof s === 'string' ? 1 : s.level;
+                return `${sName} (Lvl ${sLevel})`;
+            }).join(', ');
+            kingLevelDisplay.parentElement.style.cursor = 'help';
+        }
+    }
+    const kingExpDisplay = document.getElementById('mapKingExpDisplay');
+    const kingNextExpDisplay = document.getElementById('mapKingNextExpDisplay');
+    if (kingExpDisplay && typeof rpgState !== 'undefined') {
+        kingExpDisplay.innerText = rpgState.kingExp || 0;
+    }
+    if (kingNextExpDisplay && typeof rpgState !== 'undefined' && typeof KING_EXP_THRESHOLDS !== 'undefined') {
+        const nextThreshold = rpgState.kingLevel < 7 ? KING_EXP_THRESHOLDS[rpgState.kingLevel] : 'Max';
+        kingNextExpDisplay.innerText = nextThreshold;
+    }
     
     // Inject or Update Styles
     let style = document.getElementById('mapVisualsStyles');
@@ -658,7 +680,15 @@ function showMapCellPopup(node, grandMap) {
     if (isCurrent) {
         content += `<p style="color:#8bc34a; width: 100%;">You are here.</p>`;
     } else if (node.cleared) {
-        content += `<p style="color:#aaa; width: 100%;">Area Cleared.</p>`;
+        const canAttack = isAdjacent;
+        const btnStyle = `padding: 10px 20px; font-weight:bold; cursor:pointer; border:2px solid #4e342e; border-radius:4px; margin-bottom: 5px; font-family: 'Georgia', serif;`;
+        
+        if (canAttack) {
+             content += `<button id="popupMoveBtn" style="${btnStyle} background:#e0e0e0; color:#424242;">🚶 Move Here</button>`;
+        } else {
+             content += `<button disabled style="${btnStyle} background:#f5f5f5; color:#9e9e9e; cursor:not-allowed;">🚶 Move Here (Too Far)</button>`;
+        }
+        content += `<p style="color:#aaa; width: 100%; margin-top:5px; margin-bottom:0;">Area Cleared.</p>`;
     } else {
         // Attack Button
         const canAttack = isAdjacent;
@@ -759,6 +789,47 @@ function showMapCellPopup(node, grandMap) {
                 startLevel(rpgState.level + 1, option);
             } else {
                 showAlert("Cannot start battle: Game state not found.");
+            }
+        };
+    }
+    
+    const moveBtn = document.getElementById('popupMoveBtn');
+    if (moveBtn) {
+        moveBtn.onclick = () => {
+            popup.close();
+            if (typeof rpgState !== 'undefined') {
+                rpgState.food -= RPGStats.foodLostOnMovement;
+                if (typeof updateGoldDisplay === 'function') updateGoldDisplay();
+                
+                grandMap.moveTo(node.x, node.y);
+                
+                const mapDialog = document.getElementById('mapDialog');
+                if(mapDialog) mapDialog.close();
+                
+                if(typeof saveProgress === 'function') saveProgress();
+                
+                if (rpgState.food <= 0) {
+                    if (typeof clearProgress === 'function') clearProgress();
+                    const overlay = document.getElementById('deathOverlay');
+                    if (overlay) {
+                        overlay.style.opacity = '1';
+                        overlay.style.zIndex = '900';
+                    }
+                    setTimeout(() => {
+                        const gameOverModal = document.getElementById('gameOverDialog');
+                        if (gameOverModal) {
+                            const gameOverText = gameOverModal.querySelector('p');
+                            if (gameOverText) {
+                                gameOverText.innerText = "Your food is over";
+                            }
+                            gameOverModal.showModal();
+                        }
+                    }, 1000);
+                } else {
+                    if (typeof showMapModal === 'function') {
+                        showMapModal();
+                    }
+                }
             }
         };
     }
