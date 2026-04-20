@@ -567,14 +567,22 @@ function ani() {
 
 // --- Army Generation ---
 
-function generateRandomArmy(targetValue, includeKing = false, region = 'Classic', forceEqualFrontBack = false) {
+function generateRandomArmy(targetValue, includeKing = false, region = 'Classic', forceEqualFrontBack = false, allowOneNonClassicType = false) {
     const army = [];
     let currentValue = 0;
     
     // Determine factories for this region
     let regionList = availablePieceFactories;
     if (region && regionFactories[region]) {
-        regionList = regionFactories[region];
+        regionList = [...regionFactories[region]];
+    }
+
+    if (allowOneNonClassicType) {
+        const nonClassic = availablePieceFactories.filter(f => !regionList.includes(f) && !loseConditionFactories.includes(f));
+        if (nonClassic.length > 0) {
+            const randomNonClassic = nonClassic[Math.floor(Math.random() * nonClassic.length)];
+            regionList.push(randomNonClassic);
+        }
     }
 
     if (includeKing) {
@@ -1527,7 +1535,9 @@ function showStartModal() {
     for (let i = 0; i < 4; i++) {
         // Increase initial targetValue slightly so it can actually afford 8 frontline pieces + some backline, 
         // or just let it be 20 and it'll mostly just be frontline pieces.
-        const { army } = generateRandomArmy(9, true, 'Classic', true);
+        // 50% chance to allow a non-classic piece type in the army generation
+        const allowNonClassic = Math.random() > 0.5;
+        const { army } = generateRandomArmy(9, true, 'Classic', true, allowNonClassic);
         
         // Pick a random skill for this army
         const randomSkill = RPGSKILLS[Math.floor(Math.random() * RPGSKILLS.length)];
