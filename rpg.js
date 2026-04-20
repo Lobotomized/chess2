@@ -59,7 +59,7 @@ const regionFactories = {
     'Promoters': pomotersFactories
 };
 
-const frontLineFactories = ['rpgPawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'rpgAntFactory', 'rpgQueenbugFactory'];
+const frontLineFactories = ['rpgPawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'rpgAntFactory', 'rpgQueenbugFactory', 'cyborgFactory'];
 
 const adjustedValues = [
 
@@ -1938,6 +1938,19 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                     simBack[targetIndex] = sourceArray[sourceIndex];
                 }
 
+                // Validation: Cannot place backline piece on the frontline
+                let invalidFrontline = false;
+                for (let i = 0; i < 8; i++) {
+                    if (simFront[i] !== null && !frontLineFactories.includes(simFront[i])) {
+                        invalidFrontline = true;
+                        break;
+                    }
+                }
+                if (invalidFrontline) {
+                    showNotification("Cannot place a backline piece on the frontline.", "error");
+                    return;
+                }
+
                 // Validation: Cannot remove frontline piece if a backline piece is directly behind it
                 let exposed = false;
                 for (let i = 0; i < 8; i++) {
@@ -2041,18 +2054,31 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                         simBack[targetIndex] = sourceArray[sourceIndex];
                     }
 
-                    // Validation: Cannot remove frontline piece if a backline piece is directly behind it
-                    let exposed = false;
-                    for (let i = 0; i < 8; i++) {
-                        if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
-                            exposed = true;
-                            break;
-                        }
+                // Validation: Cannot place backline piece on the frontline
+                let invalidFrontline = false;
+                for (let i = 0; i < 8; i++) {
+                    if (simFront[i] !== null && !frontLineFactories.includes(simFront[i])) {
+                        invalidFrontline = true;
+                        break;
                     }
-                    if (exposed) {
-                        showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
-                        return;
+                }
+                if (invalidFrontline) {
+                    showNotification("Cannot place a backline piece on the frontline.", "error");
+                    return;
+                }
+
+                // Validation: Cannot remove frontline piece if a backline piece is directly behind it
+                let exposed = false;
+                for (let i = 0; i < 8; i++) {
+                    if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
+                        exposed = true;
+                        break;
                     }
+                }
+                if (exposed) {
+                    showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
+                    return;
+                }
 
                     // Perform Swap
                     const temp = sourceArray[sourceIndex];
