@@ -692,7 +692,7 @@ function generateRandomArmy(targetValue, includeKing = false, region = 'Classic'
         let iterations = 0;
         
         // Add frontline to match king if needed
-        while (frontCount < backCount) {
+        while (frontCount < backCount && frontCount < 8) {
             const randomFrontline = regionFrontline[Math.floor(Math.random() * regionFrontline.length)];
             army.push(randomFrontline);
             currentValue += getPieceValue(randomFrontline);
@@ -701,6 +701,8 @@ function generateRandomArmy(targetValue, includeKing = false, region = 'Classic'
 
         while (currentValue < targetValue && iterations < 100) {
             iterations++;
+            if (frontCount >= 8 || backCount >= 8) break;
+
             const randomFrontline = regionFrontline[Math.floor(Math.random() * regionFrontline.length)];
             const frontVal = getPieceValue(randomFrontline);
             
@@ -723,18 +725,31 @@ function generateRandomArmy(targetValue, includeKing = false, region = 'Classic'
     } else {
         let iterations = 0;
         let backlineCount = includeKing ? 1 : 0;
+        let frontlineCount = 0;
         
         while (currentValue < targetValue && iterations < 200) {
             iterations++;
-            // Randomly decide between frontline and backline
-            const pickFrontline = Math.random() > 0.5 || backlineFactories.length === 0;
             
-            if (pickFrontline) {
+            if (frontlineCount >= 8 && backlineCount >= 8) {
+                break; // Maximum army size reached (16 pieces)
+            }
+            
+            let tryFrontline = false;
+            if (frontlineCount < 8 && backlineCount < 8) {
+                tryFrontline = Math.random() > 0.5 || backlineFactories.length === 0;
+            } else if (frontlineCount < 8) {
+                tryFrontline = true;
+            } else {
+                tryFrontline = false;
+            }
+            
+            if (tryFrontline) {
                 const randomFrontline = regionFrontline[Math.floor(Math.random() * regionFrontline.length)];
                 const val = getPieceValue(randomFrontline);
                 if (currentValue + val <= targetValue + 1 || iterations > 100) {
                     army.push(randomFrontline);
                     currentValue += val;
+                    frontlineCount++;
                 }
             } else {
                 const randomFactory = backlineFactories[Math.floor(Math.random() * backlineFactories.length)];
