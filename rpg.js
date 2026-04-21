@@ -228,32 +228,30 @@ function initRpgGame() {
     // Handle custom maps via URL params
     const urlParams = new URLSearchParams(window.location.search);
     const customMapId = urlParams.get('customMapId');
-    if (customMapId) {
-        // Clean URL to prevent infinite new games on refresh
-        window.history.replaceState({}, document.title, window.location.pathname);
-        
-        // Check if there's an existing save to warn the user
-        const savedState = localStorage.getItem('rpgState');
-        if (savedState) {
-            showConfirmation("Starting a custom map will overwrite your existing save. Are you sure?", () => {
-                loadCustomGrandMap(customMapId);
-            });
-            // If they cancel, we just show the main menu
-            const confirmDialog = document.getElementById('confirmationDialog');
-            const btnNo = document.getElementById('btnConfirmNo');
-            if (btnNo) {
-                const oldNo = btnNo.onclick;
-                btnNo.onclick = () => {
-                    if (oldNo) oldNo();
-                    showMainMenu();
-                };
-            }
-        } else {
-            loadCustomGrandMap(customMapId);
-        }
+    const isNew = urlParams.get('new') === 'true';
+    const isLoad = urlParams.get('load') === 'true';
+    let currentSaveSlot = urlParams.get('slot');
+    
+    if (isNew) {
+        currentSaveSlot = 'save_' + Date.now();
+    }
+    
+    // Clean URL to prevent infinite new games on refresh, but keep slot
+    const slotQuery = currentSaveSlot ? `?slot=${currentSaveSlot}` : '';
+    window.history.replaceState({}, document.title, window.location.pathname + slotQuery);
+    
+    // Store current slot globally so saveProgress can access it
+    window.currentSaveSlot = currentSaveSlot;
+
+    if (isLoad) {
+        loadGame();
+    } else if (customMapId) {
+        loadCustomGrandMap(customMapId);
+    } else if (isNew) {
+        startNewGame();
     } else {
-        // Show Main Menu instead of auto-loading
-        showMainMenu();
+        // Show Main Menu instead of auto-loading if accessed directly
+        window.location.href = '/rpg-menu';
     }
 }
 
@@ -287,9 +285,6 @@ function startNewGameWithMap(mapName) {
     const modal = document.getElementById('mainMenuDialog');
     if(modal) modal.close();
     
-    // Clear State
-    localStorage.removeItem('rpgState');
-    
     // Reset RPGStats to default
     if (typeof resetRPGStats === 'function') resetRPGStats();
     
@@ -320,72 +315,20 @@ function startNewGameWithMap(mapName) {
         grandMap.init(rpgState.grandMap);
     }
     
+    saveProgress();
     showStartModal();
 }
 
 function showMainMenu() {
-    const modal = document.getElementById('mainMenuDialog');
-    const btnLoad = document.getElementById('btnLoadGame');
-    
-    // Fetch available custom maps
-    const mapSelect = document.getElementById('rpgMapSelect');
-    if (mapSelect && window.Auth && window.Auth.getToken()) {
-        fetch('/maps?pageSize=100', {
-            headers: window.Auth.getAuthHeaders()
-        })
-        .then(res => res.ok ? res.json() : [])
-        .then(data => {
-            const maps = data.maps || data;
-            
-            // Clear existing custom maps but keep "random"
-            Array.from(mapSelect.options).forEach(opt => {
-                if (opt.value !== 'random') opt.remove();
-            });
-            
-            if (Array.isArray(maps)) {
-                maps.forEach(map => {
-                    if (map.isGrandMap) {
-                        const opt = document.createElement('option');
-                        opt.value = map._id;
-                        opt.textContent = map.name;
-                        // Store the definition safely via stringification or rely on fetching it later
-                        mapSelect.appendChild(opt);
-                    }
-                });
-            }
-        })
-        .catch(err => console.error("Error loading custom maps:", err));
-    }
-    
-    const savedState = localStorage.getItem('rpgState');
-    if (savedState) {
-        let level = '?';
-        try {
-            const parsed = JSON.parse(savedState);
-            level = parsed.level || '?';
-        } catch(e){}
-        
-        btnLoad.disabled = false;
-        btnLoad.style.opacity = '1';
-        btnLoad.style.cursor = 'pointer';
-        btnLoad.innerText = "Continue Journey (Lvl " + level + ")";
-        btnLoad.onclick = loadGame;
-    } else {
-        btnLoad.disabled = true;
-        btnLoad.style.opacity = '0.5';
-        btnLoad.style.cursor = 'not-allowed';
-        btnLoad.innerText = "No Save Found";
-    }
-    
-    // Ensure modal exists before showing
-    if(modal) modal.showModal();
+    window.location.href = '/rpg-menu';
 }
 
 function loadGame() {
     const modal = document.getElementById('mainMenuDialog');
     if(modal) modal.close();
     
-    const savedState = localStorage.getItem('rpgState');
+    const saveKey = window.currentSaveSlot ? `rpgState_${window.currentSaveSlot}` : 'rpgState';
+    const savedState = localStorage.getItem(saveKey);
     if (savedState) {
         try {
             const parsed = JSON.parse(savedState);
@@ -483,35 +426,17 @@ function loadGame() {
 }
 
 function confirmNewGame() {
-    const savedState = localStorage.getItem('rpgState');
-    
     // Check dropdown map selection
     const mapSelect = document.getElementById('rpgMapSelect');
     const selectedMapId = mapSelect ? mapSelect.value : 'random';
     
-    if (savedState) {
-        showConfirmation("Starting a new game will overwrite your existing save. Are you sure?", () => {
-            if (selectedMapId !== 'random') {
-                loadCustomGrandMap(selectedMapId);
-            } else {
-                startNewGame();
-            }
-        });
-    } else {
-        if (selectedMapId !== 'random') {
-            loadCustomGrandMap(selectedMapId);
-        } else {
-            startNewGame();
-        }
-    }
+    // Redirect to menu instead, menu handles new game
+    window.location.href = '/rpg-menu';
 }
 
 function startNewGame() {
     const modal = document.getElementById('mainMenuDialog');
     if(modal) modal.close();
-    
-    // Clear State
-    localStorage.removeItem('rpgState');
     
     // Reset RPGStats to default
     if (typeof resetRPGStats === 'function') resetRPGStats();
@@ -541,6 +466,7 @@ function startNewGame() {
         grandMap.init();
     }
     
+    saveProgress();
     showStartModal();
 }
 
@@ -581,7 +507,17 @@ function saveProgress() {
         rpgState.grandMap = grandMap.getState();
     }
 
-    localStorage.setItem('rpgState', JSON.stringify(rpgState));
+    const saveKey = window.currentSaveSlot ? `rpgState_${window.currentSaveSlot}` : 'rpgState';
+    localStorage.setItem(saveKey, JSON.stringify(rpgState));
+    
+    // Add to saves list if not legacy
+    if (window.currentSaveSlot) {
+        let savesList = JSON.parse(localStorage.getItem('rpgSavesList') || '[]');
+        if (!savesList.includes(window.currentSaveSlot)) {
+            savesList.push(window.currentSaveSlot);
+            localStorage.setItem('rpgSavesList', JSON.stringify(savesList));
+        }
+    }
 }
 
 function restoreBoard(savedBoard) {
@@ -680,7 +616,14 @@ function findFactoryForIcon(icon) {
 }
 
 function clearProgress() {
-    localStorage.removeItem('rpgState');
+    const saveKey = window.currentSaveSlot ? `rpgState_${window.currentSaveSlot}` : 'rpgState';
+    localStorage.removeItem(saveKey);
+    
+    if (window.currentSaveSlot) {
+        let savesList = JSON.parse(localStorage.getItem('rpgSavesList') || '[]');
+        savesList = savesList.filter(s => s !== window.currentSaveSlot);
+        localStorage.setItem('rpgSavesList', JSON.stringify(savesList));
+    }
 }
 
 // Animation Loop
@@ -1530,13 +1473,13 @@ function setupBoard(shapeName = 'Standard') {
     // Helper to split army
     // "Infront" means closer to the enemy.
     
-    const splitArmy = (roster) => {
+    const splitArmy = (roster, isPlayer = false) => {
         // If the roster has nulls (from reordering), preserve them in their respective lines
         // For simplicity in standard logic, we usually don't have nulls until after reorder
         // But if we do, we need to handle them.
         
         // However, if the roster is perfectly 16 long (8 front, 8 back), we can just split it by index
-        if (roster.length >= 16 || roster.includes(null)) {
+        if (isPlayer && (roster.length >= 16 || roster.includes(null))) {
             return {
                 front: roster.slice(0, 8),
                 back: roster.slice(8, 16)
@@ -1561,14 +1504,14 @@ function setupBoard(shapeName = 'Standard') {
     // Place Player Army (White)
     // Front Line: Row maxY - 1 (Pawns)
     // Back Line: Row maxY (Rest)
-    const playerSplit = splitArmy(rpgState.playerRoster);
+    const playerSplit = splitArmy(rpgState.playerRoster, true);
     placeArmy(playerSplit.front, 'white', [maxY - 1], maxX); 
     placeArmy(playerSplit.back, 'white', [maxY], maxX); 
     
     // Place Enemy Army (Black)
     // Front Line: Row 1 (Pawns)
     // Back Line: Row 0 (Rest)
-    const enemySplit = splitArmy(rpgState.enemyRoster);
+    const enemySplit = splitArmy(rpgState.enemyRoster, false);
     placeArmy(enemySplit.front, 'black', [1], maxX);
     
     // Randomize backline (King and elite units)
@@ -1945,6 +1888,22 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
         // Clean up nulls from reservePieces
         for (let i = reservePieces.length - 1; i >= 0; i--) {
             if (reservePieces[i] === null) reservePieces.splice(i, 1);
+        }
+
+        // Update army size display
+        const sizeDisplay = document.getElementById('armySizeDisplay');
+        if (sizeDisplay) {
+            const currentCount = frontPieces.filter(u => u !== null).length + 
+                                 backPieces.filter(u => u !== null).length + 
+                                 reservePieces.length;
+            const maxCount = RPGStats.maxNumberOfPiecesToOwn;
+            sizeDisplay.innerText = `(${currentCount}/${maxCount} Pieces)`;
+            
+            if (currentCount >= maxCount) {
+                sizeDisplay.style.color = 'var(--threat)';
+            } else {
+                sizeDisplay.style.color = 'var(--piece-black)';
+            }
         }
     }
 
@@ -2475,7 +2434,10 @@ function showShopModal(restore = false) {
 
     const updateAllButtons = () => {
         const buttons = container.querySelectorAll('.buy-btn');
-        const rosterFull = rpgState.playerRoster.length >= RPGStats.maxNumberOfPiecesToOwn; 
+        
+        // Exclude null padding slots when counting the roster length
+        const currentCount = rpgState.playerRoster.filter(u => u !== null).length;
+        const rosterFull = currentCount >= RPGStats.maxNumberOfPiecesToOwn; 
 
         buttons.forEach(btn => {
             const index = btn.dataset.index;

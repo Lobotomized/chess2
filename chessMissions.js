@@ -744,6 +744,10 @@ app.get('/rpg.html', function(req,res){
     return res.status(200).sendFile(__dirname + '/rpg.html');
 })
 
+app.get('/rpg-menu', function(req,res){
+    return res.status(200).sendFile(__dirname + '/rpgMenu.html');
+})
+
 app.get('/grandMapEditor.html', function(req,res){
     return res.status(200).sendFile(__dirname + '/grandMapEditor.html');
 })
