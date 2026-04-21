@@ -62,23 +62,31 @@ const grandMap = {
     },
 
     ensureFinalBoss() {
+        // Check if there's already a Final Boss anywhere on the map
+        for (let y = 0; y < this.height; y++) {
+            for (let x = 0; x < this.width; x++) {
+                const node = this.map[y][x];
+                if (node && node.difficulty && node.difficulty.name === "Final Boss") {
+                    return; // Final boss already exists, don't overwrite the center
+                }
+            }
+        }
+
         const centerX = Math.floor(this.width / 2);
         const centerY = Math.floor(this.height / 2);
         if (this.map[centerY] && this.map[centerY][centerX]) {
             const bossNode = this.map[centerY][centerX];
-            if (!bossNode.difficulty || bossNode.difficulty.name !== "Final Boss") {
-                bossNode.enemyPower = 80;
-                bossNode.enemyFood = 9999999;
-                bossNode.rewardCap = 0;
-                bossNode.rewards = null;
-                bossNode.difficulty = {
-                    enemyValue: 80,
-                    rewardCap: 0,
-                    name: "Final Boss",
-                    description: "The ultimate challenge."
-                };
-                bossNode.board = 'Standard';
-            }
+            bossNode.enemyPower = 80;
+            bossNode.enemyFood = 9999999;
+            bossNode.rewardCap = 0;
+            bossNode.rewards = null;
+            bossNode.difficulty = {
+                enemyValue: 80,
+                rewardCap: 0,
+                name: "Final Boss",
+                description: "The ultimate challenge."
+            };
+            bossNode.board = 'Standard';
         }
     },
 
@@ -113,20 +121,117 @@ const grandMap = {
         if (pMap.nodes) {
             pMap.nodes.forEach(nodeDef => {
                 if (this.map[nodeDef.y] && this.map[nodeDef.y][nodeDef.x]) {
-                    // Merge predefined properties into the node
-                    // We need to be careful not to overwrite the object reference if possible, or just replace properties
                     const targetNode = this.map[nodeDef.y][nodeDef.x];
                     
-                    Object.assign(targetNode, nodeDef);
-                    
-                    // If difficulty details are missing but enemyPower is set, we might want to fake the difficulty profile
-                    if (nodeDef.enemyPower !== undefined && !nodeDef.difficulty) {
+                    if (pMap.isCustom) {
+                        // Custom maps export all nodes but omit defaults to save space.
+                        // We must clear the generated random values first so they don't leak through.
+                        targetNode.board = 'Standard';
+                        targetNode.region = 'Classic';
+                        targetNode.enemyPower = 5;
                         targetNode.difficulty = {
-                            enemyValue: nodeDef.enemyPower,
-                            rewardCap: nodeDef.rewardCap || 10,
-                            name: "Predefined",
-                            description: "Fixed Encounter"
+                            enemyValue: 5,
+                            rewardCap: 10,
+                            name: "Standard Encounter",
+                            description: "Normal enemy"
                         };
+                    }
+
+                    // Merge predefined properties into the node
+                    for (const key in nodeDef) {
+                        if (key === 'difficulty' && typeof nodeDef[key] === 'object' && targetNode.difficulty) {
+                            targetNode.difficulty = { ...targetNode.difficulty, ...nodeDef[key] };
+                        } else {
+                            targetNode[key] = nodeDef[key];
+                        }
+                    }
+                    
+                    // Ensure difficulty profile matches enemyPower if not fully specified
+                    if (targetNode.enemyPower !== undefined) {
+                        if (!targetNode.difficulty || Object.keys(targetNode.difficulty).length <= 1) {
+                            targetNode.difficulty = {
+                                ...targetNode.difficulty,
+                                enemyValue: targetNode.enemyPower,
+                                rewardCap: nodeDef.rewardCap || targetNode.difficulty?.rewardCap || 10,
+                                name: targetNode.difficulty?.name || "Custom Encounter",
+                                description: targetNode.difficulty?.description || "Fixed Encounter"
+                            };
+                        } else {
+                            // Always ensure enemyValue is in sync with enemyPower
+                            targetNode.difficulty.enemyValue = targetNode.enemyPower;
+                        }
+                    }
+                        
+                    // Special case for Market
+                    if (targetNode.board === 'Market') {
+                        targetNode.enemyPower = 0;
+                        targetNode.difficulty = {
+                            enemyValue: 0,
+                            rewardCap: 0,
+                            name: "Marketplace",
+                            description: "A safe haven to hire mercenaries."
+                        };
+                    }
+                    
+                    // Special case for Final Boss
+                    if (targetNode.difficulty && targetNode.difficulty.name === "Final Boss") {
+                        targetNode.enemyPower = 80;
+                        targetNode.enemyFood = 9999999;
+                        targetNode.rewardCap = 0;
+                        targetNode.rewards = null;
+                        targetNode.difficulty = {
+                            enemyValue: 80,
+                            rewardCap: 0,
+                            name: "Final Boss",
+                            description: "The ultimate challenge."
+                        };
+                    } else if (targetNode.enemyPower !== undefined) {
+                        // Recalculate rewards based on new enemy power for non-boss nodes
+                        const getDeterministicRandom = (modifier = 0) => {
+                            const seed = this.seed || 0;
+                            const v = Math.sin(targetNode.x * 129898 + targetNode.y * 78233 + seed + modifier) * 43758.5453123;
+                            return Math.abs(v - Math.floor(v));
+                        };
+
+                        const rewards = {
+                            gold: targetNode.enemyPower || 1,
+                            food: 0,
+                            pieces: []
+                        };
+                        
+                        let baseGold = rewards.gold || 10;
+                        let baseFood = Math.floor(baseGold * 0.8) + 5;
+                        targetNode.enemyFood = baseFood + Math.floor(getDeterministicRandom(8) * baseFood * 2);
+
+                        let pieceChance = 0.1;
+                        if (targetNode.board === 'Market') pieceChance = 1.0;
+                        
+                        if (getDeterministicRandom(9) < pieceChance) {
+                            rewards.pieces.push("Unit");
+                            const maxPieceValue = targetNode.enemyPower / 2;
+                            const sourceList = (typeof winnablePieceFactories !== 'undefined' && winnablePieceFactories.length > 0) 
+                                            ? winnablePieceFactories 
+                                            : (typeof availablePieceFactories !== 'undefined' ? availablePieceFactories : ['pawnFactory']);
+                            const getVal = (f) => {
+                                if (typeof getPieceValue === 'function') return getPieceValue(f);
+                                return 5;
+                            };
+                            const eligiblePieces = sourceList.filter(f => {
+                                const v = getVal(f);
+                                return v <= maxPieceValue && v >= Math.max(0, maxPieceValue - 5);
+                            });
+                            let selectedFactory = 'pawnFactory';
+                            if (eligiblePieces.length > 0) {
+                                const randIndex = Math.floor(getDeterministicRandom(10) * eligiblePieces.length);
+                                selectedFactory = eligiblePieces[randIndex];
+                            } else if (sourceList.length > 0) {
+                                const randIndex = Math.floor(getDeterministicRandom(11) * sourceList.length);
+                                selectedFactory = sourceList[randIndex];
+                            }
+                            rewards.specificPiece = selectedFactory;
+                        }
+                        
+                        targetNode.rewards = rewards;
                     }
                 }
             });

@@ -6,6 +6,13 @@ const mapSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
+    isGrandMap: {
+        type: Boolean,
+        default: false
+    },
+    grandMapDef: {
+        type: mongoose.Schema.Types.Mixed
+    },
     squares: [{
         light:Boolean,
         x:Number,

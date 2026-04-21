@@ -427,10 +427,14 @@
                         const listItem = document.createElement('li');
                         listItem.className = 'map-item';
                         
+                        const playLink = map.isGrandMap ? 
+                            `/rpg.html?customMapId=${map._id}` : 
+                            `/hotseat?gameType=customMap&customGameId=${map._id}`;
+
                         listItem.innerHTML = `
-                            <span class="map-name"><img src="/static/lg/whitePawn.png" style="height:20px;"> ${map.name}</span>
+                            <span class="map-name"><img src="/static/lg/whitePawn.png" style="height:20px;"> ${map.name} ${map.isGrandMap ? '<span style="font-size:12px; background:#4a148c; color:white; padding:2px 6px; border-radius:4px; margin-left:5px;">Grand Map</span>' : ''}</span>
                             <div style="display: flex; gap: 10px; flex-shrink: 0;">
-                                <a href="/hotseat?gameType=customMap&customGameId=${map._id}" class="play-button">Play Map</a>
+                                <a href="${playLink}" class="play-button">Play Map</a>
                                 <button onclick="deleteMap('${map._id}')" class="play-button" style="background: linear-gradient(to bottom, #8C6540, #5A3E2B); border-bottom: 6px solid #2d1b15; color: white; cursor: pointer;">Delete</button>
                             </div>
                         `;

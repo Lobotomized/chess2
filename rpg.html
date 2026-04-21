@@ -533,7 +533,15 @@
         <h2>Chess 2: RPG</h2>
         <div style="display: flex; flex-direction: column; gap: 15px; align-items: center;">
             <button id="btnLoadGame" onclick="loadGame()" style="width: 200px;">Continue Journey</button>
-            <button onclick="confirmNewGame()" style="width: 200px;">New Campaign</button>
+            
+            <div style="width: 200px; border-top: 1px solid rgba(0,0,0,0.1); margin: 5px 0;"></div>
+            
+            <label for="rpgMapSelect" style="font-weight: bold; font-size: 14px;">Select Map:</label>
+            <select id="rpgMapSelect" style="width: 200px; padding: 8px; border-radius: 6px; border: 2px solid var(--border-color); font-family: inherit;">
+                <option value="random">Random Map (Standard)</option>
+            </select>
+            
+            <button onclick="confirmNewGame()" style="width: 200px; background: var(--highlight); color: white;">New Campaign</button>
         </div>
     </dialog>
 
@@ -667,6 +675,7 @@
     <!-- Notification Container -->
     <div id="notificationContainer" style="position: fixed; top: 80px; right: 20px; z-index: 3000; display: flex; flex-direction: column; gap: 10px; pointer-events: none;"></div>
 
+    <script src="/src/auth.js"></script>
     <script src="/rpg.js"></script>
 </body>
 </html>

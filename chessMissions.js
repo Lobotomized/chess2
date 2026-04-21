@@ -50,6 +50,7 @@ app.use('/rpgDifficulties.js', express.static('./rpgDifficulties.js'))
 app.use('/rpgDetails.js', express.static('./rpgDetails.js'))
 app.use('/rpgStats.js', express.static('./rpgStats.js'))
 app.use('/grandMap.js', express.static('./grandMap.js'))
+app.use('/grandMapEditor.html', express.static('./grandMapEditor.html'))
 app.use('/mapVisuals.js', express.static('./mapVisuals.js'))
 app.use('/evolution.html', express.static('./evolution.html'))
 app.use('/evolution.js', express.static('./evolution.js'))
@@ -741,6 +742,14 @@ app.get('/gameRecorder.js', function(req,res){
 
 app.get('/rpg.html', function(req,res){
     return res.status(200).sendFile(__dirname + '/rpg.html');
+})
+
+app.get('/grandMapEditor.html', function(req,res){
+    return res.status(200).sendFile(__dirname + '/grandMapEditor.html');
+})
+
+app.get('/grandMapEditor', function(req,res){
+    return res.status(200).sendFile(__dirname + '/grandMapEditor.html');
 })
 
 app.get('/create-board', function(req,res){

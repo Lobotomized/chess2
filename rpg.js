@@ -59,7 +59,7 @@ const regionFactories = {
     'Promoters': pomotersFactories
 };
 
-const frontLineFactories = ['rpgPawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'rpgAntFactory', 'rpgQueenbugFactory', 'cyborgFactory'];
+const frontLineFactories = ['rpgPawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'rpgAntFactory', 'rpgQueenbugFactory'];
 
 const adjustedValues = [
 
@@ -225,13 +225,137 @@ function initRpgGame() {
     // Use requestAnimationFrame for smooth animation
     requestAnimationFrame(aniLoop);
     
-    // Show Main Menu instead of auto-loading
-    showMainMenu();
+    // Handle custom maps via URL params
+    const urlParams = new URLSearchParams(window.location.search);
+    const customMapId = urlParams.get('customMapId');
+    if (customMapId) {
+        // Clean URL to prevent infinite new games on refresh
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
+        // Check if there's an existing save to warn the user
+        const savedState = localStorage.getItem('rpgState');
+        if (savedState) {
+            showConfirmation("Starting a custom map will overwrite your existing save. Are you sure?", () => {
+                loadCustomGrandMap(customMapId);
+            });
+            // If they cancel, we just show the main menu
+            const confirmDialog = document.getElementById('confirmationDialog');
+            const btnNo = document.getElementById('btnConfirmNo');
+            if (btnNo) {
+                const oldNo = btnNo.onclick;
+                btnNo.onclick = () => {
+                    if (oldNo) oldNo();
+                    showMainMenu();
+                };
+            }
+        } else {
+            loadCustomGrandMap(customMapId);
+        }
+    } else {
+        // Show Main Menu instead of auto-loading
+        showMainMenu();
+    }
+}
+
+async function loadCustomGrandMap(mapId) {
+    try {
+        const headers = window.Auth ? window.Auth.getAuthHeaders() : {};
+        const response = await fetch(`/maps/${mapId}`, { headers });
+        if (!response.ok) throw new Error("Failed to load map");
+        
+        const mapData = await response.json();
+        
+        if (mapData.isGrandMap && mapData.grandMapDef) {
+            // Temporarily store the definition in grandMap system
+            grandMap.predefinedMaps[mapData.name] = mapData.grandMapDef;
+            grandMap.predefinedMaps[mapData.name].isCustom = true;
+            
+            // Start a new game with this map
+            startNewGameWithMap(mapData.name);
+        } else {
+            showAlert("This is not a valid Grand Map template.");
+            showMainMenu();
+        }
+    } catch (e) {
+        console.error(e);
+        showAlert("Failed to load custom map.");
+        showMainMenu();
+    }
+}
+
+function startNewGameWithMap(mapName) {
+    const modal = document.getElementById('mainMenuDialog');
+    if(modal) modal.close();
+    
+    // Clear State
+    localStorage.removeItem('rpgState');
+    
+    // Reset RPGStats to default
+    if (typeof resetRPGStats === 'function') resetRPGStats();
+    
+    // Reset rpgState object
+    rpgState.level = 1;
+    rpgState.kingLevel = 1;
+    rpgState.kingExp = 0;
+    rpgState.playerRoster = [];
+    rpgState.enemyRoster = [];
+    rpgState.gameActive = false;
+    rpgState.gameOverSequenceStarted = false;
+    rpgState.activeSkill = null;
+    rpgState.activeSkills = [];
+    rpgState.pendingSkillSelections = 0;
+    rpgState.gold = RPGStats.startingGold;
+    rpgState.food = RPGStats.startingFood;
+    rpgState.shopOptions = [];
+    rpgState.showWinScreen = false;
+    
+    // Set map info so it saves correctly
+    rpgState.grandMap = { predefinedMap: mapName };
+    
+    updateGoldDisplay();
+    document.getElementById('levelDisplay').innerText = "Level: 1";
+    
+    // Initialize Grand Map with the predefined map
+    if (typeof grandMap !== 'undefined') {
+        grandMap.init(rpgState.grandMap);
+    }
+    
+    showStartModal();
 }
 
 function showMainMenu() {
     const modal = document.getElementById('mainMenuDialog');
     const btnLoad = document.getElementById('btnLoadGame');
+    
+    // Fetch available custom maps
+    const mapSelect = document.getElementById('rpgMapSelect');
+    if (mapSelect && window.Auth && window.Auth.getToken()) {
+        fetch('/maps?pageSize=100', {
+            headers: window.Auth.getAuthHeaders()
+        })
+        .then(res => res.ok ? res.json() : [])
+        .then(data => {
+            const maps = data.maps || data;
+            
+            // Clear existing custom maps but keep "random"
+            Array.from(mapSelect.options).forEach(opt => {
+                if (opt.value !== 'random') opt.remove();
+            });
+            
+            if (Array.isArray(maps)) {
+                maps.forEach(map => {
+                    if (map.isGrandMap) {
+                        const opt = document.createElement('option');
+                        opt.value = map._id;
+                        opt.textContent = map.name;
+                        // Store the definition safely via stringification or rely on fetching it later
+                        mapSelect.appendChild(opt);
+                    }
+                });
+            }
+        })
+        .catch(err => console.error("Error loading custom maps:", err));
+    }
     
     const savedState = localStorage.getItem('rpgState');
     if (savedState) {
@@ -360,12 +484,25 @@ function loadGame() {
 
 function confirmNewGame() {
     const savedState = localStorage.getItem('rpgState');
+    
+    // Check dropdown map selection
+    const mapSelect = document.getElementById('rpgMapSelect');
+    const selectedMapId = mapSelect ? mapSelect.value : 'random';
+    
     if (savedState) {
         showConfirmation("Starting a new game will overwrite your existing save. Are you sure?", () => {
-            startNewGame();
+            if (selectedMapId !== 'random') {
+                loadCustomGrandMap(selectedMapId);
+            } else {
+                startNewGame();
+            }
         });
     } else {
-        startNewGame();
+        if (selectedMapId !== 'random') {
+            loadCustomGrandMap(selectedMapId);
+        } else {
+            startNewGame();
+        }
     }
 }
 
