@@ -311,15 +311,6 @@
             gap: 5px;
             flex: 1;
         }
-        
-        #jsonOutput {
-            flex: 1;
-            min-height: 100px;
-            resize: none;
-            font-family: monospace;
-            font-size: 12px;
-            white-space: pre;
-        }
     </style>
     <script src="/src/modal.js?v=1"></script>
 </head>
@@ -331,6 +322,17 @@
 
     <div class="editor-container">
         <div class="sidebar">
+            <div class="form-group" style="padding-bottom: 10px; border-bottom: 1px dashed var(--board-dark); margin-bottom: 15px;">
+                <label>Load Existing Map</label>
+                <div style="display:flex; gap:10px;">
+                    <select id="existingMaps" style="flex:1;">
+                        <option value="">-- Select Map --</option>
+                    </select>
+                    <button onclick="loadSelectedMap()">Load</button>
+                    <button onclick="createNewMap()" class="secondary">New</button>
+                </div>
+            </div>
+
             <div class="form-group">
                 <label>Map Name</label>
                 <input type="text" id="mapName" value="New Map">
@@ -393,10 +395,7 @@
             </div>
 
             <div class="output-area">
-                <button class="primary" onclick="exportJSON()">Export to JSON</button>
-                <textarea id="jsonOutput" readonly placeholder="Exported JSON will appear here..."></textarea>
                 <div style="display:flex; gap:10px;">
-                    <button onclick="copyJSON()" style="flex:1;">Copy JSON</button>
                     <button class="primary" onclick="saveToDB()" style="flex:1; background: #2e7d32;">Save to DB</button>
                 </div>
             </div>
@@ -418,13 +417,135 @@
             nodes: [] // 2D array [y][x]
         };
 
+        let currentMapId = null;
+        let fetchedMaps = [];
         let isDragging = false;
 
-        function init() {
+        async function init() {
             document.addEventListener('mousedown', () => isDragging = true);
             document.addEventListener('mouseup', () => isDragging = false);
             generateGrid();
             updateToolOptions();
+            await fetchMaps();
+        }
+
+        async function fetchMaps() {
+            if (!window.Auth || !window.Auth.getToken()) {
+                setTimeout(fetchMaps, 1000); // Retry if auth not ready
+                return;
+            }
+            try {
+                const res = await fetch('/maps?pageSize=100', {
+                    headers: window.Auth.getAuthHeaders()
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    fetchedMaps = data.maps.filter(m => m.isGrandMap);
+                    
+                    const select = document.getElementById('existingMaps');
+                    select.innerHTML = '<option value="">-- Select Map --</option>';
+                    
+                    fetchedMaps.forEach(m => {
+                        const opt = document.createElement('option');
+                        opt.value = m._id;
+                        opt.textContent = m.name;
+                        select.appendChild(opt);
+                    });
+                }
+            } catch (err) {
+                console.error("Error fetching maps", err);
+            }
+        }
+
+        function loadSelectedMap() {
+            const select = document.getElementById('existingMaps');
+            const mapId = select.value;
+            if (!mapId) return;
+            
+            const map = fetchedMaps.find(m => m._id === mapId);
+            if (!map || !map.grandMapDef) return;
+
+            currentMapId = map._id;
+            document.getElementById('mapName').value = map.name;
+            document.getElementById('mapDesc').value = map.grandMapDef.description || map.description || '';
+            document.getElementById('mapWidth').value = map.grandMapDef.width;
+            document.getElementById('mapHeight').value = map.grandMapDef.height;
+            
+            mapData.name = map.name;
+            mapData.description = document.getElementById('mapDesc').value;
+            mapData.width = map.grandMapDef.width;
+            mapData.height = map.grandMapDef.height;
+            mapData.startX = map.grandMapDef.startX || 0;
+            mapData.startY = map.grandMapDef.startY || 0;
+            
+            const grid = document.getElementById('mapGrid');
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${mapData.width}, 100px)`;
+            
+            mapData.nodes = [];
+            for (let y = 0; y < mapData.height; y++) {
+                const row = [];
+                for (let x = 0; x < mapData.width; x++) {
+                    let node = {
+                        x, y,
+                        board: 'Standard',
+                        region: 'Classic',
+                        enemyPower: 5,
+                        isBoss: false
+                    };
+                    row.push(node);
+                    
+                    const cell = document.createElement('div');
+                    cell.className = 'map-cell';
+                    cell.dataset.x = x;
+                    cell.dataset.y = y;
+                    
+                    cell.addEventListener('mousedown', (e) => applyTool(x, y, e));
+                    cell.addEventListener('mouseenter', (e) => {
+                        if (isDragging) applyTool(x, y, e);
+                    });
+                    
+                    grid.appendChild(cell);
+                }
+                mapData.nodes.push(row);
+            }
+            
+            if (map.grandMapDef.nodes) {
+                map.grandMapDef.nodes.forEach(n => {
+                    if (n.y < mapData.height && n.x < mapData.width) {
+                        const target = mapData.nodes[n.y][n.x];
+                        if (n.board) target.board = n.board;
+                        if (n.region) target.region = n.region;
+                        if (n.enemyPower !== undefined) target.enemyPower = n.enemyPower;
+                        if (n.difficulty && n.difficulty.name === "Final Boss") target.isBoss = true;
+                        if (n.difficulty && n.difficulty.name === "Marketplace") target.board = 'Market';
+                    }
+                });
+            }
+            
+            renderGrid();
+            showAlert(`Loaded map: ${map.name}`);
+        }
+
+        function createNewMap() {
+            currentMapId = null;
+            document.getElementById('existingMaps').value = "";
+            document.getElementById('mapName').value = "New Map";
+            document.getElementById('mapDesc').value = "A custom grand map.";
+            document.getElementById('mapWidth').value = 10;
+            document.getElementById('mapHeight').value = 10;
+            
+            mapData.name = "New Map";
+            mapData.description = "A custom grand map.";
+            mapData.width = 10;
+            mapData.height = 10;
+            mapData.startX = 0;
+            mapData.startY = 0;
+            
+            // clear old nodes and re-generate grid completely
+            mapData.nodes = [];
+            generateGrid();
+            showAlert("Created a new blank map.");
         }
 
         function generateGrid() {
@@ -625,60 +746,6 @@
             }
         }
 
-        function exportJSON() {
-            mapData.name = document.getElementById('mapName').value;
-            mapData.description = document.getElementById('mapDesc').value;
-            
-            // Flatten nodes to array of non-default nodes to save space
-            // Or keep all nodes, but remove defaults
-            const exportedNodes = [];
-            for (let y = 0; y < mapData.height; y++) {
-                for (let x = 0; x < mapData.width; x++) {
-                    const n = mapData.nodes[y][x];
-                    
-                    const exportNode = { x: n.x, y: n.y };
-                    
-                    // Add only what is needed
-                    if (n.board !== 'Standard') exportNode.board = n.board;
-                    if (n.region !== 'Classic') exportNode.region = n.region;
-                    if (n.enemyPower !== 5) exportNode.enemyPower = n.enemyPower;
-                    if (n.isBoss) {
-                        exportNode.difficulty = { name: "Final Boss" };
-                        exportNode.enemyPower = 80;
-                    }
-                    if (n.board === 'Market') {
-                        exportNode.difficulty = { name: "Marketplace" };
-                    }
-                    
-                    if (x === mapData.startX && y === mapData.startY) {
-                        exportNode.cleared = true;
-                        exportNode.enemyPower = 0;
-                    }
-                    
-                    exportedNodes.push(exportNode);
-                }
-            }
-            
-            const result = {
-                width: mapData.width,
-                height: mapData.height,
-                description: mapData.description,
-                startX: mapData.startX,
-                startY: mapData.startY,
-                nodes: exportedNodes
-            };
-            
-            const jsonStr = `"${mapData.name}": ` + JSON.stringify(result, null, 4);
-            document.getElementById('jsonOutput').value = jsonStr;
-        }
-
-        function copyJSON() {
-            const textarea = document.getElementById('jsonOutput');
-            textarea.select();
-            document.execCommand('copy');
-            alert('JSON copied to clipboard!');
-        }
-
         async function saveToDB() {
             if (!window.Auth || !window.Auth.getToken()) {
                 if (window.Auth) window.Auth.showAuthModal();
@@ -741,8 +808,11 @@
             };
 
             try {
-                const response = await fetch('/maps', {
-                    method: 'POST',
+                const method = currentMapId ? 'PUT' : 'POST';
+                const url = currentMapId ? `/maps/${currentMapId}` : '/maps';
+
+                const response = await fetch(url, {
+                    method: method,
                     headers: {
                         'Content-Type': 'application/json',
                         ...window.Auth.getAuthHeaders()
@@ -755,7 +825,22 @@
                 }
 
                 const data = await response.json();
+                
+                // If it was a new map, save the generated ID
+                if (!currentMapId && data._id) {
+                    currentMapId = data._id;
+                }
+                
                 showAlert(`Grand Map '${mapData.name}' saved successfully!`);
+                
+                // Refresh map list to show the newly saved/updated map
+                await fetchMaps();
+                
+                // Select the current map in the dropdown
+                const select = document.getElementById('existingMaps');
+                if (currentMapId) {
+                    select.value = currentMapId;
+                }
             } catch (error) {
                 console.error('Error saving map:', error);
                 showAlert('Error saving map to database.');
