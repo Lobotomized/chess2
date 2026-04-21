@@ -92,13 +92,14 @@ const KING_EXP_THRESHOLDS = [0, 10, 30, 60, 120, 200, 300 ]; // levels 1 to 7
 // Global State
 const rpgState = {
     level: 1,
+    maxKingLevel: 7,
     kingLevel: 1,
     kingExp: 0,
     playerRoster: [], // Array of factory names
     enemyRoster: [],
     gameActive: false,
     gold: 0,
-    food: 50, // Initial food
+    food: 100, // Initial food
     shopOptions: [],
     showWinScreen: false // New flag to persist win screen
 };
@@ -1020,7 +1021,7 @@ function generateRewardOptions() {
         options.sort((a,b) => a.difficultyIndex - b.difficultyIndex);
         
         // Randomly assign piece rewards
-        const rosterFull = rpgState.playerRoster.length >= 24; // 8 Front + 8 Back + 8 Reserve
+        const rosterFull = rpgState.playerRoster.length >= RPGStats.maxNumberOfPiecesToOwn; // 8 Front + 8 Back + 8 Reserve
         options.forEach(opt => {
             
             // Priority: Use Node Rewards if available (Consistency with Grand Map)
@@ -1594,6 +1595,14 @@ function showStartModal() {
             // We need to ensure gold and food are updated if the skill changed starting values
             rpgState.gold = RPGStats.startingGold;
             rpgState.food = RPGStats.startingFood;
+            
+            // Handle instant rewards that should only apply once when selected
+            if (randomSkill.name === "Rich") {
+                rpgState.gold += 10;
+            } else if (randomSkill.name === "Inheritance") {
+                rpgState.food += 30;
+            }
+
             updateGoldDisplay();
             
             modal.close();
@@ -2329,7 +2338,7 @@ function showShopModal(restore = false) {
 
     const updateAllButtons = () => {
         const buttons = container.querySelectorAll('.buy-btn');
-        const rosterFull = rpgState.playerRoster.length >= 24; // 8 Front + 8 Back + 8 Reserve
+        const rosterFull = rpgState.playerRoster.length >= RPGStats.maxNumberOfPiecesToOwn; 
 
         buttons.forEach(btn => {
             const index = btn.dataset.index;
@@ -2763,14 +2772,34 @@ function checkGameOver(state) {
         if (state.won === 'white') {
             // Player Won
             
-            // Mark current map node as cleared
+            // Check if it's the final boss node
+            let isFinalBoss = false;
             if (typeof grandMap !== 'undefined') {
                 const currentNode = grandMap.map[grandMap.currentY][grandMap.currentX];
                 if (currentNode) {
                     currentNode.cleared = true;
+                    if (grandMap.currentX === Math.floor(grandMap.width / 2) && grandMap.currentY === Math.floor(grandMap.height / 2)) {
+                        isFinalBoss = true;
+                    }
                 }
             }
             
+            if (isFinalBoss) {
+                setTimeout(() => {
+                    const overlay = document.getElementById('deathOverlay');
+                    if (overlay) {
+                        overlay.style.opacity = '1';
+                        overlay.style.zIndex = '900'; 
+                    }
+                    setTimeout(() => {
+                        const modal = document.getElementById('gameCompleteDialog');
+                        if (modal) modal.showModal();
+                        clearProgress();
+                    }, 2000);
+                }, 2000);
+                return;
+            }
+
             let winText = state.message === "Enemy Starvation!" ? "Enemy Starved!" : (state.message === "Enemy Army Annihilated!" ? "Army Annihilated!" : "Victory!");
             
             try {
@@ -2793,7 +2822,7 @@ function checkGameOver(state) {
                 rpgState.kingExp += Math.round(enemyExp);
                 rpgState.kingExp = Math.round(rpgState.kingExp);
                 
-                while (rpgState.kingLevel < 7 && rpgState.kingExp >= KING_EXP_THRESHOLDS[rpgState.kingLevel]) {
+                while (rpgState.kingLevel < rpgState.maxKingLevel && rpgState.kingExp >= KING_EXP_THRESHOLDS[rpgState.kingLevel]) {
                     rpgState.kingLevel++;
                     rpgState.pendingSkillSelections = (rpgState.pendingSkillSelections || 0) + 1;
                     console.log(`King leveled up to ${rpgState.kingLevel}!`);

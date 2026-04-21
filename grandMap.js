@@ -51,12 +51,34 @@ const grandMap = {
             this.height = savedState.height || 15;
             this.seed = savedState.seed || Math.random() * 10000;
             this.generateCenters();
+            this.ensureFinalBoss();
         } else {
             this.currentX = 0;
             this.currentY = 0;
             this.width = 15;
             this.height = 15;
             this.generateMap();
+        }
+    },
+
+    ensureFinalBoss() {
+        const centerX = Math.floor(this.width / 2);
+        const centerY = Math.floor(this.height / 2);
+        if (this.map[centerY] && this.map[centerY][centerX]) {
+            const bossNode = this.map[centerY][centerX];
+            if (!bossNode.difficulty || bossNode.difficulty.name !== "Final Boss") {
+                bossNode.enemyPower = 80;
+                bossNode.enemyFood = 9999999;
+                bossNode.rewardCap = 0;
+                bossNode.rewards = null;
+                bossNode.difficulty = {
+                    enemyValue: 80,
+                    rewardCap: 0,
+                    name: "Final Boss",
+                    description: "The ultimate challenge."
+                };
+                bossNode.board = 'Standard';
+            }
         }
     },
 
@@ -158,6 +180,9 @@ const grandMap = {
             this.map[0][0].cleared = true;
             this.map[0][0].enemyPower = 0;
         }
+        
+        // Final Boss Node
+        this.ensureFinalBoss();
     },
 
     // Generate a node for a specific coordinate
@@ -207,9 +232,7 @@ const grandMap = {
         else if (rand < 0.90) board = 'Desert';
         else board = 'Market';
         
-        // Determine Difficulty based on distance from 0,0
-        const distance = Math.abs(x) + Math.abs(y);
-
+        // Determine Difficulty
         const difficulties = window.difficulties || [];
         let difficultyProfile = { enemyValue: 5, rewardCap: 10, name: "Unknown", description: "Unknown Region" };
         
@@ -221,16 +244,17 @@ const grandMap = {
                 description: "A safe haven to hire mercenaries." 
             };
         } else if (difficulties.length > 0) {
-            // Randomize difficulty with a spread based on distance
-            // Near the start, keep difficulties low. Farther away, increase the max and min possible difficulties.
-            const maxIndex = Math.min(difficulties.length - 1, Math.floor(distance / 1.5) + 2);
-            const minIndex = Math.max(0, Math.floor(distance / 3) - 1);
+            // Spread powerful squares equally throughout the map
+            // Keep the immediate starting area easier so the player can begin
+            const distance = Math.abs(x) + Math.abs(y);
+            let index;
             
-            const randomFactor = getDeterministicRandom(2);
-            let index = Math.floor(minIndex + randomFactor * (maxIndex - minIndex + 1));
-            
-            if (index > difficulties.length - 1) index = difficulties.length - 1;
-            if (index < 0) index = 0;
+            if (distance <= 2) {
+                const maxIndex = Math.min(difficulties.length - 1, 3);
+                index = Math.floor(getDeterministicRandom(2) * (maxIndex + 1));
+            } else {
+                index = Math.floor(getDeterministicRandom(2) * difficulties.length);
+            }
             
             difficultyProfile = difficulties[index];
         }

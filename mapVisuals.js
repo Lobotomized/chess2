@@ -326,7 +326,13 @@ function showMapModal() {
              50% { transform: scale(1.1); filter: drop-shadow(0 0 20px gold); }
              100% { transform: scale(1); filter: drop-shadow(0 0 10px gold); }
          }
-     `;
+
+         @keyframes pulseBossKing {
+             0% { transform: scale(1); filter: drop-shadow(0 0 10px red); }
+             50% { transform: scale(1.1); filter: drop-shadow(0 0 20px red); }
+             100% { transform: scale(1); filter: drop-shadow(0 0 10px red); }
+         }
+      `;
     
     // Set grid columns
      const mapWidth = grandMap.width || 10;
@@ -410,15 +416,17 @@ function showMapModal() {
                 // However, LS showed public folder. Server likely maps /static to public.
                 const iconPath = `/static/${fSrc}/${regionIconName}`;
                 
+                // Difficulty Icons Mapping
+                const diffName = node.difficulty ? node.difficulty.name : '';
+                let isFinalBossNode = diffName === 'Final Boss';
+
                 // Top Right Region Indicator
-                const regionIndicatorHtml = `
+                const regionIndicatorHtml = isFinalBossNode ? '' : `
                     <div style="position:absolute; top: 8px; right: 8px; width: 32px; height: 32px; background: rgba(255,255,255,0.7); border: 2px solid rgba(0,0,0,0.3); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 20;">
                         <img src="${iconPath}" style="width: 80%; height: 80%; object-fit: contain; filter: drop-shadow(1px 1px 1px black);" title="${region} Territory">
                     </div>
                 `;
 
-                // Difficulty Icons Mapping
-                const diffName = node.difficulty ? node.difficulty.name : '';
                 let specialIcon = '';
                 
                 if (node.board === 'Market') specialIcon = '🛒';
@@ -426,7 +434,7 @@ function showMapModal() {
                 // For now, let's use the region image as the base for all combat nodes.
                 // Maybe overlay a "Crown" for bosses?
                 
-                let isBoss = diffName.includes('King') || diffName.includes('Royal') || diffName.includes('Warlord') || diffName.includes('End');
+                let isBoss = diffName.includes('Boss') || diffName.includes('King') || diffName.includes('Royal') || diffName.includes('Warlord') || diffName.includes('End');
 
                 // Status Overrides
                 let isCurrent = node.x === grandMap.currentX && node.y === grandMap.currentY;
@@ -434,6 +442,9 @@ function showMapModal() {
                 if (isCurrent) {
                     // Player Position - Show King!
                     icon = `<img src="/static/lg/whiteKing.png" style="width:90%; height:90%; object-fit:contain; filter: drop-shadow(0 0 10px gold); animation: pulseKing 2s infinite;">`;
+                } else if (isFinalBossNode && !node.cleared) {
+                    // Final Boss - Show Pulsing Black King
+                    icon = `<img src="/static/lg/blackKing.png" style="width:90%; height:90%; object-fit:contain; filter: drop-shadow(0 0 10px red); animation: pulseBossKing 2s infinite;">`;
                 } else if (node.cleared) {
                      icon = '🏳️'; // Cleared/Conquered
                 } else if (node.board === 'Market') {
@@ -451,20 +462,24 @@ function showMapModal() {
                 
                 // Tooltip
                 const desc = node.difficulty ? node.difficulty.description : '';
-                cell.title = `${region} Region\nDifficulty: ${diffName} (Power: ${node.enemyPower})\nReward Cap: ${node.rewardCap}\n${desc}`;
+                if (isFinalBossNode) {
+                    cell.title = `${region} Region\nDifficulty: ${diffName} (Power: ${node.enemyPower})\n${desc}`;
+                } else {
+                    cell.title = `${region} Region\nDifficulty: ${diffName} (Power: ${node.enemyPower})\nReward Cap: ${node.rewardCap}\n${desc}`;
+                }
 
                 let contentHtml = `<div class="fire-container"></div>
                 <div style="position:relative; width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:space-between; padding: 10px; z-index: 2;">`;
                 
                 // Main Icon
-                if (isCurrent) {
-                    // Player: Keep centered and prominent
+                if (isCurrent || isFinalBossNode) {
+                    // Player or Final Boss: Keep centered and prominent
                     contentHtml += `<div class="map-cell-icon" style="flex-grow:1; display:flex; align-items:center; justify-content:center; width:100%; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.5)); transform: scale(1.0);">${icon}</div>`;
                 }
                 
                 // Rewards Display
                 let rewardsHtml = '';
-                if (!node.cleared && node.rewards && node.board !== 'Market') {
+                if (!node.cleared && node.rewards && node.board !== 'Market' && !isFinalBossNode) {
                      const r = node.rewards;
                      let parts = [];
                      const rosterFull = typeof rpgState !== 'undefined' && rpgState.playerRoster && rpgState.playerRoster.length >= 24;
@@ -714,7 +729,9 @@ function showMapCellPopup(node, grandMap) {
     if (node.board === 'Market') {
          content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#fff9c4; color:#f57f17;">ℹ️ Market Info</button>`;
     } else {
-         content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e1f5fe; color:#0277bd;">ℹ️ Rewards Info</button>`;
+         if (diffName !== 'Final Boss') {
+             content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e1f5fe; color:#0277bd;">ℹ️ Rewards Info</button>`;
+         }
          content += `<button id="popupEnemyBtn" style="${infoBtnStyle} background:#f3e5f5; color:#7b1fa2;">👁️ Scout Enemies</button>`;
     }
     
@@ -836,46 +853,48 @@ function showMapCellPopup(node, grandMap) {
     }
     
     const infoBtn = document.getElementById('popupInfoBtn');
-    infoBtn.onclick = () => {
-        let rewardsText = `<p>No rewards info available.</p>`;
-        
-        if (node.board === 'Market') {
-            rewardsText = `
-                <div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3);">
-                    <p style="margin-top:0;">This is a <strong>Mercenary Market</strong>.</p>
-                    <p>You can spend your Gold 💰 here to hire new units for your army.</p>
-                    <p style="margin-bottom:0;">It is a safe zone (no battle).</p>
+    if (infoBtn) {
+        infoBtn.onclick = () => {
+            let rewardsText = `<p>No rewards info available.</p>`;
+            
+            if (node.board === 'Market') {
+                rewardsText = `
+                    <div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3);">
+                        <p style="margin-top:0;">This is a <strong>Mercenary Market</strong>.</p>
+                        <p>You can spend your Gold 💰 here to hire new units for your army.</p>
+                        <p style="margin-bottom:0;">It is a safe zone (no battle).</p>
+                    </div>
+                `;
+            } else if (node.rewards) {
+                const r = node.rewards;
+                const rosterFull = typeof rpgState !== 'undefined' && rpgState.playerRoster && rpgState.playerRoster.length >= 24;
+                const hasPiece = r.pieces && r.pieces.length > 0;
+                
+                rewardsText = `
+                    <div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3);">
+                `;
+                
+                if (hasPiece && !rosterFull) {
+                     rewardsText += `<p style="margin-top:0;"><strong>Unit:</strong> ${r.specificPiece ? r.specificPiece.replace('Factory','') : 'Unknown'} ♟️</p>`;
+                } else {
+                     rewardsText += `<p style="margin-top:0;"><strong>Gold:</strong> ${r.gold} 💰</p>`;
+                     if (hasPiece) {
+                         // If roster is full, they still see the unit they missed or it just falls back to gold?
+                         // Actually, if roster is full, they get gold instead. Let's just show Gold.
+                     }
+                }
+                rewardsText += `</div>`;
+            }
+            
+            popup.innerHTML = `
+                <h3 style="color:${node.board === 'Market' ? '#f57f17' : '#0277bd'}; border-bottom: 2px solid ${node.board === 'Market' ? '#f57f17' : '#0277bd'}; padding-bottom: 5px;">${node.board === 'Market' ? 'Market Information' : 'Reward Information'}</h3>
+                ${rewardsText}
+                <div style="margin-top:15px; padding-top:15px; border-top: 1px solid rgba(93, 64, 55, 0.3);">
+                    <button onclick="document.getElementById('mapCellPopup').remove()" style="padding: 8px 16px; background:#e6d5ac; border:2px solid #5d4037; color:#4e342e; border-radius:4px; cursor:pointer; font-weight:bold; font-family: 'Georgia', serif;">Close</button>
                 </div>
             `;
-        } else if (node.rewards) {
-            const r = node.rewards;
-            const rosterFull = typeof rpgState !== 'undefined' && rpgState.playerRoster && rpgState.playerRoster.length >= 24;
-            const hasPiece = r.pieces && r.pieces.length > 0;
-            
-            rewardsText = `
-                <div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3);">
-            `;
-            
-            if (hasPiece && !rosterFull) {
-                 rewardsText += `<p style="margin-top:0;"><strong>Unit:</strong> ${r.specificPiece ? r.specificPiece.replace('Factory','') : 'Unknown'} ♟️</p>`;
-            } else {
-                 rewardsText += `<p style="margin-top:0;"><strong>Gold:</strong> ${r.gold} 💰</p>`;
-                 if (hasPiece) {
-                     // If roster is full, they still see the unit they missed or it just falls back to gold?
-                     // Actually, if roster is full, they get gold instead. Let's just show Gold.
-                 }
-            }
-            rewardsText += `</div>`;
-        }
-        
-        popup.innerHTML = `
-            <h3 style="color:${node.board === 'Market' ? '#f57f17' : '#0277bd'}; border-bottom: 2px solid ${node.board === 'Market' ? '#f57f17' : '#0277bd'}; padding-bottom: 5px;">${node.board === 'Market' ? 'Market Information' : 'Reward Information'}</h3>
-            ${rewardsText}
-            <div style="margin-top:15px; padding-top:15px; border-top: 1px solid rgba(93, 64, 55, 0.3);">
-                <button onclick="document.getElementById('mapCellPopup').remove()" style="padding: 8px 16px; background:#e6d5ac; border:2px solid #5d4037; color:#4e342e; border-radius:4px; cursor:pointer; font-weight:bold; font-family: 'Georgia', serif;">Close</button>
-            </div>
-        `;
-    };
+        };
+    }
     
     const enemyBtn = document.getElementById('popupEnemyBtn');
     if (enemyBtn) {

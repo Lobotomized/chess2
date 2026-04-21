@@ -617,6 +617,14 @@
         <button onclick="closeWinScreen()" style="padding: 10px 20px; cursor: pointer;">Return to Map</button>
     </dialog>
 
+    <!-- Game Complete Modal -->
+    <dialog id="gameCompleteDialog" oncancel="event.preventDefault(); clearProgress(); location.reload();">
+        <h2>Campaign Complete!</h2>
+        <img src="/static/youWin.jpg" alt="You Win" style="max-width: 100%; height: auto; margin-bottom: 15px; border-radius: 12px;">
+        <p>You have defeated the Final Boss and conquered the Grand Map.</p>
+        <button onclick="clearProgress(); location.reload();" style="padding: 10px 20px; cursor: pointer;">Finish</button>
+    </dialog>
+
     <!-- Shop Modal -->
     <dialog id="shopDialog" oncancel="event.preventDefault(); document.getElementById('shopDialog').close(); showMapModal();">
         <h2>Mercenary Market</h2>

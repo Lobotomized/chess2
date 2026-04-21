@@ -1,8 +1,9 @@
 const RPGStats = {
     // Movement costs
-    foodLostOnMovement: 4,
+    foodLostOnMovement: 5,
     additionalGoldPerWin:0,
     additionalFoodPerWin:0,
+    maxNumberOfPiecesToOwn:8,
     movementFreedom: [
             { name: "North", dx: 0, dy: -1 },
             { name: "South", dx: 0, dy: 1 },
@@ -19,8 +20,26 @@ const RPGSKILLS = [
     { 
         name: "Nomad", 
         maxLevel: 3,
-        getDescription: (level) => `Movement costs ${level === 1 ? '3' : level === 2 ? '2' : '0'} food.`,
-        apply: (level) => { RPGStats.foodLostOnMovement = level === 1 ? 3 : level === 2 ? 2 : 0; } 
+        getDescription: (level) => {
+            let cost;
+            if (level === 1) {
+                cost = '2';
+            } else if (level === 2) {
+                cost = '3';
+            } else {
+                cost = '0';
+            }
+            return `Movement costs ${cost} food.`;
+        },
+        apply: (level) => {
+            if (level === 1) {
+                RPGStats.foodLostOnMovement = 3;
+            } else if (level === 2) {
+                RPGStats.foodLostOnMovement = 1;
+            } else {
+                RPGStats.foodLostOnMovement = 0;
+            }
+        }
     },
     { 
         name: "Bounty Hunter", 
@@ -84,6 +103,20 @@ const RPGSKILLS = [
         apply: (level) => { /* Applied instantly in rpg.js */ } 
     },
     { 
+        name: "Leadership", 
+        maxLevel: 3,
+        getDescription: (level) => `Allows you to have ${level === 1 ? '12' : level === 2 ? '18' : '24'} pieces in your reserve + army.`,
+        apply: (level) => { 
+            if (level === 1) {
+                RPGStats.maxNumberOfPiecesToOwn = 12;
+            } else if (level === 2) {
+                RPGStats.maxNumberOfPiecesToOwn = 18;
+            } else if (level >= 3) {
+                RPGStats.maxNumberOfPiecesToOwn = 24;
+            }
+        } 
+    },
+    { 
         name: "Tactics", 
         maxLevel: 1,
         getDescription: (level) => "The King can be freely placed anywhere in the backline.",
@@ -92,7 +125,7 @@ const RPGSKILLS = [
 ];
 
 function resetRPGStats() {
-    RPGStats.foodLostOnMovement = 4;
+    RPGStats.foodLostOnMovement = 5;
     RPGStats.additionalGoldPerWin = 0;
     RPGStats.additionalFoodPerWin = 0;
     RPGStats.movementFreedom = [
@@ -105,6 +138,7 @@ function resetRPGStats() {
     RPGStats.startingGold = 0;
     RPGStats.startingFood = 100;
     RPGStats.kingLockedToRight = true;
+    RPGStats.maxNumberOfPiecesToOwn = 8;
 }
 
 function applyRPGSkill(skillName) {
