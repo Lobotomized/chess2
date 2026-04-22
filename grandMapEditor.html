@@ -362,6 +362,7 @@
                     <option value="market">Place Market</option>
                     <option value="boss">Place Boss</option>
                     <option value="start">Set Start Node</option>
+                    <option value="customArmy">Custom Enemy Army</option>
                 </select>
 
                 <!-- Tool Options: Board -->
@@ -638,8 +639,10 @@
             } else if (tool === 'start') {
                 mapData.startX = x;
                 mapData.startY = y;
+            } else if (tool === 'customArmy') {
+                openCustomArmyModal(node);
+                return; // don't render Grid yet
             }
-            
             renderGrid();
         }
 
@@ -720,7 +723,17 @@
                         marketInd.style.fontSize = '30px';
                         marketInd.innerText = '🛒';
                         cell.appendChild(marketInd);
-                    } else if (!node.isBoss && (x !== mapData.startX || y !== mapData.startY)) {
+                    } 
+                    
+                    if (node.customArmy) {
+                        const armyInd = document.createElement('div');
+                        armyInd.className = 'indicator boss-indicator'; // Centered
+                        armyInd.style.fontSize = '30px';
+                        armyInd.innerText = '♟️';
+                        cell.appendChild(armyInd);
+                    } 
+                    
+                    if (!node.isBoss && (x !== mapData.startX || y !== mapData.startY)) {
                         const powerInd = document.createElement('div');
                         powerInd.className = 'indicator power-indicator';
                         powerInd.style.background = 'rgba(0,0,0,0.6)';
@@ -779,6 +792,9 @@
                     }
                     if (n.board === 'Market') {
                         exportNode.difficulty = { name: "Marketplace" };
+                    }
+                    if (n.customArmy) {
+                        exportNode.customArmy = n.customArmy;
                     }
                     
                     if (x === mapData.startX && y === mapData.startY) {
@@ -848,8 +864,157 @@
         }
 
         // Run on load
-        window.onload = init;
+        window.onload = () => {
+            init();
+            initCustomArmyModal();
+        };
+
+        const popularEnemyFactories = [
+            { name: "Pawn", value: "rpgPawnFactory" },
+            { name: "Knight", value: "knightFactory" },
+            { name: "Bishop", value: "bishopFactory" },
+            { name: "Rook", value: "rookFactory" },
+            { name: "Queen", value: "queenFactory" },
+            { name: "King", value: "simpleKingFactory" },
+            { name: "Ant", value: "rpgAntFactory" },
+            { name: "Spider", value: "spiderFactory" },
+            { name: "Goliath Bug", value: "goliathBugFactory" },
+            { name: "Queen Bug", value: "rpgQueenbugFactory" },
+            { name: "Cyborg", value: "cyborgFactory" },
+            { name: "Juggernaut", value: "juggernautFactory" },
+            { name: "Bootvessel", value: "bootvesselFactory" },
+            { name: "Executor", value: "executorFactory" },
+            { name: "Horse", value: "horseFactory" },
+            { name: "Pig", value: "pigFactory" },
+            { name: "Clown", value: "clownFactory" },
+            { name: "Ghost", value: "ghostFactory" },
+            { name: "Swordsman", value: "swordsMen" },
+            { name: "Pikeman", value: "pikeman" },
+            { name: "Dragon", value: "dragonFactory" }
+        ];
+
+        let currentCustomArmy = [];
+        let editingNodeForArmy = null;
+
+        function initCustomArmyModal() {
+            const selector = document.getElementById('pieceSelector');
+            popularEnemyFactories.forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p.value;
+                opt.textContent = p.name;
+                selector.appendChild(opt);
+            });
+        }
+
+        function getIconForFactory(factory) {
+            // Rough mapping based on existing patterns
+            let iconName = factory.replace('rpg', '').replace('Factory', '');
+            // Capitalize first letter
+            iconName = iconName.charAt(0).toUpperCase() + iconName.slice(1);
+            if (iconName === 'SwordsMen') return 'blackSwordsmen.png';
+            if (iconName === 'Pikeman') return 'blackPikeman.png';
+            return 'black' + iconName + '.png';
+        }
+
+        function renderArmyBoard() {
+            const board = document.getElementById('armyBoard');
+            board.innerHTML = '';
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 8; x++) {
+                    const square = document.createElement('div');
+                    square.style.width = '40px';
+                    square.style.height = '40px';
+                    square.style.boxSizing = 'border-box';
+                    square.style.border = '1px solid rgba(0,0,0,0.1)';
+                    // Light/dark pattern
+                    if ((x + y) % 2 === 0) square.style.background = 'var(--board-light)';
+                    else square.style.background = 'var(--board-dark)';
+
+                    square.dataset.x = x;
+                    square.dataset.y = y;
+
+                    // Check if piece exists
+                    const piece = currentCustomArmy.find(p => p.x === x && p.y === y);
+                    if (piece) {
+                        const img = document.createElement('img');
+                        img.src = '/static/' + getIconForFactory(piece.factory);
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'contain';
+                        img.style.pointerEvents = 'none';
+                        square.appendChild(img);
+                    }
+
+                    square.onclick = () => handleArmyBoardClick(x, y);
+                    board.appendChild(square);
+                }
+            }
+        }
+
+        function handleArmyBoardClick(x, y) {
+            const existingIndex = currentCustomArmy.findIndex(p => p.x === x && p.y === y);
+            if (existingIndex > -1) {
+                // Remove piece
+                currentCustomArmy.splice(existingIndex, 1);
+            } else {
+                // Add piece
+                const factory = document.getElementById('pieceSelector').value;
+                currentCustomArmy.push({ factory, x, y, color: 'black' });
+            }
+            renderArmyBoard();
+        }
+
+        function openCustomArmyModal(node) {
+            editingNodeForArmy = node;
+            currentCustomArmy = node.customArmy ? JSON.parse(JSON.stringify(node.customArmy)) : [];
+            renderArmyBoard();
+            document.getElementById('customArmyModal').showModal();
+        }
+
+        function saveCustomArmy() {
+            if (currentCustomArmy.length > 0) {
+                editingNodeForArmy.customArmy = JSON.parse(JSON.stringify(currentCustomArmy));
+            } else {
+                delete editingNodeForArmy.customArmy;
+            }
+            document.getElementById('customArmyModal').close();
+            renderGrid();
+        }
+
+        function clearCustomArmy() {
+            delete editingNodeForArmy.customArmy;
+            currentCustomArmy = [];
+            document.getElementById('customArmyModal').close();
+            renderGrid();
+        }
     </script>
     <script src="/src/auth.js"></script>
 </body>
+<dialog id="customArmyModal" class="modal" style="border:none; border-radius:10px; padding:20px; background:var(--board-light); box-shadow:0 5px 15px rgba(0,0,0,0.5);">
+    <div style="display:flex; flex-direction:column; gap:15px; width:450px;">
+        <h2 style="margin:0; text-align:center;">Edit Custom Enemy Army</h2>
+        <p style="margin:0; font-size:14px; text-align:center;">Select a piece, then click on the board below to place it. Click an existing piece to remove it.</p>
+        
+        <div style="display:flex; justify-content:center; gap:10px; align-items:center;">
+            <label for="pieceSelector" style="font-weight:bold;">Piece:</label>
+            <select id="pieceSelector" style="padding:5px; border-radius:5px; border:2px solid var(--border-color); font-family:inherit;">
+                <!-- Populated via JS -->
+            </select>
+        </div>
+
+        <div id="armyBoardContainer" style="display:flex; justify-content:center;">
+            <div id="armyBoard" style="display:grid; grid-template-columns:repeat(8, 40px); grid-template-rows:repeat(8, 40px); border:2px solid var(--border-color); background:var(--board-dark);">
+                <!-- 64 squares -->
+            </div>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:10px;">
+            <button onclick="clearCustomArmy()" class="btn" style="background:#cc5449; color:white;">Clear (Use Random)</button>
+            <div style="display:flex; gap:10px;">
+                <button onclick="document.getElementById('customArmyModal').close()" class="btn" style="background:#aaa;">Cancel</button>
+                <button onclick="saveCustomArmy()" class="btn" style="background:var(--highlight); color:white;">Save Army</button>
+            </div>
+        </div>
+    </div>
+</dialog>
 </html>

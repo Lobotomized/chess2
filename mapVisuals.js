@@ -902,7 +902,7 @@ function showMapCellPopup(node, grandMap) {
             let enemiesHtml = `<div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3); max-height:300px; overflow-y:auto; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">`;
             
             // If the node doesn't have an army generated yet, generate it temporarily for preview
-            let previewArmy = node.army;
+            let previewArmy = node.customArmy || node.army;
             if (!previewArmy || previewArmy.length === 0) {
                 if (typeof generateRandomArmy === 'function') {
                     const result = generateRandomArmy(node.enemyPower || 5, true, node.region);
@@ -913,19 +913,21 @@ function showMapCellPopup(node, grandMap) {
             }
 
             if (previewArmy && previewArmy.length > 0) {
-                previewArmy.forEach(piece => {
+                previewArmy.forEach(pieceData => {
+                    const pieceFactory = typeof pieceData === 'object' && pieceData !== null ? pieceData.factory : pieceData;
+                    
                     // Try to get icon
                     let iconUrl = '';
                     try {
-                        const p = window[piece]('black', 0, 0);
+                        const p = window[pieceFactory]('black', 0, 0);
                         if (p && p.icon) {
                             iconUrl = `/static/${p.icon}`;
                         }
                     } catch(e) {
-                        console.warn('Could not load piece for enemy preview:', piece);
+                        console.warn('Could not load piece for enemy preview:', pieceFactory);
                     }
                     
-                    const name = piece.replace('Factory', '');
+                    const name = pieceFactory.replace('Factory', '');
                     if (iconUrl) {
                         enemiesHtml += `
                             <div style="display:flex; flex-direction:column; align-items:center; background:#fdf6e3; padding:5px; border-radius:4px; width:70px; border: 1px solid rgba(93, 64, 55, 0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.1);">

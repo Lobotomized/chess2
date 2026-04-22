@@ -781,9 +781,11 @@ function showArmyInfo(army) {
     // The user requested "a series of modals you can click through"
     // So we will show them one by one.
     
+    // Extract factory names if army contains custom objects
+    const factoryNames = army.map(item => typeof item === 'object' && item !== null ? item.factory : item).filter(Boolean);
     
     // We'll define a recursive function to show them in sequence
-    const uniqueFactories = [...new Set(army)];
+    const uniqueFactories = [...new Set(factoryNames)];
     let currentIndex = 0;
     
     // Disable clicks on options while info modal is open
@@ -1345,7 +1347,10 @@ function startLevel(level, difficultyOption) {
     }
     
     let enemyArmy;
-    if (difficultyOption && difficultyOption.army) {
+    if (difficultyOption && difficultyOption.node && difficultyOption.node.customArmy) {
+        // Use custom placed army
+        enemyArmy = difficultyOption.node.customArmy;
+    } else if (difficultyOption && difficultyOption.army) {
         // Use pre-generated army
         enemyArmy = difficultyOption.army;
         // If it was a node, update the node's cleared status later? No, that's done in win condition.
@@ -1524,42 +1529,56 @@ function setupBoard(shapeName = 'Standard') {
     placeArmy(playerSplit.back, 'white', [maxY], maxX); 
     
     // Place Enemy Army (Black)
-    // Front Line: Row 1 (Pawns)
-    // Back Line: Row 0 (Rest)
-    const enemySplit = splitArmy(rpgState.enemyRoster, false);
-    placeArmy(enemySplit.front, 'black', [1], maxX);
-    
-    // Randomize backline (King and elite units)
-    // Ensure King is not lost if roster exceeds available squares
-    const availableSlots = maxX + 1;
-    let backline = enemySplit.back;
-
-    // Separate King
-    const kings = backline.filter(u => u && u.toLowerCase().includes('king'));
-    const others = backline.filter(u => u && !u.toLowerCase().includes('king'));
-
-    // If total exceeds slots, prioritize Kings and trim others
-    if (kings.length + others.length > availableSlots) {
-        // Keep all kings, trim others
-        const allowedOthersCount = Math.max(0, availableSlots - kings.length);
-        // Randomly select which others to keep
-        for (let i = others.length - 1; i > 0; i--) {
-            const j = Math.floor(Math.random() * (i + 1));
-            [others[i], others[j]] = [others[j], others[i]];
+    if (rpgState.enemyRoster && rpgState.enemyRoster.length > 0 && typeof rpgState.enemyRoster[0] === 'object') {
+        // Custom Manual Placement
+        for (const pData of rpgState.enemyRoster) {
+            if (pData.factory && typeof window[pData.factory] === 'function') {
+                const isValidSquare = hotseatGame.state.board.some(sq => sq.x === pData.x && sq.y === pData.y);
+                if (isValidSquare) {
+                    const piece = window[pData.factory]('black', pData.x, pData.y);
+                    hotseatGame.state.pieces.push(piece);
+                }
+            }
         }
-        others.splice(allowedOthersCount);
-    }
+    } else {
+        // Standard random generation split
+        // Front Line: Row 1 (Pawns)
+        // Back Line: Row 0 (Rest)
+        const enemySplit = splitArmy(rpgState.enemyRoster, false);
+        placeArmy(enemySplit.front, 'black', [1], maxX);
+        
+        // Randomize backline (King and elite units)
+        // Ensure King is not lost if roster exceeds available squares
+        const availableSlots = maxX + 1;
+        let backline = enemySplit.back;
 
-    // Combine
-    backline = [...kings, ...others];
+        // Separate King
+        const kings = backline.filter(u => u && u.toLowerCase().includes('king'));
+        const others = backline.filter(u => u && !u.toLowerCase().includes('king'));
 
-    // Shuffle
-    for (let i = backline.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [backline[i], backline[j]] = [backline[j], backline[i]];
+        // If total exceeds slots, prioritize Kings and trim others
+        if (kings.length + others.length > availableSlots) {
+            // Keep all kings, trim others
+            const allowedOthersCount = Math.max(0, availableSlots - kings.length);
+            // Randomly select which others to keep
+            for (let i = others.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [others[i], others[j]] = [others[j], others[i]];
+            }
+            others.splice(allowedOthersCount);
+        }
+
+        // Combine
+        backline = [...kings, ...others];
+
+        // Shuffle
+        for (let i = backline.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [backline[i], backline[j]] = [backline[j], backline[i]];
+        }
+        
+        placeArmy(backline, 'black', [0], maxX);
     }
-    
-    placeArmy(backline, 'black', [0], maxX);
 }
 
 function placeArmy(roster, color, rows, maxX = 7) {
@@ -2892,7 +2911,7 @@ function checkGameOver(state) {
                 const currentNode = grandMap.map[grandMap.currentY][grandMap.currentX];
                 if (currentNode) {
                     currentNode.cleared = true;
-                    if (grandMap.currentX === Math.floor(grandMap.width / 2) && grandMap.currentY === Math.floor(grandMap.height / 2)) {
+                    if (currentNode.difficulty && currentNode.difficulty.name === "Final Boss") {
                         isFinalBoss = true;
                     }
                 }
@@ -2921,9 +2940,12 @@ function checkGameOver(state) {
                 let enemyExp = 0;
                 if (rpgState.enemyRoster && rpgState.enemyRoster.length > 0) {
                     rpgState.enemyRoster.forEach(piece => {
-                        // Exclude the king from experience calculation
-                        if (piece !== 'kingFactory' && piece !== 'medievalKingFactory' && piece !== 'bugKingFactory' && piece !== 'promotersKingFactory' && !piece.toLowerCase().includes('king')) {
-                            enemyExp += getPieceValue(piece);
+                        let pieceName = typeof piece === 'object' && piece !== null ? piece.factory : piece;
+                        if (pieceName) {
+                            // Exclude the king from experience calculation
+                            if (pieceName !== 'kingFactory' && pieceName !== 'medievalKingFactory' && pieceName !== 'bugKingFactory' && pieceName !== 'promotersKingFactory' && !pieceName.toLowerCase().includes('king')) {
+                                enemyExp += getPieceValue(pieceName);
+                            }
                         }
                     });
                 } else if (rpgState.currentEnemyValue) {
