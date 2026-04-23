@@ -3,6 +3,7 @@ const RPGStats = {
     foodLostOnMovement: 5,
     additionalGoldPerWin:0,
     additionalFoodPerWin:0,
+    additionalExperiencePerWin:0,
     maxNumberOfPiecesToOwn:8,
     movementFreedom: [
             { name: "North", dx: 0, dy: -1 },
@@ -14,9 +15,17 @@ const RPGStats = {
     startingGold: 0,
     startingFood: 100,
     kingLockedToRight: true,
+    tacticsLevel: 0,
+    scoutingLevel: 0,
 };
 
 const RPGSKILLS = [
+    { 
+        name: "Scouting", 
+        maxLevel: 3,
+        getDescription: (level) => level === 1 ? "You can see enemy pieces on the map." : level === 2 ? "You can see what options the shops have." : "You can see the square terrain (woods, fountains, etc.).",
+        apply: (level) => { RPGStats.scoutingLevel = level; } 
+    },
     { 
         name: "Nomad", 
         maxLevel: 3,
@@ -118,9 +127,22 @@ const RPGSKILLS = [
     },
     { 
         name: "Tactics", 
-        maxLevel: 1,
-        getDescription: (level) => "The King can be freely placed anywhere in the backline.",
-        apply: (level) => { RPGStats.kingLockedToRight = false; } 
+        maxLevel: 3,
+        getDescription: (level) => {
+            if (level === 1) return "The King can be freely placed anywhere in the backline.";
+            if (level === 2) return "You can place pieces anywhere in the backline without frontline protection.";
+            return "You can freely swap frontline and backline units.";
+        },
+        apply: (level) => { 
+            RPGStats.tacticsLevel = level;
+            RPGStats.kingLockedToRight = false;
+        } 
+    },
+    { 
+        name: "Learning", 
+        maxLevel: 3,
+        getDescription: (level) => `Gain +${level * 2} experience for every battle.`,
+        apply: (level) => { RPGStats.additionalExperiencePerWin = level * 2; } 
     },
 ];
 
@@ -128,6 +150,7 @@ function resetRPGStats() {
     RPGStats.foodLostOnMovement = 5;
     RPGStats.additionalGoldPerWin = 0;
     RPGStats.additionalFoodPerWin = 0;
+    RPGStats.additionalExperiencePerWin = 0;
     RPGStats.movementFreedom = [
         { name: "North", dx: 0, dy: -1 },
         { name: "South", dx: 0, dy: 1 },
@@ -138,14 +161,16 @@ function resetRPGStats() {
     RPGStats.startingGold = 0;
     RPGStats.startingFood = 100;
     RPGStats.kingLockedToRight = true;
+    RPGStats.tacticsLevel = 0;
     RPGStats.maxNumberOfPiecesToOwn = 8;
+    RPGStats.scoutingLevel = 0;
 }
 
 function applyRPGSkill(skillName) {
     resetRPGStats(); // Reset before applying to avoid duplicate effects
     const skill = RPGSKILLS.find(s => s.name === skillName);
     if (skill) {
-        skill.apply();
+        skill.apply(1); // Default to level 1 for backward compatibility when not passing level
     }
 }
 

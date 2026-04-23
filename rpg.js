@@ -87,12 +87,12 @@ function getPieceValue(factoryName) {
     return 1;
 }
 
-const KING_EXP_THRESHOLDS = [0, 10, 30, 60, 120, 200, 300 ]; // levels 1 to 7
+const KING_EXP_THRESHOLDS = [0, 10, 30, 60, 100, 150, 210, 280, 360, 450, 550, 660 ]; // levels 1 to 12
 
 // Global State
 const rpgState = {
     level: 1,
-    maxKingLevel: 7,
+    maxKingLevel: 12,
     kingLevel: 1,
     kingExp: 0,
     playerRoster: [], // Array of factory names
@@ -101,7 +101,8 @@ const rpgState = {
     gold: 0,
     food: 100, // Initial food
     shopOptions: [],
-    showWinScreen: false // New flag to persist win screen
+    showWinScreen: false, // New flag to persist win screen
+    boardHistory: [] // Track board states for attrition warfare
 };
 
 // --- Hotseat Game Setup (Copied/Adapted from hotseat.js) ---
@@ -303,6 +304,7 @@ function startNewGameWithMap(mapName) {
     rpgState.food = RPGStats.startingFood;
     rpgState.shopOptions = [];
     rpgState.showWinScreen = false;
+    rpgState.boardHistory = [];
     
     // Set map info so it saves correctly
     rpgState.grandMap = { predefinedMap: mapName };
@@ -457,6 +459,7 @@ function startNewGame() {
     rpgState.shopOptions = [];
     rpgState.showWinScreen = false;
     rpgState.grandMap = undefined; // Reset grand map state
+    rpgState.boardHistory = [];
     
     updateGoldDisplay();
     document.getElementById('levelDisplay').innerText = "Level: 1";
@@ -1255,10 +1258,11 @@ function startLevel(level, difficultyOption) {
         overlay.style.opacity = '0';
     }
     rpgState.level = level;
-    rpgState.mapSeed = Math.random() * 10000;
+    rpgState.mapSeed = (difficultyOption && difficultyOption.node && difficultyOption.node.mapSeed !== undefined) ? difficultyOption.node.mapSeed : Math.random() * 10000;
     rpgState.shopOptions = []; // Clear shop options to prevent reopening shop on refresh
     rpgState.showWinScreen = false; // Ensure win screen is cleared
     rpgState.gameOverSequenceStarted = false; // Reset flag for new level
+    rpgState.boardHistory = []; // Reset board history
     updateGoldDisplay();
 
     // Check if it's a market visit
@@ -1845,7 +1849,7 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
         let kingPiece = null;
         let kingOldIndex = -1;
 
-        if (RPGStats.kingLockedToRight) {
+        if (RPGStats.kingLockedToRight && RPGStats.tacticsLevel < 1) {
             // Remove King from wherever it is
             [frontPieces, backPieces, reservePieces].forEach(arr => {
                 for (let i = arr.length - 1; i >= 0; i--) {
@@ -1868,27 +1872,31 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
         // Any backline piece without a frontline piece protecting it gets moved to reserve
         for (let i = 0; i < 8; i++) {
             if (backPieces[i] !== null && (!frontPieces[i] || !frontLineFactories.includes(frontPieces[i]))) {
-                reservePieces.push(backPieces[i]);
-                backPieces[i] = null;
+                if (RPGStats.tacticsLevel < 2) {
+                    reservePieces.push(backPieces[i]);
+                    backPieces[i] = null;
+                }
             }
         }
 
         // Compact columns to the left
-        let newFront = [];
-        let newBack = [];
-        for (let i = 0; i < 8; i++) {
-            if (frontPieces[i] !== null || backPieces[i] !== null) {
-                newFront.push(frontPieces[i]);
-                newBack.push(backPieces[i]);
+        if (RPGStats.tacticsLevel < 2) {
+            let newFront = [];
+            let newBack = [];
+            for (let i = 0; i < 8; i++) {
+                if (frontPieces[i] !== null || backPieces[i] !== null) {
+                    newFront.push(frontPieces[i]);
+                    newBack.push(backPieces[i]);
+                }
             }
+            while (newFront.length < 8) newFront.push(null);
+            while (newBack.length < 8) newBack.push(null);
+            frontPieces = newFront;
+            backPieces = newBack;
         }
-        while (newFront.length < 8) newFront.push(null);
-        while (newBack.length < 8) newBack.push(null);
-        frontPieces = newFront;
-        backPieces = newBack;
 
         // Place King at kingIndexTarget
-        if (RPGStats.kingLockedToRight && kingPiece) {
+        if (RPGStats.kingLockedToRight && RPGStats.tacticsLevel < 1 && kingPiece) {
             if (backPieces[kingIndexTarget]) {
                 if (kingOldIndex !== -1 && kingOldIndex < 8 && backPieces[kingOldIndex] === null) {
                     backPieces[kingOldIndex] = backPieces[kingIndexTarget];
@@ -1902,18 +1910,18 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
         // Move any pieces in disabled slots to the reserve
         // Note: We use maxFrontline for slot availability, not activeFrontline
         for (let i = 0; i < 8; i++) {
-            if (RPGStats.kingLockedToRight) {
+            if (RPGStats.kingLockedToRight && RPGStats.tacticsLevel < 1) {
                 if (i !== kingIndexTarget && i >= Math.max(0, maxFrontline - 1) && backPieces[i]) {
                     reservePieces.push(backPieces[i]);
                     backPieces[i] = null;
                 }
             } else {
-                if (i >= maxFrontline && backPieces[i]) {
+                if (RPGStats.tacticsLevel < 2 && i >= maxFrontline && backPieces[i]) {
                     reservePieces.push(backPieces[i]);
                     backPieces[i] = null;
                 }
             }
-            if (i >= maxFrontline && frontPieces[i]) {
+            if (RPGStats.tacticsLevel < 2 && i >= maxFrontline && frontPieces[i]) {
                 reservePieces.push(frontPieces[i]);
                 frontPieces[i] = null;
             }
@@ -1953,23 +1961,25 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
             const isBackline = container === backContainer;
             const isFrontline = container === frontContainer;
             const isKing = factoryName && factoryName.toLowerCase().includes('king');
-            const disableKingDrag = RPGStats.kingLockedToRight && isKing;
+            const disableKingDrag = RPGStats.kingLockedToRight && isKing && RPGStats.tacticsLevel < 1;
             
             // Check if slot is disabled
             let isDisabled = false;
-            if (isFrontline && index >= maxFrontline) {
-                isDisabled = true;
-            }
-            if (isBackline) {
-                if (RPGStats.kingLockedToRight) {
-                    if (index === kingIndexTarget) {
-                        isDisabled = false; // King's slot
-                    } else if (index >= Math.max(0, maxFrontline - 1)) {
-                        isDisabled = true; // Only maxFrontline - 1 slots available for other backline pieces
-                    }
-                } else {
-                    if (index >= maxFrontline) {
-                        isDisabled = true; // Same availability as frontline slots
+            if (RPGStats.tacticsLevel < 2) {
+                if (isFrontline && index >= maxFrontline) {
+                    isDisabled = true;
+                }
+                if (isBackline) {
+                    if (RPGStats.kingLockedToRight && RPGStats.tacticsLevel < 1) {
+                        if (index === kingIndexTarget) {
+                            isDisabled = false; // King's slot
+                        } else if (index >= Math.max(0, maxFrontline - 1)) {
+                            isDisabled = true; // Only maxFrontline - 1 slots available for other backline pieces
+                        }
+                    } else {
+                        if (index >= maxFrontline) {
+                            isDisabled = true; // Same availability as frontline slots
+                        }
                     }
                 }
             }
@@ -2078,29 +2088,33 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                 }
 
                 // Validation: Cannot place backline piece on the frontline
-                let invalidFrontline = false;
-                for (let i = 0; i < 8; i++) {
-                    if (simFront[i] !== null && !frontLineFactories.includes(simFront[i])) {
-                        invalidFrontline = true;
-                        break;
+                if (RPGStats.tacticsLevel < 3) {
+                    let invalidFrontline = false;
+                    for (let i = 0; i < 8; i++) {
+                        if (simFront[i] !== null && !frontLineFactories.includes(simFront[i])) {
+                            invalidFrontline = true;
+                            break;
+                        }
                     }
-                }
-                if (invalidFrontline) {
-                    showNotification("Cannot place a backline piece on the frontline.", "error");
-                    return;
+                    if (invalidFrontline) {
+                        showNotification("Cannot place a backline piece on the frontline.", "error");
+                        return;
+                    }
                 }
 
                 // Validation: Cannot remove frontline piece if a backline piece is directly behind it
-                let exposed = false;
-                for (let i = 0; i < 8; i++) {
-                    if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
-                        exposed = true;
-                        break;
+                if (RPGStats.tacticsLevel < 2) {
+                    let exposed = false;
+                    for (let i = 0; i < 8; i++) {
+                        if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
+                            exposed = true;
+                            break;
+                        }
                     }
-                }
-                if (exposed) {
-                    showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
-                    return;
+                    if (exposed) {
+                        showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
+                        return;
+                    }
                 }
 
                 // Perform Swap
@@ -2288,16 +2302,18 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                     }
 
                     // Validation: Cannot remove frontline piece if a backline piece is directly behind it
-                    let exposed = false;
-                    for (let i = 0; i < 8; i++) {
-                        if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
-                            exposed = true;
-                            break;
+                    if (RPGStats.tacticsLevel < 2) {
+                        let exposed = false;
+                        for (let i = 0; i < 8; i++) {
+                            if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
+                                exposed = true;
+                                break;
+                            }
                         }
-                    }
-                    if (exposed) {
-                        showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
-                        return;
+                        if (exposed) {
+                            showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
+                            return;
+                        }
                     }
                     
                     const piece = sourceArray[sourceIndex];
@@ -2334,16 +2350,18 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                     }
 
                     // Validation: Cannot remove frontline piece if a backline piece is directly behind it
-                    let exposed = false;
-                    for (let i = 0; i < 8; i++) {
-                        if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
-                            exposed = true;
-                            break;
+                    if (RPGStats.tacticsLevel < 2) {
+                        let exposed = false;
+                        for (let i = 0; i < 8; i++) {
+                            if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
+                                exposed = true;
+                                break;
+                            }
                         }
-                    }
-                    if (exposed) {
-                        showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
-                        return;
+                        if (exposed) {
+                            showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
+                            return;
+                        }
                     }
                     
                     // Move piece to reserve
@@ -2382,16 +2400,23 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
             return;
         }
 
-        // Validation: Frontline must be a straight line without holes
-        const requiredFrontline = Math.min(8, maxFrontline);
-        for (let i = 0; i < requiredFrontline; i++) {
-            if (!frontPieces[i]) {
-                showNotification("Frontline cannot have empty slots or holes! Please fill all active frontline slots.", "error");
-                return;
+        // Validation: Frontline must be a straight line without holes (unless Tactics >= 2)
+        if (RPGStats.tacticsLevel < 2) {
+            const requiredFrontline = Math.min(8, maxFrontline);
+            for (let i = 0; i < requiredFrontline; i++) {
+                if (!frontPieces[i]) {
+                    showNotification("Frontline cannot have empty slots or holes! Please fill all active frontline slots.", "error");
+                    return;
+                }
             }
-            if (!frontLineFactories.includes(frontPieces[i])) {
-                showNotification("Only frontline units can be placed in the frontline!", "error");
-                return;
+        }
+
+        if (RPGStats.tacticsLevel < 3) {
+            for (let i = 0; i < 8; i++) {
+                if (frontPieces[i] && !frontLineFactories.includes(frontPieces[i])) {
+                    showNotification("Only frontline units can be placed in the frontline!", "error");
+                    return;
+                }
             }
         }
 
@@ -2844,6 +2869,24 @@ function showRewardModal() {
 }
 
 // --- Win Condition Helper ---
+function gainKingExperience(exp) {
+    if (typeof rpgState === 'undefined') return;
+    
+    rpgState.kingExp += Math.round(exp);
+    rpgState.kingExp = Math.round(rpgState.kingExp);
+    
+    while (rpgState.kingLevel < rpgState.maxKingLevel && rpgState.kingExp >= KING_EXP_THRESHOLDS[rpgState.kingLevel]) {
+        rpgState.kingLevel++;
+        rpgState.pendingSkillSelections = (rpgState.pendingSkillSelections || 0) + 1;
+        console.log(`King leveled up to ${rpgState.kingLevel}!`);
+    }
+}
+
+// Ensure the function is accessible globally
+if (typeof window !== 'undefined') {
+    window.gainKingExperience = gainKingExperience;
+}
+
 function checkWinCondition(state) {
 
     if (state.won) return; // Already won
@@ -2893,11 +2936,77 @@ function checkWinCondition(state) {
     }
 }
 
+function getBoardStateString(state) {
+    if (!state || !state.pieces) return '';
+    const piecesStr = state.pieces.map(p => `${p.icon},${p.x},${p.y},${p.color}`).sort().join('|');
+    return piecesStr + '|' + state.turn;
+}
+
 function checkGameOver(state) {
     if (rpgState.gameOverSequenceStarted) return; // Prevent multiple executions
 
-    checkWinCondition(state);
+    // Threefold repetition / Attrition Warfare check
+    if (!rpgState.boardHistory) rpgState.boardHistory = [];
+    const currentStateStr = getBoardStateString(state);
     
+    // Only record if the state actually changed (e.g. a turn progressed)
+    // Consecutive identical states mean the player just clicked/selected without completing a move.
+    if (rpgState.boardHistory.length === 0 || rpgState.boardHistory[rpgState.boardHistory.length - 1] !== currentStateStr) {
+        rpgState.boardHistory.push(currentStateStr);
+        
+        const occurrences = rpgState.boardHistory.filter(s => s === currentStateStr).length;
+        if (occurrences >= 3) {
+            // Use the existing confirmation modal to ask the user
+            const dialog = document.getElementById('confirmationDialog');
+            if (dialog) {
+                document.getElementById('confirmTitle').innerText = "Attrition Warfare";
+                document.getElementById('confirmMessage').innerText = "The exact same board state has occurred 3 times. Would you like to trigger Attrition Warfare? Both sides will lose food.";
+                
+                const btnYes = document.getElementById('btnConfirmYes');
+                const btnNo = document.getElementById('btnConfirmNo');
+                
+                // Clear old listeners
+                const newYes = btnYes.cloneNode(true);
+                btnYes.parentNode.replaceChild(newYes, btnYes);
+                const newNo = btnNo.cloneNode(true);
+                btnNo.parentNode.replaceChild(newNo, btnNo);
+                
+                newYes.onclick = () => {
+                    const minFood = Math.min(rpgState.food, rpgState.currentFoodReward);
+                    rpgState.food -= minFood;
+                    rpgState.currentFoodReward -= minFood;
+                    rpgState.boardHistory = []; // Reset to avoid multiple triggers
+                    updateGoldDisplay();
+                    showNotification("Attrition Warfare triggered! Both sides lost food.", "alert");
+                    dialog.close();
+                    checkWinCondition(state);
+                    checkGameEndSequence(state);
+                };
+                
+                newNo.onclick = () => {
+                    rpgState.boardHistory = []; // Reset so it doesn't immediately prompt again next click
+                    dialog.close();
+                };
+                
+                dialog.showModal();
+                return; // Stop standard checkWinCondition execution until user decides
+            } else {
+                // Fallback if modal is missing
+                const minFood = Math.min(rpgState.food, rpgState.currentFoodReward);
+                rpgState.food -= minFood;
+                rpgState.currentFoodReward -= minFood;
+                rpgState.boardHistory = [];
+                updateGoldDisplay();
+                showNotification("Attrition Warfare! Both sides lose food due to repetition.", "alert");
+            }
+        }
+    }
+
+    checkWinCondition(state);
+    checkGameEndSequence(state);
+}
+
+function checkGameEndSequence(state) {
     if (state.won) {
         rpgState.gameActive = false;
         rpgState.gameOverSequenceStarted = true; // Mark as started
@@ -2955,14 +3064,8 @@ function checkGameOver(state) {
                 }
 
                 // Add experience and check level up
-                rpgState.kingExp += Math.round(enemyExp);
-                rpgState.kingExp = Math.round(rpgState.kingExp);
-                
-                while (rpgState.kingLevel < rpgState.maxKingLevel && rpgState.kingExp >= KING_EXP_THRESHOLDS[rpgState.kingLevel]) {
-                    rpgState.kingLevel++;
-                    rpgState.pendingSkillSelections = (rpgState.pendingSkillSelections || 0) + 1;
-                    console.log(`King leveled up to ${rpgState.kingLevel}!`);
-                }
+                let totalExp = Math.round(enemyExp) + (RPGStats.additionalExperiencePerWin || 0);
+                gainKingExperience(totalExp);
 
                 // Earn Gold or Piece
                 let foodEarned = (rpgState.currentFoodReward || 0) + RPGStats.additionalFoodPerWin;

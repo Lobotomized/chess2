@@ -50,7 +50,7 @@ function showMapModal() {
         kingExpDisplay.innerText = Math.floor(rpgState.kingExp || 0);
     }
     if (kingNextExpDisplay && typeof rpgState !== 'undefined' && typeof KING_EXP_THRESHOLDS !== 'undefined') {
-        const nextThreshold = rpgState.kingLevel < 7 ? KING_EXP_THRESHOLDS[rpgState.kingLevel] : 'Max';
+        const nextThreshold = rpgState.kingLevel < rpgState.maxKingLevel ? KING_EXP_THRESHOLDS[rpgState.kingLevel] : 'Max';
         kingNextExpDisplay.innerText = nextThreshold;
     }
     
@@ -270,16 +270,23 @@ function showMapModal() {
                 conic-gradient(from 0deg at 50% 50%, rgba(0,0,0,0.2) 0deg, transparent 60deg, rgba(0,0,0,0.2) 120deg, transparent 180deg, rgba(0,0,0,0.2) 240deg, transparent 300deg, rgba(0,0,0,0.2) 360deg),
                 radial-gradient(circle at 50% 50%, #8e24aa 0%, #4a148c 100%);
         }
+
+        /* LIBRARY: Checkered wooden floor */
+        .map-cell.library { 
+            background-color: #3e2723;
+            border-color: #1b0000;
+            background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 10px, transparent 10px, transparent 20px);
+        }
         
         /* --- Region Styles (Applied when not a special terrain) --- */
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market)[data-region="Classic"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Classic"] {
             background-color: #8d6e63;
             background-image: repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(0,0,0,0.1) 20px), repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(0,0,0,0.1) 20px);
             border-color: #5d4037;
         }
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market)[data-region="Medieval"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Medieval"] {
             background-color: #78909c;
             background-image: 
                 linear-gradient(45deg, #607d8b 25%, transparent 25%, transparent 75%, #607d8b 75%, #607d8b),
@@ -289,7 +296,7 @@ function showMapModal() {
             border-color: #37474f;
         }
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market)[data-region="Insect"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Insect"] {
             background-color: #558b2f;
             background-image: radial-gradient(#33691e 15%, transparent 16%), radial-gradient(#33691e 15%, transparent 16%);
             background-size: 20px 20px;
@@ -297,7 +304,7 @@ function showMapModal() {
             border-color: #1b5e20;
         }
 
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market)[data-region="Cyborgs"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Cyborgs"] {
             background-color: #455a64;
             background-image: 
                 linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
@@ -307,7 +314,7 @@ function showMapModal() {
             box-shadow: inset 0 0 20px #000;
         }
 
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market)[data-region="Promoters"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Promoters"] {
             background-color: #c62828;
             background-image: 
                 radial-gradient(circle at 50% 50%, #b71c1c 0%, #8b0000 100%);
@@ -376,6 +383,7 @@ function showMapModal() {
                     cell.style.backgroundPosition = 'center';
                 }
                 else if (node.board === 'Market') cell.classList.add('market');
+                else if (node.board === 'Library') cell.classList.add('library');
                 else {
                     cell.classList.add('standard');
                     cell.style.backgroundImage = `url("/static/bigMap/plains1.png")`;
@@ -430,6 +438,7 @@ function showMapModal() {
                 let specialIcon = '';
                 
                 if (node.board === 'Market') specialIcon = '🛒';
+                if (node.board === 'Library') specialIcon = '📖';
                 // We prioritize region images over generic difficulty icons, but keep Boss/Special markers if needed.
                 // For now, let's use the region image as the base for all combat nodes.
                 // Maybe overlay a "Crown" for bosses?
@@ -687,6 +696,80 @@ function showMapCellPopup(node, grandMap) {
     let content = `
         <h2 style="margin-top:0; color:#5d4037; border-bottom: 2px solid #5d4037; padding-bottom: 5px;">${region}</h2>
         <h3 style="margin:10px 0; color: #8b4513;">${diffName}</h3>
+    `;
+    
+    if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 3 && node.board !== 'Market' && node.board !== 'Standard') {
+        // Pre-calculate exact layout for preview
+        let boardPreview = [];
+        for(let y=0; y<=7; y++){
+            boardPreview[y] = [];
+            for(let x=0; x<=7; x++){
+                boardPreview[y][x] = true; // default exists
+            }
+        }
+        
+        if (node.board === 'Woods') {
+            if (node.mapSeed === undefined) {
+                node.mapSeed = Math.random() * 10000;
+                if (typeof saveProgress === 'function') saveProgress();
+            }
+            const seed = node.mapSeed;
+            const candidateSquares = [];
+            for (let x = 0; x <= 7; x++) {
+                for (let y = 2; y <= 5; y++) {
+                    candidateSquares.push({ x, y });
+                }
+            }
+            let currentSeed = seed;
+            const seededRandom = () => {
+                const val = Math.sin(currentSeed++) * 10000;
+                return val - Math.floor(val);
+            };
+            for (let i = candidateSquares.length - 1; i > 0; i--) {
+                const j = Math.floor(seededRandom() * (i + 1));
+                [candidateSquares[i], candidateSquares[j]] = [candidateSquares[j], candidateSquares[i]];
+            }
+            const bushes = candidateSquares.slice(0, 6);
+            bushes.forEach(b => { boardPreview[b.y][b.x] = false; });
+        } else if (node.board === 'Fountain') {
+            // Fountain logic
+            if (node.fountainX === undefined) {
+                node.fountainX = Math.floor(Math.random() * 7);
+                if (typeof saveProgress === 'function') saveProgress();
+            }
+            const fx = node.fountainX;
+            const fy = 3;
+            boardPreview[fy][fx] = false;
+            boardPreview[fy][fx+1] = false;
+            boardPreview[fy+1][fx] = false;
+            boardPreview[fy+1][fx+1] = false;
+        }
+        
+        // Render mini board preview
+        let miniBoardHtml = `<div style="display:flex; flex-direction:column; border: 4px solid #5d4037; background: #fff; width: 240px; height: 240px; margin: 10px auto; box-shadow: 0 4px 8px rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden;">`;
+        for(let y=0; y<=7; y++){
+            miniBoardHtml += `<div style="display:flex; height: 12.5%;">`;
+            for(let x=0; x<=7; x++){
+                const isLight = (x + y) % 2 === 0;
+                const bgColor = isLight ? '#f0d9b5' : '#b58863';
+                let sqContent = '';
+                if (!boardPreview[y][x]) {
+                    if (node.board === 'Woods') sqContent = '🌲';
+                    if (node.board === 'Fountain') sqContent = '💧';
+                }
+                miniBoardHtml += `<div style="width: 12.5%; height: 100%; background: ${bgColor}; display:flex; align-items:center; justify-content:center; font-size:20px;">${sqContent}</div>`;
+            }
+            miniBoardHtml += `</div>`;
+        }
+        miniBoardHtml += `</div>`;
+        
+        content += `<p style="margin:5px 0; color: #2e7d32; font-weight: bold;">Terrain Layout: ${node.board}</p>`;
+        content += miniBoardHtml;
+    } else if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 3 && node.board !== 'Market') {
+        content += `<p style="margin:5px 0; color: #2e7d32; font-weight: bold;">Terrain: ${node.board}</p>`;
+    }
+    
+    content += `
         <p style="font-size: 14px; font-style: italic;">${node.difficulty ? node.difficulty.description : ''}</p>
         <div style="margin-top:20px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
     `;
@@ -715,6 +798,12 @@ function showMapCellPopup(node, grandMap) {
              } else {
                  content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;">🛒 Enter Market (Too Far)</button>`;
              }
+        } else if (node.board === 'Library') {
+             if (canAttack) {
+                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#bcaaa4; color:#3e2723;">📖 Enter Library</button>`;
+             } else {
+                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;">📖 Enter Library (Too Far)</button>`;
+             }
         } else {
              if (canAttack) {
                  content += `<button id="popupAttackBtn" style="${btnStyle} background:#ffcdd2; color:#c62828; border-color:#c62828;">⚔️ Attack</button>`;
@@ -727,12 +816,23 @@ function showMapCellPopup(node, grandMap) {
     // Info Button (Rewards)
     const infoBtnStyle = `padding: 10px 20px; font-weight:bold; cursor:pointer; border:2px solid #4e342e; border-radius:4px; margin-bottom: 5px; font-family: 'Georgia', serif;`;
     if (node.board === 'Market') {
-         content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#fff9c4; color:#f57f17;">ℹ️ Market Info</button>`;
+         if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 2) {
+             content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#fff9c4; color:#f57f17;">ℹ️ Market Info</button>`;
+         } else {
+             content += `<button disabled style="${infoBtnStyle} background:#e0e0e0; color:#9e9e9e; cursor:not-allowed;" title="Requires Scouting Level 2">ℹ️ Market Info (Req. Scouting Lvl 2)</button>`;
+         }
+    } else if (node.board === 'Library') {
+         content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e1f5fe; color:#0277bd;">ℹ️ Library Info</button>`;
     } else {
          if (diffName !== 'Final Boss') {
              content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e1f5fe; color:#0277bd;">ℹ️ Rewards Info</button>`;
          }
-         content += `<button id="popupEnemyBtn" style="${infoBtnStyle} background:#f3e5f5; color:#7b1fa2;">👁️ Scout Enemies</button>`;
+         
+         if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 1) {
+             content += `<button id="popupEnemyBtn" style="${infoBtnStyle} background:#f3e5f5; color:#7b1fa2;">👁️ Scout Enemies</button>`;
+         } else {
+             content += `<button disabled style="${infoBtnStyle} background:#e0e0e0; color:#9e9e9e; cursor:not-allowed;" title="Requires Scouting Level 1">👁️ Scout Enemies (Req. Scouting Lvl 1)</button>`;
+         }
     }
     
     content += `</div>
@@ -772,6 +872,36 @@ function showMapCellPopup(node, grandMap) {
                 
                  if (node.board === 'Market') {
                      option.rewardType = 'none';
+                 } else if (node.board === 'Library') {
+                     if (typeof gainKingExperience === 'function') {
+                         gainKingExperience(node.enemyPower);
+                     } else {
+                         // Fallback
+                         rpgState.kingExp += node.enemyPower;
+                     }
+                     node.cleared = true;
+                      node.enemyPower = 0;
+                      
+                      if (typeof updateGoldDisplay === 'function') updateGoldDisplay();
+                      
+                      const mapDialog = document.getElementById('mapDialog');
+                     if(mapDialog) mapDialog.close();
+                     
+                     grandMap.moveTo(node.x, node.y);
+                     if(typeof saveProgress === 'function') saveProgress();
+                     
+                     if (typeof showNotification === 'function') {
+                         showNotification(`Gained ${node.enemyPower} King Experience!`, 'success');
+                     } else if (typeof showAlert === 'function') {
+                         showAlert(`Gained ${node.enemyPower} King Experience!`);
+                     }
+                     
+                     if (typeof showSkillSelectionModal === 'function' && rpgState.pendingSkillSelections > 0) {
+                         showSkillSelectionModal();
+                     } else if (typeof showMapModal === 'function') {
+                         showMapModal();
+                     }
+                     return; // Skip startLevel
                  } else {
                      const rosterFull = rpgState.playerRoster.length >= 24;
                      if (node.rewards) {
@@ -857,12 +987,90 @@ function showMapCellPopup(node, grandMap) {
         infoBtn.onclick = () => {
             let rewardsText = `<p>No rewards info available.</p>`;
             
-            if (node.board === 'Market') {
+            if (node.board === 'Library') {
+                rewardsText = `
+                    <div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3);">
+                        <p style="margin-top:0;">This is a <strong>Library</strong>.</p>
+                        <p>Provides <strong>${node.enemyPower} King Experience</strong> instantly upon entering.</p>
+                    </div>
+                `;
+            } else if (node.board === 'Market') {
+                // Ensure shopItems are generated
+                if (!node.shopItems || node.shopItems.length === 0) {
+                    let factories = typeof marketPieceFactories !== 'undefined' ? marketPieceFactories : []; // Default fallback
+                    if (node.region && typeof regionFactories !== 'undefined' && regionFactories[node.region]) {
+                         factories = regionFactories[node.region];
+                    }
+                    let shopItems = [];
+                    for(let i=0; i<6; i++) {
+                        if (Math.random() < 0.25) { // 25% chance for food
+                            let goldCost = Math.floor(Math.random() * 10) + 2; // 2 to 11 gold
+                            const foodAmount = goldCost * 5;
+                            goldCost -= typeof RPGStats !== 'undefined' ? RPGStats.shopDiscout : 0;
+                            if(goldCost < 0) goldCost = 0;
+                            shopItems.push({ type: 'food', cost: goldCost, amount: foodAmount, bought: false });
+                        } else if (factories.length > 0) {
+                            const randomFactory = factories[Math.floor(Math.random() * factories.length)];
+                            const val = typeof getPieceValue === 'function' ? getPieceValue(randomFactory) : 5;
+                            let cost =  Math.floor(val * 5) - (typeof RPGStats !== 'undefined' ? RPGStats.shopDiscout : 0);
+                            if(cost < 0) cost = 0;
+                            shopItems.push({ type: 'unit', factory: randomFactory, cost: cost, value: val, bought: false });
+                        }
+                    }
+                    node.shopItems = shopItems;
+                    if(typeof saveProgress === 'function') saveProgress();
+                }
+                
+                let shopHtml = `<div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:10px;">`;
+                if (node.shopItems && node.shopItems.length > 0) {
+                    node.shopItems.forEach(item => {
+                        if (item.type === 'food') {
+                            shopHtml += `
+                                <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <div style="font-size:24px; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3));">🍖</div>
+                                    <div style="font-size:10px; font-weight:bold; color:#4e342e; margin-top:2px;">Rations (${item.amount})</div>
+                                    <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} 🪙</div>
+                                </div>
+                            `;
+                        } else {
+                            let iconUrl = '';
+                            try {
+                                const p = window[item.factory]('white', 0, 0);
+                                if (p && p.icon) {
+                                    iconUrl = `/static/${p.icon}`;
+                                }
+                            } catch(e) {}
+                            
+                            const name = item.factory.replace('Factory', '').replace('rpg', '');
+                            if (iconUrl) {
+                                shopHtml += `
+                                    <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                        <img src="${iconUrl}" style="width:24px; height:24px; object-fit:contain; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3)); margin: 0 auto; display: block;">
+                                        <div style="font-size:10px; font-weight:bold; color:#4e342e; margin-top:2px; word-break:break-all;">${name}</div>
+                                        <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} 🪙</div>
+                                    </div>
+                                `;
+                            } else {
+                                shopHtml += `
+                                    <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                        <span style="font-size:24px; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3));">♟️</span>
+                                        <div style="font-size:10px; font-weight:bold; color:#4e342e; margin-top:2px; word-break:break-all;">${name}</div>
+                                        <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} 🪙</div>
+                                    </div>
+                                `;
+                            }
+                        }
+                    });
+                } else {
+                    shopHtml += `<p style="color:#4e342e; width:100%;">No items available.</p>`;
+                }
+                shopHtml += `</div>`;
+
                 rewardsText = `
                     <div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3);">
                         <p style="margin-top:0;">This is a <strong>Mercenary Market</strong>.</p>
-                        <p>You can spend your Gold 💰 here to hire new units for your army.</p>
-                        <p style="margin-bottom:0;">It is a safe zone (no battle).</p>
+                        <p>Available items:</p>
+                        ${shopHtml}
                     </div>
                 `;
             } else if (node.rewards) {
@@ -886,8 +1094,12 @@ function showMapCellPopup(node, grandMap) {
                 rewardsText += `</div>`;
             }
             
+            let popupTitle = 'Reward Information';
+            if (node.board === 'Market') popupTitle = 'Market Information';
+            if (node.board === 'Library') popupTitle = 'Library Information';
+            
             popup.innerHTML = `
-                <h3 style="color:${node.board === 'Market' ? '#f57f17' : '#0277bd'}; border-bottom: 2px solid ${node.board === 'Market' ? '#f57f17' : '#0277bd'}; padding-bottom: 5px;">${node.board === 'Market' ? 'Market Information' : 'Reward Information'}</h3>
+                <h3 style="color:${node.board === 'Market' ? '#f57f17' : (node.board === 'Library' ? '#3e2723' : '#0277bd')}; border-bottom: 2px solid ${node.board === 'Market' ? '#f57f17' : (node.board === 'Library' ? '#3e2723' : '#0277bd')}; padding-bottom: 5px;">${popupTitle}</h3>
                 ${rewardsText}
                 <div style="margin-top:15px; padding-top:15px; border-top: 1px solid rgba(93, 64, 55, 0.3);">
                     <button onclick="document.getElementById('mapCellPopup').remove()" style="padding: 8px 16px; background:#e6d5ac; border:2px solid #5d4037; color:#4e342e; border-radius:4px; cursor:pointer; font-weight:bold; font-family: 'Georgia', serif;">Close</button>

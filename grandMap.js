@@ -372,7 +372,8 @@ const grandMap = {
             cleared: false,
             rewardCap: difficultyProfile.rewardCap,
             difficulty: difficultyProfile, // Keep reference for details
-            region: region
+            region: region,
+            mapSeed: getDeterministicRandom(4) * 10000
         };
         
         if (board === 'Fountain') {

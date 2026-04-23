@@ -202,15 +202,21 @@
                 conic-gradient(from 0deg at 50% 50%, rgba(0,0,0,0.2) 0deg, transparent 60deg, rgba(0,0,0,0.2) 120deg, transparent 180deg, rgba(0,0,0,0.2) 240deg, transparent 300deg, rgba(0,0,0,0.2) 360deg),
                 radial-gradient(circle at 50% 50%, #8e24aa 0%, #4a148c 100%);
         }
+
+        .map-cell.library { 
+            background-color: #3e2723;
+            border-color: #1b0000;
+            background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 10px, transparent 10px, transparent 20px);
+        }
         
         /* --- Region Styles (Applied when not a special terrain) --- */
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market)[data-region="Classic"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Classic"] {
             background-color: #8d6e63;
             background-image: repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(0,0,0,0.1) 20px), repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(0,0,0,0.1) 20px);
             border-color: #5d4037;
         }
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market)[data-region="Medieval"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Medieval"] {
             background-color: #78909c;
             background-image: 
                 linear-gradient(45deg, #607d8b 25%, transparent 25%, transparent 75%, #607d8b 75%, #607d8b),
@@ -220,7 +226,7 @@
             border-color: #37474f;
         }
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market)[data-region="Insect"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Insect"] {
             background-color: #558b2f;
             background-image: radial-gradient(#33691e 15%, transparent 16%), radial-gradient(#33691e 15%, transparent 16%);
             background-size: 20px 20px;
@@ -228,7 +234,7 @@
             border-color: #1b5e20;
         }
 
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market)[data-region="Cyborgs"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Cyborgs"] {
             background-color: #455a64;
             background-image: 
                 linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
@@ -238,7 +244,7 @@
             box-shadow: inset 0 0 20px #000;
         }
 
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market)[data-region="Promoters"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Promoters"] {
             background-color: #c62828;
             background-image: 
                 radial-gradient(circle at 50% 50%, #b71c1c 0%, #8b0000 100%);
@@ -372,6 +378,7 @@
                         <option value="Woods">Woods (Forest)</option>
                         <option value="Fountain">Fountain (Lake)</option>
                         <option value="Desert">Desert</option>
+                        <option value="Library">Library</option>
                     </select>
                 </div>
 
@@ -699,6 +706,9 @@
                     else if (node.board === 'Market') {
                         cell.classList.add('market');
                     }
+                    else if (node.board === 'Library') {
+                        cell.classList.add('library');
+                    }
                     else {
                         cell.classList.add('standard');
                         cell.style.backgroundImage = `url("/static/bigMap/plains1.png")`;
@@ -727,6 +737,14 @@
                         marketInd.style.fontSize = '30px';
                         marketInd.innerText = '🛒';
                         cell.appendChild(marketInd);
+                    } 
+                    
+                    if (node.board === 'Library') {
+                        const libInd = document.createElement('div');
+                        libInd.className = 'indicator boss-indicator'; // Centered
+                        libInd.style.fontSize = '30px';
+                        libInd.innerText = '📖';
+                        cell.appendChild(libInd);
                     } 
                     
                     if (node.customArmy) {
