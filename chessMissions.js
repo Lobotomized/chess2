@@ -67,7 +67,7 @@ const {miniChess, randomChess,  catchTheDragon, mongolianChess, classicChess, ra
 const { applyCustomEffects } = require('./customEffects.js');
 const { selectPiece, playerMove, checkTurn, changeTurn, closeLights } = require('./moveMethods.js')
 const pieceDefinitions = require('./pieceDefinitions.js');
-const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFactory,blindCatFactory} = pieceDefinitions;
+const {kingFactory, hatFactory, shroomFactory, northernKing, empoweredCrystalFactory,blindcatFactory} = pieceDefinitions;
 
 const iconToFactoryMap = {};
 Object.keys(pieceDefinitions).forEach(key => {

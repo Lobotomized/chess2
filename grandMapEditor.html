@@ -878,8 +878,9 @@
             { name: "King", value: "simpleKingFactory" },
             { name: "Ant", value: "rpgAntFactory" },
             { name: "Spider", value: "spiderFactory" },
-            { name: "Goliath Bug", value: "goliathBugFactory" },
+            { name: "Goliath Bug", value: "goliathbugFactory" },
             { name: "Queen Bug", value: "rpgQueenbugFactory" },
+            { name: "Strong Ladybug", value: "strongladybugFactory" },
             { name: "Cyborg", value: "cyborgFactory" },
             { name: "Juggernaut", value: "juggernautFactory" },
             { name: "Bootvessel", value: "bootvesselFactory" },
@@ -913,6 +914,7 @@
             iconName = iconName.charAt(0).toUpperCase() + iconName.slice(1);
             if (iconName === 'SwordsMen') return 'blackSwordsmen.png';
             if (iconName === 'Pikeman') return 'blackPikeman.png';
+            if (iconName === 'Strongladybug') return 'blackLadyBug.png';
             return 'black' + iconName + '.png';
         }
 

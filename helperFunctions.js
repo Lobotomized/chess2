@@ -115,7 +115,7 @@ function areYouCheckedWithoutTempMoves(state,enemyColor,me, flag){
     let toReturn = false;
     for (let i = state.pieces.length - 1; i >= 0; i--) {
         const piece = state.pieces[i]
-
+        
         for(let ii = [...piece.moves].length-1; ii>=0; ii--){
             const move = [...piece.moves][ii];
             if (piece.color == enemyColor) {

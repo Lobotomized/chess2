@@ -23,7 +23,7 @@ const medievalFactories = [
 ]
 
 const insectFactories = [
-    "rpgAntFactory", "spiderFactory", 'goliathBugFactory', "rpgQueenbugFactory", "strongladybugFactory"
+    "rpgAntFactory", "spiderFactory", 'goliathbugFactory', "rpgQueenbugFactory", "strongladybugFactory"
 ]
 
 const classicPieceFactories = [
@@ -40,7 +40,7 @@ const marketPieceFactories = [
 
 const winnablePieceFactories = [
     'horseFactory','rpgQueenbugFactory',
-    "rpgAntFactory", "spiderFactory", 'goliathBugFactory',"pigFactory", "strongladybugFactory","dragonFactory"
+    "rpgAntFactory", "spiderFactory", 'goliathbugFactory',"pigFactory", "strongladybugFactory","dragonFactory"
 ];
 
 const availablePieceFactories = [

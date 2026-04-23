@@ -97,7 +97,7 @@ function alphaBeta(state, depth, alpha, beta, isMaximizer, maximizerColor, filte
         for (let i = 0; i < len; i++) {
             let m = moves[i];
             let evalBoard = alphaBeta(
-                { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
                 depth - 1, alpha, beta, false, maximizerColor, filters, magnifiers
             );
             if (evalBoard > maxEval) maxEval = evalBoard;
@@ -111,7 +111,7 @@ function alphaBeta(state, depth, alpha, beta, isMaximizer, maximizerColor, filte
         for (let i = 0; i < len; i++) {
             let m = moves[i];
             let evalBoard = alphaBeta(
-                { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
                 depth - 1, alpha, beta, true, maximizerColor, filters, magnifiers
             );
             if (evalBoard < minEval) minEval = evalBoard;
@@ -223,7 +223,7 @@ function minimaxAlphaBetaBudget(state, maximizer, exactTurnsBudget, removedTurns
             }
             
             let evalBoard = alphaBetaBudgetOptimized(
-                { pieces: move.pieces, board: state.board, turn: enemy, won: move.won },
+                { pieces: move.pieces, board: state.board, turn: move.nextTurn || enemy, won: move.won },
                 currentDepth - 1, alpha, beta, false, maximizer, filters, magnifiers, budgetObj
             );
             
@@ -345,7 +345,7 @@ function alphaBetaBudgetOptimized(state, depth, alpha, beta, isMaximizer, maximi
             }
             
             const evalBoard = alphaBetaBudgetOptimized(
-                { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
                 depth - 1, alpha, beta, false, maximizerColor, filters, magnifiers, budgetObj
             );
             
@@ -388,7 +388,7 @@ function alphaBetaBudgetOptimized(state, depth, alpha, beta, isMaximizer, maximi
             }
             
             const evalBoard = alphaBetaBudgetOptimized(
-                { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
                 depth - 1, alpha, beta, true, maximizerColor, filters, magnifiers, budgetObj
             );
             
@@ -496,7 +496,7 @@ function minimaxAlphaBeta(state, maximizer, depth, removedTurns, magnifiers, fil
         }
         
         let evalBoard = alphaBetaOptimized(
-            { pieces: move.pieces, board: state.board, turn: enemy, won: move.won },
+            { pieces: move.pieces, board: state.board, turn: move.nextTurn || enemy, won: move.won },
             depth - 1, alpha, beta, false, maximizer, filters, magnifiers
         );
         
@@ -589,7 +589,7 @@ function minimaxAlphaBeta(state, maximizer, depth, removedTurns, magnifiers, fil
              }
              
              const evalBoard = alphaBetaOptimized(
-                 { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                 { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
                  depth - 1, alpha, beta, false, maximizerColor, filters, magnifiers
              );
              
@@ -632,7 +632,7 @@ function minimaxAlphaBeta(state, maximizer, depth, removedTurns, magnifiers, fil
              }
              
              const evalBoard = alphaBetaOptimized(
-                 { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                 { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
                  depth - 1, alpha, beta, true, maximizerColor, filters, magnifiers
              );
              
@@ -788,7 +788,7 @@ function minimaxQuiescence(state, maximizer, depth, removedTurns, magnifiers, fi
         }
         
         let evalBoard = alphaBetaQuiescence(
-            { pieces: move.pieces, board: state.board, turn: enemy, won: move.won },
+            { pieces: move.pieces, board: state.board, turn: move.nextTurn || enemy, won: move.won },
             depth - 1, alpha, beta, false, maximizer, filters, magnifiers
         );
         
@@ -867,7 +867,7 @@ function alphaBetaQuiescence(state, depth, alpha, beta, isMaximizer, maximizerCo
              if (maxEval !== -Infinity && currentScore < maxEval - 500) continue;
              
              const evalBoard = alphaBetaQuiescence(
-                 { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                 { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
                  depth - 1, alpha, beta, false, maximizerColor, filters, magnifiers
              );
              
@@ -899,7 +899,7 @@ function alphaBetaQuiescence(state, depth, alpha, beta, isMaximizer, maximizerCo
              if (minEval !== Infinity && currentScore > minEval + 500) continue;
              
              const evalBoard = alphaBetaQuiescence(
-                 { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                 { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
                  depth - 1, alpha, beta, true, maximizerColor, filters, magnifiers
              );
              
@@ -990,7 +990,7 @@ function quiescenceSearch(state, alpha, beta, isMaximizer, maximizerColor, filte
     for (let i = 0; i < len; i++) {
         let m = moves[i];
         let evalBoard = quiescenceSearch(
-            { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+            { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
             alpha, beta, !isMaximizer, maximizerColor, filters, magnifiers, qDepth - 1
         );
         
@@ -1136,7 +1136,7 @@ class PnsNode {
             let nextState = {
                 pieces: m.pieces,
                 board: this.state.board,
-                turn: getEnemy(turn),
+                turn: m.nextTurn || getEnemy(turn),
                 won: m.won
             };
             
@@ -1240,7 +1240,7 @@ function bestFirstSearch(state, maximizer, depth, removedTurns, magnifiers, filt
             state: {
                 pieces: m.pieces,
                 board: state.board,
-                turn: getEnemy(maximizer),
+                turn: m.nextTurn || getEnemy(maximizer),
                 won: m.won
             },
             move: m, // Store the root move that led here
@@ -1293,7 +1293,7 @@ function bestFirstSearch(state, maximizer, depth, removedTurns, magnifiers, filt
             let nextState = {
                 pieces: m.pieces,
                 board: state.board,
-                turn: getEnemy(turn),
+                turn: m.nextTurn || getEnemy(turn),
                 won: m.won
             };
             
@@ -1407,19 +1407,19 @@ function principalVariationSearch(state, maximizer, depth, removedTurns, magnifi
         let evalBoard;
         if (i === 0) {
             evalBoard = pvsOptimized(
-                { pieces: move.pieces, board: state.board, turn: enemy, won: move.won },
+                { pieces: move.pieces, board: state.board, turn: move.nextTurn || enemy, won: move.won },
                 depth - 1, alpha, beta, false, maximizer, filters, magnifiers
             );
         } else {
             // Null window search
             evalBoard = pvsOptimized(
-                { pieces: move.pieces, board: state.board, turn: enemy, won: move.won },
+                { pieces: move.pieces, board: state.board, turn: move.nextTurn || enemy, won: move.won },
                 depth - 1, alpha, alpha + 1, false, maximizer, filters, magnifiers
             );
             if (evalBoard > alpha && evalBoard < beta) {
                 // Re-search with full window
                 evalBoard = pvsOptimized(
-                    { pieces: move.pieces, board: state.board, turn: enemy, won: move.won },
+                    { pieces: move.pieces, board: state.board, turn: move.nextTurn || enemy, won: move.won },
                     depth - 1, alpha, beta, false, maximizer, filters, magnifiers
                 );
             }
@@ -1493,17 +1493,17 @@ function pvsOptimized(state, depth, alpha, beta, isMaximizer, maximizerColor, fi
             let evalBoard;
             if (i === 0) {
                 evalBoard = pvsOptimized(
-                    { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                    { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
                     depth - 1, alpha, beta, false, maximizerColor, filters, magnifiers
                 );
             } else {
                 evalBoard = pvsOptimized(
-                    { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                    { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
                     depth - 1, alpha, alpha + 1, false, maximizerColor, filters, magnifiers
                 );
                 if (evalBoard > alpha && evalBoard < beta) {
                     evalBoard = pvsOptimized(
-                        { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                        { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
                         depth - 1, alpha, beta, false, maximizerColor, filters, magnifiers
                     );
                 }
@@ -1534,17 +1534,17 @@ function pvsOptimized(state, depth, alpha, beta, isMaximizer, maximizerColor, fi
             let evalBoard;
             if (i === 0) {
                 evalBoard = pvsOptimized(
-                    { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                    { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
                     depth - 1, alpha, beta, true, maximizerColor, filters, magnifiers
                 );
             } else {
                 evalBoard = pvsOptimized(
-                    { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                    { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
                     depth - 1, beta - 1, beta, true, maximizerColor, filters, magnifiers
                 );
                 if (evalBoard > alpha && evalBoard < beta) {
                     evalBoard = pvsOptimized(
-                        { pieces: m.pieces, board: state.board, turn: getEnemy(currentColor), won: m.won },
+                        { pieces: m.pieces, board: state.board, turn: m.nextTurn || getEnemy(currentColor), won: m.won },
                         depth - 1, alpha, beta, true, maximizerColor, filters, magnifiers
                     );
                 }

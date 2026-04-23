@@ -23,9 +23,9 @@ const RPGSKILLS = [
         getDescription: (level) => {
             let cost;
             if (level === 1) {
-                cost = '2';
-            } else if (level === 2) {
                 cost = '3';
+            } else if (level === 2) {
+                cost = '1';
             } else {
                 cost = '0';
             }

@@ -9,7 +9,7 @@ catch(err){
 
 var posValue = (typeof window !== 'undefined') ? window.posValue : (typeof global !== 'undefined') ? global.posValue : self.posValue;
 
-function electricCatFactory(color, x, y) {
+function electriccatFactory(color, x, y) {
 
     let moves = [{ type: 'absolute',  y: -1, x: 0 }]
 
@@ -66,7 +66,7 @@ function electricCatFactory(color, x, y) {
     }
 }
 
-function scaryCatFactory(color, x, y) {
+function scarycatFactory(color, x, y) {
 
     return {
         icon: color + 'ScaryCat.png',
@@ -85,7 +85,7 @@ function scaryCatFactory(color, x, y) {
 
 
 
-function fatCatFactory(color, x, y) {
+function fatcatFactory(color, x, y) {
 
     return {
         icon: color + 'FatCat.png',
@@ -146,7 +146,7 @@ function fatCatFactory(color, x, y) {
 }
 
 
-function longCatFactory(color, x, y) {
+function longcatFactory(color, x, y) {
     return {
         icon: color + 'LongCat.png',
         moves: [{ type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
@@ -161,7 +161,7 @@ function longCatFactory(color, x, y) {
 }
 
 
-function blindCatFactory(color, x, y) {
+function blindcatFactory(color, x, y) {
 
 
     return {
@@ -197,7 +197,7 @@ function blindCatFactory(color, x, y) {
 
 
 
-function cuteCatFactory(color, x, y) {
+function cutecatFactory(color, x, y) {
 
     return {
         icon: color + 'CuteCat.png',
@@ -227,12 +227,12 @@ function cuteCatFactory(color, x, y) {
 
 try{
     module.exports = {
-        electricCatFactory,
-        longCatFactory,
-        blindCatFactory,
-        cuteCatFactory,
-        fatCatFactory,
-        scaryCatFactory
+        electriccatFactory,
+        longcatFactory,
+        blindcatFactory,
+        cutecatFactory,
+        fatcatFactory,
+        scarycatFactory
     }
 }
 catch(err){
