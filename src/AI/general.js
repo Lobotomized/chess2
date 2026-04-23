@@ -96,9 +96,7 @@
                     initialX: p.initialX,
                     initialY: p.initialY,
                     id: p.id,
-                    customDef: p.customDef,
-                    hasMovedThisTurn: p.hasMovedThisTurn,
-                    strongMoves: p.strongMoves
+                    customDef: p.customDef
                 };
 
                 if(p.moves){
@@ -130,7 +128,7 @@
              let tempState = {board:state.board, pieces:newPieces, pieceSelected:newPiece , turn:color};
              if(playerMove({x:square.x, y:square.y},tempState,true, undefined, 'allowedMove')){
                  let won = tempState.won;
-                 movesAndPieces.push({pieceCounter:piecesCounter,pieces:newPieces, xClicked:square.x, yClicked:square.y, parent:state.id, id:crypto.randomUUID(), won:won, nextTurn:tempState.turn})
+                 movesAndPieces.push({pieceCounter:piecesCounter,pieces:newPieces, xClicked:square.x, yClicked:square.y, parent:state.id, id:crypto.randomUUID(), won:won})
              }
          }
          piecesCounter++;
@@ -224,9 +222,7 @@
                     initialX: p.initialX,
                     initialY: p.initialY,
                     id: p.id,
-                    customDef: p.customDef,
-                    hasMovedThisTurn: p.hasMovedThisTurn,
-                    strongMoves: p.strongMoves
+                    customDef: p.customDef
                 };
 
                 // Deep copy moves/weakMoves arrays to prevent mutation leaks ONLY for the piece moving
@@ -263,7 +259,7 @@
              let tempState = {board:state.board, pieces:newPieces, pieceSelected:newPiece , turn:color};
              if(playerMove({x:square.x, y:square.y},tempState,true, undefined, 'allowedMove')){
                  let won = tempState.won;
-                 movesAndPieces.push({pieceCounter:piecesCounter,pieces:newPieces, xClicked:square.x, yClicked:square.y, parent:state.id, id:crypto.randomUUID(), won:won, nextTurn:tempState.turn})
+                 movesAndPieces.push({pieceCounter:piecesCounter,pieces:newPieces, xClicked:square.x, yClicked:square.y, parent:state.id, id:crypto.randomUUID(), won:won})
              }
          }
          piecesCounter++;
@@ -279,7 +275,7 @@
         if(move.won){
             return;
         }
-        childMoves.push(...generateMovesFromPieces({pieces:move.pieces,board,turn:move.nextTurn || color, id:move.id},move.nextTurn || color,filters,enemy))
+        childMoves.push(...generateMovesFromPieces({pieces:move.pieces,board,turn:color, id:move.id},color,filters,enemy))
     })
     return childMoves
  }
