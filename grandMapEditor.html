@@ -431,13 +431,11 @@
         }
 
         async function fetchMaps() {
-            if (!window.Auth || !window.Auth.getToken()) {
-                setTimeout(fetchMaps, 1000); // Retry if auth not ready
-                return;
-            }
+            const headers = window.Auth && window.Auth.getToken() ? window.Auth.getAuthHeaders() : {};
+            
             try {
                 const res = await fetch('/maps?pageSize=100', {
-                    headers: window.Auth.getAuthHeaders()
+                    headers: headers
                 });
                 if (res.ok) {
                     const data = await res.json();
@@ -466,13 +464,19 @@
             const map = fetchedMaps.find(m => m._id === mapId);
             if (!map || !map.grandMapDef) return;
 
-            currentMapId = map._id;
-            document.getElementById('mapName').value = map.name;
+            if (!map.isAuthor) {
+                currentMapId = null;
+                document.getElementById('mapName').value = map.name + " (Copy)";
+            } else {
+                currentMapId = map._id;
+                document.getElementById('mapName').value = map.name;
+            }
+            
             document.getElementById('mapDesc').value = map.grandMapDef.description || map.description || '';
             document.getElementById('mapWidth').value = map.grandMapDef.width;
             document.getElementById('mapHeight').value = map.grandMapDef.height;
             
-            mapData.name = map.name;
+            mapData.name = document.getElementById('mapName').value;
             mapData.description = document.getElementById('mapDesc').value;
             mapData.width = map.grandMapDef.width;
             mapData.height = map.grandMapDef.height;

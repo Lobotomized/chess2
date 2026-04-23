@@ -832,6 +832,25 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
+const optionalAuthenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token) {
+        req.user = null;
+        return next();
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            req.user = null;
+            return next();
+        }
+        req.user = user;
+        next();
+    });
+};
+
 app.post('/api/upload-image-pair', authenticateToken, (req, res) => {
     const uploadPair = upload.fields([
         { name: 'whiteImage', maxCount: 1 },
@@ -1178,10 +1197,25 @@ app.post('/maps', authenticateToken, async (req, res) => {
     }
 });
 
-app.get('/maps/:id', authenticateToken, async (req, res) => {
+app.get('/maps/:id', optionalAuthenticateToken, async (req, res) => {
     try {
-        const map = await Map.findOne({ _id: req.params.id, authorId: req.user.id });
+        // Find map either authored by the user or a public Grand Map
+        const query = {
+            _id: req.params.id,
+            $or: [{ isGrandMap: true }]
+        };
+        
+        if (req.user) {
+            query.$or.push({ authorId: req.user.id });
+        }
+
+        const map = await Map.findOne(query).lean();
+        
         if (!map) return res.status(404).json({ error: "Map not found" });
+        
+        // Add isAuthor flag
+        map.isAuthor = map.authorId && req.user && map.authorId.toString() === req.user.id;
+        
         return res.status(200).json(map);
     } catch (error) {
         console.log(error);
@@ -1273,7 +1307,7 @@ app.post('/gameTester', function(req,res){
     return res.status(200).json({state:state, moves:generateMovesFromPieces(state,state.turn,[])})
 })
 
-app.get('/maps', authenticateToken, async (req, res) => {
+app.get('/maps', optionalAuthenticateToken, async (req, res) => {
     try {
       const pageSize = parseInt(req.query.pageSize) || 10;
       const pageNumber = parseInt(req.query.page) || 1;
@@ -1283,12 +1317,21 @@ app.get('/maps', authenticateToken, async (req, res) => {
         limit: pageSize,
       };
   
-      const query = { authorId: req.user.id };
+      const query = { $or: [{ isGrandMap: true }] };
+      if (req.user) {
+          query.$or.push({ authorId: req.user.id });
+      }
+
       const mapCount = await Map.countDocuments(query);
-      const maps = await Map.find(query, null, options);
+      const maps = await Map.find(query, null, options).lean();
   
+      const mappedMaps = maps.map(m => ({
+          ...m,
+          isAuthor: m.authorId && req.user && m.authorId.toString() === req.user.id
+      }));
+
       res.status(200).json({
-        maps,
+        maps: mappedMaps,
         pageSize,
         pageNumber,
         pageCount: Math.ceil(mapCount / pageSize),

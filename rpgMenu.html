@@ -246,35 +246,33 @@
                 </a>
             `;
             
-            if (window.Auth && window.Auth.getToken()) {
-                fetch('/maps?pageSize=100', {
-                    headers: window.Auth.getAuthHeaders()
-                })
-                .then(res => res.ok ? res.json() : [])
-                .then(data => {
-                    const maps = data.maps || data;
-                    mapsList.innerHTML = html;
-                    
-                    if (Array.isArray(maps)) {
-                        maps.forEach(map => {
-                            if (map.isGrandMap) {
-                                mapsList.innerHTML += `
-                                    <a href="/rpg.html?customMapId=${map._id}&new=true" class="menu-button map-list-item">
-                                        <img src="/static/lg/whitePawn.png" class="icon">
-                                        ${map.name}
-                                    </a>
-                                `;
-                            }
-                        });
-                    }
-                })
-                .catch(err => {
-                    console.error("Error loading custom maps:", err);
-                    mapsList.innerHTML = html + '<p style="color:white; font-size:20px; -webkit-text-stroke: 1px black;">Failed to load custom maps.</p>';
-                });
-            } else {
-                mapsList.innerHTML = html + '<p style="color:white; font-size:20px; -webkit-text-stroke: 1px black;">Log in to see custom maps.</p>';
-            }
+            const headers = window.Auth && window.Auth.getToken() ? window.Auth.getAuthHeaders() : {};
+            
+            fetch('/maps?pageSize=100', {
+                headers: headers
+            })
+            .then(res => res.ok ? res.json() : [])
+            .then(data => {
+                const maps = data.maps || data;
+                mapsList.innerHTML = html;
+                
+                if (Array.isArray(maps)) {
+                    maps.forEach(map => {
+                        if (map.isGrandMap) {
+                            mapsList.innerHTML += `
+                                <a href="/rpg.html?customMapId=${map._id}&new=true" class="menu-button map-list-item">
+                                    <img src="/static/lg/whitePawn.png" class="icon">
+                                    ${map.name}
+                                </a>
+                            `;
+                        }
+                    });
+                }
+            })
+            .catch(err => {
+                console.error("Error loading custom maps:", err);
+                mapsList.innerHTML = html + '<p style="color:white; font-size:20px; -webkit-text-stroke: 1px black;">Failed to load custom maps.</p>';
+            });
         }
     </script>
 </body>
