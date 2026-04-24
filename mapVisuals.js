@@ -458,6 +458,8 @@ function showMapModal() {
                      icon = '🏳️'; // Cleared/Conquered
                 } else if (node.board === 'Market') {
                      icon = '🛒';
+                } else if (node.board === 'Library') {
+                     icon = '📖';
                 } else {
                      // Combat Node
                      // Use Image
@@ -488,7 +490,10 @@ function showMapModal() {
                 
                 // Rewards Display
                 let rewardsHtml = '';
-                if (!node.cleared && node.rewards && node.board !== 'Market' && !isFinalBossNode) {
+                if (!node.cleared && node.board === 'Library') {
+                     // Library shows King Experience instead of standard rewards
+                     rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="King Experience" style="display:flex; align-items:center;">📖${node.enemyPower}</span></div>`;
+                } else if (!node.cleared && node.rewards && node.board !== 'Market' && !isFinalBossNode) {
                      const r = node.rewards;
                      let parts = [];
                      const rosterFull = typeof rpgState !== 'undefined' && rpgState.playerRoster && rpgState.playerRoster.length >= 24;

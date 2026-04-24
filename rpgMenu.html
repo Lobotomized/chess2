@@ -192,7 +192,7 @@
             if (allSaves.length > 0) {
                 allSaves.forEach((save, index) => {
                     let level = save.data.level || '?';
-                    let mapName = 'Standard';
+                    let mapName = 'Random Map (Super Hard)';
                     if (save.data.grandMap && save.data.grandMap.predefinedMap) {
                         mapName = save.data.grandMap.predefinedMap;
                     }
@@ -239,10 +239,10 @@
             const mapsList = document.getElementById('mapsList');
             mapsList.innerHTML = '<p style="color:white; font-size:24px; -webkit-text-stroke: 1px black;">Loading maps...</p>';
             
-            let html = `
+            let randomMapHtml = `
                 <a href="/rpg.html?new=true" class="menu-button map-list-item">
                     <img src="/static/lg/whitePawn.png" class="icon">
-                    Random Map (Standard)
+                    Random Map (Super Hard)
                 </a>
             `;
             
@@ -254,7 +254,7 @@
             .then(res => res.ok ? res.json() : [])
             .then(data => {
                 const maps = data.maps || data;
-                mapsList.innerHTML = html;
+                mapsList.innerHTML = '';
                 
                 if (Array.isArray(maps)) {
                     maps.forEach(map => {
@@ -268,10 +268,11 @@
                         }
                     });
                 }
+                mapsList.innerHTML += randomMapHtml;
             })
             .catch(err => {
                 console.error("Error loading custom maps:", err);
-                mapsList.innerHTML = html + '<p style="color:white; font-size:20px; -webkit-text-stroke: 1px black;">Failed to load custom maps.</p>';
+                mapsList.innerHTML = '<p style="color:white; font-size:20px; -webkit-text-stroke: 1px black;">Failed to load custom maps.</p>' + randomMapHtml;
             });
         }
     </script>

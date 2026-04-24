@@ -52,10 +52,15 @@ if (typeof window !== 'undefined') {
         
         let magicNumber = widthOrHeight > 800 ? sqLength/1.5 : sqLength/2
         arr.forEach((el) => {
-            // Main content wrapper - removed event.stopPropagation() so clicks bubble up to backdrop which closes it
-            // Removed white background/padding/shadow to show only the miniboard as requested
-            theString  = `<div style="position:relative; width:${magicNumber * (Math.sqrt(el.board.length))}px;height:${magicNumber * Math.sqrt(el.board.length)}px;">`
+            let boardSize = Math.sqrt(el.board.length);
+            let boardWidth = magicNumber * boardSize;
+            let boardHeight = magicNumber * boardSize;
+
+            // Main content wrapper - Flex container to handle both board and description
+            theString = `<div style="display:flex; flex-direction:column; align-items:center; max-width:95vw; max-height:95vh; overflow-y:auto; gap:15px;">`
             
+            // Board container
+            theString += `<div style="position:relative; width:${boardWidth}px;height:${boardHeight}px; flex-shrink:0;">`
 
             el.board.forEach((square) => {
                 if(square.lighted){
@@ -72,12 +77,13 @@ if (typeof window !== 'undefined') {
                     theString += `<img style="z-index:500;position:absolute; width:${magicNumber}px;height:${magicNumber}px; left:${square.x*magicNumber}px;top:${(square.y)*magicNumber}px;" src="/static/${el.icon}"></img>`
                 }
             })
-            theString += `  <p style=" z-index:501; padding:5px; position:absolute; color:#ffffff; background:${backgroundColor}; top:${magicNumber * Math.sqrt(el.board.length)}px;">${el.description}</p>`
+            theString += `</div>` // Close board container
+
+            // Description
+            theString += `<div style="z-index:501; padding:15px; color:#ffffff; background:${backgroundColor}; border-radius:8px; width:100%; max-width:${Math.max(boardWidth, 300)}px; box-sizing:border-box; text-align:center; font-size:16px; line-height:1.4; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">${el.description}</div>`
+
+            theString += `</div>` // Close main wrapper
         })
-
-        // Removed close button generation as per user request
-
-        theString += `</div>` // Close main content wrapper
 
         pieceModal.innerHTML = theString
         pieceModal.classList.remove('displayNone')

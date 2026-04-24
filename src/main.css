@@ -151,6 +151,14 @@ html{
 
 
 @media only screen and (max-width: 600px) {
+    html, body {
+        min-width: 0 !important;
+        width: 100%;
+        overflow-x: hidden;
+    }
+    body {
+        background-attachment: scroll;
+    }
     .black{
         background:var(--black-square-color);
         color: var(--white-square-color);
