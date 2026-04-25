@@ -1,6 +1,6 @@
 const RPGStats = {
     // Movement costs
-    foodLostOnMovement: 5,
+    foodLostOnMovement: 6,
     additionalGoldPerWin:0,
     additionalFoodPerWin:0,
     additionalExperiencePerWin:0,
@@ -147,7 +147,7 @@ const RPGSKILLS = [
 ];
 
 function resetRPGStats() {
-    RPGStats.foodLostOnMovement = 5;
+    RPGStats.foodLostOnMovement = 6;
     RPGStats.additionalGoldPerWin = 0;
     RPGStats.additionalFoodPerWin = 0;
     RPGStats.additionalExperiencePerWin = 0;
