@@ -386,6 +386,24 @@
 
     <div class="container">
         <h1><img src="/static/lg/whiteShroom.png" class="icon"> Custom Maps <img src="/static/lg/blackShroom.png" class="icon"></h1>
+        
+        <div class="game-settings" style="background: rgba(255,255,255,0.5); padding: 15px; border-radius: 12px; border: 2px solid var(--border-color); margin-bottom: 20px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label for="whiteAI" style="font-weight: bold;">White Player:</label>
+                <select id="whiteAI" style="padding: 5px; font-family: 'Quicksand', sans-serif; font-weight: bold; border-radius: 8px; border: 2px solid var(--border-color); background: var(--board-light); color: var(--piece-black);">
+                    <option value="">Human</option>
+                    <option value="customEvolution">AI</option>
+                </select>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label for="blackAI" style="font-weight: bold;">Black Player:</label>
+                <select id="blackAI" style="padding: 5px; font-family: 'Quicksand', sans-serif; font-weight: bold; border-radius: 8px; border: 2px solid var(--border-color); background: var(--board-light); color: var(--piece-black);">
+                    <option value="">Human</option>
+                    <option value="customEvolution" selected>AI</option>
+                </select>
+            </div>
+        </div>
+
         <ul id="mapList" class="map-list">
             <!-- Maps will be loaded here -->
             <li style="text-align:center; font-style: italic;">Loading maps...</li>
@@ -424,10 +442,6 @@
                         const listItem = document.createElement('li');
                         listItem.className = 'map-item';
                         
-                        const playLink = map.isGrandMap ? 
-                            `/rpg.html?customMapId=${map._id}` : 
-                            `/hotseat?gameType=customMap&customGameId=${map._id}`;
-
                         let deleteBtnHtml = '';
                         if (map.isAuthor) {
                             deleteBtnHtml = `<button onclick="deleteMap('${map._id}')" class="play-button" style="background: linear-gradient(to bottom, #8C6540, #5A3E2B); border-bottom: 6px solid #2d1b15; color: white; cursor: pointer;">Delete</button>`;
@@ -436,7 +450,7 @@
                         listItem.innerHTML = `
                             <span class="map-name"><img src="/static/lg/whitePawn.png" style="height:20px;"> ${map.name} ${map.isGrandMap ? '<span style="font-size:12px; background:#4a148c; color:white; padding:2px 6px; border-radius:4px; margin-left:5px;">Grand Map</span>' : ''} ${!map.isAuthor ? '<span style="font-size:12px; background:#666; color:white; padding:2px 6px; border-radius:4px; margin-left:5px;">Public</span>' : ''}</span>
                             <div style="display: flex; gap: 10px; flex-shrink: 0;">
-                                <a href="${playLink}" class="play-button">Play Map</a>
+                                <a href="javascript:void(0)" onclick="playCustomMap('${map._id}', ${map.isGrandMap})" class="play-button">Play Map</a>
                                 ${deleteBtnHtml}
                             </div>
                         `;
@@ -497,6 +511,33 @@
                     console.error('Error deleting map:', error);
                     await showAlert('Failed to delete map.');
                 }
+            }
+        }
+
+        function playCustomMap(mapId, isGrandMap) {
+            if (isGrandMap) {
+                window.location.href = `/rpg.html?customMapId=${mapId}`;
+            } else {
+                let whiteAI = document.getElementById('whiteAI').value;
+                let blackAI = document.getElementById('blackAI').value;
+                
+                let url = `/hotseat?gameType=customMap&customGameId=${mapId}`;
+                
+                let aiColor = '';
+                let aiPower = '';
+
+                if (whiteAI && blackAI) {
+                    aiColor = '&AIColor=all';
+                    aiPower = `&AIPowerWhite=${whiteAI}&AIPowerBlack=${blackAI}`;
+                } else if (whiteAI) {
+                    aiColor = '&AIColor=white';
+                    aiPower = `&AIPowerWhite=${whiteAI}`;
+                } else if (blackAI) {
+                    aiColor = '&AIColor=black';
+                    aiPower = `&AIPowerBlack=${blackAI}`;
+                }
+                
+                window.location.href = url + aiColor + aiPower;
             }
         }
     </script>

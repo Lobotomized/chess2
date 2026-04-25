@@ -330,9 +330,8 @@ function brainbugFactory(color,x,y){
         x:x,
         y:y,
         color:color,
-        value:5,
+        value:4,
         posValue:0.1,
-        hasMovedThisTurn: false,
 
         moves:[
                 { type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
@@ -340,7 +339,20 @@ function brainbugFactory(color,x,y){
                 { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }
             ],
         afterEnemyPieceTaken:function(enemyPiece, state){
-            this.moves = [...this.moves, ...enemyPiece.moves]
+            color = this.color;
+            if(color == 'black'){
+                direction = -1;
+            }
+            else{
+                direction = 1;
+            }
+            const copy = findCopyPieceByXY(state.pieces,this.x,this.y + direction);
+            const squareCheck = state.board.find((sq) => {
+                return sq.x == this.x && sq.y == this.y + direction;
+            })
+            if(!copy && squareCheck != undefined){
+                state.pieces.push(queenbugFactory(color,this.x,this.y + direction));
+            }
         },
 
     }

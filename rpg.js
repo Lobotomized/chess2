@@ -23,7 +23,7 @@ const medievalFactories = [
 ]
 
 const insectFactories = [
-    "rpgAntFactory", "spiderFactory", 'goliathbugFactory', "rpgQueenbugFactory", "strongladybugFactory"
+    "rpgAntFactory", "spiderFactory", 'goliathbugFactory', "rpgQueenbugFactory", "strongladybugFactory", "brainbugFactory"
 ]
 
 const classicPieceFactories = [
@@ -1582,6 +1582,37 @@ function setupBoard(shapeName = 'Standard') {
         }
         
         placeArmy(backline, 'black', [0], maxX);
+    }
+
+    // --- Summoner Skill Logic ---
+    if (RPGStats.summonerLevel > 0) {
+        const emptySquares = [];
+        const playerRows = [maxY - 1, maxY];
+        
+        hotseatGame.state.board.forEach(sq => {
+            if (playerRows.includes(sq.y)) {
+                const isOccupied = hotseatGame.state.pieces.some(p => p.x === sq.x && p.y === sq.y);
+                if (!isOccupied) {
+                    emptySquares.push(sq);
+                }
+            }
+        });
+
+        if (emptySquares.length > 0) {
+            const randomSq = emptySquares[Math.floor(Math.random() * emptySquares.length)];
+            
+            let factoryName = 'starManWeakFactory';
+            if (RPGStats.summonerLevel === 2) {
+                factoryName = 'starManMidFactory';
+            } else if (RPGStats.summonerLevel >= 3) {
+                factoryName = 'starManExpertFactory';
+            }
+
+            if (typeof window[factoryName] === 'function') {
+                const summonedPiece = window[factoryName]('white', randomSq.x, randomSq.y);
+                hotseatGame.state.pieces.push(summonedPiece);
+            }
+        }
     }
 }
 

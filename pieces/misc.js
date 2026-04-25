@@ -178,12 +178,49 @@ function clownFactory(color,x,y){
     }
 }
 
-function starMan(color, x, y){
-    let moves = [{ type: 'absolute', impotent: true, y: -1, x: 0 }, { type: 'absolute', y: -1, x: -1 }, { type: 'absolute', y: -1, x: 1 }]
+function starManWeakFactory(color, x, y){
+    let moves = [{ type: 'blockable', repeat: true, x: 0, y: -1, limit:1 }, { type: 'blockable', repeat: true, x: 0, y: 1, limit:1 },
+                    { type: 'blockable', repeat: true, x: -1, y: 0, limit:1 }, { type: 'blockable', repeat: true, x: 1, y: 0, limit:1 },
+                    { type: 'blockable', repeat: true, x: -1, y: -1, limit:1 }, { type: 'blockable', repeat: true, x: 1, y: 1, limit:1 },
+                    { type: 'blockable', repeat: true, x: -1, y: 1, limit:1 }, { type: 'blockable', repeat: true, x: 1, y: -1, limit:1 }]
 
-    if (color == 'black') {
-        moves = [{ type: 'absolute', impotent: true, y: 1, x: 0 }, { type: 'absolute', y: 1, x: -1 }, { type: 'absolute', y: 1, x: 1 }];
+
+    return {
+        icon: color + 'StarMan.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
     }
+}
+
+function starManMidFactory(color, x, y){
+    let moves = [{ type: 'blockable', repeat: true, x: 0, y: -1, limit:2 }, { type: 'blockable', repeat: true, x: 0, y: 1, limit:2 },
+                    { type: 'blockable', repeat: true, x: -1, y: 0, limit:2 }, { type: 'blockable', repeat: true, x: 1, y: 0, limit:2 },
+                    { type: 'blockable', repeat: true, x: -1, y: -1, limit:2 }, { type: 'blockable', repeat: true, x: 1, y: 1, limit:2 },
+                    { type: 'blockable', repeat: true, x: -1, y: 1, limit:2 }, { type: 'blockable', repeat: true, x: 1, y: -1, limit:2 }]
+
+
+    return {
+        icon: color + 'StarMan.png',
+        moves: moves,
+        x: x,
+        y: y,
+        color: color,
+        value:1,
+        posValue:0.1,
+    }
+}
+
+function starManExpertFactory(color, x, y){
+    let moves = [{ type: 'blockable', repeat: true, x: 0, y: -1, limit:3 }, { type: 'blockable', repeat: true, x: 0, y: 1, limit:3 },
+                    { type: 'blockable', repeat: true, x: -1, y: 0, limit:3 }, { type: 'blockable', repeat: true, x: 1, y: 0, limit:3 },
+                    { type: 'blockable', repeat: true, x: -1, y: -1, limit:3 }, { type: 'blockable', repeat: true, x: 1, y: 1, limit:3 },
+                    { type: 'blockable', repeat: true, x: -1, y: 1, limit:3 }, { type: 'blockable', repeat: true, x: 1, y: -1, limit:3 }]
+
+
     return {
         icon: color + 'StarMan.png',
         moves: moves,
@@ -202,7 +239,9 @@ try{
         unpromotablePawn,
         hatFactory,
         clownFactory,
-        starMan
+        starManWeakFactory,
+        starManMidFactory,
+        starManExpertFactory
     }
 }
 catch(err){

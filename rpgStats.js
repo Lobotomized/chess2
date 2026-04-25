@@ -17,6 +17,7 @@ const RPGStats = {
     kingLockedToRight: true,
     tacticsLevel: 0,
     scoutingLevel: 0,
+    summonerLevel: 0,
 };
 
 const RPGSKILLS = [
@@ -144,6 +145,16 @@ const RPGSKILLS = [
         getDescription: (level) => `Gain +${level * 2} experience for every battle.`,
         apply: (level) => { RPGStats.additionalExperiencePerWin = level * 2; } 
     },
+    { 
+        name: "Summoner", 
+        maxLevel: 3,
+        getDescription: (level) => {
+            if (level === 1) return "Summons a Weak Star Man on a random empty spot in your two rows at the start of battle.";
+            if (level === 2) return "Summons a Mid Star Man on a random empty spot in your two rows at the start of battle.";
+            return "Summons an Expert Star Man on a random empty spot in your two rows at the start of battle.";
+        },
+        apply: (level) => { RPGStats.summonerLevel = level; } 
+    },
 ];
 
 function resetRPGStats() {
@@ -164,6 +175,7 @@ function resetRPGStats() {
     RPGStats.tacticsLevel = 0;
     RPGStats.maxNumberOfPiecesToOwn = 8;
     RPGStats.scoutingLevel = 0;
+    RPGStats.summonerLevel = 0;
 }
 
 function applyRPGSkill(skillName) {
