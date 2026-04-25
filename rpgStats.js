@@ -50,8 +50,8 @@ const RPGSKILLS = [
     { 
         name: "Bounty Hunter", 
         maxLevel: 3,
-        getDescription: (level) => `Earn ${level} extra gold per win.`,
-        apply: (level) => { RPGStats.additionalGoldPerWin = level; } 
+        getDescription: (level) => `Earn ${level*2} extra gold per win.`,
+        apply: (level) => { RPGStats.additionalGoldPerWin = level*2; } 
     },
     { 
         name: "Scavenger", 
