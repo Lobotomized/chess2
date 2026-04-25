@@ -192,14 +192,12 @@ self.addEventListener("message", async function(e) {
                 )
             }
             if(obj.AIPower === 101){
-
+                console.log('here?')
                 console.time('101')
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
                     methods[obj.AICharacter](0),
                     [
-                        {method:removeNonAttackingMovesFilter, options:{maximum:2,maxPieceValue:2,randomException:0.3, filterDepth:1,
-                        exceptions:[pieceValueMustBeSmallerThanException,randomException]}},
-                        {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeBiggerThanException, pieceAttackedException]}}
+
                     ]
                 )
                 console.timeEnd('101')

@@ -1328,7 +1328,7 @@
             .then(response => response.json())
             .then(data => {
                 // After successful save, redirect to hotseat with the new map id
-                window.location.href = `/hotseat?gameType=customMap&customGameId=${data._id}&AIColor=black&AIPowerBlack=101`;
+                window.location.href = `/hotseat?gameType=customMap&customGameId=${data._id}&AIColor=black&AIPowerBlack=customEvolution`;
             })
             .catch((error) => {
                 console.error('Error:', error);

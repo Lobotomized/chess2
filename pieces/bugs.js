@@ -330,62 +330,19 @@ function brainbugFactory(color,x,y){
         x:x,
         y:y,
         color:color,
-        value:7,
+        value:5,
         posValue:0.1,
         hasMovedThisTurn: false,
-        weakMoves:[],
 
         moves:[
                 { type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
                 { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },
                 { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }
             ],
-        afterPieceMove:function(state, move, prevMove){
-            if (!this.hasMovedThisTurn) {
-                this.hasMovedThisTurn = true;
-                this.moves = []; // Disable further moves this turn
-                
-                // Check if we have any other pieces that can still play
-                // (i.e. a non-BrainBug piece, or another BrainBug that has not moved yet)
-                const canStillPlay = state.pieces.some(p => 
-                    p.color === this.color && 
-                    p !== this && 
-                    (
-                        !p.icon.includes('BrainBug.png') || 
-                        !p.hasMovedThisTurn
-                    )
-                );
-
-                if (canStillPlay) {
-                    // Give the turn back to us by setting the state.turn to enemy color before the engine flips it
-                    state.turn = this.color === 'white' ? 'black' : 'white';
-                }
-                else{
-                    this.moves = [
-                        { type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
-                        { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },
-                        { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }
-                    ]
-                }
-            }
-            return true;
+        afterEnemyPieceTaken:function(enemyPiece, state){
+            this.moves = [...this.moves, ...enemyPiece.moves]
         },
-        afterPlayerMove:function(state, move, prevMove){
-            // Find the piece that just moved
-            const movedPiece = state.pieces.find(p => p.x === move.x && p.y === move.y);
-            
-            // We reset this BrainBug's moves if:
-            // 1. The opponent moved a piece (our turn is starting / their turn is ending)
-            // 2. We moved a normal piece (our turn is ending)
-            if (!movedPiece || movedPiece.color !== this.color || !movedPiece.icon.includes('BrainBug.png')) {
-                this.hasMovedThisTurn = false;
-                    this.moves = [
-                        { type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
-                        { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },
-                        { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }
-                    ]
-            }
-        }
+
     }
 }
 
