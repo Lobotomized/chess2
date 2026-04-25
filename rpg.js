@@ -232,6 +232,7 @@ function initRpgGame() {
     const isNew = urlParams.get('new') === 'true';
     const isLoad = urlParams.get('load') === 'true';
     let currentSaveSlot = urlParams.get('slot');
+    window.initialDifficulty = urlParams.get('difficulty');
     
     if (isNew) {
         currentSaveSlot = 'save_' + Date.now();
@@ -282,12 +283,35 @@ async function loadCustomGrandMap(mapId) {
     }
 }
 
+function applyDifficultySettings() {
+    let diff = window.initialDifficulty || rpgState.difficultyLevel || 'normal';
+    
+    rpgState.difficultyLevel = diff;
+    rpgState.permadeath = false;
+    
+    if (diff === 'easy') {
+        RPGStats.startingGold = 10;
+        RPGStats.startingFood = 100;
+    } else if (diff === 'normal') {
+        RPGStats.startingGold = 0;
+        RPGStats.startingFood = 100;
+    } else if (diff === 'hard') {
+        RPGStats.startingGold = 0;
+        RPGStats.startingFood = 50;
+    } else if (diff === 'impossible') {
+        RPGStats.startingGold = 0;
+        RPGStats.startingFood = 100;
+        rpgState.permadeath = true;
+    }
+}
+
 function startNewGameWithMap(mapName) {
     const modal = document.getElementById('mainMenuDialog');
     if(modal) modal.close();
     
     // Reset RPGStats to default
     if (typeof resetRPGStats === 'function') resetRPGStats();
+    applyDifficultySettings();
     
     // Reset rpgState object
     rpgState.level = 1;
@@ -442,6 +466,7 @@ function startNewGame() {
     
     // Reset RPGStats to default
     if (typeof resetRPGStats === 'function') resetRPGStats();
+    applyDifficultySettings();
     
     // Reset rpgState object
     rpgState.level = 1;
@@ -1665,6 +1690,7 @@ function placeArmy(roster, color, rows, maxX = 7) {
 
         if (factoryName && typeof window[factoryName] === 'function') {
             const piece = window[factoryName](color, x, y);
+            piece.factory = factoryName; // Tag piece with its factory for permadeath tracking
             
             hotseatGame.state.pieces.push(piece);
         }
@@ -3044,6 +3070,37 @@ function checkGameEndSequence(state) {
 
         if (state.won === 'white') {
             // Player Won
+            
+            if (rpgState.permadeath) {
+                // Track surviving pieces by their factory names
+                const survivingWhitePieces = state.pieces.filter(p => p.color === 'white');
+                const survivingFactories = survivingWhitePieces.map(p => p.factory).filter(f => f);
+                
+                const newRoster = [];
+                for (let i = 0; i < rpgState.playerRoster.length; i++) {
+                    const factoryName = rpgState.playerRoster[i];
+                    if (!factoryName) {
+                        newRoster.push(null);
+                        continue;
+                    }
+                    
+                    // Only check deployed pieces (first 16 slots: 8 front, 8 back)
+                    if (i < 16) {
+                        const survivedIndex = survivingFactories.indexOf(factoryName);
+                        if (survivedIndex !== -1) {
+                            newRoster.push(factoryName);
+                            survivingFactories.splice(survivedIndex, 1); // remove one instance
+                        } else {
+                            // Piece died, don't keep it
+                            newRoster.push(null);
+                        }
+                    } else {
+                        // Reserve pieces were not deployed, so they didn't die
+                        newRoster.push(factoryName);
+                    }
+                }
+                rpgState.playerRoster = newRoster;
+            }
             
             // Check if it's the final boss node
             let isFinalBoss = false;

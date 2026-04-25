@@ -172,6 +172,10 @@ function resetRPGStats() {
     RPGStats.maxNumberOfPiecesToOwn = 8;
     RPGStats.scoutingLevel = 0;
     RPGStats.summonerLevel = 0;
+    
+    if (typeof applyDifficultySettings === 'function') {
+        applyDifficultySettings();
+    }
 }
 
 function applyRPGSkill(skillName) {

@@ -144,7 +144,16 @@
 
     <div class="menu-container" id="newGameMenu" style="display: none; max-width: 700px;">
         <h1>Select Map</h1>
-        <div id="mapsList" class="hide-scrollbar" style="display:flex; flex-direction:column; gap:15px; max-height:60vh; padding: 10px;"></div>
+        
+        <label for="difficultySelect" style="color: white; font-size: 24px; -webkit-text-stroke: 1px black; margin-bottom: 5px; text-align: left; width: 100%;">Difficulty:</label>
+        <select id="difficultySelect" style="font-size: 20px; padding: 10px; margin-bottom: 15px; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: inherit;">
+            <option value="easy">Easy (10 Gold, 100 Food)</option>
+            <option value="normal" selected>Normal (100 Food)</option>
+            <option value="hard">Hard (50 Food)</option>
+            <option value="impossible">Impossible (100 Food, Permadeath)</option>
+        </select>
+        
+        <div id="mapsList" class="hide-scrollbar" style="display:flex; flex-direction:column; gap:15px; max-height:45vh; padding: 10px; width: 100%; box-sizing: border-box;"></div>
         <button onclick="showMainMenu()" class="menu-button back-button">Back</button>
     </div>
 
@@ -232,6 +241,15 @@
             }
         }
         
+        window.startNewMap = function(mapId) {
+            const diff = document.getElementById('difficultySelect').value;
+            let url = '/rpg.html?new=true&difficulty=' + diff;
+            if (mapId !== 'random') {
+                url += '&customMapId=' + mapId;
+            }
+            window.location.href = url;
+        }
+        
         function showNewGame() {
             document.getElementById('mainMenu').style.display = 'none';
             document.getElementById('newGameMenu').style.display = 'flex';
@@ -240,10 +258,10 @@
             mapsList.innerHTML = '<p style="color:white; font-size:24px; -webkit-text-stroke: 1px black;">Loading maps...</p>';
             
             let randomMapHtml = `
-                <a href="/rpg.html?new=true" class="menu-button map-list-item">
+                <button onclick="startNewMap('random')" class="menu-button map-list-item">
                     <img src="/static/lg/whitePawn.png" class="icon">
                     Random Map (Super Hard)
-                </a>
+                </button>
             `;
             
             const headers = window.Auth && window.Auth.getToken() ? window.Auth.getAuthHeaders() : {};
@@ -260,10 +278,10 @@
                     maps.forEach(map => {
                         if (map.isGrandMap) {
                             mapsList.innerHTML += `
-                                <a href="/rpg.html?customMapId=${map._id}&new=true" class="menu-button map-list-item">
+                                <button onclick="startNewMap('${map._id}')" class="menu-button map-list-item">
                                     <img src="/static/lg/whitePawn.png" class="icon">
                                     ${map.name}
-                                </a>
+                                </button>
                             `;
                         }
                     });
