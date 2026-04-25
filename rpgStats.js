@@ -56,8 +56,8 @@ const RPGSKILLS = [
     { 
         name: "Scavenger", 
         maxLevel: 3,
-        getDescription: (level) => `Earn ${level * 3} extra food per win.`,
-        apply: (level) => { RPGStats.additionalFoodPerWin = level * 3; } 
+        getDescription: (level) => `Earn ${level * 4} extra food per win.`,
+        apply: (level) => { RPGStats.additionalFoodPerWin = level * 4; } 
     },
     { 
         name: "Logistics", 
