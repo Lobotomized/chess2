@@ -29,26 +29,22 @@ const RPGSKILLS = [
     },
     { 
         name: "Nomad", 
-        maxLevel: 3,
+        maxLevel: 2,
         getDescription: (level) => {
             let cost;
             if (level === 1) {
                 cost = '3';
             } else if (level === 2) {
-                cost = '1';
-            } else {
                 cost = '0';
-            }
+            } 
             return `Movement costs ${cost} food.`;
         },
         apply: (level) => {
             if (level === 1) {
                 RPGStats.foodLostOnMovement = 3;
             } else if (level === 2) {
-                RPGStats.foodLostOnMovement = 1;
-            } else {
                 RPGStats.foodLostOnMovement = 0;
-            }
+            } 
         }
     },
     { 
