@@ -338,20 +338,16 @@ function brainbugFactory(color,x,y){
                 { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },
                 { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }
             ],
-        afterEnemyPieceTaken:function(enemyPiece, state){
-            color = this.color;
-            if(color == 'black'){
-                direction = -1;
-            }
-            else{
-                direction = 1;
-            }
-            const copy = findCopyPieceByXY(state.pieces,this.x,this.y + direction);
+        afterEnemyPieceTaken:function(enemyPiece, state, prevMove){
+            let color = this.color;
+            if(!prevMove) return; // Fallback just in case
+            
+            const copy = findCopyPieceByXY(state.pieces, prevMove.x, prevMove.y);
             const squareCheck = state.board.find((sq) => {
-                return sq.x == this.x && sq.y == this.y + direction;
+                return sq.x == prevMove.x && sq.y == prevMove.y;
             })
             if(!copy && squareCheck != undefined){
-                state.pieces.push(queenbugFactory(color,this.x,this.y + direction));
+                state.pieces.push(queenbugFactory(color, prevMove.x, prevMove.y));
             }
         },
 

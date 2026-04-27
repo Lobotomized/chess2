@@ -2758,7 +2758,7 @@ function showShopModal(restore = false) {
     
     // Initial update
     updateAllButtons();
-
+    
     if (!modal.open) {
         modal.showModal();
     }

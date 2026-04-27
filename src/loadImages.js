@@ -1,11 +1,6 @@
 let folderSrc =  "lg"
 function setImageSource() { 
-    const screenWidth = window.innerWidth;
-    if (screenWidth < 700) {
-        folderSrc = 'sm';
-    } else {
-        folderSrc = 'lg';
-    }
+    folderSrc = 'lg';
   }
 
 // Call the function to set the image source initially
@@ -301,12 +296,7 @@ function drawPiece(x, y, img, size) {
         size = 500
     }
     size = squareLength
-    if(folderSrc === 'sm'){
-        sizePiece = size*10
-    }
-    else{
-        sizePiece = size;
-    }
+    sizePiece = size;
     
     // Support for custom uploaded images
     if (img && (img.startsWith('http') || img.startsWith('/uploads/'))) {

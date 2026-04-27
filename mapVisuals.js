@@ -414,10 +414,8 @@ function showMapModal() {
                 };
                 
                 // Use global folderSrc if available, else default to 'lg'
-                // Check if folderSrc is defined, otherwise check window width
                 let fSrc = 'lg';
                 if (typeof folderSrc !== 'undefined') fSrc = folderSrc;
-                else if (window.innerWidth < 700) fSrc = 'sm';
 
                 const regionIconName = regionIcons[region] || 'blackPawn.png';
                 // Try to find correct path. Since we saw /static/ in loadImages.js, we use that.

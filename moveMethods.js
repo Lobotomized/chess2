@@ -127,7 +127,7 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
                 }
             }
             if (operatedPiece.afterEnemyPieceTaken) {
-                operatedPiece.afterEnemyPieceTaken(enemyPiece, state);
+                operatedPiece.afterEnemyPieceTaken(enemyPiece, state, {x: oldX, y: oldY});
             }
             enemyPiece.x = undefined;
             enemyPiece.y = undefined;
