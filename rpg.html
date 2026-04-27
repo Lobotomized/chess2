@@ -591,11 +591,11 @@
         <p>Drag and drop or click to swap pieces within their lines.</p>
         <div style="margin-bottom: 20px;">
             <h3 style="color: #000000; border-bottom: 1px solid var(--board-dark); margin-bottom: 10px;">Frontline</h3>
-            <div id="reorderFrontline" style="display: flex; gap: 10px; justify-content: center; min-height: 60px; padding: 10px; background: rgba(255,255,255,0.3); border-radius: 12px;"></div>
+            <div id="reorderFrontline" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 60px; padding: 10px; background: rgba(255,255,255,0.3); border-radius: 12px;"></div>
         </div>
         <div style="margin-bottom: 20px;">
             <h3 style="color: #000000; border-bottom: 1px solid var(--board-dark); margin-bottom: 10px;">Backline</h3>
-            <div id="reorderBackline" style="display: flex; gap: 10px; justify-content: center; min-height: 60px; padding: 10px; background: rgba(255,255,255,0.3); border-radius: 12px;"></div>
+            <div id="reorderBackline" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 60px; padding: 10px; background: rgba(255,255,255,0.3); border-radius: 12px;"></div>
         </div>
         <div style="margin-bottom: 20px;">
             <h3 style="color: #000000; border-bottom: 1px solid var(--board-dark); margin-bottom: 10px;">Reserve</h3>
@@ -611,7 +611,7 @@
         <h2>Choose Your Next Mission</h2>
         <p>Select your next challenge.</p>
         <div id="rewardOptions" class="army-choice"></div>
-        <div style="display: flex; gap: 10px; justify-content: center; margin-top: 15px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 15px;">
             <button onclick="showMapModal()">View Map</button>
             <button onclick="showReorderModal(rpgState.playerRoster)">Reorder Army</button>
         </div>
@@ -664,7 +664,7 @@
         <h2>Mercenary Market</h2>
         <p>Current 🪙: <span id="playerGold" style="color:#e5b53e; font-weight:bold;">0</span></p>
         <div id="shopOptions" class="army-choice"></div>
-        <div style="margin-top:20px;">
+        <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px;">
             <button onclick="document.getElementById('shopDialog').close(); showMapModal();">Leave Market</button>
             <button onclick="showReorderModal(rpgState.playerRoster, () => { if(document.getElementById('shopDialog').open) showShopModal(true); })">Reorder Army</button>
         </div>
