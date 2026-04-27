@@ -5,6 +5,7 @@ const Map = require('./models/map'); // Import the Map model
 const Bot = require('./models/bot'); // Import the Bot model
 const GameHistory = require('./models/gameHistory'); // Import the GameHistory model
 const UserGameRecord = require('./models/UserGameRecord');
+const RpgSave = require('./models/RpgSave');
 const User = require('./models/user');
 const CustomPiece = require('./models/customPiece');
 const bcrypt = require('bcryptjs');
@@ -1342,6 +1343,54 @@ app.get('/maps', optionalAuthenticateToken, async (req, res) => {
       res.status(500).json({ error: 'Internal Server Error' });
     }
   }); 
+
+app.post('/api/rpg-save', authenticateToken, async (req, res) => {
+    try {
+        const { slotId, saveData } = req.body;
+        if (!saveData) return res.status(400).json({ error: 'saveData is required' });
+        
+        const slot = slotId || 'default';
+        
+        await RpgSave.updateOne(
+            { userId: req.user.id, slotId: slot },
+            { userId: req.user.id, slotId: slot, saveData: saveData, updatedAt: Date.now() },
+            { upsert: true }
+        );
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/rpg-save/:slotId?', authenticateToken, async (req, res) => {
+    try {
+        const slot = req.params.slotId || 'default';
+        const save = await RpgSave.findOne({ userId: req.user.id, slotId: slot });
+        if (!save) return res.json({ saveData: null });
+        res.json({ saveData: save.saveData });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/rpg-saves-list', authenticateToken, async (req, res) => {
+    try {
+        const saves = await RpgSave.find({ userId: req.user.id }).select('slotId updatedAt');
+        res.json({ saves });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/rpg-save/:slotId', authenticateToken, async (req, res) => {
+    try {
+        const slot = req.params.slotId || 'default';
+        await RpgSave.deleteOne({ userId: req.user.id, slotId: slot });
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 http.listen(8080, function () {
     console.log('listening on *:8080');

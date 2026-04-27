@@ -666,7 +666,7 @@
         <div id="shopOptions" class="army-choice"></div>
         <div style="margin-top:20px;">
             <button onclick="document.getElementById('shopDialog').close(); showMapModal();">Leave Market</button>
-            <button onclick="showReorderModal(rpgState.playerRoster)">Reorder Army</button>
+            <button onclick="showReorderModal(rpgState.playerRoster, () => { if(document.getElementById('shopDialog').open) showShopModal(true); })">Reorder Army</button>
         </div>
     </dialog>
 

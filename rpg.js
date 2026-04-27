@@ -232,6 +232,7 @@ function initRpgGame() {
     const isNew = urlParams.get('new') === 'true';
     const isLoad = urlParams.get('load') === 'true';
     let currentSaveSlot = urlParams.get('slot');
+    window.currentSaveSource = urlParams.get('source');
     window.initialDifficulty = urlParams.get('difficulty');
     
     if (isNew) {
@@ -349,12 +350,35 @@ function showMainMenu() {
     window.location.href = '/rpg-menu';
 }
 
-function loadGame() {
+async function loadGame() {
     const modal = document.getElementById('mainMenuDialog');
     if(modal) modal.close();
     
     const saveKey = window.currentSaveSlot ? `rpgState_${window.currentSaveSlot}` : 'rpgState';
-    const savedState = localStorage.getItem(saveKey);
+    const slotId = window.currentSaveSlot || 'default';
+    let savedState = null;
+    
+    const token = typeof Auth !== 'undefined' ? Auth.getToken() : null;
+    if (token && window.currentSaveSource !== 'local') {
+        try {
+            const res = await fetch(`/api/rpg-save/${slotId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.saveData) {
+                    savedState = JSON.stringify(data.saveData);
+                }
+            }
+        } catch (e) {
+            console.error("Failed to load from DB, trying local storage:", e);
+        }
+    }
+    
+    if (!savedState && window.currentSaveSource !== 'db') {
+        savedState = localStorage.getItem(saveKey);
+    }
+    
     if (savedState) {
         try {
             const parsed = JSON.parse(savedState);
@@ -498,7 +522,7 @@ function startNewGame() {
     showStartModal();
 }
 
-function saveProgress() {
+async function saveProgress() {
     // Ensure rpgState.gold and food is a number
     if (typeof rpgState.gold !== 'number') rpgState.gold = 0;
     if (typeof rpgState.food !== 'number') rpgState.food = 20;
@@ -536,9 +560,32 @@ function saveProgress() {
     }
 
     const saveKey = window.currentSaveSlot ? `rpgState_${window.currentSaveSlot}` : 'rpgState';
-    localStorage.setItem(saveKey, JSON.stringify(rpgState));
+    const slotId = window.currentSaveSlot || 'default';
     
-    // Add to saves list if not legacy
+    // Check if logged in
+    const token = typeof Auth !== 'undefined' ? Auth.getToken() : null;
+    if (token) {
+        try {
+            await fetch('/api/rpg-save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ slotId, saveData: rpgState })
+            });
+        } catch (e) {
+            console.error("Failed to save to DB, falling back to local storage:", e);
+            localStorage.setItem(saveKey, JSON.stringify(rpgState));
+            updateLocalSavesList();
+        }
+    } else {
+        localStorage.setItem(saveKey, JSON.stringify(rpgState));
+        updateLocalSavesList();
+    }
+}
+
+function updateLocalSavesList() {
     if (window.currentSaveSlot) {
         let savesList = JSON.parse(localStorage.getItem('rpgSavesList') || '[]');
         if (!savesList.includes(window.currentSaveSlot)) {
@@ -643,8 +690,22 @@ function findFactoryForIcon(icon) {
     return null;
 }
 
-function clearProgress() {
+async function clearProgress() {
     const saveKey = window.currentSaveSlot ? `rpgState_${window.currentSaveSlot}` : 'rpgState';
+    const slotId = window.currentSaveSlot || 'default';
+    
+    const token = typeof Auth !== 'undefined' ? Auth.getToken() : null;
+    if (token) {
+        try {
+            await fetch(`/api/rpg-save/${slotId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+        } catch (e) {
+            console.error("Failed to delete from DB:", e);
+        }
+    }
+    
     localStorage.removeItem(saveKey);
     
     if (window.currentSaveSlot) {
@@ -2698,7 +2759,9 @@ function showShopModal(restore = false) {
     // Initial update
     updateAllButtons();
 
-    modal.showModal();
+    if (!modal.open) {
+        modal.showModal();
+    }
 }
 
 function showSkillSelectionModal() {

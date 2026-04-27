@@ -560,15 +560,19 @@ function showMapModal() {
                         const mapDialog = document.getElementById('mapDialog');
                         if (mapDialog) mapDialog.close();
                         
-                        // Open the Reorder Army modal
-                        if (typeof showReorderModal === 'function' && typeof rpgState !== 'undefined') {
-                            // Pass a callback that just re-opens the map dialog
-                            showReorderModal(rpgState.playerRoster, () => {
-                                const mDialog = document.getElementById('mapDialog');
-                                if (mDialog) mDialog.showModal();
-                            }, true); // The `true` parameter forces the button text to be "Confirm Army"
+                        if (node.board === 'Market' && typeof showShopModal === 'function') {
+                            showShopModal(true);
                         } else {
-                            console.warn("Reorder army function or state not available.");
+                            // Open the Reorder Army modal
+                            if (typeof showReorderModal === 'function' && typeof rpgState !== 'undefined') {
+                                // Pass a callback that just re-opens the map dialog
+                                showReorderModal(rpgState.playerRoster, () => {
+                                    const mDialog = document.getElementById('mapDialog');
+                                    if (mDialog) mDialog.showModal();
+                                }, true); // The `true` parameter forces the button text to be "Confirm Army"
+                            } else {
+                                console.warn("Reorder army function or state not available.");
+                            }
                         }
                     } else {
                         showMapCellPopup(node, grandMap);
