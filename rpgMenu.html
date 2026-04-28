@@ -156,6 +156,12 @@
             <option value="hard">Hard (50 Food)</option>
             <option value="impossible">Impossible (100 Food, Permadeath)</option>
         </select>
+
+        <label for="armyTypeSelect" style="color: white; font-size: 24px; -webkit-text-stroke: 1px black; margin-bottom: 5px; text-align: left; width: 100%;">Starting Army:</label>
+        <select id="armyTypeSelect" style="font-size: 20px; padding: 10px; margin-bottom: 15px; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: inherit;">
+            <option value="mixed" >Mixed Army</option>
+            <option selected value="classic">Classic Army</option>
+        </select>
         
         <div id="mapsList" class="hide-scrollbar" style="display:flex; flex-direction:column; gap:15px; max-height:45vh; padding: 10px; width: 100%; box-sizing: border-box;"></div>
         <button onclick="showMainMenu()" class="menu-button back-button">Back</button>
@@ -328,7 +334,8 @@
         
         window.startNewMap = function(mapId) {
             const diff = document.getElementById('difficultySelect').value;
-            let url = '/rpg.html?new=true&difficulty=' + diff;
+            const armyType = document.getElementById('armyTypeSelect').value;
+            let url = '/rpg.html?new=true&difficulty=' + diff + '&armyType=' + armyType;
             if (mapId !== 'random') {
                 url += '&customMapId=' + mapId;
             }

@@ -234,6 +234,7 @@ function initRpgGame() {
     let currentSaveSlot = urlParams.get('slot');
     window.currentSaveSource = urlParams.get('source');
     window.initialDifficulty = urlParams.get('difficulty');
+    window.initialArmyType = urlParams.get('armyType');
     
     if (isNew) {
         currentSaveSlot = 'save_' + Date.now();
@@ -286,8 +287,10 @@ async function loadCustomGrandMap(mapId) {
 
 function applyDifficultySettings() {
     let diff = window.initialDifficulty || rpgState.difficultyLevel || 'normal';
+    let armyType = window.initialArmyType || rpgState.armyType || 'mixed';
     
     rpgState.difficultyLevel = diff;
+    rpgState.armyType = armyType;
     rpgState.permadeath = false;
     
     if (diff === 'easy') {
@@ -1816,7 +1819,13 @@ function showStartModal() {
         // or just let it be 20 and it'll mostly just be frontline pieces.
         // 50% chance to allow a non-classic piece type in the army generation
         const allowNonClassic = Math.random() > 0.5;
-        const { army } = generateRandomArmy(9, true, null, true, allowNonClassic);
+        
+        let army;
+        if (rpgState.armyType === 'classic') {
+            army = generateRandomArmy(9, true, 'Classic', true, allowNonClassic).army;
+        } else {
+            army = generateRandomArmy(9, true, null, true, allowNonClassic).army;
+        }
         
         // Pick a random skill for this army
         const randomSkill = RPGSKILLS[Math.floor(Math.random() * RPGSKILLS.length)];
