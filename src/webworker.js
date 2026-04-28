@@ -18,6 +18,7 @@ importScripts('/src/AI/general.js')
 
 importScripts('/src/AI/magnifiers.js')
 importScripts('/src/AI/filters.js')
+importScripts('/src/AI/forcedAlgorithms.js')
 
 
 function buildMagsFromLegacy(charConfig) {
@@ -55,7 +56,6 @@ function parseMags(magsList, fallbackConfig) {
 self.addEventListener("message", async function(e) {
     
     let obj = JSONfn.parse(e.data)
-    console.log(obj.AIPower)
     if(!obj.state.won){
             
 
@@ -192,7 +192,6 @@ self.addEventListener("message", async function(e) {
                 )
             }
             if(obj.AIPower === 101){
-                console.log('here?')
                 console.time('101')
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
                     methods[obj.AICharacter](0),
@@ -458,20 +457,39 @@ self.addEventListener("message", async function(e) {
                             }
                         }
 
-                        if (algorithm === 'minimaxDeep') {
-                            move = minimaxDeep(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
-                        } else if (algorithm === 'minimaxAlphaBetaBudget') {
-                            move = minimaxAlphaBetaBudget(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
-                        } else if (algorithm === 'minimaxQuiescence') {
-                            move = minimaxQuiescence(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
-                        } else if (algorithm === 'proofNumberSearch') {
-                            move = proofNumberSearch(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
-                        } else if (algorithm === 'bestFirstSearch') {
-                            move = bestFirstSearch(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
-                        } else if (algorithm === 'principalVariationSearch') {
-                            move = principalVariationSearch(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
+                        // --- Forced Algorithms Framework ---
+                        let forcedAlgorithmMatch = null;
+                        const FORCED_ALGORITHMS_THRESHOLD = 10; // Threshold of pieces on board to start checking
+
+                        if (numPieces < FORCED_ALGORITHMS_THRESHOLD) {
+                            for (let fAlg of forcedAlgorithms) {
+                                console.log('why so slow?')
+                                if (fAlg.checkCondition(obj.state, obj.color)) {
+                                    forcedAlgorithmMatch = fAlg;
+                                    break; // Stop at the first algorithm whose conditions are met
+                                }
+                            }
+                        }
+                        if (forcedAlgorithmMatch) {
+                            // Run the matched forced algorithm
+                            move = forcedAlgorithmMatch.execute(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
                         } else {
-                            move = minimaxAlphaBeta(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
+                            // Fallback to the prechosen algorithm
+                            if (algorithm === 'minimaxDeep') {
+                                move = minimaxDeep(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
+                            } else if (algorithm === 'minimaxAlphaBetaBudget') {
+                                move = minimaxAlphaBetaBudget(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
+                            } else if (algorithm === 'minimaxQuiescence') {
+                                move = minimaxQuiescence(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
+                            } else if (algorithm === 'proofNumberSearch') {
+                                move = proofNumberSearch(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
+                            } else if (algorithm === 'bestFirstSearch') {
+                                move = bestFirstSearch(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
+                            } else if (algorithm === 'principalVariationSearch') {
+                                move = principalVariationSearch(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
+                            } else {
+                                move = minimaxAlphaBeta(obj.state, obj.color, currentDepth, obj.removedTurns, currentMags, currentFilters);
+                            }
                         }
                     } catch(e) {
                         console.error("Failed parsing custom AI config", e);
