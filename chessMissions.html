@@ -74,7 +74,15 @@
 
 <body>
     <div class="container">
-        <canvas id="canvas" width="500" height="500"></canvas>
+        <div class="board-wrapper" style="display: flex; flex-direction: row; gap: 20px; align-items: flex-start; justify-content: center; max-width: 100%;">
+            <canvas id="canvas" width="500" height="500"></canvas>
+            <div id="moveHistoryContainer" class="move-history" style="width: 250px; max-height: 500px; overflow-y: auto; background: var(--bg-overlay, rgba(240, 230, 200, 0.95)); border: 2px solid var(--border-color, #000); border-radius: 12px; padding: 10px; display: flex; flex-direction: column;">
+                <h3 style="margin-top: 0; text-align: center; border-bottom: 2px solid var(--border-color, #000); padding-bottom: 5px;">Move History</h3>
+                <div id="moveHistoryList" style="display: flex; flex-direction: column; gap: 8px;">
+                    <div style="text-align: center; color: var(--piece-black, #333); font-style: italic; padding: 10px;">No moves yet</div>
+                </div>
+            </div>
+        </div>
         <div class="times">
             <h1 class="clock" id="blackClock"></h1>
             <button class="row exitButton" style="display:none;" id="exitButton"><span id="forfeitText" class="forfeitText">Forfeit</span> <img id="flagImage" style="width:50px; height:50px;" src="/static/lg/whiteFlag.svg" alt="" /></button>
@@ -178,7 +186,13 @@
                 whiteClock: 6000,
                 blackClock: 6000,
                 whiteRace: undefined,
-                blackRace: bot.race || 'classic'
+                blackRace: bot.race || 'classic',
+                recordMoves: true,
+                gameRecordId: Date.now() + '_' + Math.random(),
+                gameMetadata: {
+                    mode: 'multiplayer',
+                    vsBot: true
+                }
             };
             
             for (let x = 0; x <= 7; x++) {
@@ -663,6 +677,11 @@
                     drawPiece(piece.x, piece.y, piece.icon, squareLength)
                 }
             })
+            
+            if (typeof renderMoveHistory === 'function') {
+                renderMoveHistory(state);
+            }
+
             // Start Loop if not started
             if (!window.drawLoopStarted) {
                 window.drawLoopStarted = true;
@@ -835,175 +854,6 @@
         }
     }
     
-    function drawLoop() {
-        if (!state) {
-            requestAnimationFrame(drawLoop);
-            return;
-        }
-        
-        // Clear canvas
-        canvas.width = squareLength * boardWidth + squareLength; // This clears it
-        canvas.height = squareLength * boardHeight + squareLength;
-        
-        // Re-draw board (reusing logic from socket callback is hard without refactoring)
-        // Ideally we should move the drawing logic to a separate function `drawGame()`.
-        // But the socket callback also updates DOM text (clocks, messages).
-        // Let's assume the socket callback sets up the state and `drawLoop` handles the continuous rendering of pieces?
-        // No, if we clear canvas, we lose the board.
-        // So we MUST redraw the board in the loop.
-        
-        // Copying the drawing logic here is duplicated code but necessary given the structure.
-        // Or we define `drawGame` and call it from both places (or just from loop).
-        
-        // Let's implement `drawGame` function that takes `state` and draws everything.
-        // And replace the drawing block in socket callback with `drawGame(state)`.
-        
-        drawGame(state);
-        
-        requestAnimationFrame(drawLoop);
-    }
-    
-    function drawGame(state) {
-        if (!state || !state.board) return;
-        
-        const me = document.getElementById('blackClock');
-        const enemy = document.getElementById('whiteClock');
-        const body = document.getElementsByTagName('body')[0];
-        const forfeitTextButton = document.getElementById('forfeitText');
-        
-        // DOM updates (can be optimized but fine for now)
-        if(state.turn != 'menu' && !state.won){
-             if(state.turn == 'white' && state.yourTurn || state.turn == 'black' && !state.yourTurn){
-                  me.innerText = 'My time '+state.whiteClock;
-                  enemy.innerText = 'Enemy time '+state.blackClock;
-             }
-        } else {
-             me.innerText = 'My Time ' +state.blackClock;
-             enemy.innerText = 'Enemy Time ' +state.whiteClock
-        }
-
-        if (state.turn == 'black') {
-            body.style.background = blackSquareColor
-            me.style.color = whiteSquareColor;
-            enemy.style.color = whiteSquareColor;
-        }
-        else {
-            me.style.color = blackSquareColor;
-            enemy.style.color = blackSquareColor;
-            body.style.background = whiteSquareColor
-        }
-        
-        state.board.forEach((sq,index) => {
-            let y = sq.y;
-            let x = sq.x;
-            if(IAM == 'black'){
-                y = reverseNumber(y,boardHeight);
-            }
-
-            let orderFirst = true;
-            if(y%2 != 0){
-                orderFirst = false;
-            }
-            if (!sq.light && !sq.special) {
-                    if(IAM == 'white'){
-                        if(orderFirst){
-                            if(x % 2 != 0){
-                                drawBlackSquare(x * squareLength, y * squareLength, squareLength)
-                            }
-                            else{
-                                drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
-                            }
-                        }
-                        else{
-                            if(x % 2 != 0){
-                                drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
-                            }
-                            else{
-                                drawBlackSquare(x * squareLength, y * squareLength, squareLength)
-                            }
-                        }
-                        if(state.pieceSelected){
-                            if(x == state.pieceSelected.x && y == state.pieceSelected.y){
-                                drawColoredSquare(x*squareLength, y*squareLength,availableSquareColor, squareLength)
-                            }
-                        }
-                    }
-                    else{
-                        if(orderFirst){
-                            if(x % 2 != 0){
-                                drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
-                            }
-                            else{
-                                drawBlackSquare(x * squareLength, y * squareLength, squareLength)
-                            }
-                        }
-                        else{
-                            if(x % 2 != 0){
-                                drawBlackSquare(x * squareLength, y * squareLength, squareLength)
-                            }
-                            else{
-                                drawWhiteSquare(x * squareLength, y * squareLength, squareLength)
-                            }
-                        }
-                        if(state.pieceSelected){
-                            if(x == state.pieceSelected.x && y == state.pieceSelected.y){
-                                drawColoredSquare(x*squareLength, reverseNumber(y, boardHeight)*squareLength,availableSquareColor, squareLength)
-                            }
-                        }
-                    }
-            }
-            else if(sq.special){
-                drawColoredSquare(x*squareLength, y * squareLength, specialSquareColor, squareLength)
-            }
-            else {
-                drawLightedSquare(x * squareLength, y * squareLength, squareLength);
-            }
-
-            if(sq.red){
-                drawColoredSquare(x*squareLength, y * squareLength, dangerSquareColor, squareLength)
-            }
-            else if(sq.grey){
-                drawColoredSquare(x*squareLength, y * squareLength, blockedSquareColor, squareLength)
-            }
-            
-        })
-        
-        if(state.oldMove){
-            const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);
-            const newSquare = findSquareByXY(state.board,state.oldMove.currentX, state.oldMove.currentY);
-            if(IAM === 'black'){
-                if(!oldSquare.light && !oldSquare.red){
-                    drawColoredSquare(state.oldMove.oldX*squareLength, reverseNumber(state.oldMove.oldY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
-                }
-                if(!newSquare.light){
-                    drawColoredSquare(state.oldMove.currentX*squareLength, reverseNumber(state.oldMove.currentY,boardHeight)*squareLength,oldMoveSquareColor, squareLength)
-                }
-            }
-            else if(IAM === 'white'){
-                if(!oldSquare.light && !oldSquare.red){
-                    drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
-                }
-                if(!newSquare.light){
-                    drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
-                }
-            }
-        }
-
-        // Draw Pieces with Animation
-        state.pieces.forEach((piece) => {
-            if(IAM == 'black'){
-                let drawX = piece.animX !== undefined ? piece.animX : piece.x;
-                let drawY = piece.animY !== undefined ? piece.animY : piece.y;
-                drawPiece(drawX, reverseNumber(drawY,boardHeight), piece.icon, squareLength)
-            }
-            else{
-                let drawX = piece.animX !== undefined ? piece.animX : piece.x;
-                let drawY = piece.animY !== undefined ? piece.animY : piece.y;
-                drawPiece(drawX, drawY, piece.icon, squareLength)
-            }
-        })
-    }
-
     // Animation Loop
     function drawLoop() {
         if (!state) {
@@ -1183,6 +1033,10 @@
                     drawPiece(drawX, drawY, piece.icon, squareLength)
                 }
             })
+            
+            if (typeof renderMoveHistory === 'function') {
+                renderMoveHistory(state);
+            }
     }
     
     // Start Loop

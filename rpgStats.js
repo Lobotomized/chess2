@@ -158,6 +158,12 @@ const RPGSKILLS = [
         getDescription: (level) => "Allows movement across Mountain nodes.",
         apply: (level) => { RPGStats.mountaineerLevel = level; } 
     },
+    {
+        name: "Divination",
+        maxLevel: 3,
+        getDescription: (level) => `Allows you to go back in time up to ${level} turn${level > 1 ? 's' : ''} once per battle.`,
+        apply: (level) => { RPGStats.divinationLevel = level; }
+    }
 ];
 
 function resetRPGStats() {
@@ -180,6 +186,7 @@ function resetRPGStats() {
     RPGStats.scoutingLevel = 0;
     RPGStats.summonerLevel = 0;
     RPGStats.mountaineerLevel = 0;
+    RPGStats.divinationLevel = 0;
     
     if (typeof applyDifficultySettings === 'function') {
         applyDifficultySettings();

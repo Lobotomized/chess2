@@ -188,7 +188,9 @@ function playerMove(playerMove, state,alwaysLight,selectedForced, specialFlag) {
             color: operatedPiece.color,
             from: {x: oldX, y: oldY},
             to: {x: x, y: y},
-            piece: operatedPiece.icon
+            piece: operatedPiece.icon,
+            snapshotPieces: (typeof JSONfn !== 'undefined') ? JSONfn.parse(JSONfn.stringify(state.pieces)) : JSON.parse(JSON.stringify(state.pieces)),
+            snapshotTurn: state.turn
         });
     }
     state.pieceSelected = undefined;

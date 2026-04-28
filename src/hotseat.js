@@ -334,6 +334,11 @@ function animate(secretState){
             
             drawPiece(piece.currentX, piece.currentY, piece.icon, squareLength)
         })
+
+        if (typeof renderMoveHistory === 'function') {
+            renderMoveHistory(state);
+        }
+
         if (state.won) {
             if (state.won == 'black') {
                 

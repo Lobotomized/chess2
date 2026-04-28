@@ -1,5 +1,6 @@
 let memoizedSquares = {};
 let memoizedPieces = {};
+let lastRenderedMoveHistoryLength = 0;
 
 
 function findSquareByXY(board,x,y){
@@ -17,6 +18,154 @@ function findSquareByXY(board,x,y){
     return undefined;
  }
 
+
+function revertGameState(state, targetLength) {
+    if (targetLength === 0) {
+        state.pieces = (typeof JSONfn !== 'undefined') ? JSONfn.parse(JSONfn.stringify(state.initialPieces)) : JSON.parse(JSON.stringify(state.initialPieces));
+        state.board = (typeof JSONfn !== 'undefined') ? JSONfn.parse(JSONfn.stringify(state.initialBoard)) : JSON.parse(JSON.stringify(state.initialBoard));
+        state.turn = 'white';
+        state.moveHistory = [];
+    } else {
+        const targetMove = state.moveHistory[targetLength - 1];
+        state.pieces = (typeof JSONfn !== 'undefined') ? JSONfn.parse(JSONfn.stringify(targetMove.snapshotPieces)) : JSON.parse(JSON.stringify(targetMove.snapshotPieces));
+        state.turn = targetMove.snapshotTurn === 'white' ? 'black' : 'white';
+        state.moveHistory = state.moveHistory.slice(0, targetLength);
+    }
+    
+    if (typeof rpgState !== 'undefined') {
+        rpgState.divinationUsed = true;
+    }
+    
+    if (state.board) {
+        state.board.forEach(sq => { sq.light = false; sq.specialLight = false; });
+    }
+    state.pieceSelected = undefined;
+    
+    lastRenderedMoveHistoryLength = 0;
+
+    if (typeof renderMoveHistory === 'function') {
+        renderMoveHistory(state);
+    }
+}
+
+if (typeof window !== 'undefined') {
+    window.revertGameState = revertGameState;
+}
+
+function renderMoveHistory(state) {
+    console.log('here!?')
+    if (typeof document === 'undefined') return;
+
+    const container = document.getElementById('moveHistoryContainer');
+    const list = document.getElementById('moveHistoryList');    
+
+    if (!container || !list) return;
+
+    if (!state.moveHistory || state.moveHistory.length === 0) {
+        container.style.display = 'flex';
+        list.innerHTML = '<div style="text-align: center; color: var(--piece-black, #333); font-style: italic; padding: 10px;">No moves yet</div>';
+        lastRenderedMoveHistoryLength = 0;
+        return;
+    }
+
+    if (lastRenderedMoveHistoryLength === state.moveHistory.length) {
+        return; // No need to re-render if nothing changed
+    }
+
+    lastRenderedMoveHistoryLength = state.moveHistory.length;
+
+    container.style.display = 'flex';
+    list.innerHTML = '';
+
+    let boardHeightY = 7;
+            if (state.board && state.board.length > 0) {
+                boardHeightY = Math.max(...state.board.map(sq => sq.y));
+            }
+
+            const reversedHistory = [...state.moveHistory].reverse();
+
+            reversedHistory.forEach((move, index) => {
+                const moveEntry = document.createElement('div');
+                moveEntry.style.display = 'flex';
+                moveEntry.style.flexDirection = 'row';
+                moveEntry.style.alignItems = 'center';
+                moveEntry.style.justifyContent = 'space-between';
+                moveEntry.style.padding = '4px 8px';
+                moveEntry.style.background = index % 2 === 0 ? 'rgba(255, 255, 255, 0.5)' : 'transparent';
+                moveEntry.style.borderRadius = '6px';
+                moveEntry.style.border = '1px solid var(--border-color, rgba(0,0,0,0.1))';
+                moveEntry.style.color = 'var(--piece-black, #000)';
+
+                const leftSide = document.createElement('div');
+                leftSide.style.display = 'flex';
+                leftSide.style.alignItems = 'center';
+                leftSide.style.gap = '8px';
+
+                const pieceImg = document.createElement('img');
+                let iconSrc = move.piece;
+                if (iconSrc) {
+                    if(!iconSrc.includes('/')) iconSrc = '/static/lg/' + iconSrc;
+                    if(!iconSrc.endsWith('.png') && !iconSrc.includes('.')) iconSrc += '.png';
+                } else {
+                    // fallback
+                    iconSrc = '/static/lg/' + move.color + 'Pawn.png';
+                }
+                pieceImg.src = iconSrc;
+                pieceImg.style.width = '24px';
+                pieceImg.style.height = '24px';
+                pieceImg.style.objectFit = 'contain';
+
+                const moveNumber = document.createElement('span');
+                moveNumber.style.fontWeight = 'bold';
+                moveNumber.style.fontSize = '14px';
+                moveNumber.innerText = (state.moveHistory.length - index) + '.';
+
+                leftSide.appendChild(moveNumber);
+                leftSide.appendChild(pieceImg);
+
+                const rightSide = document.createElement('div');
+                rightSide.style.display = 'flex';
+                rightSide.style.alignItems = 'center';
+                rightSide.style.gap = '8px';
+
+                const moveText = document.createElement('div');
+                moveText.style.fontSize = '14px';
+                moveText.style.fontWeight = 'bold';
+                moveText.style.fontFamily = "'Lilita One', cursive, sans-serif";
+
+                const fromSquare = String.fromCharCode(97 + move.from.x) + ((boardHeightY - move.from.y) + 1);
+                const toSquare = String.fromCharCode(97 + move.to.x) + ((boardHeightY - move.to.y) + 1);
+
+                moveText.innerText = `${fromSquare} ➔ ${toSquare}`;
+
+                rightSide.appendChild(moveText);
+
+                const backwardsIndex = index + 1;
+                if (typeof rpgState !== 'undefined' && rpgState && typeof RPGStats !== 'undefined' && RPGStats.divinationLevel > 0 && !rpgState.divinationUsed && !state.won) {
+                    if (backwardsIndex <= RPGStats.divinationLevel * 2) {
+                        const clockBtn = document.createElement('button');
+                        clockBtn.innerText = '⏰';
+                        clockBtn.style.background = 'transparent';
+                        clockBtn.style.border = 'none';
+                        clockBtn.style.cursor = 'pointer';
+                        clockBtn.style.fontSize = '16px';
+                        clockBtn.title = 'Use Divination to revert to before this move';
+                        clockBtn.onclick = () => {
+                            if(confirm('Use Divination to go back to this move? (Once per battle)')) {
+                                if (typeof revertGameState === 'function') {
+                                revertGameState(state, state.moveHistory.length - backwardsIndex);
+                            }
+                            }
+                        };
+                        rightSide.appendChild(clockBtn);
+                    }
+                }
+
+                moveEntry.appendChild(leftSide);
+                moveEntry.appendChild(rightSide);
+                list.appendChild(moveEntry);
+            });
+        }
 
 function findCopyPieceByXY(pieces,x,y){
     return pieces.find((piece) => {
@@ -1119,7 +1268,8 @@ try{
         lightBoardFE,
         isPositionAttacked,
         checkRemi,
-        getColorPieces
+        getColorPieces,
+        renderMoveHistory
     }
 }
 catch(err){

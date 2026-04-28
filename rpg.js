@@ -221,6 +221,7 @@ function initRpgGame() {
     hotseatGame = getSinglePlayerGame();
     hotseatGame.join('white', 'white');
     hotseatGame.join('black', 'black');
+    hotseatGame.state.recordMoves = true;
     
     // Start Animation Loop
     // Use requestAnimationFrame for smooth animation
@@ -548,7 +549,10 @@ async function saveProgress() {
             }),
             turn: hotseatGame.state.turn,
             won: hotseatGame.state.won,
-            message: hotseatGame.state.message
+            message: hotseatGame.state.message,
+            moveHistory: hotseatGame.state.moveHistory,
+            initialPieces: hotseatGame.state.initialPieces,
+            initialBoard: hotseatGame.state.initialBoard
         };
     } else if (!rpgState.gameActive) {
         // If game is not active, ensure we don't save a broken board state
@@ -635,6 +639,9 @@ function restoreBoard(savedBoard) {
     hotseatGame.state.turn = savedBoard.turn || 'white';
     hotseatGame.state.won = savedBoard.won;
     hotseatGame.state.message = savedBoard.message;
+    hotseatGame.state.moveHistory = savedBoard.moveHistory || undefined;
+    hotseatGame.state.initialPieces = savedBoard.initialPieces || undefined;
+    hotseatGame.state.initialBoard = savedBoard.initialBoard || undefined;
     
     // Update Turn Display
     const turnDisplay = document.getElementById('turn');
@@ -1382,6 +1389,7 @@ function startLevel(level, difficultyOption) {
     rpgState.showWinScreen = false; // Ensure win screen is cleared
     rpgState.gameOverSequenceStarted = false; // Reset flag for new level
     rpgState.boardHistory = []; // Reset board history
+    rpgState.divinationUsed = false; // Reset divination skill usage per battle
     updateGoldDisplay();
 
     // Check if it's a market visit
@@ -1613,6 +1621,9 @@ const boardShapes = {
 function setupBoard(shapeName = 'Standard') {
     hotseatGame.state.pieces = [];
     hotseatGame.state.board = [];
+    hotseatGame.state.moveHistory = undefined;
+    hotseatGame.state.initialPieces = undefined;
+    hotseatGame.state.initialBoard = undefined;
     
     // Create Board Grid based on shape
     if (boardShapes[shapeName]) {
@@ -3880,6 +3891,10 @@ function animate(secretState){
         
         drawPiece(piece.currentX, piece.currentY, piece.icon, squareLength);
     });
+
+    if (typeof renderMoveHistory === 'function') {
+        renderMoveHistory(state);
+    }
     
     // Status Text
     const turnText = document.getElementById('turn');
