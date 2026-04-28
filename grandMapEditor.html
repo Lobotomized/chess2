@@ -209,14 +209,21 @@
             background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 10px, transparent 10px, transparent 20px);
         }
         
+        .map-cell.mountain { 
+            background-color: #5d4037;
+            border-color: #3e2723;
+            background-image: radial-gradient(circle at center, #795548 0%, #4e342e 100%);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
+        
         /* --- Region Styles (Applied when not a special terrain) --- */
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Classic"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Classic"] {
             background-color: #8d6e63;
             background-image: repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(0,0,0,0.1) 20px), repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(0,0,0,0.1) 20px);
             border-color: #5d4037;
         }
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Medieval"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Medieval"] {
             background-color: #78909c;
             background-image: 
                 linear-gradient(45deg, #607d8b 25%, transparent 25%, transparent 75%, #607d8b 75%, #607d8b),
@@ -226,7 +233,7 @@
             border-color: #37474f;
         }
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Insect"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Insect"] {
             background-color: #558b2f;
             background-image: radial-gradient(#33691e 15%, transparent 16%), radial-gradient(#33691e 15%, transparent 16%);
             background-size: 20px 20px;
@@ -234,7 +241,7 @@
             border-color: #1b5e20;
         }
 
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Cyborgs"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Cyborgs"] {
             background-color: #455a64;
             background-image: 
                 linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
@@ -244,7 +251,7 @@
             box-shadow: inset 0 0 20px #000;
         }
 
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Promoters"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Promoters"] {
             background-color: #c62828;
             background-image: 
                 radial-gradient(circle at 50% 50%, #b71c1c 0%, #8b0000 100%);
@@ -380,6 +387,7 @@
                         <option value="Fountain">Fountain (Lake)</option>
                         <option value="Desert">Desert</option>
                         <option value="Library">Library</option>
+                        <option value="Mountain">Mountain</option>
                     </select>
                 </div>
 
@@ -722,6 +730,13 @@
                     }
                     else if (node.board === 'Library') {
                         cell.classList.add('library');
+                    }
+                    else if (node.board === 'Mountain') {
+                        cell.classList.add('mountain');
+                        const num = (node.x * 31 + node.y * 17) % 4 + 1;
+                        cell.style.backgroundImage = `url("/static/bigMap/mountain${num}.png")`;
+                        cell.style.backgroundSize = 'cover';
+                        cell.style.backgroundPosition = 'center';
                     }
                     else {
                         cell.classList.add('standard');

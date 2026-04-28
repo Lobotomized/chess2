@@ -283,7 +283,6 @@ function getParams (url) {
 
 
 function checkRemi(state){
-    console.log('vliza v 4ek remi')
     let yourPieces = state.pieces.filter((piece) => {
         return piece.color === state.turn;
     })

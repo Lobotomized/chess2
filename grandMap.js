@@ -328,14 +328,15 @@ const grandMap = {
 
         // Determine board type
         // Adjust probabilities: Standard (35%), Woods (25%), Fountain (20%), Desert (10%), Market (10%)
-        const boards = ['Standard', 'Woods', 'Fountain', 'Desert', 'Market'];
+        const boards = ['Standard', 'Woods', 'Fountain', 'Desert', 'Market', 'Mountain'];
         let board = 'Standard';
         const rand = getDeterministicRandom(1);
         if (rand < 0.35) board = 'Standard';
-        else if (rand < 0.60) board = 'Woods';
-        else if (rand < 0.80) board = 'Fountain';
-        else if (rand < 0.90) board = 'Desert';
-        else board = 'Market';
+        else if (rand < 0.55) board = 'Woods';
+        else if (rand < 0.70) board = 'Fountain';
+        else if (rand < 0.80) board = 'Desert';
+        else if (rand < 0.90) board = 'Market';
+        else board = 'Mountain';
         
         // Determine Difficulty
         const difficulties = window.difficulties || [];
@@ -347,6 +348,13 @@ const grandMap = {
                 rewardCap: 0, 
                 name: "Marketplace", 
                 description: "A safe haven to hire mercenaries." 
+            };
+        } else if (board === 'Mountain') {
+            difficultyProfile = { 
+                enemyValue: 0, 
+                rewardCap: 0, 
+                name: "Mountain Range", 
+                description: "Impassable Terrain." 
             };
         } else if (difficulties.length > 0) {
             // Spread powerful squares equally throughout the map
@@ -404,6 +412,7 @@ const grandMap = {
         // Market always has a unit (Mercenary)
         let pieceChance = 0.1;
         if (board === 'Market') pieceChance = 1.0;
+        else if (board === 'Mountain') pieceChance = 0.0;
         
         if (getDeterministicRandom(9) < pieceChance) {
              rewards.pieces.push("Unit");
@@ -454,12 +463,16 @@ const grandMap = {
             
             // Check bounds
             if (nx >= 0 && nx < this.width && ny >= 0 && ny < this.height) {
-                moves.push({
-                    direction: dir.name,
-                    x: nx,
-                    y: ny,
-                    node: this.map[ny][nx]
-                });
+                const targetNode = this.map[ny][nx];
+                const isMountaineer = typeof RPGStats !== 'undefined' && RPGStats.mountaineerLevel > 0;
+                if (targetNode.board !== 'Mountain' || isMountaineer) {
+                    moves.push({
+                        direction: dir.name,
+                        x: nx,
+                        y: ny,
+                        node: targetNode
+                    });
+                }
             }
         });
         return moves;

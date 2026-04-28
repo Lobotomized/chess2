@@ -277,16 +277,24 @@ function showMapModal() {
             border-color: #1b0000;
             background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 10px, transparent 10px, transparent 20px);
         }
+
+        /* MOUNTAIN: Grey rocky look */
+        .map-cell.mountain { 
+            background-color: #5d4037;
+            border-color: #3e2723;
+            background-image: radial-gradient(circle at center, #795548 0%, #4e342e 100%);
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.8);
+        }
         
         /* --- Region Styles (Applied when not a special terrain) --- */
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Classic"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Classic"] {
             background-color: #8d6e63;
             background-image: repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(0,0,0,0.1) 20px), repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(0,0,0,0.1) 20px);
             border-color: #5d4037;
         }
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Medieval"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Medieval"] {
             background-color: #78909c;
             background-image: 
                 linear-gradient(45deg, #607d8b 25%, transparent 25%, transparent 75%, #607d8b 75%, #607d8b),
@@ -296,7 +304,7 @@ function showMapModal() {
             border-color: #37474f;
         }
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Insect"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Insect"] {
             background-color: #558b2f;
             background-image: radial-gradient(#33691e 15%, transparent 16%), radial-gradient(#33691e 15%, transparent 16%);
             background-size: 20px 20px;
@@ -304,7 +312,7 @@ function showMapModal() {
             border-color: #1b5e20;
         }
 
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Cyborgs"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Cyborgs"] {
             background-color: #455a64;
             background-image: 
                 linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
@@ -314,7 +322,7 @@ function showMapModal() {
             box-shadow: inset 0 0 20px #000;
         }
 
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library)[data-region="Promoters"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Promoters"] {
             background-color: #c62828;
             background-image: 
                 radial-gradient(circle at 50% 50%, #b71c1c 0%, #8b0000 100%);
@@ -382,6 +390,13 @@ function showMapModal() {
                     cell.style.backgroundSize = 'cover';
                     cell.style.backgroundPosition = 'center';
                 }
+                else if (node.board === 'Mountain') {
+                    cell.classList.add('mountain');
+                    const num = (node.x * 31 + node.y * 17) % 4 + 1;
+                    cell.style.backgroundImage = `url("/static/bigMap/mountain${num}.png")`;
+                    cell.style.backgroundSize = 'cover';
+                    cell.style.backgroundPosition = 'center';
+                }
                 else if (node.board === 'Market') cell.classList.add('market');
                 else if (node.board === 'Library') cell.classList.add('library');
                 else {
@@ -427,7 +442,7 @@ function showMapModal() {
                 let isFinalBossNode = diffName === 'Final Boss';
 
                 // Top Right Region Indicator
-                const regionIndicatorHtml = isFinalBossNode ? '' : `
+                const regionIndicatorHtml = (isFinalBossNode || node.board === 'Mountain') ? '' : `
                     <div style="position:absolute; top: 8px; right: 8px; width: 32px; height: 32px; background: rgba(255,255,255,0.7); border: 2px solid rgba(0,0,0,0.3); border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 4px rgba(0,0,0,0.5); z-index: 20;">
                         <img src="${iconPath}" style="width: 80%; height: 80%; object-fit: contain; filter: drop-shadow(1px 1px 1px black);" title="${region} Territory">
                     </div>
@@ -458,6 +473,8 @@ function showMapModal() {
                      icon = '🛒';
                 } else if (node.board === 'Library') {
                      icon = '📖';
+                } else if (node.board === 'Mountain') {
+                     icon = ''; // No combat icon on mountains
                 } else {
                      // Combat Node
                      // Use Image
@@ -473,6 +490,8 @@ function showMapModal() {
                 const desc = node.difficulty ? node.difficulty.description : '';
                 if (isFinalBossNode) {
                     cell.title = `${region} Region\nDifficulty: ${diffName} (Power: ${node.enemyPower})\n${desc}`;
+                } else if (node.board === 'Mountain') {
+                    cell.title = `Mountain\n${desc}`;
                 } else {
                     cell.title = `${region} Region\nDifficulty: ${diffName} (Power: ${node.enemyPower})\nReward Cap: ${node.rewardCap}\n${desc}`;
                 }
@@ -491,7 +510,7 @@ function showMapModal() {
                 if (!node.cleared && node.board === 'Library') {
                      // Library shows King Experience instead of standard rewards
                      rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="King Experience" style="display:flex; align-items:center;">📖${node.enemyPower}</span></div>`;
-                } else if (!node.cleared && node.rewards && node.board !== 'Market' && !isFinalBossNode) {
+                } else if (!node.cleared && node.rewards && node.board !== 'Market' && node.board !== 'Mountain' && !isFinalBossNode) {
                      const r = node.rewards;
                      let parts = [];
                      const rosterFull = typeof rpgState !== 'undefined' && rpgState.playerRoster && rpgState.playerRoster.length >= 24;
@@ -669,7 +688,7 @@ function showMapCellPopup(node, grandMap) {
     if (existing) existing.remove();
 
     // Ensure the node has its army and actual enemy value generated before we display its stats
-    if (typeof ensureNodeArmy === 'function' && node.board !== 'Market' && !node.cleared) {
+    if (typeof ensureNodeArmy === 'function' && node.board !== 'Market' && node.board !== 'Library' && node.board !== 'Mountain' && !node.cleared) {
         ensureNodeArmy(node);
     }
 
@@ -700,12 +719,19 @@ function showMapCellPopup(node, grandMap) {
     const diffName = node.difficulty ? node.difficulty.name : 'Unknown';
     const region = node.region || 'Unknown Region';
     
-    let content = `
-        <h2 style="margin-top:0; color:#5d4037; border-bottom: 2px solid #5d4037; padding-bottom: 5px;">${region}</h2>
-        <h3 style="margin:10px 0; color: #8b4513;">${diffName}</h3>
-    `;
+    let content = '';
+    if (node.board === 'Mountain') {
+        content = `
+            <h2 style="margin-top:0; color:#5d4037; border-bottom: 2px solid #5d4037; padding-bottom: 5px;">Mountain Range</h2>
+        `;
+    } else {
+        content = `
+            <h2 style="margin-top:0; color:#5d4037; border-bottom: 2px solid #5d4037; padding-bottom: 5px;">${region}</h2>
+            <h3 style="margin:10px 0; color: #8b4513;">${diffName}</h3>
+        `;
+    }
     
-    if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 3 && node.board !== 'Market' && node.board !== 'Library') {
+    if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 3 && node.board !== 'Market' && node.board !== 'Library' && node.board !== 'Mountain') {
         // Pre-calculate exact layout for preview
         let boardPreview = [];
         for(let y=0; y<=7; y++){
@@ -875,14 +901,30 @@ function showMapCellPopup(node, grandMap) {
         content += `<p style="margin:5px 0; color: #2e7d32; font-weight: bold;">Terrain: ${node.board}</p>`;
     }
     
+    if (node.board !== 'Mountain') {
+        content += `<p style="font-size: 14px; font-style: italic;">${node.difficulty ? node.difficulty.description : ''}</p>`;
+    }
+    
     content += `
-        <p style="font-size: 14px; font-style: italic;">${node.difficulty ? node.difficulty.description : ''}</p>
         <div style="margin-top:20px; display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
     `;
     
     // Actions
     if (isCurrent) {
         content += `<p style="color:#8bc34a; width: 100%;">You are here.</p>`;
+    } else if (node.board === 'Mountain') {
+        if (typeof RPGStats !== 'undefined' && RPGStats.mountaineerLevel > 0) {
+            const canAttack = isAdjacent;
+            const btnStyle = `padding: 10px 20px; font-weight:bold; cursor:pointer; border:2px solid #4e342e; border-radius:4px; margin-bottom: 5px; font-family: 'Georgia', serif;`;
+            if (canAttack) {
+                 content += `<button id="popupMoveBtn" style="${btnStyle} background:#e0e0e0; color:#424242;">🚶 Move Here</button>`;
+            } else {
+                 content += `<button disabled style="${btnStyle} background:#f5f5f5; color:#9e9e9e; cursor:not-allowed;">🚶 Move Here (Too Far)</button>`;
+            }
+            content += `<p style="color:#e53935; width: 100%; font-weight:bold;">Mountain Range</p>`;
+        } else {
+            content += `<p style="color:#e53935; width: 100%; font-weight:bold;">Impassable Terrain</p>`;
+        }
     } else if (node.cleared) {
         const canAttack = isAdjacent;
         const btnStyle = `padding: 10px 20px; font-weight:bold; cursor:pointer; border:2px solid #4e342e; border-radius:4px; margin-bottom: 5px; font-family: 'Georgia', serif;`;
@@ -920,25 +962,27 @@ function showMapCellPopup(node, grandMap) {
     }
     
     // Info Button (Rewards)
-    const infoBtnStyle = `padding: 10px 20px; font-weight:bold; cursor:pointer; border:2px solid #4e342e; border-radius:4px; margin-bottom: 5px; font-family: 'Georgia', serif;`;
-    if (node.board === 'Market') {
-         if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 2) {
-             content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#fff9c4; color:#f57f17;">ℹ️ Market Info</button>`;
-         } else {
-             content += `<button disabled style="${infoBtnStyle} background:#e0e0e0; color:#9e9e9e; cursor:not-allowed;" title="Requires Scouting Level 2">ℹ️ Market Info (Req. Scouting Lvl 2)</button>`;
-         }
-    } else if (node.board === 'Library') {
-         content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e1f5fe; color:#0277bd;">ℹ️ Library Info</button>`;
-    } else {
-         if (diffName !== 'Final Boss') {
-             content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e1f5fe; color:#0277bd;">ℹ️ Rewards Info</button>`;
-         }
-         
-         if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 1) {
-             content += `<button id="popupEnemyBtn" style="${infoBtnStyle} background:#f3e5f5; color:#7b1fa2;">👁️ Scout Enemies</button>`;
-         } else {
-             content += `<button disabled style="${infoBtnStyle} background:#e0e0e0; color:#9e9e9e; cursor:not-allowed;" title="Requires Scouting Level 1">👁️ Scout Enemies (Req. Scouting Lvl 1)</button>`;
-         }
+    if (node.board !== 'Mountain') {
+        const infoBtnStyle = `padding: 10px 20px; font-weight:bold; cursor:pointer; border:2px solid #4e342e; border-radius:4px; margin-bottom: 5px; font-family: 'Georgia', serif;`;
+        if (node.board === 'Market') {
+             if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 2) {
+                 content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#fff9c4; color:#f57f17;">ℹ️ Market Info</button>`;
+             } else {
+                 content += `<button disabled style="${infoBtnStyle} background:#e0e0e0; color:#9e9e9e; cursor:not-allowed;" title="Requires Scouting Level 2">ℹ️ Market Info (Req. Scouting Lvl 2)</button>`;
+             }
+        } else if (node.board === 'Library') {
+             content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e1f5fe; color:#0277bd;">ℹ️ Library Info</button>`;
+        } else {
+             if (diffName !== 'Final Boss') {
+                 content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e1f5fe; color:#0277bd;">ℹ️ Rewards Info</button>`;
+             }
+             
+             if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 1) {
+                 content += `<button id="popupEnemyBtn" style="${infoBtnStyle} background:#f3e5f5; color:#7b1fa2;">👁️ Scout Enemies</button>`;
+             } else {
+                 content += `<button disabled style="${infoBtnStyle} background:#e0e0e0; color:#9e9e9e; cursor:not-allowed;" title="Requires Scouting Level 1">👁️ Scout Enemies (Req. Scouting Lvl 1)</button>`;
+             }
+        }
     }
     
     content += `</div>

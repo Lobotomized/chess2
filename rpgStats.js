@@ -18,6 +18,7 @@ const RPGStats = {
     tacticsLevel: 0,
     scoutingLevel: 0,
     summonerLevel: 0,
+    mountaineerLevel: 0,
 };
 
 const RPGSKILLS = [
@@ -151,6 +152,12 @@ const RPGSKILLS = [
         },
         apply: (level) => { RPGStats.summonerLevel = level; } 
     },
+    { 
+        name: "Mountaineer", 
+        maxLevel: 1,
+        getDescription: (level) => "Allows movement across Mountain nodes.",
+        apply: (level) => { RPGStats.mountaineerLevel = level; } 
+    },
 ];
 
 function resetRPGStats() {
@@ -172,6 +179,7 @@ function resetRPGStats() {
     RPGStats.maxNumberOfPiecesToOwn = 8;
     RPGStats.scoutingLevel = 0;
     RPGStats.summonerLevel = 0;
+    RPGStats.mountaineerLevel = 0;
     
     if (typeof applyDifficultySettings === 'function') {
         applyDifficultySettings();

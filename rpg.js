@@ -1123,7 +1123,9 @@ function generateRewardOptions() {
             }
             
             // Ensure army is pre-generated for accurate power display
-            ensureNodeArmy(node);
+            if (node.board !== 'Mountain' && node.board !== 'Library') {
+                ensureNodeArmy(node);
+            }
 
             const diff = node.difficulty || { name: "Unknown", description: "Unknown Region" };
 
@@ -1331,7 +1333,7 @@ function generateRewardOptions() {
 // --- Level Management ---
 
 function ensureNodeArmy(node) {
-    if (!node.army) {
+    if (!node.army && node.board !== 'Mountain' && node.board !== 'Library' && node.board !== 'Market') {
         const { army, value } = generateRandomArmy(node.enemyPower, true, node.region);
         node.army = army;
         node.actualEnemyValue = value;
@@ -3026,7 +3028,6 @@ if (typeof window !== 'undefined') {
 }
 
 function checkWinCondition(state) {
-    console.log(state.tie)
     if(state.won === 'tie') {
         if(state.turn === 'black'){
             state.won = 'white';
