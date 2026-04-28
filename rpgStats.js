@@ -161,7 +161,7 @@ const RPGSKILLS = [
     {
         name: "Divination",
         maxLevel: 3,
-        getDescription: (level) => `Allows you to go back in time up to ${level} turn${level > 1 ? 's' : ''} once per battle.`,
+        getDescription: (level) => `Allows you to go back in time up to ${level} turn${level > 1 ? 's' : ''} once per battle. One time piece effects that were used are not refreshed.`,
         apply: (level) => { RPGStats.divinationLevel = level; }
     }
 ];
