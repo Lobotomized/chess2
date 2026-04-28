@@ -746,6 +746,11 @@ function generateRandomArmy(targetValue, includeKing = false, region = 'Classic'
     if (region && regionFactories[region]) {
         regionList = [...regionFactories[region]];
     }
+    else if (!region){
+        let allFactories = Object.values(regionFactories).flat();
+        regionList = allFactories;
+    }
+
 
     if (allowOneNonClassicType) {
         const nonClassic = availablePieceFactories.filter(f => !regionList.includes(f) && !loseConditionFactories.includes(f));
@@ -1811,7 +1816,7 @@ function showStartModal() {
         // or just let it be 20 and it'll mostly just be frontline pieces.
         // 50% chance to allow a non-classic piece type in the army generation
         const allowNonClassic = Math.random() > 0.5;
-        const { army } = generateRandomArmy(9, true, 'Classic', true, allowNonClassic);
+        const { army } = generateRandomArmy(9, true, null, true, allowNonClassic);
         
         // Pick a random skill for this army
         const randomSkill = RPGSKILLS[Math.floor(Math.random() * RPGSKILLS.length)];
