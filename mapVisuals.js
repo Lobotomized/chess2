@@ -705,7 +705,7 @@ function showMapCellPopup(node, grandMap) {
         <h3 style="margin:10px 0; color: #8b4513;">${diffName}</h3>
     `;
     
-    if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 3 && node.board !== 'Market' && node.board !== 'Standard') {
+    if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 3 && node.board !== 'Market' && node.board !== 'Library') {
         // Pre-calculate exact layout for preview
         let boardPreview = [];
         for(let y=0; y<=7; y++){
@@ -751,6 +751,81 @@ function showMapCellPopup(node, grandMap) {
             boardPreview[fy+1][fx] = false;
             boardPreview[fy+1][fx+1] = false;
         }
+
+        // Calculate enemy piece positions
+        let enemyPieces = [];
+        if (node.customArmy && node.customArmy.length > 0) {
+            enemyPieces = node.customArmy;
+        } else if (node.army && node.army.length > 0) {
+            const frontLineFacts = typeof frontLineFactories !== 'undefined' ? frontLineFactories : ['rpgPawnFactory'];
+            const front = node.army.filter(u => u && frontLineFacts.includes(u));
+            let backline = node.army.filter(u => u && !frontLineFacts.includes(u));
+            
+            let seed = node.mapSeed || 12345;
+            const seededRandom = () => {
+                const val = Math.sin(seed++) * 10000;
+                return val - Math.floor(val);
+            };
+            
+            const kings = backline.filter(u => u && u.toLowerCase().includes('king'));
+            const others = backline.filter(u => u && !u.toLowerCase().includes('king'));
+            const availableSlots = 8;
+            if (kings.length + others.length > availableSlots) {
+                const allowedOthersCount = Math.max(0, availableSlots - kings.length);
+                for (let i = others.length - 1; i > 0; i--) {
+                    const j = Math.floor(seededRandom() * (i + 1));
+                    [others[i], others[j]] = [others[j], others[i]];
+                }
+                others.splice(allowedOthersCount);
+            }
+            backline = [...kings, ...others];
+            for (let i = backline.length - 1; i > 0; i--) {
+                const j = Math.floor(seededRandom() * (i + 1));
+                [backline[i], backline[j]] = [backline[j], backline[i]];
+            }
+            
+            const placePreviewArmy = (roster, rows) => {
+                let result = [];
+                let currentRowIndex = 0;
+                let px = 0;
+                let py = rows[currentRowIndex];
+                
+                const isValidSquare = (bx, by) => {
+                    if (by < 0 || by > 7 || bx < 0 || bx > 7) return false;
+                    return boardPreview[by][bx] !== false;
+                };
+                
+                const advance = () => {
+                    px++;
+                    if (px > 7) {
+                        px = 0;
+                        currentRowIndex++;
+                        if (currentRowIndex >= rows.length) return false;
+                        py = rows[currentRowIndex];
+                    }
+                    return true;
+                };
+                
+                for (const factoryName of roster) {
+                    let attempts = 0;
+                    while (!isValidSquare(px, py) && attempts < 100) {
+                        if (!advance()) return result;
+                        attempts++;
+                    }
+                    if (attempts >= 100) return result;
+                    if (factoryName) {
+                        result.push({ factory: factoryName, x: px, y: py });
+                    }
+                    if (!advance()) return result;
+                }
+                return result;
+            };
+            
+            enemyPieces = [
+                ...placePreviewArmy(front, [1]),
+                ...placePreviewArmy(backline, [0])
+            ];
+        }
         
         // Render mini board preview
         let miniBoardHtml = `<div style="display:flex; flex-direction:column; border: 4px solid #5d4037; background: #fff; width: 240px; height: 240px; margin: 10px auto; box-shadow: 0 4px 8px rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden;">`;
@@ -763,6 +838,23 @@ function showMapCellPopup(node, grandMap) {
                 if (!boardPreview[y][x]) {
                     if (node.board === 'Woods') sqContent = '🌲';
                     if (node.board === 'Fountain') sqContent = '💧';
+                } else {
+                    const pieceOnSq = enemyPieces.find(p => p.x === x && p.y === y);
+                    if (pieceOnSq) {
+                        let iconUrl = '';
+                        try {
+                            const p = window[pieceOnSq.factory]('black', 0, 0);
+                            if (p && p.icon) {
+                                iconUrl = `/static/${p.icon}`;
+                            }
+                        } catch(e) {}
+                        
+                        if (iconUrl) {
+                            sqContent = `<img src="${iconUrl}" style="width: 80%; height: 80%; object-fit: contain; filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.5));">`;
+                        } else {
+                            sqContent = '<span style="font-size:16px; filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.5));">♟️</span>';
+                        }
+                    }
                 }
                 miniBoardHtml += `<div style="width: 12.5%; height: 100%; background: ${bgColor}; display:flex; align-items:center; justify-content:center; font-size:20px;">${sqContent}</div>`;
             }
@@ -770,7 +862,7 @@ function showMapCellPopup(node, grandMap) {
         }
         miniBoardHtml += `</div>`;
         
-        content += `<p style="margin:5px 0; color: #2e7d32; font-weight: bold;">Terrain Layout: ${node.board}</p>`;
+        content += `<p style="margin:5px 0; color: #2e7d32; font-weight: bold;">Terrain Layout: ${node.board || 'Standard'}</p>`;
         content += miniBoardHtml;
     } else if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 3 && node.board !== 'Market') {
         content += `<p style="margin:5px 0; color: #2e7d32; font-weight: bold;">Terrain: ${node.board}</p>`;
