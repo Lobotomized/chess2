@@ -292,6 +292,79 @@ function kingFactory(color, x, y, options) {
         options:options,
         conditionalMoves: function(state){
             let toReturn = []
+            
+            // PREVENT PRE-SELECTION CHECK MOVES
+            // The logic: if the currently selected piece is friendly, we simulate its moves.
+            // If a move results in a check, we modify the board to turn off the light.
+            if (state.pieceSelected && state.pieceSelected.color === this.color && !state._kingIsCheckingMoves) {
+                state._kingIsCheckingMoves = true; // Prevent infinite recursion
+                let enemyColor = this.color === 'white' ? 'black' : 'white';
+                let piece = state.pieceSelected;
+                
+                // Temporarily light the board to see what moves are possible
+                lightBoardFE(piece, state, 'temp_light', 'temp_blocked', true);
+                
+                state.board.forEach(sq => {
+                    if (sq.temp_light) {
+                        // Simulate the move
+                        const oldX = piece.x;
+                        const oldY = piece.y;
+                        const targetX = sq.x;
+                        const targetY = sq.y;
+                        
+                        let takenPiece = null;
+                        let takenIndex = -1;
+                        for (let i = 0; i < state.pieces.length; i++) {
+                            if (state.pieces[i].x === targetX && state.pieces[i].y === targetY) {
+                                takenPiece = state.pieces[i];
+                                takenIndex = i;
+                                break;
+                            }
+                        }
+                        
+                        piece.x = targetX;
+                        piece.y = targetY;
+                        if (takenPiece) {
+                            takenPiece.x = -1;
+                            takenPiece.y = -1;
+                        }
+                        
+                        let kingToCheck = this;
+                        if (piece === this) {
+                            kingToCheck = { x: targetX, y: targetY, color: this.color };
+                        }
+                        
+                        let isChecked = areYouChecked(state, enemyColor, kingToCheck);
+                        
+                        piece.x = oldX;
+                        piece.y = oldY;
+                        if (takenPiece) {
+                            takenPiece.x = targetX;
+                            takenPiece.y = targetY;
+                        }
+                        
+                        // If the move leaves us in check, mark this square so we can un-light it later
+                        if (isChecked) {
+                            sq._kingInvalidMove = true;
+                        }
+                    }
+                    sq.temp_light = false;
+                    sq.temp_blocked = false;
+                });
+                
+                // Add a micro-task to clean up the lights right after lightBoardFE finishes
+                setTimeout(() => {
+                    state.board.forEach(sq => {
+                        if (sq._kingInvalidMove) {
+                            sq.light = false;
+                            sq._kingInvalidMove = false;
+                        }
+                    });
+                }, 0);
+                
+                state._kingIsCheckingMoves = false;
+            }
+
             let enemyKing = state.pieces.find((piece) => {
                 return piece.icon.includes('King.png') && piece.color != this.color
             })
@@ -441,52 +514,51 @@ function kingFactory(color, x, y, options) {
                 }
             }
         },
-        afterEnemyPlayerMove: function(state,move){
+        afterEnemyPlayerMove: function(state, move) {
             let enemyColor = 'black';
             if (this.color == 'black') {
                 enemyColor = 'white'
             }
-            if(areYouChecked(state,enemyColor,this)){
-                let fakeState = JSONfn.parse(JSONfn.stringify(state));
-                let possibleEscape = false;
-                for(let i = fakeState.pieces.length - 1; i>=0; i--){
-                    let friendlyPiece = fakeState.pieces[i];    
-                    if(friendlyPiece.color == this.color){
-                        // if (friendlyPiece.conditionalMoves) {
-                        //     tempMoves = friendlyPiece.conditionalMoves(state); //  If the piece is from your team we gonna need it's conditional moves.
-                        // }
-                        fakeState.turn = this.color;
-    
+
+            // 1. Idea 2: Make King the absolute master of game-over states (Checkmate & Stalemate)
+            let possibleEscape = false;
+            let fakeState = JSONfn.parse(JSONfn.stringify(state));
+            for (let i = fakeState.pieces.length - 1; i >= 0; i--) {
+                let friendlyPiece = fakeState.pieces[i];
+                if (friendlyPiece.color == this.color) {
+                    fakeState.turn = this.color;
+                    fakeState.pieceSelected = friendlyPiece;
+                    lightBoardFE(friendlyPiece, fakeState, 'light', undefined, true);
+
+                    const lightedSquares = fakeState.board.filter((sq) => sq.light == true);
+
+                    for (let j = 0; j < lightedSquares.length; j++) {
+                        let sq = lightedSquares[j];
+                        friendlyPiece = fakeState.pieces[i];
                         fakeState.pieceSelected = friendlyPiece;
-    
-                        lightBoardFE(friendlyPiece,fakeState, 'light',undefined,true)
-    
-                        const lightedSquares = fakeState.board.filter((sq) => {
-                            return sq.light == true;
-                        })
-    
-                        lightedSquares.forEach((sq) => {
-                            friendlyPiece = fakeState.pieces[i];
-                            fakeState.pieceSelected = friendlyPiece;
-                            lightBoardFE(friendlyPiece,fakeState, 'light',undefined,true)
-    
-                            fakeKing = fakeState.pieces.find((piece) => {
-                                return piece.x == this.x && piece.y == this.y
-                            });
-                            playerMove({x:sq.x, y:sq.y},fakeState)
-                            if(!areYouChecked(fakeState,enemyColor,fakeKing)){
-                                possibleEscape = true;
-                            }
-                            fakeState = JSONfn.parse(JSONfn.stringify(state));
-                        })
-    
+                        lightBoardFE(friendlyPiece, fakeState, 'light', undefined, true);
+
+                        let fakeKing = fakeState.pieces.find((piece) => piece.x == this.x && piece.y == this.y);
+                        
+                        let moveResult = playerMove({ x: sq.x, y: sq.y }, fakeState);
+                        if (moveResult && !areYouChecked(fakeState, enemyColor, fakeKing)) {
+                            possibleEscape = true;
+                            break;
+                        }
+                        fakeState = JSONfn.parse(JSONfn.stringify(state));
                     }
                 }
-                if(!possibleEscape){
-                    state.won = enemyColor
-                    if(this.options){
-                        this.options?.gameEndedEvent(state.won);
-                    }                
+                if (possibleEscape) break;
+            }
+
+            if (!possibleEscape) {
+                if (areYouChecked(state, enemyColor, this)) {
+                    state.won = enemyColor; // Checkmate
+                } else {
+                    state.won = 'tie'; // Stalemate
+                }
+                if (this.options) {
+                    this.options?.gameEndedEvent(state.won);
                 }
             }
         },

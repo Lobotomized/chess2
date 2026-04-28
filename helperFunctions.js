@@ -372,6 +372,7 @@ function getSinglePlayerGame() {
                 if(state.on){
                     return;
                 }
+                console.log('2')
                 if (state.pieceSelected) {
                     if (playerMove(move, state)) {
                         if(state.specialOnMoveEffects && state.specialOnMoveEffects.length){
@@ -379,6 +380,7 @@ function getSinglePlayerGame() {
                                 effect(state);
                             })
                         }
+                        console.log('wtf? ', state.won, checkRemi(state)    , ' here?')
                         changeTurn(state)
                         if(!state.won && checkRemi(state)){
                             state.won = 'tie'
