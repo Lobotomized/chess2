@@ -209,6 +209,13 @@
             background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 10px, transparent 10px, transparent 20px);
         }
         
+        .map-cell.inn { 
+            background-color: #f57f17;
+            border-color: #bc5100;
+            background-image: linear-gradient(135deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent);
+            background-size: 10px 10px;
+        }
+        
         .map-cell.mountain { 
             background-color: #5d4037;
             border-color: #3e2723;
@@ -217,13 +224,13 @@
         }
         
         /* --- Region Styles (Applied when not a special terrain) --- */
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Classic"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain):not(.inn)[data-region="Classic"] {
             background-color: #8d6e63;
             background-image: repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(0,0,0,0.1) 20px), repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(0,0,0,0.1) 20px);
             border-color: #5d4037;
         }
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Medieval"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain):not(.inn)[data-region="Medieval"] {
             background-color: #78909c;
             background-image: 
                 linear-gradient(45deg, #607d8b 25%, transparent 25%, transparent 75%, #607d8b 75%, #607d8b),
@@ -233,7 +240,7 @@
             border-color: #37474f;
         }
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Insect"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain):not(.inn)[data-region="Insect"] {
             background-color: #558b2f;
             background-image: radial-gradient(#33691e 15%, transparent 16%), radial-gradient(#33691e 15%, transparent 16%);
             background-size: 20px 20px;
@@ -241,7 +248,7 @@
             border-color: #1b5e20;
         }
 
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Cyborgs"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain):not(.inn)[data-region="Cyborgs"] {
             background-color: #455a64;
             background-image: 
                 linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
@@ -251,7 +258,7 @@
             box-shadow: inset 0 0 20px #000;
         }
 
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Promoters"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain):not(.inn)[data-region="Promoters"] {
             background-color: #c62828;
             background-image: 
                 radial-gradient(circle at 50% 50%, #b71c1c 0%, #8b0000 100%);
@@ -374,6 +381,7 @@
                     <option value="power">Set Enemy Power</option>
                     <option value="market">Place Market</option>
                     <option value="boss">Place Boss</option>
+                    <option value="inn">Place Inn</option>
                     <option value="start">Set Start Node</option>
                 <option value="customArmy">Custom Enemy Army</option>
                 <option value="customTerrain">Custom Terrain Details</option>
@@ -388,6 +396,7 @@
                         <option value="Desert">Desert</option>
                         <option value="Library">Library</option>
                         <option value="Mountain">Mountain</option>
+                        <option value="Inn">Inn</option>
                     </select>
                 </div>
 
@@ -662,6 +671,10 @@
                 node.isBoss = true;
                 node.board = 'Standard';
                 node.enemyPower = 80;
+            } else if (tool === 'inn') {
+                node.board = 'Inn';
+                node.enemyPower = 10;
+                node.isBoss = false;
             } else if (tool === 'start') {
                 mapData.startX = x;
                 mapData.startY = y;
@@ -731,6 +744,9 @@
                     else if (node.board === 'Library') {
                         cell.classList.add('library');
                     }
+                    else if (node.board === 'Inn') {
+                        cell.classList.add('inn');
+                    }
                     else if (node.board === 'Mountain') {
                         cell.classList.add('mountain');
                         const num = (node.x * 31 + node.y * 17) % 4 + 1;
@@ -774,6 +790,14 @@
                         libInd.style.fontSize = '30px';
                         libInd.innerText = '📖';
                         cell.appendChild(libInd);
+                    } 
+
+                    if (node.board === 'Inn') {
+                        const innInd = document.createElement('div');
+                        innInd.className = 'indicator boss-indicator'; // Centered
+                        innInd.style.fontSize = '30px';
+                        innInd.innerText = '🏨';
+                        cell.appendChild(innInd);
                     } 
                     
                     if (node.customArmy) {

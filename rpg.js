@@ -1121,9 +1121,26 @@ function generateRewardOptions() {
                 });
                 return;
             }
+
+            // Handle Inn
+            if (node.board === 'Inn') {
+                options.push({
+                    type: "Rest at Inn",
+                    direction: move.direction,
+                    node: node,
+                    description: "Rest and recover food.",
+                    rewardCap: 0,
+                    enemyValue: node.enemyPower,
+                    difficultyIndex: -1,
+                    boardShape: 'Inn',
+                    army: [],
+                    rewardType: 'none'
+                });
+                return;
+            }
             
             // Ensure army is pre-generated for accurate power display
-            if (node.board !== 'Mountain' && node.board !== 'Library') {
+            if (node.board !== 'Mountain' && node.board !== 'Library' && node.board !== 'Inn') {
                 ensureNodeArmy(node);
             }
 
@@ -1333,7 +1350,7 @@ function generateRewardOptions() {
 // --- Level Management ---
 
 function ensureNodeArmy(node) {
-    if (!node.army && node.board !== 'Mountain' && node.board !== 'Library' && node.board !== 'Market') {
+    if (!node.army && node.board !== 'Mountain' && node.board !== 'Library' && node.board !== 'Market' && node.board !== 'Inn') {
         const { army, value } = generateRandomArmy(node.enemyPower, true, node.region);
         node.army = army;
         node.actualEnemyValue = value;
@@ -2927,6 +2944,36 @@ function showRewardModal() {
                  saveProgress();
                  // Market counts as a level/stage visit
                  startLevel(rpgState.level + 1, option);
+             };
+             container.appendChild(div);
+             return; // Skip standard rendering
+        } else if (option.boardShape === 'Inn') {
+            // Inn styling
+            div.style.background = 'linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%)';
+            div.style.borderColor = '#fb8c00';
+            div.innerHTML = `<h3>${option.type}</h3>
+                             <p style="font-size:14px;">${option.description || ''}</p>
+                             <div style="text-align:center; font-size: 40px; margin: 10px 0;">🏨</div>
+                             <p style="text-align:center;">+${option.enemyValue} Food</p>`;
+                             
+            div.onclick = () => {
+                 modal.close();
+                 rpgState.food += option.enemyValue;
+                 option.node.cleared = true;
+                 option.node.enemyPower = 0;
+                 if (typeof updateGoldDisplay === 'function') updateGoldDisplay();
+                 saveProgress();
+                 
+                 if (typeof showNotification === 'function') {
+                     showNotification(`Gained ${option.enemyValue} Food!`, 'success');
+                 }
+                 
+                 // Show map or next options
+                 if (typeof showMapModal === 'function') {
+                     showMapModal();
+                 } else {
+                     showRewardModal();
+                 }
              };
              container.appendChild(div);
              return; // Skip standard rendering

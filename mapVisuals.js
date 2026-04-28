@@ -278,6 +278,14 @@ function showMapModal() {
             background-image: repeating-linear-gradient(45deg, rgba(0,0,0,0.1), rgba(0,0,0,0.1) 10px, transparent 10px, transparent 20px);
         }
 
+        /* INN: Cozy orange glow */
+        .map-cell.inn { 
+            background-color: #f57f17;
+            border-color: #bc5100;
+            background-image: linear-gradient(135deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent);
+            background-size: 10px 10px;
+        }
+
         /* MOUNTAIN: Grey rocky look */
         .map-cell.mountain { 
             background-color: #5d4037;
@@ -288,13 +296,13 @@ function showMapModal() {
         
         /* --- Region Styles (Applied when not a special terrain) --- */
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Classic"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain):not(.inn)[data-region="Classic"] {
             background-color: #8d6e63;
             background-image: repeating-linear-gradient(0deg, transparent, transparent 19px, rgba(0,0,0,0.1) 20px), repeating-linear-gradient(90deg, transparent, transparent 19px, rgba(0,0,0,0.1) 20px);
             border-color: #5d4037;
         }
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Medieval"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain):not(.inn)[data-region="Medieval"] {
             background-color: #78909c;
             background-image: 
                 linear-gradient(45deg, #607d8b 25%, transparent 25%, transparent 75%, #607d8b 75%, #607d8b),
@@ -304,7 +312,7 @@ function showMapModal() {
             border-color: #37474f;
         }
         
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Insect"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain):not(.inn)[data-region="Insect"] {
             background-color: #558b2f;
             background-image: radial-gradient(#33691e 15%, transparent 16%), radial-gradient(#33691e 15%, transparent 16%);
             background-size: 20px 20px;
@@ -312,7 +320,7 @@ function showMapModal() {
             border-color: #1b5e20;
         }
 
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Cyborgs"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain):not(.inn)[data-region="Cyborgs"] {
             background-color: #455a64;
             background-image: 
                 linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px),
@@ -322,7 +330,7 @@ function showMapModal() {
             box-shadow: inset 0 0 20px #000;
         }
 
-        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain)[data-region="Promoters"] {
+        .map-cell:not(.woods):not(.fountain):not(.desert):not(.market):not(.library):not(.mountain):not(.inn)[data-region="Promoters"] {
             background-color: #c62828;
             background-image: 
                 radial-gradient(circle at 50% 50%, #b71c1c 0%, #8b0000 100%);
@@ -399,6 +407,7 @@ function showMapModal() {
                 }
                 else if (node.board === 'Market') cell.classList.add('market');
                 else if (node.board === 'Library') cell.classList.add('library');
+                else if (node.board === 'Inn') cell.classList.add('inn');
                 else {
                     cell.classList.add('standard');
                     cell.style.backgroundImage = `url("/static/bigMap/plains1.png")`;
@@ -473,6 +482,8 @@ function showMapModal() {
                      icon = '🛒';
                 } else if (node.board === 'Library') {
                      icon = '📖';
+                } else if (node.board === 'Inn') {
+                     icon = '🏨';
                 } else if (node.board === 'Mountain') {
                      icon = ''; // No combat icon on mountains
                 } else {
@@ -510,7 +521,9 @@ function showMapModal() {
                 if (!node.cleared && node.board === 'Library') {
                      // Library shows King Experience instead of standard rewards
                      rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="King Experience" style="display:flex; align-items:center;">📖${node.enemyPower}</span></div>`;
-                } else if (!node.cleared && node.rewards && node.board !== 'Market' && node.board !== 'Mountain' && !isFinalBossNode) {
+                } else if (!node.cleared && node.board === 'Inn') {
+                     rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="Food" style="display:flex; align-items:center;">🍖${node.enemyPower}</span></div>`;
+                } else if (!node.cleared && node.rewards && node.board !== 'Market' && node.board !== 'Mountain' && node.board !== 'Inn' && !isFinalBossNode) {
                      const r = node.rewards;
                      let parts = [];
                      const rosterFull = typeof rpgState !== 'undefined' && rpgState.playerRoster && rpgState.playerRoster.length >= 24;
@@ -952,6 +965,12 @@ function showMapCellPopup(node, grandMap) {
              } else {
                  content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;">📖 Enter Library (Too Far)</button>`;
              }
+        } else if (node.board === 'Inn') {
+             if (canAttack) {
+                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#ffe082; color:#e65100;">🏨 Rest at Inn</button>`;
+             } else {
+                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;">🏨 Rest at Inn (Too Far)</button>`;
+             }
         } else {
              if (canAttack) {
                  content += `<button id="popupAttackBtn" style="${btnStyle} background:#ffcdd2; color:#c62828; border-color:#c62828;">⚔️ Attack</button>`;
@@ -972,6 +991,8 @@ function showMapCellPopup(node, grandMap) {
              }
         } else if (node.board === 'Library') {
              content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e1f5fe; color:#0277bd;">ℹ️ Library Info</button>`;
+        } else if (node.board === 'Inn') {
+             content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#fff3e0; color:#e65100;">ℹ️ Inn Info</button>`;
         } else {
              if (diffName !== 'Final Boss') {
                  content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e1f5fe; color:#0277bd;">ℹ️ Rewards Info</button>`;
@@ -1052,6 +1073,31 @@ function showMapCellPopup(node, grandMap) {
                      if (typeof showSkillSelectionModal === 'function' && rpgState.pendingSkillSelections > 0) {
                          showSkillSelectionModal();
                      } else if (typeof showMapModal === 'function') {
+                         showMapModal();
+                     }
+                     return; // Skip startLevel
+                 } else if (node.board === 'Inn') {
+                     const foodGained = node.enemyPower;
+                     rpgState.food += foodGained;
+                     
+                     node.cleared = true;
+                     node.enemyPower = 0;
+                     
+                     if (typeof updateGoldDisplay === 'function') updateGoldDisplay();
+                     
+                     const mapDialog = document.getElementById('mapDialog');
+                     if(mapDialog) mapDialog.close();
+                     
+                     grandMap.moveTo(node.x, node.y);
+                     if(typeof saveProgress === 'function') saveProgress();
+                     
+                     if (typeof showNotification === 'function') {
+                         showNotification(`Gained ${foodGained} Food!`, 'success');
+                     } else if (typeof showAlert === 'function') {
+                         showAlert(`Gained ${foodGained} Food!`);
+                     }
+                     
+                     if (typeof showMapModal === 'function') {
                          showMapModal();
                      }
                      return; // Skip startLevel
@@ -1145,6 +1191,13 @@ function showMapCellPopup(node, grandMap) {
                     <div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3);">
                         <p style="margin-top:0;">This is a <strong>Library</strong>.</p>
                         <p>Provides <strong>${node.enemyPower} King Experience</strong> instantly upon entering.</p>
+                    </div>
+                `;
+            } else if (node.board === 'Inn') {
+                rewardsText = `
+                    <div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3);">
+                        <p style="margin-top:0;">This is an <strong>Inn</strong>.</p>
+                        <p>Provides <strong>${node.enemyPower} Food</strong> instantly upon entering.</p>
                     </div>
                 `;
             } else if (node.board === 'Market') {
@@ -1250,9 +1303,10 @@ function showMapCellPopup(node, grandMap) {
             let popupTitle = 'Reward Information';
             if (node.board === 'Market') popupTitle = 'Market Information';
             if (node.board === 'Library') popupTitle = 'Library Information';
+            if (node.board === 'Inn') popupTitle = 'Inn Information';
             
             popup.innerHTML = `
-                <h3 style="color:${node.board === 'Market' ? '#f57f17' : (node.board === 'Library' ? '#3e2723' : '#0277bd')}; border-bottom: 2px solid ${node.board === 'Market' ? '#f57f17' : (node.board === 'Library' ? '#3e2723' : '#0277bd')}; padding-bottom: 5px;">${popupTitle}</h3>
+                <h3 style="color:${node.board === 'Market' ? '#f57f17' : (node.board === 'Library' ? '#3e2723' : (node.board === 'Inn' ? '#e65100' : '#0277bd'))}; border-bottom: 2px solid ${node.board === 'Market' ? '#f57f17' : (node.board === 'Library' ? '#3e2723' : (node.board === 'Inn' ? '#e65100' : '#0277bd'))}; padding-bottom: 5px;">${popupTitle}</h3>
                 ${rewardsText}
                 <div style="margin-top:15px; padding-top:15px; border-top: 1px solid rgba(93, 64, 55, 0.3);">
                     <button onclick="document.getElementById('mapCellPopup').remove()" style="padding: 8px 16px; background:#e6d5ac; border:2px solid #5d4037; color:#4e342e; border-radius:4px; cursor:pointer; font-weight:bold; font-family: 'Georgia', serif;">Close</button>
