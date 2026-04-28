@@ -278,7 +278,6 @@ self.addEventListener("message", function(e) {
             state.won = isWhite ? 'black' : 'white';
             break;
         }
-        console.log(movedPiece, '  wtf?!')
         let fromX = movedPiece.x;
         let fromY = movedPiece.y;
         

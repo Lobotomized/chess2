@@ -272,7 +272,6 @@ const effects = {
         }
     },
     causeVictory: function(state, piece, settings) {
-        console.log('wtf?')
         const param = settings.pieceType; // Re-using pieceType to store 'You' or 'Enemy'
         if (param === 'You') {
             state.won = piece.color;
