@@ -1000,6 +1000,12 @@ function showEnemyInfo() {
     }
 }
 
+function showMyArmyInfo() {
+    if (rpgState.playerRoster && rpgState.playerRoster.length > 0) {
+        showArmyInfo(rpgState.playerRoster.filter(p => p !== null));
+    }
+}
+
 function showPieceDiscoveryModal(factoryName) {
     if (typeof window[factoryName] !== 'function') return;
 
