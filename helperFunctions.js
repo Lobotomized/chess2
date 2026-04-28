@@ -283,6 +283,7 @@ function getParams (url) {
 
 
 function checkRemi(state){
+    console.log('vliza v 4ek remi')
     let yourPieces = state.pieces.filter((piece) => {
         return piece.color === state.turn;
     })
@@ -372,7 +373,6 @@ function getSinglePlayerGame() {
                 if(state.on){
                     return;
                 }
-                console.log('2')
                 if (state.pieceSelected) {
                     if (playerMove(move, state)) {
                         if(state.specialOnMoveEffects && state.specialOnMoveEffects.length){

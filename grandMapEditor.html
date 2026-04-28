@@ -368,8 +368,9 @@
                     <option value="market">Place Market</option>
                     <option value="boss">Place Boss</option>
                     <option value="start">Set Start Node</option>
-                    <option value="customArmy">Custom Enemy Army</option>
-                </select>
+                <option value="customArmy">Custom Enemy Army</option>
+                <option value="customTerrain">Custom Terrain Details</option>
+            </select>
 
                 <!-- Tool Options: Board -->
                 <div id="options-board" class="tool-options active">
@@ -531,6 +532,12 @@
                         if (n.enemyPower !== undefined) target.enemyPower = n.enemyPower;
                         if (n.difficulty && n.difficulty.name === "Final Boss") target.isBoss = true;
                         if (n.difficulty && n.difficulty.name === "Marketplace") target.board = 'Market';
+                        if (n.customArmy) target.customArmy = n.customArmy;
+                        if (n.customTrees) target.customTrees = n.customTrees;
+                        if (n.fountainX !== undefined) {
+                            target.fountainX = n.fountainX;
+                            target.fountainY = n.fountainY;
+                        }
                     }
                 });
             }
@@ -653,6 +660,13 @@
             } else if (tool === 'customArmy') {
                 openCustomArmyModal(node);
                 return; // don't render Grid yet
+            } else if (tool === 'customTerrain') {
+                if (node.board === 'Woods' || node.board === 'Fountain') {
+                    openCustomTerrainModal(node);
+                } else {
+                    showAlert('Custom Terrain Details only apply to Woods or Fountain nodes.');
+                }
+                return;
             }
             renderGrid();
         }
@@ -817,6 +831,13 @@
                     }
                     if (n.customArmy) {
                         exportNode.customArmy = n.customArmy;
+                    }
+                    if (n.customTrees) {
+                        exportNode.customTrees = n.customTrees;
+                    }
+                    if (n.fountainX !== undefined) {
+                        exportNode.fountainX = n.fountainX;
+                        exportNode.fountainY = n.fountainY;
                     }
                     
                     if (x === mapData.startX && y === mapData.startY) {
@@ -1004,6 +1025,108 @@
             document.getElementById('customArmyModal').close();
             renderGrid();
         }
+        
+        let editingNodeForTerrain = null;
+        let currentCustomTrees = [];
+        let currentFountainPos = {x: 3, y: 3};
+        
+        function openCustomTerrainModal(node) {
+            editingNodeForTerrain = node;
+            
+            const title = document.getElementById('terrainModalTitle');
+            const subtitle = document.getElementById('terrainModalSubtitle');
+            
+            if (node.board === 'Woods') {
+                title.innerText = 'Custom Trees';
+                subtitle.innerText = 'Click squares to place/remove trees.';
+                currentCustomTrees = node.customTrees ? JSON.parse(JSON.stringify(node.customTrees)) : [];
+            } else if (node.board === 'Fountain') {
+                title.innerText = 'Custom Fountain';
+                subtitle.innerText = 'Click a square to place the top-left corner of the 2x2 fountain.';
+                currentFountainPos.x = node.fountainX !== undefined ? node.fountainX : 3;
+                currentFountainPos.y = node.fountainY !== undefined ? node.fountainY : 3;
+            }
+            
+            renderTerrainBoard();
+            document.getElementById('customTerrainModal').showModal();
+        }
+        
+        function renderTerrainBoard() {
+            const board = document.getElementById('terrainBoard');
+            board.innerHTML = '';
+            
+            for (let y = 0; y < 8; y++) {
+                for (let x = 0; x < 8; x++) {
+                    const square = document.createElement('div');
+                    square.style.width = '40px';
+                    square.style.height = '40px';
+                    square.style.boxSizing = 'border-box';
+                    square.style.border = '1px solid rgba(0,0,0,0.1)';
+                    
+                    if ((x + y) % 2 === 0) square.style.background = 'var(--board-light)';
+                    else square.style.background = 'var(--board-dark)';
+                    
+                    square.dataset.x = x;
+                    square.dataset.y = y;
+                    
+                    if (editingNodeForTerrain.board === 'Woods') {
+                        const hasTree = currentCustomTrees.some(t => t.x === x && t.y === y);
+                        if (hasTree) {
+                            const img = document.createElement('div');
+                            img.style.width = '100%';
+                            img.style.height = '100%';
+                            img.style.background = 'url("/static/bigMap/forest1.png") center/cover';
+                            img.style.pointerEvents = 'none';
+                            square.appendChild(img);
+                        }
+                    } else if (editingNodeForTerrain.board === 'Fountain') {
+                        const fx = currentFountainPos.x;
+                        const fy = currentFountainPos.y;
+                        
+                        if (x >= fx && x < fx + 2 && y >= fy && y < fy + 2) {
+                            square.style.background = '#0277bd';
+                            square.style.border = '1px solid #fff';
+                        }
+                    }
+                    
+                    square.onclick = () => handleTerrainBoardClick(x, y);
+                    board.appendChild(square);
+                }
+            }
+        }
+        
+        function handleTerrainBoardClick(x, y) {
+            if (editingNodeForTerrain.board === 'Woods') {
+                const existingIndex = currentCustomTrees.findIndex(t => t.x === x && t.y === y);
+                if (existingIndex > -1) {
+                    currentCustomTrees.splice(existingIndex, 1);
+                } else {
+                    currentCustomTrees.push({x, y});
+                }
+            } else if (editingNodeForTerrain.board === 'Fountain') {
+                // Ensure the 2x2 fountain stays within the 8x8 grid
+                if (x > 6) x = 6;
+                if (y > 6) y = 6;
+                currentFountainPos.x = x;
+                currentFountainPos.y = y;
+            }
+            renderTerrainBoard();
+        }
+        
+        function saveCustomTerrain() {
+            if (editingNodeForTerrain.board === 'Woods') {
+                if (currentCustomTrees.length > 0) {
+                    editingNodeForTerrain.customTrees = JSON.parse(JSON.stringify(currentCustomTrees));
+                } else {
+                    delete editingNodeForTerrain.customTrees;
+                }
+            } else if (editingNodeForTerrain.board === 'Fountain') {
+                editingNodeForTerrain.fountainX = currentFountainPos.x;
+                editingNodeForTerrain.fountainY = currentFountainPos.y;
+            }
+            document.getElementById('customTerrainModal').close();
+            renderGrid();
+        }
 
         function clearCustomArmy() {
             delete editingNodeForArmy.customArmy;
@@ -1011,34 +1134,61 @@
             document.getElementById('customArmyModal').close();
             renderGrid();
         }
+
+        function clearCustomTerrain() {
+            if (editingNodeForTerrain.board === 'Woods') {
+                currentCustomTrees = [];
+            } else if (editingNodeForTerrain.board === 'Fountain') {
+                currentFountainPos.x = 3;
+                currentFountainPos.y = 3;
+            }
+            renderTerrainBoard();
+        }
     </script>
     <script src="/src/auth.js"></script>
-</body>
-<dialog id="customArmyModal" class="modal" style="border:none; border-radius:10px; padding:20px; background:var(--board-light); box-shadow:0 5px 15px rgba(0,0,0,0.5);">
-    <div style="display:flex; flex-direction:column; gap:15px; width:450px;">
-        <h2 style="margin:0; text-align:center;">Edit Custom Enemy Army</h2>
-        <p style="margin:0; font-size:14px; text-align:center;">Select a piece, then click on the board below to place it. Click an existing piece to remove it.</p>
+
+    <dialog id="customArmyModal" class="modal" style="border:none; border-radius:10px; padding:20px; background:var(--board-light); box-shadow:0 5px 15px rgba(0,0,0,0.5);">
+        <div style="display:flex; flex-direction:column; gap:15px; width:450px;">
+            <h2 style="margin:0; text-align:center;">Edit Custom Enemy Army</h2>
+            <p style="margin:0; font-size:14px; text-align:center;">Select a piece, then click on the board below to place it. Click an existing piece to remove it.</p>
+            
+            <div style="display:flex; justify-content:center; gap:10px; align-items:center;">
+                <label for="pieceSelector" style="font-weight:bold;">Piece:</label>
+                <select id="pieceSelector" style="padding:5px; border-radius:5px; border:2px solid var(--border-color); font-family:inherit;">
+                    <!-- Populated via JS -->
+                </select>
+            </div>
+
+            <div id="armyBoardContainer" style="display:flex; justify-content:center;">
+                <div id="armyBoard" style="display:grid; grid-template-columns:repeat(8, 40px); grid-template-rows:repeat(8, 40px); border:2px solid var(--border-color); background:var(--board-dark);">
+                    <!-- 64 squares -->
+                </div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; margin-top:10px;">
+                <button onclick="clearCustomArmy()" class="btn" style="background:#cc5449; color:white;">Clear (Use Random)</button>
+                <div style="display:flex; gap:10px;">
+                    <button onclick="document.getElementById('customArmyModal').close()" class="btn" style="background:#aaa;">Cancel</button>
+                    <button onclick="saveCustomArmy()" class="btn" style="background:var(--highlight); color:white;">Save Army</button>
+                </div>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- Modal for Custom Terrain -->
+    <dialog id="customTerrainModal" style="border:4px solid var(--border-color); border-radius:8px; padding:20px; background:var(--bg-overlay); max-width:500px;">
+        <h2 id="terrainModalTitle" style="font-family:'Lilita One', cursive; margin-top:0;">Custom Terrain</h2>
+        <p id="terrainModalSubtitle" style="font-size:14px; margin-bottom:15px;">Customize the placement of trees or fountain.</p>
         
-        <div style="display:flex; justify-content:center; gap:10px; align-items:center;">
-            <label for="pieceSelector" style="font-weight:bold;">Piece:</label>
-            <select id="pieceSelector" style="padding:5px; border-radius:5px; border:2px solid var(--border-color); font-family:inherit;">
-                <!-- Populated via JS -->
-            </select>
+        <div style="display:flex; justify-content:center; margin-bottom:15px;">
+            <div id="terrainBoard" style="display:grid; grid-template-columns:repeat(8, 40px); grid-template-rows:repeat(8, 40px); border:2px solid var(--border-color); background:var(--border-color);"></div>
         </div>
 
-        <div id="armyBoardContainer" style="display:flex; justify-content:center;">
-            <div id="armyBoard" style="display:grid; grid-template-columns:repeat(8, 40px); grid-template-rows:repeat(8, 40px); border:2px solid var(--border-color); background:var(--board-dark);">
-                <!-- 64 squares -->
-            </div>
+        <div style="display:flex; justify-content:flex-end; gap:10px;">
+            <button onclick="clearCustomTerrain()" class="secondary" style="background:#e0e0e0;">Clear/Reset</button>
+            <button onclick="document.getElementById('customTerrainModal').close()" class="secondary">Cancel</button>
+            <button onclick="saveCustomTerrain()" class="primary">Save</button>
         </div>
-
-        <div style="display:flex; justify-content:space-between; margin-top:10px;">
-            <button onclick="clearCustomArmy()" class="btn" style="background:#cc5449; color:white;">Clear (Use Random)</button>
-            <div style="display:flex; gap:10px;">
-                <button onclick="document.getElementById('customArmyModal').close()" class="btn" style="background:#aaa;">Cancel</button>
-                <button onclick="saveCustomArmy()" class="btn" style="background:var(--highlight); color:white;">Save Army</button>
-            </div>
-        </div>
-    </div>
-</dialog>
+    </dialog>
+</body>
 </html>

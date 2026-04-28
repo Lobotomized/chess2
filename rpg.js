@@ -1459,11 +1459,24 @@ function startLevel(level, difficultyOption) {
     if (boardShape === 'Fountain') {
         if (difficultyOption && difficultyOption.node && typeof difficultyOption.node.fountainX !== 'undefined') {
             rpgState.fountainX = difficultyOption.node.fountainX;
+            rpgState.fountainY = difficultyOption.node.fountainY;
         } else if (difficultyOption && typeof difficultyOption.fountainX !== 'undefined') {
             rpgState.fountainX = difficultyOption.fountainX;
+            rpgState.fountainY = difficultyOption.fountainY;
         } else {
              // Fallback for non-map or legacy
              rpgState.fountainX = Math.floor(Math.random() * 7);
+             rpgState.fountainY = Math.floor(Math.random() * 7);
+        }
+    }
+    
+    if (boardShape === 'Woods') {
+        if (difficultyOption && difficultyOption.node && difficultyOption.node.customTrees) {
+            rpgState.customTrees = difficultyOption.node.customTrees;
+        } else if (difficultyOption && difficultyOption.customTrees) {
+            rpgState.customTrees = difficultyOption.customTrees;
+        } else {
+            rpgState.customTrees = null;
         }
     }
     
@@ -1499,32 +1512,37 @@ const boardShapes = {
         }
     },
     'Woods': (board) => {
-        // Use mapSeed to determine pattern
-        const seed = rpgState.mapSeed || Math.random();
-        
-        // Define candidate squares for bushes (rows 2, 3, 4, 5)
-        const candidateSquares = [];
-        for (let x = 0; x <= 7; x++) {
-            for (let y = 2; y <= 5; y++) {
-                candidateSquares.push({ x, y });
+        let bushes = [];
+        if (rpgState.customTrees) {
+            bushes = rpgState.customTrees;
+        } else {
+            // Use mapSeed to determine pattern
+            const seed = rpgState.mapSeed || Math.random();
+            
+            // Define candidate squares for bushes (rows 2, 3, 4, 5)
+            const candidateSquares = [];
+            for (let x = 0; x <= 7; x++) {
+                for (let y = 2; y <= 5; y++) {
+                    candidateSquares.push({ x, y });
+                }
             }
+
+            // Deterministic shuffle using seed
+            let currentSeed = seed;
+            const seededRandom = () => {
+                const x = Math.sin(currentSeed++) * 10000;
+                return x - Math.floor(x);
+            };
+
+            // Fisher-Yates shuffle
+            for (let i = candidateSquares.length - 1; i > 0; i--) {
+                const j = Math.floor(seededRandom() * (i + 1));
+                [candidateSquares[i], candidateSquares[j]] = [candidateSquares[j], candidateSquares[i]];
+            }
+
+            // Pick first 6 as bushes
+            bushes = candidateSquares.slice(0, 6);
         }
-
-        // Deterministic shuffle using seed
-        let currentSeed = seed;
-        const seededRandom = () => {
-            const x = Math.sin(currentSeed++) * 10000;
-            return x - Math.floor(x);
-        };
-
-        // Fisher-Yates shuffle
-        for (let i = candidateSquares.length - 1; i > 0; i--) {
-            const j = Math.floor(seededRandom() * (i + 1));
-            [candidateSquares[i], candidateSquares[j]] = [candidateSquares[j], candidateSquares[i]];
-        }
-
-        // Pick first 6 as bushes
-        const bushes = candidateSquares.slice(0, 6);
         
         for (let x = 0; x <= 7; x++) {
             for (let y = 0; y <= 7; y++) {
@@ -3008,7 +3026,17 @@ if (typeof window !== 'undefined') {
 }
 
 function checkWinCondition(state) {
-
+    console.log(state.tie)
+    if(state.won === 'tie') {
+        if(state.turn === 'black'){
+            state.won = 'white';
+            state.message = "Black king was trapped!";
+        }
+        else{
+            state.won = 'black';
+            state.message = "White king was trapped!";
+        }
+    }
     if (state.won) return; // Already won
 
     // Check if King Captured (Regicide)

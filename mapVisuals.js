@@ -716,40 +716,47 @@ function showMapCellPopup(node, grandMap) {
         }
         
         if (node.board === 'Woods') {
-            if (node.mapSeed === undefined) {
-                node.mapSeed = Math.random() * 10000;
-                if (typeof saveProgress === 'function') saveProgress();
-            }
-            const seed = node.mapSeed;
-            const candidateSquares = [];
-            for (let x = 0; x <= 7; x++) {
-                for (let y = 2; y <= 5; y++) {
-                    candidateSquares.push({ x, y });
+            if (node.customTrees) {
+                node.customTrees.forEach(b => { boardPreview[b.y][b.x] = false; });
+            } else {
+                if (node.mapSeed === undefined) {
+                    node.mapSeed = Math.random() * 10000;
+                    if (typeof saveProgress === 'function') saveProgress();
                 }
+                const seed = node.mapSeed;
+                const candidateSquares = [];
+                for (let x = 0; x <= 7; x++) {
+                    for (let y = 2; y <= 5; y++) {
+                        candidateSquares.push({ x, y });
+                    }
+                }
+                let currentSeed = seed;
+                const seededRandom = () => {
+                    const val = Math.sin(currentSeed++) * 10000;
+                    return val - Math.floor(val);
+                };
+                for (let i = candidateSquares.length - 1; i > 0; i--) {
+                    const j = Math.floor(seededRandom() * (i + 1));
+                    [candidateSquares[i], candidateSquares[j]] = [candidateSquares[j], candidateSquares[i]];
+                }
+                const bushes = candidateSquares.slice(0, 6);
+                bushes.forEach(b => { boardPreview[b.y][b.x] = false; });
             }
-            let currentSeed = seed;
-            const seededRandom = () => {
-                const val = Math.sin(currentSeed++) * 10000;
-                return val - Math.floor(val);
-            };
-            for (let i = candidateSquares.length - 1; i > 0; i--) {
-                const j = Math.floor(seededRandom() * (i + 1));
-                [candidateSquares[i], candidateSquares[j]] = [candidateSquares[j], candidateSquares[i]];
-            }
-            const bushes = candidateSquares.slice(0, 6);
-            bushes.forEach(b => { boardPreview[b.y][b.x] = false; });
         } else if (node.board === 'Fountain') {
             // Fountain logic
             if (node.fountainX === undefined) {
                 node.fountainX = Math.floor(Math.random() * 7);
+                node.fountainY = Math.floor(Math.random() * 7);
                 if (typeof saveProgress === 'function') saveProgress();
             }
             const fx = node.fountainX;
-            const fy = 3;
-            boardPreview[fy][fx] = false;
-            boardPreview[fy][fx+1] = false;
-            boardPreview[fy+1][fx] = false;
-            boardPreview[fy+1][fx+1] = false;
+            const fy = node.fountainY !== undefined ? node.fountainY : 3;
+            if (fy <= 6 && fx <= 6) {
+                boardPreview[fy][fx] = false;
+                boardPreview[fy][fx+1] = false;
+                boardPreview[fy+1][fx] = false;
+                boardPreview[fy+1][fx+1] = false;
+            }
         }
 
         // Calculate enemy piece positions
@@ -966,6 +973,9 @@ function showMapCellPopup(node, grandMap) {
                     boardShape: node.board || 'Standard',
                     army: node.army,
                     region: node.region, // Pass the region to startLevel
+                    customTrees: node.customTrees,
+                    fountainX: node.fountainX,
+                    fountainY: node.fountainY,
                     difficultyIndex: 0
                 };
                 
