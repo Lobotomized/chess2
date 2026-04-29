@@ -7,6 +7,14 @@ let isRunning = false;
 let worker = null;
 let workerTimeout = null;
 let wakeLock = null;
+let currentMode = 'normal';
+
+const MODE_TIMEOUTS = {
+    'super_fast': 5000,
+    'fast': 15000,
+    'normal': 60000,
+    'slow': 120000
+};
 
 async function requestWakeLock() {
     try {
@@ -20,7 +28,20 @@ async function requestWakeLock() {
 }
 
 function init() {
-    let saved = localStorage.getItem('chess_evolution_cache');
+    let savedMode = localStorage.getItem('chess_evolution_mode') || 'normal';
+    currentMode = savedMode;
+    let modeSelect = document.getElementById('modeSelect');
+    if(modeSelect) modeSelect.value = currentMode;
+
+    loadDataForMode(currentMode);
+    updateUI();
+}
+
+function loadDataForMode(mode) {
+    characters = [];
+    generation = 0;
+    let cacheKey = mode === 'normal' ? 'chess_evolution_cache' : `chess_evolution_cache_${mode}`;
+    let saved = localStorage.getItem(cacheKey);
     if (saved) {
         try {
             let data = JSON.parse(saved);
@@ -45,8 +66,24 @@ function init() {
         }
         saveData();
     }
-    
+}
+
+function changeEvolutionMode(mode) {
+    if (isRunning) {
+        toggleEvolution(); // stop current
+    }
+    currentMode = mode;
+    localStorage.setItem('chess_evolution_mode', mode);
+    loadDataForMode(mode);
     updateUI();
+}
+
+function saveData() {
+    let cacheKey = currentMode === 'normal' ? 'chess_evolution_cache' : `chess_evolution_cache_${currentMode}`;
+    localStorage.setItem(cacheKey, JSON.stringify({
+        characters: characters,
+        generation: generation
+    }));
 }
 
 function generateRandomCharacter() {
@@ -182,12 +219,7 @@ function generateRandomCharacter() {
     return char;
 }
 
-function saveData() {
-    localStorage.setItem('chess_evolution_cache', JSON.stringify({
-        characters: characters,
-        generation: generation
-    }));
-}
+
 
 let selectedBotId = null;
 
@@ -426,8 +458,9 @@ async function saveBotToDb(charId) {
     if(!name) return;
     
     char.name = name;
+    char.mode = currentMode;
     
-    fetch('/bots', {
+    fetch('/api/bots', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -519,10 +552,11 @@ function runMatch() {
             thinkingColor = msg.color;
             if (workerTimeout) clearTimeout(workerTimeout);
             
-            // 60 seconds per move limit check from main thread
+            // timeout limit check from main thread
+            let currentTimeout = MODE_TIMEOUTS[currentMode] || 60000;
             workerTimeout = setTimeout(() => {
                 if (worker) {
-                    console.log(`Worker timeout! ${thinkingColor} took more than 60s.`);
+                    console.log(`Worker timeout! ${thinkingColor} took more than ${currentTimeout/1000}s.`);
                     worker.terminate();
                     worker = null;
                     
@@ -541,7 +575,7 @@ function runMatch() {
                     };
                     handleMatchResult(charWhite, charBlack, result);
                 }
-            }, 60000);
+            }, currentTimeout);
             return;
         }
         

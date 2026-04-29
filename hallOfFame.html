@@ -70,9 +70,15 @@
     </head>
 <body>
     <div class="container">
-        <div style="display:flex; justify-content:space-between; align-items:center;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap: wrap; gap: 10px;">
             <h1>Hall of Fame</h1>
-            <div>
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <select id="hofModeSelect" style="padding: 10px; font-size: 20px; background: #333; color: #f0d9b5; border: 1px solid #555; border-radius: 12px;" onchange="changeHofMode(this.value)">
+                    <option value="super_fast">SUPER FAST</option>
+                    <option value="fast">FAST</option>
+                    <option value="normal" selected>NORMAL</option>
+                    <option value="slow">SLOW</option>
+                </select>
                 <button onclick="openHofFightModal()" style="background: #e67e22;">Fight Bots</button>
                 <button onclick="showHofHistory()" style="background: #9b59b6;">Fight History</button>
                 <a href="/evolution.html"><button>Back to Evolution</button></a>

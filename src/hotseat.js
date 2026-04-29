@@ -13,8 +13,8 @@ let aiPowers = {
 
 
 // Add random hall of fame AI support
-if (AIPowerWhite === 'randomHallOfFame') aiPowers.white = 'randomHallOfFame';
-if (AIPowerBlack === 'randomHallOfFame') aiPowers.black = 'randomHallOfFame';
+if (typeof AIPowerWhite === 'string' && AIPowerWhite.startsWith('randomHallOfFame')) aiPowers.white = AIPowerWhite;
+if (typeof AIPowerBlack === 'string' && AIPowerBlack.startsWith('randomHallOfFame')) aiPowers.black = AIPowerBlack;
 
 let ani = function(){
     animate(hotseatGame.state)
@@ -79,35 +79,58 @@ function loop() {
 
 const startGameLoop = async () => {
     // If randomHallOfFame is used, fetch random bots from the Hall of Fame
-    if (aiPowers.white === 'randomHallOfFame' || aiPowers.black === 'randomHallOfFame') {
+    let whiteNeedsHof = typeof aiPowers.white === 'string' && aiPowers.white.startsWith('randomHallOfFame');
+    let blackNeedsHof = typeof aiPowers.black === 'string' && aiPowers.black.startsWith('randomHallOfFame');
+
+    if (whiteNeedsHof || blackNeedsHof) {
         try {
             const loadingScreen = document.getElementById('loadingScreen');
             if (loadingScreen) {
                 loadingScreen.style.display = 'flex';
                 loadingScreen.innerHTML = '<div class="spinner"></div>Fetching Hall of Fame AI...';
             }
-            const res = await fetch('/bots');
-            const bots = await res.json();
-            if (bots && bots.length > 0) {
-                if (aiPowers.white === 'randomHallOfFame') {
-                    const randomBotWhite = bots[Math.floor(Math.random() * bots.length)];
-                    localStorage.setItem('chess_evolution_custom_ai_white', JSON.stringify(randomBotWhite));
-                    aiPowers.white = 'customEvolution'; // fallback to customEvolution logic
+
+            const fetchBotForMode = async (powerStr, race) => {
+                let mode = 'normal';
+                if (powerStr === 'randomHallOfFameEasy') mode = 'super_fast';
+                else if (powerStr === 'randomHallOfFameMedium') mode = 'fast';
+                else if (powerStr === 'randomHallOfFameHard') mode = 'normal';
+                else if (powerStr === 'randomHallOfFameSuperHard') mode = 'slow';
+
+                const res = await fetch(`/api/bots/mode/${mode}`);
+                const bots = await res.json();
+
+                if (bots && bots.length > 0) {
+                    const raceBots = bots.filter(b => b.race === race);
+                    if (raceBots.length > 0) {
+                        return raceBots[Math.floor(Math.random() * raceBots.length)];
+                    }
                 }
-                if (aiPowers.black === 'randomHallOfFame') {
-                    const randomBotBlack = bots[Math.floor(Math.random() * bots.length)];
-                    localStorage.setItem('chess_evolution_custom_ai_black', JSON.stringify(randomBotBlack));
-                    aiPowers.black = 'customEvolution'; // fallback to customEvolution logic
+                return null;
+            };
+
+            if (whiteNeedsHof) {
+                let botWhite = await fetchBotForMode(aiPowers.white, hotseatGame.state.whiteRace);
+                if (botWhite) {
+                    localStorage.setItem('chess_evolution_custom_ai_white', JSON.stringify(botWhite));
+                    aiPowers.white = 'customEvolution';
+                } else {
+                    aiPowers.white = 101;
                 }
-            } else {
-                // No bots found, fallback to medium
-                if (aiPowers.white === 'randomHallOfFame') aiPowers.white = 3;
-                if (aiPowers.black === 'randomHallOfFame') aiPowers.black = 3;
+            }
+            if (blackNeedsHof) {
+                let botBlack = await fetchBotForMode(aiPowers.black, hotseatGame.state.blackRace);
+                if (botBlack) {
+                    localStorage.setItem('chess_evolution_custom_ai_black', JSON.stringify(botBlack));
+                    aiPowers.black = 'customEvolution';
+                } else {
+                    aiPowers.black = 101;
+                }
             }
         } catch (e) {
             console.error('Failed to fetch bots for randomHallOfFame', e);
-            if (aiPowers.white === 'randomHallOfFame') aiPowers.white = 3;
-            if (aiPowers.black === 'randomHallOfFame') aiPowers.black = 3;
+            if (whiteNeedsHof) aiPowers.white = 101;
+            if (blackNeedsHof) aiPowers.black = 101;
         }
     }
 

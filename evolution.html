@@ -231,7 +231,7 @@
     <div class="container">
         <h1>AI Evolutionary Arena</h1>
         <p>Characters evolve by playing rapid games against each other. Max 50 turns per side. Results cached in localStorage. <br>
-           <b>Timeout:</b> >60s per move counts as loss. <b>Elimination:</b> Bots below 980 ELO are killed. <br>
+           <b>Timeout:</b> Automatically enforced based on selected mode. <b>Elimination:</b> Bots below 980 ELO are killed. <br>
            <b>Filters:</b> 
            <span class="filter-tag filter-ra">RA</span> Remove Attacked, 
            <span class="filter-tag filter-rna">RNA</span> Remove Non-Attacking, 
@@ -242,7 +242,13 @@
            <b>Exceptions:</b> pV (Piece Value > min), att (Piece Attacked), rnd (Random Chance), pVS (Piece Value < max)
         </p>
         
-        <div style="margin-bottom:20px;">
+        <div style="margin-bottom:20px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap;">
+            <select id="modeSelect" style="padding: 10px; font-size: 20px; background: #333; color: #f0d9b5; border: 1px solid #555; border-radius: 12px;" onchange="changeEvolutionMode(this.value)">
+                <option value="super_fast">SUPER FAST (5s timeout)</option>
+                <option value="fast">FAST (15s timeout)</option>
+                <option value="normal" selected>NORMAL (60s timeout)</option>
+                <option value="slow">SLOW (120s timeout)</option>
+            </select>
             <button class="primary" id="toggleBtn" onclick="toggleEvolution()">Start Evolution</button>
             <button class="primary" style="background: #4ecdc4; border-color: #4ecdc4;" onclick="openCreateBotModal()">Create Custom Bot</button>
             <button class="primary" style="background: #e67e22; border-color: #e67e22;" onclick="openEvoFightModal()">Fight Bots</button>

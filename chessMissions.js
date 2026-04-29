@@ -120,9 +120,16 @@ app.get('/match-opponent/:botId', async (req, res) => {
     }
 });
 
-app.get('/bots', async (req, res) => {
+app.get(['/bots', '/api/bots/mode/:mode'], async (req, res) => {
     try {
-        const bots = await Bot.find().sort({ score: -1 }).limit(100);
+        let mode = req.params.mode || req.query.mode || 'normal';
+        let query = {};
+        if (mode === 'normal') {
+            query = { $or: [{ mode: 'normal' }, { mode: { $exists: false } }] };
+        } else if (mode !== 'all') {
+            query = { mode: mode };
+        }
+        const bots = await Bot.find(query).sort({ score: -1 }).limit(100);
         res.json(bots);
     } catch (err) {
         res.status(500).send(err);
@@ -215,7 +222,7 @@ app.post('/join-match', (req, res) => {
     res.status(200).send("OK");
 });
 
-app.post('/bots', async (req, res) => {
+app.post('/api/bots', async (req, res) => {
     try {
         const bot = new Bot(req.body);
         await bot.save();
@@ -225,7 +232,7 @@ app.post('/bots', async (req, res) => {
     }
 });
 
-app.delete('/bots/:botId', async (req, res) => {
+app.delete('/api/bots/:botId', async (req, res) => {
     try {
         const botId = req.params.botId;
         const query = mongoose.Types.ObjectId.isValid(botId) 

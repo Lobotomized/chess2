@@ -185,7 +185,7 @@ function updateGoldDisplay() {
 // Initialize Game
 function initRpgGame() {
     // Fetch Hall of Fame bots to use against the player
-    fetch('/bots')
+    fetch('/api/bots/mode/all')
         .then(res => res.json())
         .then(data => {
             rpgState.hofBots = data;

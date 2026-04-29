@@ -47,6 +47,8 @@ const botSchema = new Schema({
     rwpN: Number,
     rwpExceptionAttacked: Boolean,
 
+    mode: { type: String, default: 'normal' },
+
     createdAt: { type: Date, default: Date.now }
 });
 

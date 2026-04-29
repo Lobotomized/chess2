@@ -1,9 +1,25 @@
 const RACES = ['classic', 'medieval', 'bug', 'promoters', 'cyborgs'];
 let bots = [];
 let selectedBotId = null;
+let currentHofMode = 'normal';
 
 function init() {
-    fetch('/bots')
+    let savedMode = localStorage.getItem('chess_hof_mode') || 'normal';
+    currentHofMode = savedMode;
+    let modeSelect = document.getElementById('hofModeSelect');
+    if (modeSelect) modeSelect.value = currentHofMode;
+
+    loadBots();
+}
+
+function changeHofMode(mode) {
+    currentHofMode = mode;
+    localStorage.setItem('chess_hof_mode', mode);
+    loadBots();
+}
+
+function loadBots() {
+    fetch(`/api/bots/mode/${currentHofMode}`)
     .then(res => res.json())
     .then(data => {
         bots = data;
@@ -82,12 +98,12 @@ function updateUI() {
 
 async function deleteBot(charId) {
     if(await showConfirm('Are you sure you want to delete this bot from the Hall of Fame?')) {
-        fetch('/bots/' + charId, {
+        fetch('/api/bots/' + charId, {
             method: 'DELETE'
         })
         .then(res => {
             if(res.ok) {
-                init(); // Refresh the list
+                loadBots(); // Refresh the list
             } else if(res.status === 404) {
                 showAlert('Endpoint not found or bot not found. Did you restart the node server?');
             } else {
@@ -199,6 +215,16 @@ function startHofFight() {
     
     let worker = new Worker('evolutionWorker.js');
     
+    let workerTimeout = null;
+    let thinkingColor = 'white';
+
+    const MODE_TIMEOUTS = {
+        'super_fast': 5000,
+        'fast': 15000,
+        'normal': 60000,
+        'slow': 120000
+    };
+
     worker.postMessage(JSONfn.stringify({
         charWhite: wBot,
         charBlack: bBot,
@@ -208,37 +234,70 @@ function startHofFight() {
     
     worker.onmessage = function(e) {
         let msg = JSONfn.parse(e.data);
-        if (msg.type === 'result') {
-            worker.terminate();
+
+        if (msg.type === 'thinking') {
+            thinkingColor = msg.color;
+            if (workerTimeout) clearTimeout(workerTimeout);
             
-            let result = msg;
-            if (result.history) {
-                result.history.isHallOfFame = true; // Flag as HoF match
-                
-                fetch('/games', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(result.history)
-                }).then(res => res.json()).then(savedGame => {
-                    let wName = wBot.name || wBot.id;
-                    let bName = bBot.name || bBot.id;
-                    let winText = result.winner === 'tie' ? 'It was a tie!' : (result.winner === 'white' ? `${wName} (White) won!` : `${bName} (Black) won!`);
+            let currentTimeout = MODE_TIMEOUTS[currentHofMode] || 60000;
+            workerTimeout = setTimeout(() => {
+                if (worker) {
+                    worker.terminate();
                     
-                    document.getElementById('fightStatus').innerHTML = `
-                        ${winText} in ${result.turns} turns.<br><br>
-                        <button onclick="window.open('/replay.html?gameId=${savedGame._id}', '_blank')" style="background:#829769; padding:5px 10px; font-size:14px;">Watch Replay</button>
-                    `;
-                }).catch(err => {
-                    document.getElementById('fightStatus').innerText = 'Fight finished, but failed to save history.';
-                });
-            }
+                    let result = {
+                        winner: thinkingColor === 'white' ? 'black' : 'white',
+                        turns: msg.turns || 0,
+                        history: {
+                            whiteId: wBot.id,
+                            blackId: bBot.id,
+                            whiteRace: wBot.race || 'classic',
+                            blackRace: bBot.race || 'classic',
+                            winner: thinkingColor === 'white' ? 'black' : 'white',
+                            turns: msg.turns || 0,
+                            moves: []
+                        }
+                    };
+                    handleHofResult(result, wBot, bBot);
+                }
+            }, currentTimeout);
+            return;
+        }
+
+        if (msg.type === 'result') {
+            if (workerTimeout) clearTimeout(workerTimeout);
+            worker.terminate();
+            handleHofResult(msg, wBot, bBot);
         }
     };
     
     worker.onerror = function(err) {
+        if (workerTimeout) clearTimeout(workerTimeout);
         document.getElementById('fightStatus').innerText = 'Error during fight!';
         worker.terminate();
     };
+}
+
+function handleHofResult(result, wBot, bBot) {
+    if (result.history) {
+        result.history.isHallOfFame = true; // Flag as HoF match
+        
+        fetch('/games', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(result.history)
+        }).then(res => res.json()).then(savedGame => {
+            let wName = wBot.name || wBot.id;
+            let bName = bBot.name || bBot.id;
+            let winText = result.winner === 'tie' ? 'It was a tie!' : (result.winner === 'white' ? `${wName} (White) won!` : `${bName} (Black) won!`);
+            
+            document.getElementById('fightStatus').innerHTML = `
+                ${winText} in ${result.turns} turns.<br><br>
+                <button onclick="window.open('/replay.html?gameId=${savedGame._id}', '_blank')" style="background:#829769; padding:5px 10px; font-size:14px;">Watch Replay</button>
+            `;
+        }).catch(err => {
+            document.getElementById('fightStatus').innerText = 'Fight finished, but failed to save history.';
+        });
+    }
 }
 
 function showHofHistory() {
