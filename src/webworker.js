@@ -193,18 +193,7 @@ self.addEventListener("message", async function(e) {
             }
             if(obj.AIPower === 101){
                 console.time('101')
-                move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
-                    methods[obj.AICharacter](0),
-                    [
-
-                    ]
-                )
-                console.timeEnd('101')
-            }
-
-            else if(obj.AIPower === 102){
-                console.time('102')
-                move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns,
+                move = minimaxDeepAlphaBeta(obj.state,obj.color,2, obj.removedTurns,
                     methods[obj.AICharacter](0),
                     [
                         {method:removeNonAttackingMovesFilter, options:{maximum:2,maxPieceValue:2,randomException:0.3, filterDepth:1,
@@ -212,85 +201,9 @@ self.addEventListener("message", async function(e) {
                         {method:randomlyRemove1NthFilter,options:{n:1.2,minPieceValue:4, exceptions:[pieceValueMustBeBiggerThanException, pieceAttackedException]}}
                     ]
                 )
-                console.timeEnd('102')
-            }
-            else if(obj.AIPower === 103){
-                console.time('103')
-                move = minimaxDeep(obj.state,obj.color,3, obj.removedTurns,
-                    methods[obj.AICharacter](0),
-                    [
-                    ]
-                )
-                console.timeEnd('103')
-            }
-            else if(obj.AIPower === 104){
-                console.time('104')
-                let depth = 2;
-                if(obj.state.pieces.length < 8){
-                    depth = 4;
-                }
-                else if(obj.state.pieces.length < 16){
-                    depth = 3;
-                }
-
-                move = minimaxDeep(obj.state,obj.color,depth, obj.removedTurns,
-                    methods[obj.AICharacter](0),
-                    []
-                )
-                console.timeEnd('104')
+                console.timeEnd('101')
             }
 
-            else if(obj.AIPower === 105){
-                console.time('105')
-                let character = methods[obj.AICharacter];
-                if(!obj.AICharacter){
-                    character = rpgCharacter;
-                }
-                let depth = 2;
-                if(obj.state.pieces.length < 16 && obj.state.pieces.length > 8){
-                    depth = 4;
-                }
-                else if(obj.state.pieces.length < 8){
-                    depth = 3;
-                }
-                move = minimaxAlphaBetaBudget(obj.state,obj.color,depth, obj.removedTurns,
-                    character(0),
-                    [
-                    ]
-                )
-                console.timeEnd('105')
-            }
-
-            else if(obj.AIPower === 106){
-                console.time('106')
-                let character = methods[obj.AICharacter];
-                if(!obj.AICharacter){
-                    character = rpgCharacter;
-                }
-                let depth = 3;
-                 if(obj.state.pieces.length < 16  && obj.state.pieces.length > 8){
-                    depth = 4;
-                }
-                else if(obj.state.pieces.length < 8){
-                    depth = 5;
-                }
-                move = minimaxAlphaBeta(obj.state,obj.color,depth, obj.removedTurns,
-                    character(0),
-                    [
-                    ]
-                )
-                console.timeEnd('106')
-            }
-            else if(obj.AIPower === 107){
-                console.time('test')
-                let character = methods[obj.AICharacter];
-                move = proofNumberSearch(obj.state,obj.color,2, obj.removedTurns,
-                    character(0),
-                    [
-                    ]
-                )
-                console.timeEnd('test')
-            }
             else if(obj.AIPower === 'customEvolution'){
                 console.time('customEvolution');
                 
@@ -298,9 +211,7 @@ self.addEventListener("message", async function(e) {
                 let charWhiteStr = obj.customEvolutionWhite;
                 let charBlackStr = obj.customEvolutionBlack;
                 let charConfigStr = obj.color === 'white' ? charWhiteStr : charBlackStr;
-                
                 let moveFallback = false;
-
                 if (charConfigStr) {
                     try {
                         let charConfig = JSON.parse(charConfigStr);
@@ -460,10 +371,8 @@ self.addEventListener("message", async function(e) {
                         // --- Forced Algorithms Framework ---
                         let forcedAlgorithmMatch = null;
                         const FORCED_ALGORITHMS_THRESHOLD = 10; // Threshold of pieces on board to start checking
-
                         if (numPieces < FORCED_ALGORITHMS_THRESHOLD) {
                             for (let fAlg of forcedAlgorithms) {
-                                console.log('why so slow?')
                                 if (fAlg.checkCondition(obj.state, obj.color)) {
                                     forcedAlgorithmMatch = fAlg;
                                     break; // Stop at the first algorithm whose conditions are met

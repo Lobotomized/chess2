@@ -36,6 +36,29 @@ function isRook(p) {
     return hasUp && hasDown && hasLeft && hasRight;
 }
 
+function isQueen(p) {
+    if (p.icon && p.icon.includes('Queen')) return true;
+    if (!p.moves) return false;
+    
+    let hasUp = false, hasDown = false, hasLeft = false, hasRight = false;
+    let hasUpRight = false, hasUpLeft = false, hasDownRight = false, hasDownLeft = false;
+    
+    for (let m of p.moves) {
+        if (m.repeat && (!m.limit || m.limit >= 7) && !m.impotent) {
+            if (m.x === 0 && m.y === -1) hasUp = true;
+            if (m.x === 0 && m.y === 1) hasDown = true;
+            if (m.x === -1 && m.y === 0) hasLeft = true;
+            if (m.x === 1 && m.y === 0) hasRight = true;
+            if (m.x === 1 && m.y === -1) hasUpRight = true;
+            if (m.x === -1 && m.y === -1) hasUpLeft = true;
+            if (m.x === 1 && m.y === 1) hasDownRight = true;
+            if (m.x === -1 && m.y === 1) hasDownLeft = true;
+        }
+    }
+    
+    return hasUp && hasDown && hasLeft && hasRight && hasUpRight && hasUpLeft && hasDownRight && hasDownLeft;
+}
+
 const forcedAlgorithms = [
     {
         name: 'ladderMateTwoRooks',
@@ -143,5 +166,5 @@ const forcedAlgorithms = [
             
             return bestMove;
         }
-    }
+    },
 ];
