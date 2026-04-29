@@ -56,14 +56,32 @@ function renderMoveHistory(state) {
     console.log('here!?')
     if (typeof document === 'undefined') return;
 
-    const container = document.getElementById('moveHistoryContainer');
-    const list = document.getElementById('moveHistoryList');    
+    const containers = [
+        document.getElementById('moveHistoryContainer'),
+        document.getElementById('moveHistoryContainerDesktop'),
+        document.getElementById('moveHistoryContainerMobile')
+    ].filter(Boolean);
+    
+    const lists = [
+        document.getElementById('moveHistoryList'),
+        document.getElementById('moveHistoryListDesktop'),
+        document.getElementById('moveHistoryListMobile')
+    ].filter(Boolean);
 
-    if (!container || !list) return;
+    if (containers.length === 0 || lists.length === 0) return;
 
     if (!state.moveHistory || state.moveHistory.length === 0) {
-        container.style.display = 'flex';
-        list.innerHTML = '<div style="text-align: center; color: var(--piece-black, #333); font-style: italic; padding: 10px;">No moves yet</div>';
+        containers.forEach(container => {
+            if (container.style.display !== 'none' || container.classList.contains('mobile-only') || container.classList.contains('desktop-only')) {
+                // Don't force display flex on elements hidden by media queries, rely on CSS classes if they exist
+                if (!container.classList.contains('mobile-only') && !container.classList.contains('desktop-only')) {
+                    container.style.display = 'flex';
+                }
+            }
+        });
+        lists.forEach(list => {
+            list.innerHTML = '<div style="text-align: center; color: var(--piece-black, #333); font-style: italic; padding: 10px;">No moves yet</div>';
+        });
         lastRenderedMoveHistoryLength = 0;
         return;
     }
@@ -74,8 +92,12 @@ function renderMoveHistory(state) {
 
     lastRenderedMoveHistoryLength = state.moveHistory.length;
 
-    container.style.display = 'flex';
-    list.innerHTML = '';
+    containers.forEach(container => {
+        if (!container.classList.contains('mobile-only') && !container.classList.contains('desktop-only')) {
+            container.style.display = 'flex';
+        }
+    });
+    lists.forEach(list => list.innerHTML = '');
 
     let boardHeightY = 7;
             if (state.board && state.board.length > 0) {
@@ -163,7 +185,23 @@ function renderMoveHistory(state) {
 
                 moveEntry.appendChild(leftSide);
                 moveEntry.appendChild(rightSide);
-                list.appendChild(moveEntry);
+
+                lists.forEach(list => {
+                    // Clone the node so we can append it to multiple lists
+                    const entryClone = moveEntry.cloneNode(true);
+                    
+                    // We need to re-attach the event listener since cloneNode doesn't copy JS events
+                    if (entryClone.querySelector('button')) {
+                        entryClone.querySelector('button').onclick = async () => {
+                            if(await showConfirm('Use Divination to go back to this move? (Once per battle)')) {
+                                if (typeof revertGameState === 'function') {
+                                    revertGameState(state, state.moveHistory.length - backwardsIndex);
+                                }
+                            }
+                        };
+                    }
+                    list.appendChild(entryClone);
+                });
             });
         }
 
