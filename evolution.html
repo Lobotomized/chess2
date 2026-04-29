@@ -149,6 +149,41 @@
             border-bottom: 1px solid #333;
             padding-bottom: 10px;
         }
+
+        /* Mobile styles */
+        @media (max-width: 768px) {
+            h1 { font-size: 2em; }
+            h1 .icon { height: 64px; }
+            button { font-size: 20px; padding: 8px 16px; }
+            table { font-size: 20px; }
+            .container { padding: 15px; width: 95%; max-width: 95%; }
+            #config-base > div { grid-template-columns: 1fr !important; }
+            .modal-content { min-width: unset; width: 95%; }
+        }
+        @media (max-width: 480px) {
+            h1 { font-size: 1.5em; }
+            h1 .icon { height: 48px; }
+            button { font-size: 16px; padding: 6px 12px; }
+            table { font-size: 16px; }
+            th, td { padding: 10px; }
+            .detail-label { font-size: 18px !important; }
+            select, input { font-size: 18px !important; }
+            #status { font-size: 20px; }
+            #createBotSubmitBtn { font-size: 20px !important; }
+            .modal-content { padding: 15px; }
+        }
+        @media (max-width: 360px) {
+            h1 { font-size: 1.2em; }
+            h1 .icon { height: 36px; }
+            button { font-size: 14px; padding: 5px 10px; }
+            table { font-size: 14px; }
+            th, td { padding: 8px; }
+            .detail-label { font-size: 16px !important; }
+            select, input { font-size: 16px !important; }
+            #status { font-size: 16px; }
+            #createBotSubmitBtn { font-size: 18px !important; }
+            .modal-content { padding: 10px; }
+        }
         .modal-header h2 .icon { height: 72px; margin-right: 15px; }
         h2 {
             font-family: 'Lilita One', cursive; font-weight: normal; letter-spacing: 1px; margin: 0; color: #ffffff; }

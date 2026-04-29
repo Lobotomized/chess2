@@ -502,8 +502,8 @@
                 padding: 15px;
             }
             button {
-                font-size: 26px;
-                padding: 10px;
+                font-size: 20px;
+                padding: 8px;
             }
             
             /* Allow chessboard to scroll if it overflows */
@@ -530,6 +530,18 @@
             #chessboard {
                 border-width: 8px;
             }
+        }
+        @media (max-width: 360px) {
+            .square {
+                width: 32px;
+                height: 32px;
+            }
+            button {
+                font-size: 16px;
+                padding: 6px;
+            }
+            .panel h2 { font-size: 20px; }
+            .panel h2 .icon { height: 36px; }
         }
     </style>
 <script src="/src/modal.js?v=1"></script>

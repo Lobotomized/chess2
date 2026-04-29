@@ -338,6 +338,28 @@
                 font-size: 26px;
             }
         }
+        @media (max-width: 480px) {
+            h1 { font-size: 24px; }
+            h1 .icon { height: 48px; margin-right: 10px; }
+            .hotseat { padding: 15px; }
+            .row { padding: 10px; gap: 8px; margin-bottom: 15px; }
+            .racePickImage { width: 36px; height: 36px; padding: 2px; }
+            select { font-size: 20px; padding: 8px; }
+            label { font-size: 20px; }
+            .startGame { font-size: 20px; padding: 12px; }
+            .startGame .icon { height: 32px; margin-right: 8px; }
+        }
+        @media (max-width: 360px) {
+            h1 { font-size: 20px; }
+            h1 .icon { height: 36px; margin-right: 8px; }
+            .hotseat { padding: 10px; width: 95%; max-width: 95%; }
+            .row { padding: 8px; gap: 6px; }
+            .racePickImage { width: 30px; height: 30px; padding: 1px; }
+            select { font-size: 16px; padding: 6px; }
+            label { font-size: 16px; }
+            .startGame { font-size: 16px; padding: 10px; }
+            .startGame .icon { height: 24px; margin-right: 6px; }
+        }
     </style>
     <script>
         let raceWhite = 'classic';

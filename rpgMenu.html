@@ -124,6 +124,27 @@
         .hide-scrollbar::-webkit-scrollbar {
             display: none; /* Chrome, Safari and Opera */
         }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 2.8em; margin-bottom: 20px; }
+            h1 .icon { height: 56px; margin-right: 10px; }
+            .menu-button { font-size: 22px; padding: 12px; }
+            .menu-button .icon { height: 36px; margin-right: 10px; }
+            .menu-container { padding: 20px; width: 92%; }
+            .back-button { font-size: 20px; padding: 12px; }
+            .map-list-item { font-size: 20px; padding: 12px; }
+            .map-list-item .icon { height: 36px; }
+        }
+        @media (max-width: 360px) {
+            h1 { font-size: 2em; }
+            h1 .icon { height: 40px; }
+            .menu-button { font-size: 16px; padding: 8px; }
+            .menu-button .icon { height: 28px; }
+            .menu-container { padding: 15px; width: 95%; gap: 12px; }
+            .back-button { font-size: 16px; padding: 8px; }
+            .map-list-item { font-size: 16px; padding: 8px; }
+            .map-list-item .icon { height: 28px; }
+        }
     </style>
     <script src="/src/modal.js?v=1"></script>
 </head>
