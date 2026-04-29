@@ -150,11 +150,11 @@ function renderMoveHistory(state) {
                         clockBtn.style.cursor = 'pointer';
                         clockBtn.style.fontSize = '16px';
                         clockBtn.title = 'Use Divination to revert to before this move';
-                        clockBtn.onclick = () => {
-                            if(confirm('Use Divination to go back to this move? (Once per battle)')) {
+                        clockBtn.onclick = async () => {
+                            if(await showConfirm('Use Divination to go back to this move? (Once per battle)')) {
                                 if (typeof revertGameState === 'function') {
-                                revertGameState(state, state.moveHistory.length - backwardsIndex);
-                            }
+                                    revertGameState(state, state.moveHistory.length - backwardsIndex);
+                                }
                             }
                         };
                         rightSide.appendChild(clockBtn);

@@ -186,7 +186,7 @@ function resetRPGStats() {
     RPGStats.scoutingLevel = 0;
     RPGStats.summonerLevel = 0;
     RPGStats.mountaineerLevel = 0;
-    RPGStats.divinationLevel = 0;
+    RPGStats.divinationLevel = 3;
     
     if (typeof applyDifficultySettings === 'function') {
         applyDifficultySettings();

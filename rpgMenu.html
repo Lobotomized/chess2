@@ -307,7 +307,7 @@
         }
         
         window.deleteSave = async function(key, slot) {
-            if(confirm('Are you sure you want to delete this save?')) {
+            if(await showConfirm('Are you sure you want to delete this save?')) {
                 if (key.startsWith('db_')) {
                     const token = window.Auth ? window.Auth.getToken() : null;
                     if (token && slot) {
