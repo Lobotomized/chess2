@@ -53,7 +53,6 @@ if (typeof window !== 'undefined') {
 }
 
 function renderMoveHistory(state) {
-    console.log('here!?')
     if (typeof document === 'undefined') return;
 
     const containers = [
@@ -1257,6 +1256,13 @@ function cyborgTeleport(state,me,toReturn){
 
 function getRndInteger(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function formatTime(ticks) {
+    const totalSeconds = Math.max(0, Math.floor(ticks / 10));
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
 var posValue = [

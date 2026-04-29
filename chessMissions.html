@@ -235,8 +235,8 @@
                     const enemy = document.getElementById('whiteClock');
                     
                     if (me && enemy) {
-                        me.innerText = 'My time ' + localState.whiteClock;
-                        enemy.innerText = 'Enemy time ' + localState.blackClock;
+                        me.innerText = 'My time ' + formatTime(localState.whiteClock);
+                        enemy.innerText = 'Enemy time ' + formatTime(localState.blackClock);
                     }
                 }
             } else {
@@ -517,9 +517,9 @@
             const enemy = document.getElementById('whiteClock');
             const body = document.getElementsByTagName('body')[0];
             const forfeitTextButton = document.getElementById('forfeitText');
-            me.innerText = 'My Time ' +state.blackClock;
+            me.innerText = 'My Time ' + formatTime(state.blackClock);
             
-            enemy.innerText = 'Enemy Time ' +state.whiteClock
+            enemy.innerText = 'Enemy Time ' + formatTime(state.whiteClock);
             if (state.turn == 'black') {
                 body.style.background = blackSquareColor
                 me.style.color = whiteSquareColor;
@@ -542,8 +542,8 @@
                 else if(!state.won){
                     if(state.turn == 'white' && state.yourTurn || state.turn == 'black' && !state.yourTurn){
                         IAM = 'white'
-                        me.innerText = 'My time '+state.whiteClock;
-                        enemy.innerText = 'Enemy time '+state.blackClock;
+                        me.innerText = 'My time '+ formatTime(state.whiteClock);
+                        enemy.innerText = 'Enemy time '+ formatTime(state.blackClock);
                     }
                     else{
                         IAM = 'black'

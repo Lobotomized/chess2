@@ -186,6 +186,8 @@ html{
         font-size: 16px !important;
         white-space: nowrap;
         margin: 0 5px;
+        font-variant-numeric: tabular-nums;
+        width: 70px;
     }
 
     .exitButton {
@@ -359,7 +361,13 @@ html{
     margin-right:50px; */
     margin-top:auto;
     margin-bottom:auto;
+    font-variant-numeric: tabular-nums;
+    width: 120px;
     /* color:var(--black-square-color); */
+}
+
+#blackClock{
+    text-align:left;
 }
 
 #whiteClock{
