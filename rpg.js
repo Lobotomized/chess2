@@ -3565,16 +3565,7 @@ canvas.addEventListener('click', (e) => {
         w = new Worker("src/webworker.js");
     }
 
-    var element = canvas, offsetX = 0, offsetY = 0;
-    if (element.offsetParent !== undefined) {
-        do {
-            offsetX += element.offsetLeft;
-            offsetY += element.offsetTop;
-        } while ((element = element.offsetParent));
-    }
-
-    const mx = e.pageX - offsetX;
-    const my = e.pageY - offsetY;
+    let {x: mx, y: my} = getMousePos(canvas, e);
     const x = parseInt(mx / squareLength);
     const y = parseInt(my / squareLength);
 

@@ -39,6 +39,80 @@
 
 <script src="/src/modal.js?v=1"></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Quicksand:wght@500;700&display=swap');</style>
+    <style>
+        /* Mobile responsiveness */
+        @media (max-width: 600px) {
+            body, html {
+                min-width: 100vw;
+                overflow-x: hidden;
+                padding: 0;
+                margin: 0;
+            }
+
+            .container {
+                width: 100%;
+                max-width: 100%;
+                padding: 10px;
+                box-sizing: border-box;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+            }
+
+            #canvas {
+                max-width: 100%;
+                height: auto;
+            }
+
+            .times {
+                width: 100%;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                margin-top: 10px;
+                gap: 5px;
+            }
+
+            .clock {
+                font-size: 8px !important;
+                margin: 0;
+                font-variant-numeric: tabular-nums;
+                width: 70px;
+                text-align: center;
+            }
+
+            .exitButton {
+                padding: 5px 10px;
+                font-size: 18px;
+                transform: none !important;
+                margin: 0 !important;
+            }
+
+            .exitButton img {
+                width: 25px !important;
+                height: 25px !important;
+            }
+            
+            .forfeitText {
+                font-size: 18px;
+                margin-right: 5px;
+            }
+            
+            .message h3 {
+                font-family: 'Lilita One', cursive; font-weight: normal; letter-spacing: 1px;
+                font-size: 26px;
+                margin: 10px 0;
+                text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+            }
+
+            #menuDialog {
+                width: 90%;
+                max-width: 90%;
+                padding: 15px;
+                border: 2px solid #000;
+            }
+        }
+    </style>
     </head>
 
 <!-- Google tag (gtag.js) -->
@@ -769,31 +843,22 @@
     })
 
     canvas.addEventListener('click', (e) => {
-        var element = canvas, offsetX = 0, offsetY = 0, mx, my;
-
-        // Compute the total offset. It's possible to cache this if you want
-        if (element.offsetParent !== undefined) {
-            do {
-                offsetX += element.offsetLeft;
-                offsetY += element.offsetTop;
-            } while ((element = element.offsetParent));
-        }
+        let {x, y} = getMousePos(canvas, e);
         
-        mx = e.pageX - offsetX;
-        my = e.pageY - offsetY;
+        let mx = x;
+        let my = y;
         
         if (localState) {
-            let x = parseInt(mx / squareLength);
-            let y = parseInt(my / squareLength);
+            let cx = parseInt(mx / squareLength);
+            let cy = parseInt(my / squareLength);
             if (IAM === 'black' && boardHeight) {
-                y = reverseNumber(y, boardHeight);
+                cy = reverseNumber(cy, boardHeight);
             }
-            handleLocalMove(x, y);
+            handleLocalMove(cx, cy);
             return;
         }
         
         if(IAM == 'black' && boardHeight){
-
             socket.emit('move', { x: parseInt(mx / squareLength), y: reverseNumber(parseInt(my / squareLength),boardHeight) })
         }
         else{

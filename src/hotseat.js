@@ -378,17 +378,7 @@ canvas.addEventListener('click', (e) => {
     }
 
     if(hotseat || state.turn !=  AIColor){
-        var element = canvas, offsetX = 0, offsetY = 0, mx, my;
-        // Compute the total offset. It's possible to cache this if you want
-        if (element.offsetParent !== undefined) {
-            do {
-                offsetX += element.offsetLeft;
-                offsetY += element.offsetTop;
-            } while ((element = element.offsetParent));
-        }
-
-        mx = e.pageX - offsetX;
-        my = e.pageY - offsetY;
+        let {x: mx, y: my} = getMousePos(canvas, e);
 
         hotseatGame.move(hotseatGame.state.turn,{ x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
         
