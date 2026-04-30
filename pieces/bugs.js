@@ -277,13 +277,16 @@ function shroomFactory(color,x,y){
         value:1000,
         posValue:1,
         afterThisPieceTaken:function(state){
+            let shroomsLeft = state.pieces.filter(p => p.color === this.color && p.icon.includes('Shroom.png'));
+            if (shroomsLeft.length <= 1) {
+                state.won = giveOppositeColor(this.color);
+            }
+            
             state.pieces.forEach((piece) => {
                 if(piece.color == this.color){
                     if(piece.weakMoves){
-                        if(piece.moves == piece.weakMoves){
-                            state.won = giveOppositeColor(this.color)
-                        }
-                        else{
+                        if(!piece.isWeakened){
+                            piece.isWeakened = true;
                             if(piece.icon.includes('Ant.png')){
                                 piece.value = 0.4
                             }
