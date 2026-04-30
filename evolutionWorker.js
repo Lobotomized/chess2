@@ -245,7 +245,7 @@ self.addEventListener("message", function(e) {
             }
         }
         
-        self.postMessage(JSONfn.stringify({ type: 'thinking', color: state.turn, turns: turns }));
+        self.postMessage(JSONfn.stringify({ type: 'thinking', color: state.turn, turns: turns, moves: movesHistory }));
 
         let moveStartTime = Date.now();
 

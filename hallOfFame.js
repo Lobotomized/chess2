@@ -237,6 +237,7 @@ function startHofFight() {
 
         if (msg.type === 'thinking') {
             thinkingColor = msg.color;
+            let currentMoves = msg.moves || [];
             if (workerTimeout) clearTimeout(workerTimeout);
             
             let currentTimeout = MODE_TIMEOUTS[currentHofMode] || 60000;
@@ -254,7 +255,7 @@ function startHofFight() {
                             blackRace: bBot.race || 'classic',
                             winner: thinkingColor === 'white' ? 'black' : 'white',
                             turns: msg.turns || 0,
-                            moves: []
+                            moves: currentMoves
                         }
                     };
                     handleHofResult(result, wBot, bBot);

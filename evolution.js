@@ -598,6 +598,7 @@ function runMatch() {
         
         if (msg.type === 'thinking') {
             thinkingColor = msg.color;
+            let currentMoves = msg.moves || [];
             if (workerTimeout) clearTimeout(workerTimeout);
             
             // timeout limit check from main thread
@@ -618,7 +619,7 @@ function runMatch() {
                             blackRace: blackRace,
                             winner: thinkingColor === 'white' ? 'black' : 'white',
                             turns: msg.turns || 0,
-                            moves: [] // Timeout, moves lost
+                            moves: currentMoves // Use moves tracked until the timeout
                         }
                     };
                     handleMatchResult(charWhite, charBlack, result);
