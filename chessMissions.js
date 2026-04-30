@@ -163,7 +163,7 @@ const realisticGameNames = [
 
 async function generateFakeBotGames() {
     try {
-        const bots = await Bot.find().sort({ score: -1 }).limit(100);
+        const bots = await Bot.find({ $or: [{ mode: 'normal' }, { mode: { $exists: false } }] }).sort({ score: -1 }).limit(100);
         if(bots && bots.length > 0) {
             const currentCount = fakeBotGames.length;
             const targetCount = Math.floor(Math.random() * 4) + 2; // Target 2 to 5 games
