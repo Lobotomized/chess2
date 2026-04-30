@@ -247,6 +247,8 @@ self.addEventListener("message", function(e) {
         
         self.postMessage(JSONfn.stringify({ type: 'thinking', color: state.turn, turns: turns }));
 
+        let moveStartTime = Date.now();
+
         let move;
         if (algorithm === 'minimaxDeep') {
             move = minimaxDeep(state, state.turn, currentDepth, [], currentMags, currentFilters);
@@ -264,6 +266,8 @@ self.addEventListener("message", function(e) {
             move = minimaxAlphaBeta(state, state.turn, currentDepth, [], currentMags, currentFilters);
         }
         
+        let moveTimeMs = Date.now() - moveStartTime;
+
         if (!move) {
             state.won = isWhite ? 'black' : 'white';
             break;
@@ -288,7 +292,8 @@ self.addEventListener("message", function(e) {
             color: state.turn,
             from: {x: fromX, y: fromY},
             pieceIndex: move.pieceCounter,
-            to: {x: move.xClicked, y: move.yClicked}
+            to: {x: move.xClicked, y: move.yClicked},
+            timeMs: moveTimeMs
         });
 
         if (state.specialOnMoveEffects && state.specialOnMoveEffects.length) {

@@ -378,7 +378,10 @@ function showHistory(charId) {
                         <td>${myRace || '-'} vs ${opponentRace || '-'}</td>
                         <td style="color:${color}; font-weight:bold;">${result}</td>
                         <td>${g.turns}</td>
-                        <td><button style="padding:5px;" onclick="replayGame('${g._id}')">Replay</button></td>
+                        <td>
+                            <button style="padding:5px;" onclick="replayGame('${g._id}')">Replay</button>
+                            <button style="padding:5px; margin-left: 5px; background: #4ecdc4; color: #111;" onclick="showTurnTimes('${g._id}')">Turn Times</button>
+                        </td>
                     </tr>
                 `;
             });
@@ -432,7 +435,10 @@ function showAllHistory() {
                         <td>${g.blackId} ${bRace}</td>
                         <td style="color:${color}; font-weight:bold;">${result}</td>
                         <td>${g.turns}</td>
-                        <td><button style="padding:5px;" onclick="replayGame('${g._id}')">Replay</button></td>
+                        <td>
+                            <button style="padding:5px;" onclick="replayGame('${g._id}')">Replay</button>
+                            <button style="padding:5px; margin-left: 5px; background: #4ecdc4; color: #111;" onclick="showTurnTimes('${g._id}')">Turn Times</button>
+                        </td>
                     </tr>
                 `;
             });
@@ -442,6 +448,48 @@ function showAllHistory() {
     })
     .catch(e => {
         document.getElementById('historyContent').innerText = 'Error loading history.';
+        console.error(e);
+    });
+}
+
+function showTurnTimes(gameId) {
+    let modal = document.getElementById('turnTimesModal');
+    if(!modal) {
+        modal = document.createElement('div');
+        modal.id = 'turnTimesModal';
+        modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.9); z-index:3000; justify-content:center; align-items:center;';
+        modal.innerHTML = `
+            <div style="background:#1a1a1a; padding:20px; border-radius:8px; width:60%; max-height:80%; overflow-y:auto; position:relative;">
+                <button onclick="document.getElementById('turnTimesModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:#555;">Close</button>
+                <h2 id="turnTimesTitle">Turn Times</h2>
+                <div id="turnTimesContent" style="margin-top: 15px;">Loading...</div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    document.getElementById('turnTimesTitle').innerText = `Turn Times for Game`;
+    modal.style.display = 'flex';
+    document.getElementById('turnTimesContent').innerHTML = 'Loading...';
+    
+    fetch(`/game/${gameId}`)
+    .then(res => res.json())
+    .then(game => {
+        if (!game.moves || game.moves.length === 0) {
+            document.getElementById('turnTimesContent').innerHTML = 'No move data available.';
+            return;
+        }
+        let html = '<table style="width:100%; text-align:left; font-size: 20px;"><thead><tr><th>Turn</th><th>Color</th><th>Time Taken</th></tr></thead><tbody>';
+        game.moves.forEach((m, i) => {
+            let timeStr = m.timeMs !== undefined ? `${m.timeMs} ms` : 'N/A';
+            let color = m.color === 'white' ? '#f0d9b5' : '#888888';
+            html += `<tr><td>${i + 1}</td><td style="color: ${color}; font-weight: bold;">${m.color.charAt(0).toUpperCase() + m.color.slice(1)}</td><td>${timeStr}</td></tr>`;
+        });
+        html += '</tbody></table>';
+        document.getElementById('turnTimesContent').innerHTML = html;
+    })
+    .catch(e => {
+        document.getElementById('turnTimesContent').innerText = 'Error loading turn times.';
         console.error(e);
     });
 }
