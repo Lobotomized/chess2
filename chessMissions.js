@@ -51,14 +51,14 @@ app.use('/rpgDifficulties.js', express.static('./rpgDifficulties.js'))
 app.use('/rpgDetails.js', express.static('./rpgDetails.js'))
 app.use('/rpgStats.js', express.static('./rpgStats.js'))
 app.use('/grandMap.js', express.static('./grandMap.js'))
-app.use('/grandMapEditor.html', express.static('./grandMapEditor.html'))
+app.use('/grandMapEditor.html', express.static('./static/grandMapEditor.html'))
 app.use('/mapVisuals.js', express.static('./mapVisuals.js'))
-app.use('/evolution.html', express.static('./evolution.html'))
+app.use('/evolution.html', express.static('./static/evolution.html'))
 app.use('/evolution.js', express.static('./evolution.js'))
 app.use('/evolutionWorker.js', express.static('./evolutionWorker.js'))
-app.use('/hallOfFame.html', express.static('./hallOfFame.html'))
+app.use('/hallOfFame.html', express.static('./static/hallOfFame.html'))
 app.use('/hallOfFame.js', express.static('./hallOfFame.js'))
-app.use('/replay.html', express.static('./replay.html'))
+app.use('/replay.html', express.static('./static/replay.html'))
 app.use('/replay.js', express.static('./replay.js'))
 
 const http = require('http').createServer(app);
@@ -704,15 +704,15 @@ io.on('connection', (socket) => {
 
 app.get('/', function (req, res) {
 
-    return res.status(200).sendFile(__dirname + '/mainMenu.html');
+    return res.status(200).sendFile(__dirname + '/static/mainMenu.html');
 });
 
 app.get('/single-player', function(req,res){
-    return res.status(200).sendFile(__dirname + '/singlePlayerMenu.html');
+    return res.status(200).sendFile(__dirname + '/static/singlePlayerMenu.html');
 });
 
 app.get('/lobby', function(req,res){
-    return res.status(200).sendFile(__dirname + '/lobby.html');
+    return res.status(200).sendFile(__dirname + '/static/lobby.html');
 });
 
 app.get('/allgames', function(req,res){
@@ -720,28 +720,28 @@ app.get('/allgames', function(req,res){
 })
 
 app.get('/play', function(req,res){
-    return res.status(200).sendFile(__dirname + '/chessMissions.html');
+    return res.status(200).sendFile(__dirname + '/static/chessMissions.html');
 })
 
 app.get('/customMaps', function(req,res){
-    return res.status(200).sendFile(__dirname + '/customMaps.html');
+    return res.status(200).sendFile(__dirname + '/static/customMaps.html');
 })
 
 
 app.get('/hotseat-menu', function(req,res){
-    return res.status(200).sendFile(__dirname + '/hotseat-menu.html');
+    return res.status(200).sendFile(__dirname + '/static/hotseat-menu.html');
 })
 
 app.get('/campaign', function(req,res){
-    return res.status(200).sendFile(__dirname + '/campaign.html');
+    return res.status(200).sendFile(__dirname + '/static/campaign.html');
 })
 
 app.get('/pieces', function(req,res){
-    return res.status(200).sendFile(__dirname + '/pieces.html');
+    return res.status(200).sendFile(__dirname + '/static/pieces.html');
 })
 
 app.get('/hotseat', function(req,res){
-    return res.status(200).sendFile(__dirname + '/hotseat.html');
+    return res.status(200).sendFile(__dirname + '/static/hotseat.html');
 })
 
 app.get('/gameRecorder.js', function(req,res){
@@ -749,47 +749,47 @@ app.get('/gameRecorder.js', function(req,res){
 })
 
 app.get('/rpg.html', function(req,res){
-    return res.status(200).sendFile(__dirname + '/rpg.html');
+    return res.status(200).sendFile(__dirname + '/static/rpg.html');
 })
 
 app.get('/rpg-menu', function(req,res){
-    return res.status(200).sendFile(__dirname + '/rpgMenu.html');
+    return res.status(200).sendFile(__dirname + '/static/rpgMenu.html');
 })
 
 app.get('/grandMapEditor.html', function(req,res){
-    return res.status(200).sendFile(__dirname + '/grandMapEditor.html');
+    return res.status(200).sendFile(__dirname + '/static/grandMapEditor.html');
 })
 
 app.get('/grandMapEditor', function(req,res){
-    return res.status(200).sendFile(__dirname + '/grandMapEditor.html');
+    return res.status(200).sendFile(__dirname + '/static/grandMapEditor.html');
 })
 
 app.get('/create-board', function(req,res){
-    return res.status(200).sendFile(__dirname + '/boardEditorUpgraded.html');
+    return res.status(200).sendFile(__dirname + '/static/boardEditorUpgraded.html');
 })
 
 app.get('/create-board-upgraded', function(req,res){
-    return res.status(200).sendFile(__dirname + '/boardEditorUpgraded.html');
+    return res.status(200).sendFile(__dirname + '/static/boardEditorUpgraded.html');
 })
 
 app.get('/taenadmin', function(req,res){
-    return res.status(200).sendFile(__dirname + '/adminDashboard.html');
+    return res.status(200).sendFile(__dirname + '/static/adminDashboard.html');
 })
 
 app.get('/evolution', function(req,res){
-    return res.status(200).sendFile(__dirname + '/evolution.html');
+    return res.status(200).sendFile(__dirname + '/static/evolution.html');
 });
 
 app.get('/evoltuion', function(req,res){
-    return res.status(200).sendFile(__dirname + '/evolution.html');
+    return res.status(200).sendFile(__dirname + '/static/evolution.html');
 });
 
 app.get('/hallOfFame', function(req,res){
-    return res.status(200).sendFile(__dirname + '/hallOfFame.html');
+    return res.status(200).sendFile(__dirname + '/static/hallOfFame.html');
 });
 
 app.get('/replay.html', function(req,res){
-    return res.status(200).sendFile(__dirname + '/replay.html');
+    return res.status(200).sendFile(__dirname + '/static/replay.html');
 });
 
 
