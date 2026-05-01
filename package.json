@@ -6,16 +6,27 @@
   "scripts": {
     "test": "jest"
   },
+  "jest": {
+    "testEnvironment": "node",
+    "testEnvironmentOptions": {
+      "customExportConditions": ["node", "node-addons"]
+    }
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "dotenv": "^16.4.5",
     "express": "^4.17.1",
+    "jest": "^30.3.0",
     "jsonwebtoken": "^9.0.3",
     "mongodb": "^3.5.3",
     "mongoose": "^8.4.1",
     "multer": "^2.1.1",
-    "socket.io": "^2.3.0"
+    "socket.io": "^2.3.0",
+    "ws": "^6.1.4"
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2"
   }
 }

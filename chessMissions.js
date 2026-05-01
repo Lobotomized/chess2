@@ -200,8 +200,8 @@ async function generateFakeBotGames() {
 }
 
 // Generate initially and maintain continuously
-setTimeout(generateFakeBotGames, 2000);
-setInterval(generateFakeBotGames, 15000); // Check and adjust every 15 seconds
+const fakeBotGamesTimeout = setTimeout(generateFakeBotGames, 2000);
+const fakeBotGamesInterval = setInterval(generateFakeBotGames, 15000); // Check and adjust every 15 seconds
 
 app.get('/ping', (req, res) => {
     res.status(200).send("pong");
@@ -775,6 +775,23 @@ app.get('/create-board-upgraded', function(req,res){
 app.get('/taenadmin', function(req,res){
     return res.status(200).sendFile(__dirname + '/adminDashboard.html');
 })
+
+app.get('/evolution', function(req,res){
+    return res.status(200).sendFile(__dirname + '/evolution.html');
+});
+
+app.get('/evoltuion', function(req,res){
+    return res.status(200).sendFile(__dirname + '/evolution.html');
+});
+
+app.get('/hallOfFame', function(req,res){
+    return res.status(200).sendFile(__dirname + '/hallOfFame.html');
+});
+
+app.get('/replay.html', function(req,res){
+    return res.status(200).sendFile(__dirname + '/replay.html');
+});
+
 
 // POST endpoint to record games
 app.post('/api/record-games', async (req, res) => {
@@ -1399,9 +1416,11 @@ app.delete('/api/rpg-save/:slotId', authenticateToken, async (req, res) => {
     }
 });
 
-http.listen(8080, function () {
-    console.log('listening on *:8080');
-});
+if (require.main === module) {
+    http.listen(8080, function () {
+        console.log('listening on *:8080');
+    });
+}
 
 
  function generateMovesFromPieces(state,color, filters,enemy){
@@ -1450,3 +1469,10 @@ http.listen(8080, function () {
      }
      return movesAndPieces
  }
+
+ function cleanup() {
+    clearTimeout(fakeBotGamesTimeout);
+    clearInterval(fakeBotGamesInterval);
+ }
+
+ module.exports = { app, http, io, cleanup };
