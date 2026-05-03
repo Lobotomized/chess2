@@ -215,6 +215,12 @@
             background-image: linear-gradient(135deg, rgba(255,255,255,0.1) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.1) 75%, transparent 75%, transparent);
             background-size: 10px 10px;
         }
+
+        .map-cell.bank { 
+            background-color: #fbc02d;
+            border-color: #f57f17;
+            background-image: radial-gradient(circle at center, rgba(255,255,255,0.4) 0%, transparent 60%);
+        }
         
         .map-cell.mountain { 
             background-color: #5d4037;
@@ -382,6 +388,7 @@
                     <option value="market">Place Market</option>
                     <option value="boss">Place Boss</option>
                     <option value="inn">Place Inn</option>
+                    <option value="bank">Place Bank</option>
                     <option value="start">Set Start Node</option>
                 <option value="customArmy">Custom Enemy Army</option>
                 <option value="customTerrain">Custom Terrain Details</option>
@@ -397,6 +404,7 @@
                         <option value="Library">Library</option>
                         <option value="Mountain">Mountain</option>
                         <option value="Inn">Inn</option>
+                        <option value="Bank">Bank</option>
                     </select>
                 </div>
 
@@ -675,6 +683,10 @@
                 node.board = 'Inn';
                 node.enemyPower = 10;
                 node.isBoss = false;
+            } else if (tool === 'bank') {
+                node.board = 'Bank';
+                node.enemyPower = 10;
+                node.isBoss = false;
             } else if (tool === 'start') {
                 mapData.startX = x;
                 mapData.startY = y;
@@ -747,6 +759,9 @@
                     else if (node.board === 'Inn') {
                         cell.classList.add('inn');
                     }
+                    else if (node.board === 'Bank') {
+                        cell.classList.add('bank');
+                    }
                     else if (node.board === 'Mountain') {
                         cell.classList.add('mountain');
                         const num = (node.x * 31 + node.y * 17) % 4 + 1;
@@ -798,6 +813,14 @@
                         innInd.style.fontSize = '30px';
                         innInd.innerText = '🏨';
                         cell.appendChild(innInd);
+                    } 
+                    
+                    if (node.board === 'Bank') {
+                        const bankInd = document.createElement('div');
+                        bankInd.className = 'indicator boss-indicator'; // Centered
+                        bankInd.style.fontSize = '30px';
+                        bankInd.innerText = '🏦';
+                        cell.appendChild(bankInd);
                     } 
                     
                     if (node.customArmy) {

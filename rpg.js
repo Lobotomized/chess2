@@ -1159,9 +1159,43 @@ function generateRewardOptions() {
                 });
                 return;
             }
+
+            // Handle Bank
+            if (node.board === 'Bank') {
+                options.push({
+                    type: "Visit Bank",
+                    direction: move.direction,
+                    node: node,
+                    description: "Collect gold without a battle.",
+                    rewardCap: 0,
+                    enemyValue: node.enemyPower,
+                    difficultyIndex: -1,
+                    boardShape: 'Bank',
+                    army: [],
+                    rewardType: 'none'
+                });
+                return;
+            }
+            
+            // Handle Library
+            if (node.board === 'Library') {
+                options.push({
+                    type: "Visit Library",
+                    direction: move.direction,
+                    node: node,
+                    description: "Gain King Experience.",
+                    rewardCap: 0,
+                    enemyValue: node.enemyPower,
+                    difficultyIndex: -1,
+                    boardShape: 'Library',
+                    army: [],
+                    rewardType: 'none'
+                });
+                return;
+            }
             
             // Ensure army is pre-generated for accurate power display
-            if (node.board !== 'Mountain' && node.board !== 'Library' && node.board !== 'Inn') {
+            if (node.board !== 'Mountain' && node.board !== 'Library' && node.board !== 'Inn' && node.board !== 'Bank') {
                 ensureNodeArmy(node);
             }
 
@@ -2997,6 +3031,75 @@ function showRewardModal() {
                  
                  if (typeof showNotification === 'function') {
                      showNotification(`Gained ${option.enemyValue} Food!`, 'success');
+                 }
+                 
+                 // Show map or next options
+                 if (typeof showMapModal === 'function') {
+                     showMapModal();
+                 } else {
+                     showRewardModal();
+                 }
+             };
+             container.appendChild(div);
+             return; // Skip standard rendering
+        } else if (option.boardShape === 'Bank') {
+            // Bank styling
+            div.style.background = 'linear-gradient(135deg, #fffde7 0%, #fff59d 100%)';
+            div.style.borderColor = '#fbc02d';
+            div.innerHTML = `<h3>${option.type}</h3>
+                             <p style="font-size:14px;">${option.description || ''}</p>
+                             <div style="text-align:center; font-size: 40px; margin: 10px 0;">🏦</div>
+                             <p style="text-align:center;">+${option.enemyValue} Gold</p>`;
+                             
+            div.onclick = () => {
+                 modal.close();
+                 rpgState.gold += option.enemyValue;
+                 option.node.cleared = true;
+                 option.node.enemyPower = 0;
+                 if (typeof updateGoldDisplay === 'function') updateGoldDisplay();
+                 saveProgress();
+                 
+                 if (typeof showNotification === 'function') {
+                     showNotification(`Gained ${option.enemyValue} Gold!`, 'success');
+                 }
+                 
+                 // Show map or next options
+                 if (typeof showMapModal === 'function') {
+                     showMapModal();
+                 } else {
+                     showRewardModal();
+                 }
+             };
+             container.appendChild(div);
+             return; // Skip standard rendering
+        } else if (option.boardShape === 'Library') {
+            // Library styling
+            div.style.background = 'linear-gradient(135deg, #efebe9 0%, #d7ccc8 100%)';
+            div.style.borderColor = '#8d6e63';
+            div.innerHTML = `<h3>${option.type}</h3>
+                             <p style="font-size:14px;">${option.description || ''}</p>
+                             <div style="text-align:center; font-size: 40px; margin: 10px 0;">📖</div>
+                             <p style="text-align:center;">+${option.enemyValue} King Exp</p>`;
+                             
+            div.onclick = () => {
+                 modal.close();
+                 if (typeof gainKingExperience === 'function') {
+                     gainKingExperience(option.enemyValue);
+                 } else {
+                     rpgState.kingExp += option.enemyValue;
+                 }
+                 option.node.cleared = true;
+                 option.node.enemyPower = 0;
+                 if (typeof updateGoldDisplay === 'function') updateGoldDisplay();
+                 saveProgress();
+                 
+                 if (typeof showNotification === 'function') {
+                     showNotification(`Gained ${option.enemyValue} King Experience!`, 'success');
+                 }
+                 
+                 if (typeof showSkillSelectionModal === 'function' && rpgState.pendingSkillSelections > 0) {
+                     showSkillSelectionModal();
+                     return;
                  }
                  
                  // Show map or next options

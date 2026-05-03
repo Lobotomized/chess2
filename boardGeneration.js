@@ -384,11 +384,7 @@ function raceChoiceChess(state,raceWhite,raceBlack){
 
     state.specialOnMoveEffects = [
         function(state){
-            if(state.won === 'black' || state.won === 'white'){
-                buildModal(state, 
-                    [{type:'link', classes:"", text:`${state.won.charAt(0).toUpperCase() + state.won.slice(1)} Won`,linkText:'Play Again', link:`/hotseat-menu`}]
-                    )
-            }
+            // Removed legacy small modal buildModal call here to allow RPG-style modals to handle game over
         }
     ]
 

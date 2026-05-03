@@ -248,6 +248,12 @@ function animate(secretState){
     canvas.width = squareLength * boardWidth + squareLength;
     canvas.height = squareLength * boardHeight + squareLength;
     state = secretState;
+
+    if(state.modalMessages && typeof buildModal !== 'undefined'){
+        if (!state.won) {
+            buildModal(state, state.modalMessages, modal);
+        }
+    }
     if(hoveredPiece){
         // Clear threat highlights
         closeLights(state.board, 'red');
@@ -279,7 +285,9 @@ function animate(secretState){
             enemy.style.color = blackSquareColor;
             body.style.background = backgroundColor
         }
-        myTurnH1.innerText = state.message || '';
+        if (!state.won) {
+            myTurnH1.innerText = state.message || '';
+        }
         myTurnH1.style.color = whiteSquareColor;
 
         const height = getMaxX(state.board,'y')
@@ -397,20 +405,53 @@ function animate(secretState){
             renderMoveHistory(state);
         }
 
-        if (state.won) {
-            if (state.won == 'black') {
+        if (state.won && !window.winScreenTriggered) {
+            window.winScreenTriggered = true;
+            
+            setTimeout(() => {
+                const overlay = document.getElementById('deathOverlay');
+                if (overlay) {
+                    overlay.style.opacity = '1';
+                }
                 
-                forfeitTextButton.innerText = 'Black Won'
+                setTimeout(() => {
+                    if (state.won === 'black') {
+                        const modal = document.getElementById('gameWonDialog');
+                        if(modal) {
+                            modal.querySelector('h2').innerText = 'Black Won';
+                            document.getElementById('gameWonText').innerText = 'Black is victorious.';
+                            modal.showModal();
+                        }
+                    } else if (state.won === 'white') {
+                        const modal = document.getElementById('gameWonDialog');
+                        if(modal) {
+                            modal.querySelector('h2').innerText = 'White Won';
+                            document.getElementById('gameWonText').innerText = 'White is victorious.';
+                            modal.showModal();
+                        }
+                    } else if (state.won === 'tie') {
+                        const modal = document.getElementById('gameOverDialog');
+                        if(modal) {
+                            modal.querySelector('h2').innerText = 'Draw';
+                            document.getElementById('gameOverText').innerText = 'The game ended in a draw.';
+                            modal.showModal();
+                        }
+                    }
+                }, 2000);
+            }, 2000);
+        }
+
+        if (state.won && !window.winTextUpdated) {
+            window.winTextUpdated = true;
+            if (state.won == 'black') {
+                forfeitTextButton.innerText = 'Black Won';
             }
             else if (state.won == 'white') {
-
-                forfeitTextButton.innerText = 'White Won'
-
+                forfeitTextButton.innerText = 'White Won';
             }
             else if(state.won === 'tie'){
-                forfeitTextButton.innerText = 'Game ended in a draw'
+                forfeitTextButton.innerText = 'Game ended in a draw';
             }
-            
         }
 
 

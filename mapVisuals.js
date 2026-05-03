@@ -286,6 +286,13 @@ function showMapModal() {
             background-size: 10px 10px;
         }
 
+        /* BANK: Vault/Treasury */
+        .map-cell.bank { 
+            background-color: #fbc02d;
+            border-color: #f57f17;
+            background-image: radial-gradient(circle at center, rgba(255,255,255,0.4) 0%, transparent 60%);
+        }
+
         /* MOUNTAIN: Grey rocky look */
         .map-cell.mountain { 
             background-color: #5d4037;
@@ -408,6 +415,7 @@ function showMapModal() {
                 else if (node.board === 'Market') cell.classList.add('market');
                 else if (node.board === 'Library') cell.classList.add('library');
                 else if (node.board === 'Inn') cell.classList.add('inn');
+                else if (node.board === 'Bank') cell.classList.add('bank');
                 else {
                     cell.classList.add('standard');
                     cell.style.backgroundImage = `url("/static/bigMap/plains1.png")`;
@@ -484,6 +492,8 @@ function showMapModal() {
                      icon = '📖';
                 } else if (node.board === 'Inn') {
                      icon = '🏨';
+                } else if (node.board === 'Bank') {
+                     icon = '🏦';
                 } else if (node.board === 'Mountain') {
                      icon = ''; // No combat icon on mountains
                 } else {
@@ -523,7 +533,9 @@ function showMapModal() {
                      rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="King Experience" style="display:flex; align-items:center;">📖${node.enemyPower}</span></div>`;
                 } else if (!node.cleared && node.board === 'Inn') {
                      rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="Food" style="display:flex; align-items:center;">🍖${node.enemyPower}</span></div>`;
-                } else if (!node.cleared && node.rewards && node.board !== 'Market' && node.board !== 'Mountain' && node.board !== 'Inn' && !isFinalBossNode) {
+                } else if (!node.cleared && node.board === 'Bank') {
+                     rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="Gold" style="display:flex; align-items:center;">💰${node.enemyPower}</span></div>`;
+                } else if (!node.cleared && node.rewards && node.board !== 'Market' && node.board !== 'Mountain' && node.board !== 'Inn' && node.board !== 'Bank' && !isFinalBossNode) {
                      const r = node.rewards;
                      let parts = [];
                      const rosterFull = typeof rpgState !== 'undefined' && rpgState.playerRoster && rpgState.playerRoster.length >= 24;
@@ -701,7 +713,7 @@ function showMapCellPopup(node, grandMap) {
     if (existing) existing.remove();
 
     // Ensure the node has its army and actual enemy value generated before we display its stats
-    if (typeof ensureNodeArmy === 'function' && node.board !== 'Market' && node.board !== 'Library' && node.board !== 'Mountain' && !node.cleared) {
+    if (typeof ensureNodeArmy === 'function' && node.board !== 'Market' && node.board !== 'Library' && node.board !== 'Bank' && node.board !== 'Mountain' && !node.cleared) {
         ensureNodeArmy(node);
     }
 
@@ -971,6 +983,12 @@ function showMapCellPopup(node, grandMap) {
              } else {
                  content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;">🏨 Rest at Inn (Too Far)</button>`;
              }
+        } else if (node.board === 'Bank') {
+             if (canAttack) {
+                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#fff9c4; color:#f57f17;">🏦 Visit Bank</button>`;
+             } else {
+                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;">🏦 Visit Bank (Too Far)</button>`;
+             }
         } else {
              if (canAttack) {
                  content += `<button id="popupAttackBtn" style="${btnStyle} background:#ffcdd2; color:#c62828; border-color:#c62828;">⚔️ Attack</button>`;
@@ -993,6 +1011,8 @@ function showMapCellPopup(node, grandMap) {
              content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e1f5fe; color:#0277bd;">ℹ️ Library Info</button>`;
         } else if (node.board === 'Inn') {
              content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#fff3e0; color:#e65100;">ℹ️ Inn Info</button>`;
+        } else if (node.board === 'Bank') {
+             content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#fffde7; color:#f57f17;">ℹ️ Bank Info</button>`;
         } else {
              if (diffName !== 'Final Boss') {
                  content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e1f5fe; color:#0277bd;">ℹ️ Rewards Info</button>`;
@@ -1101,6 +1121,31 @@ function showMapCellPopup(node, grandMap) {
                          showMapModal();
                      }
                      return; // Skip startLevel
+                 } else if (node.board === 'Bank') {
+                     const goldGained = node.enemyPower;
+                     rpgState.gold += goldGained;
+                     
+                     node.cleared = true;
+                     node.enemyPower = 0;
+                     
+                     if (typeof updateGoldDisplay === 'function') updateGoldDisplay();
+                     
+                     const mapDialog = document.getElementById('mapDialog');
+                     if(mapDialog) mapDialog.close();
+                     
+                     grandMap.moveTo(node.x, node.y);
+                     if(typeof saveProgress === 'function') saveProgress();
+                     
+                     if (typeof showNotification === 'function') {
+                         showNotification(`Gained ${goldGained} Gold!`, 'success');
+                     } else if (typeof showAlert === 'function') {
+                         showAlert(`Gained ${goldGained} Gold!`);
+                     }
+                     
+                     if (typeof showMapModal === 'function') {
+                         showMapModal();
+                     }
+                     return; // Skip startLevel
                  } else {
                      const rosterFull = rpgState.playerRoster.length >= 24;
                      if (node.rewards) {
@@ -1198,6 +1243,13 @@ function showMapCellPopup(node, grandMap) {
                     <div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3);">
                         <p style="margin-top:0;">This is an <strong>Inn</strong>.</p>
                         <p>Provides <strong>${node.enemyPower} Food</strong> instantly upon entering.</p>
+                    </div>
+                `;
+            } else if (node.board === 'Bank') {
+                rewardsText = `
+                    <div style="text-align:left; background:rgba(230, 213, 172, 0.5); padding:15px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.3);">
+                        <p style="margin-top:0;">This is a <strong>Bank</strong>.</p>
+                        <p>Provides <strong>${node.enemyPower} Gold</strong> instantly upon entering.</p>
                     </div>
                 `;
             } else if (node.board === 'Market') {
@@ -1304,9 +1356,10 @@ function showMapCellPopup(node, grandMap) {
             if (node.board === 'Market') popupTitle = 'Market Information';
             if (node.board === 'Library') popupTitle = 'Library Information';
             if (node.board === 'Inn') popupTitle = 'Inn Information';
+            if (node.board === 'Bank') popupTitle = 'Bank Information';
             
             popup.innerHTML = `
-                <h3 style="color:${node.board === 'Market' ? '#f57f17' : (node.board === 'Library' ? '#3e2723' : (node.board === 'Inn' ? '#e65100' : '#0277bd'))}; border-bottom: 2px solid ${node.board === 'Market' ? '#f57f17' : (node.board === 'Library' ? '#3e2723' : (node.board === 'Inn' ? '#e65100' : '#0277bd'))}; padding-bottom: 5px;">${popupTitle}</h3>
+                <h3 style="color:${node.board === 'Market' ? '#f57f17' : (node.board === 'Library' ? '#3e2723' : (node.board === 'Inn' ? '#e65100' : (node.board === 'Bank' ? '#f57f17' : '#0277bd')))}; border-bottom: 2px solid ${node.board === 'Market' ? '#f57f17' : (node.board === 'Library' ? '#3e2723' : (node.board === 'Inn' ? '#e65100' : (node.board === 'Bank' ? '#f57f17' : '#0277bd')))}; padding-bottom: 5px;">${popupTitle}</h3>
                 ${rewardsText}
                 <div style="margin-top:15px; padding-top:15px; border-top: 1px solid rgba(93, 64, 55, 0.3);">
                     <button onclick="document.getElementById('mapCellPopup').remove()" style="padding: 8px 16px; background:#e6d5ac; border:2px solid #5d4037; color:#4e342e; border-radius:4px; cursor:pointer; font-weight:bold; font-family: 'Georgia', serif;">Close</button>
