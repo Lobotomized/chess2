@@ -2428,29 +2428,33 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                     }
 
                 // Validation: Cannot place backline piece on the frontline
-                let invalidFrontline = false;
-                for (let i = 0; i < 8; i++) {
-                    if (simFront[i] !== null && !frontLineFactories.includes(simFront[i])) {
-                        invalidFrontline = true;
-                        break;
+                if (RPGStats.tacticsLevel < 3) {
+                    let invalidFrontline = false;
+                    for (let i = 0; i < 8; i++) {
+                        if (simFront[i] !== null && !frontLineFactories.includes(simFront[i])) {
+                            invalidFrontline = true;
+                            break;
+                        }
                     }
-                }
-                if (invalidFrontline) {
-                    showNotification("Cannot place a backline piece on the frontline.", "error");
-                    return;
+                    if (invalidFrontline) {
+                        showNotification("Cannot place a backline piece on the frontline.", "error");
+                        return;
+                    }
                 }
 
                 // Validation: Cannot remove frontline piece if a backline piece is directly behind it
-                let exposed = false;
-                for (let i = 0; i < 8; i++) {
-                    if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
-                        exposed = true;
-                        break;
+                if (RPGStats.tacticsLevel < 2) {
+                    let exposed = false;
+                    for (let i = 0; i < 8; i++) {
+                        if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
+                            exposed = true;
+                            break;
+                        }
                     }
-                }
-                if (exposed) {
-                    showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
-                    return;
+                    if (exposed) {
+                        showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
+                        return;
+                    }
                 }
 
                     // Perform Swap
