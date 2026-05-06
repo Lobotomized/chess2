@@ -13,7 +13,7 @@ function showMapModal() {
 
     if (typeof grandMap === 'undefined') return;
     
-    const modal = document.getElementById('mapDialog');
+    let modal = document.getElementById('mapDialog');
     if (!modal) return;
     
     const grid = document.getElementById('mapGrid');

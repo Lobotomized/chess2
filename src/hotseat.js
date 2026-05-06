@@ -251,7 +251,10 @@ function animate(secretState){
 
     if(state.modalMessages && typeof buildModal !== 'undefined'){
         if (!state.won) {
-            buildModal(state, state.modalMessages, modal);
+            if(!window.modalAdded){
+                buildModal(state, state.modalMessages, modal);
+                window.modalAdded = true;
+            }
         }
     }
     if(hoveredPiece){
@@ -416,21 +419,21 @@ function animate(secretState){
                 
                 setTimeout(() => {
                     if (state.won === 'black') {
-                        const modal = document.getElementById('gameWonDialog');
+                        let modal = document.getElementById('gameWonDialog');
                         if(modal) {
                             modal.querySelector('h2').innerText = 'Black Won';
                             document.getElementById('gameWonText').innerText = 'Black is victorious.';
                             modal.showModal();
                         }
                     } else if (state.won === 'white') {
-                        const modal = document.getElementById('gameWonDialog');
+                        let modal = document.getElementById('gameWonDialog');
                         if(modal) {
                             modal.querySelector('h2').innerText = 'White Won';
                             document.getElementById('gameWonText').innerText = 'White is victorious.';
                             modal.showModal();
                         }
                     } else if (state.won === 'tie') {
-                        const modal = document.getElementById('gameOverDialog');
+                        let modal = document.getElementById('gameOverDialog');
                         if(modal) {
                             modal.querySelector('h2').innerText = 'Draw';
                             document.getElementById('gameOverText').innerText = 'The game ended in a draw.';

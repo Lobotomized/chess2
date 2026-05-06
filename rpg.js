@@ -311,7 +311,7 @@ function applyDifficultySettings() {
 }
 
 function startNewGameWithMap(mapName) {
-    const modal = document.getElementById('mainMenuDialog');
+    let modal = document.getElementById('mainMenuDialog');
     if(modal) modal.close();
     
     // Reset RPGStats to default
@@ -355,7 +355,7 @@ function showMainMenu() {
 }
 
 async function loadGame() {
-    const modal = document.getElementById('mainMenuDialog');
+    let modal = document.getElementById('mainMenuDialog');
     if(modal) modal.close();
     
     const saveKey = window.currentSaveSlot ? `rpgState_${window.currentSaveSlot}` : 'rpgState';
@@ -441,7 +441,7 @@ async function loadGame() {
                      }
                  }
                  
-                 const modal = document.getElementById('gameWonDialog');
+                 let modal = document.getElementById('gameWonDialog');
                  if(modal) modal.showModal();
                  
                  // Also restore board in background
@@ -489,7 +489,7 @@ function confirmNewGame() {
 }
 
 function startNewGame() {
-    const modal = document.getElementById('mainMenuDialog');
+    let modal = document.getElementById('mainMenuDialog');
     if(modal) modal.close();
     
     // Reset RPGStats to default
@@ -901,7 +901,7 @@ function showArmyInfo(army) {
     function showNext() {
         if (currentIndex >= uniqueFactories.length) {
             // End of sequence
-            const modalDiv = document.querySelector('.pieceModal');
+            let modalDiv = document.querySelector('.pieceModal');
             
             // Re-enable clicks
             if(startDialog) startDialog.style.pointerEvents = 'auto';
@@ -977,7 +977,7 @@ function showArmyInfo(army) {
                 }
                 
                 // Add listener to the modal container to re-enable clicks if closed via backdrop
-                const modalDiv = document.querySelector('.pieceModal');
+                let modalDiv = document.querySelector('.pieceModal');
                 if(modalDiv) {
                     const originalOnclick = modalDiv.onclick;
                     modalDiv.onclick = function(e) {
@@ -1860,7 +1860,7 @@ function placeArmy(roster, color, rows, maxX = 7) {
 // --- UI / Modals ---
 
 function showStartModal() {
-    const modal = document.getElementById('startDialog');
+    let modal = document.getElementById('startDialog');
     const container = document.getElementById('startOptions');
     container.innerHTML = '';
     
@@ -1974,7 +1974,7 @@ function toggleHeroSkills() {
 }
 
 function showReorderModal(army, onConfirm, forceConfirmText = false) {
-    const modal = document.getElementById('reorderDialog');
+    let modal = document.getElementById('reorderDialog');
     const frontContainer = document.getElementById('reorderFrontline');
     const backContainer = document.getElementById('reorderBackline');
     const reserveContainer = document.getElementById('reorderReserve');
@@ -2664,7 +2664,7 @@ function showShopModal(restore = false) {
     rpgState.showWinScreen = false;
     // Don't save yet, we save when generating/restoring shop options below
 
-    const modal = document.getElementById('shopDialog');
+    let modal = document.getElementById('shopDialog');
     const container = document.getElementById('shopOptions');
     container.innerHTML = '';
     
@@ -2871,7 +2871,7 @@ function showShopModal(restore = false) {
 }
 
 function showSkillSelectionModal() {
-    const modal = document.getElementById('skillSelectionDialog');
+    let modal = document.getElementById('skillSelectionDialog');
     const container = document.getElementById('skillOptions');
     if (!modal || !container) return;
     
@@ -2976,7 +2976,7 @@ function showRewardModal() {
         return;
     }
 
-    const modal = document.getElementById('rewardDialog');
+    let modal = document.getElementById('rewardDialog');
     const container = document.getElementById('rewardOptions');
     container.innerHTML = '';
     
@@ -3399,7 +3399,7 @@ function checkGameEndSequence(state) {
                         overlay.style.zIndex = '900'; 
                     }
                     setTimeout(() => {
-                        const modal = document.getElementById('gameCompleteDialog');
+                        let modal = document.getElementById('gameCompleteDialog');
                         if (modal) modal.showModal();
                         clearProgress();
                     }, 2000);
@@ -3576,7 +3576,7 @@ function checkGameEndSequence(state) {
                 }
 
                 setTimeout(() => {
-                    const modal = document.getElementById('gameWonDialog');
+                    let modal = document.getElementById('gameWonDialog');
                     if(modal) modal.showModal();
                 }, 2000);
             }, 2000); // 2 second delay to see the final board
@@ -3593,7 +3593,7 @@ function checkGameEndSequence(state) {
                 }
                 
                 setTimeout(() => {
-                    const modal = document.getElementById('gameOverDialog');
+                    let modal = document.getElementById('gameOverDialog');
                     if (modal) {
                         const gameOverText = modal.querySelector('p');
                         if (gameOverText) {
@@ -3619,7 +3619,7 @@ function checkGameEndSequence(state) {
 }
 
 function closeWinScreen() {
-    const modal = document.getElementById('gameWonDialog');
+    let modal = document.getElementById('gameWonDialog');
     if (modal) modal.close();
     rpgState.showWinScreen = false;
     saveProgress();

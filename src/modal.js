@@ -5,7 +5,7 @@ window.showAlert = function(message) {
         document.getElementById('customAlertModal').remove();
     }
 
-    const modalHtml = `
+    let modalHtml = `
     <div id="customAlertModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 100000;">
         <div style="background: #f0d9b5; padding: 30px; border-radius: 8px; border: 4px solid #2e2e2e; min-width: 300px; max-width: 80%; text-align: center; font-family: 'Georgia', serif; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
             <h2 style="margin-top: 0; color: #2e2e2e; border-bottom: 2px solid #b58863; padding-bottom: 10px; margin-bottom: 20px;">Alert</h2>
@@ -32,7 +32,7 @@ window.showConfirm = function(message) {
             document.getElementById('customConfirmModal').remove();
         }
 
-        const modalHtml = `
+        let modalHtml = `
         <div id="customConfirmModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 100000;">
             <div style="background: #f0d9b5; padding: 30px; border-radius: 8px; border: 4px solid #2e2e2e; min-width: 300px; max-width: 80%; text-align: center; font-family: 'Georgia', serif; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
                 <h2 style="margin-top: 0; color: #2e2e2e; border-bottom: 2px solid #b58863; padding-bottom: 10px; margin-bottom: 20px;">Confirm</h2>
@@ -47,7 +47,7 @@ window.showConfirm = function(message) {
         
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         
-        const modal = document.getElementById('customConfirmModal');
+        let modal = document.getElementById('customConfirmModal');
         const btnCancel = document.getElementById('customConfirmCancelBtn');
         const btnOk = document.getElementById('customConfirmOkBtn');
 
@@ -77,7 +77,7 @@ window.showPrompt = function(message, defaultValue = '') {
             document.getElementById('customPromptModal').remove();
         }
 
-        const modalHtml = `
+        let modalHtml = `
         <div id="customPromptModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 100000;">
             <div style="background: #f0d9b5; padding: 30px; border-radius: 8px; border: 4px solid #2e2e2e; min-width: 300px; max-width: 80%; text-align: center; font-family: 'Georgia', serif; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
                 <h2 style="margin-top: 0; color: #2e2e2e; border-bottom: 2px solid #b58863; padding-bottom: 10px; margin-bottom: 20px;">Prompt</h2>
@@ -93,7 +93,7 @@ window.showPrompt = function(message, defaultValue = '') {
         
         document.body.insertAdjacentHTML('beforeend', modalHtml);
         
-        const modal = document.getElementById('customPromptModal');
+        let modal = document.getElementById('customPromptModal');
         const input = document.getElementById('customPromptInput');
         const btnCancel = document.getElementById('customPromptCancelBtn');
         const btnOk = document.getElementById('customPromptOkBtn');

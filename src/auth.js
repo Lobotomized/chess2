@@ -73,7 +73,7 @@ const Auth = {
             <p style="font-size: 14px; color: #2e2e2e;">Already have an account? <a href="#" onclick="event.preventDefault(); Auth.showAuthModal('login')" style="color: #829769; font-weight: bold;">Login here</a></p>
         `;
 
-        const modalHtml = `
+        let modalHtml = `
         <div id="authModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: flex; justify-content: center; align-items: center; z-index: 10000;">
             <div style="background: #f0d9b5; padding: 30px; border-radius: 8px; border: 4px solid #2e2e2e; width: 300px; text-align: center;">
                 <h2 style="margin-top: 0; color: #2e2e2e;">${isLogin ? 'Login' : 'Register'}</h2>
@@ -87,7 +87,7 @@ const Auth = {
     },
 
     closeAuthModal() {
-        const modal = document.getElementById('authModal');
+        let modal = document.getElementById('authModal');
         if (modal) modal.remove();
     },
 

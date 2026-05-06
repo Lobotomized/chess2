@@ -239,11 +239,13 @@
 
 
 <script>
-const modal = document.querySelector('.modal');
+let modal = document.querySelector('.modal');
 const pieceModal = document.querySelector('.pieceModal');
 let closeModal = function(which){
+    console.log('here? ', which, modal.classList)
     if(which === 'modal'){
         modal.classList.add("displayNone")
+        console.log(modal.classList, ' i dolu')
     }
     else if(which === 'pieceModal'){
         pieceModal.classList.add("displayNone")

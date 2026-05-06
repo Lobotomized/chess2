@@ -1091,17 +1091,17 @@
                 
                 setTimeout(() => {
                     if (didIWin === true) {
-                        const modal = document.getElementById('gameWonDialog');
+                        let modal = document.getElementById('gameWonDialog');
                         if(modal) modal.showModal();
                     } else if (didIWin === 'tie') {
-                        const modal = document.getElementById('gameOverDialog');
+                        let modal = document.getElementById('gameOverDialog');
                         if(modal) {
                             modal.querySelector('h2').innerText = 'Draw';
                             document.getElementById('gameOverText').innerText = 'The game ended in a draw.';
                             modal.showModal();
                         }
                     } else {
-                        const modal = document.getElementById('gameOverDialog');
+                        let modal = document.getElementById('gameOverDialog');
                         if(modal) modal.showModal();
                     }
                 }, 2000);
