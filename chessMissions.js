@@ -1342,9 +1342,36 @@ app.get('/maps', optionalAuthenticateToken, async (req, res) => {
         limit: pageSize,
       };
   
-      const query = { $or: [{ isGrandMap: true }] };
+      const query = {};
+      const orConditions = [];
+
+      if (req.query.excludeGrandMaps !== 'true') {
+          orConditions.push({ isGrandMap: true });
+      }
       if (req.user) {
-          query.$or.push({ authorId: req.user.id });
+          orConditions.push({ authorId: req.user.id });
+      }
+
+      if (orConditions.length > 0) {
+          query.$or = orConditions;
+      } else {
+          // If no conditions are met (e.g., not logged in and excluding grand maps),
+          // return an impossible condition to return empty results.
+          query._id = null;
+      }
+
+      // If we are excluding grand maps, we also need to ensure that the user's
+      // own maps returned are NOT grand maps, or maybe it's fine if they are?
+      // The requirement says "Grand Maps should not show as possible custom games in the lobby".
+      // So we should strictly exclude them.
+      if (req.query.excludeGrandMaps === 'true') {
+          query.isGrandMap = { $ne: true };
+          if (req.user) {
+              query.authorId = req.user.id;
+          } else {
+              query._id = null;
+          }
+          delete query.$or; // Overwrite $or logic for strictly excluding grand maps
       }
 
       const mapCount = await Map.countDocuments(query);

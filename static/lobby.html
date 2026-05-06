@@ -829,7 +829,7 @@
             if (mapsLoaded) return;
             const headers = window.Auth ? window.Auth.getAuthHeaders() : {};
             try {
-                let resp = await fetch('/maps', { headers });
+                let resp = await fetch('/maps?excludeGrandMaps=true', { headers });
                 if (!resp.ok) {
                     if (resp.status === 401 || resp.status === 403) {
                         if (window.Auth) window.Auth.showAuthModal();
