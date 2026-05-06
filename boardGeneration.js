@@ -53,28 +53,36 @@ if (typeof window !== 'undefined') {
         let magicNumber = widthOrHeight > 800 ? sqLength/1.5 : sqLength/2
         arr.forEach((el) => {
             let boardSize = Math.sqrt(el.board.length);
-            let boardWidth = magicNumber * boardSize;
-            let boardHeight = magicNumber * boardSize;
+            
+            let localMagicNumber = magicNumber;
+            let maxMagicWidth = (window.innerWidth * 0.9) / boardSize;
+            let maxMagicHeight = (window.innerHeight * 0.6) / boardSize;
+            if (localMagicNumber > maxMagicWidth) localMagicNumber = maxMagicWidth;
+            if (localMagicNumber > maxMagicHeight) localMagicNumber = maxMagicHeight;
+            localMagicNumber = Math.floor(localMagicNumber);
+            
+            let boardWidth = localMagicNumber * boardSize;
+            let boardHeight = localMagicNumber * boardSize;
 
             // Main content wrapper - Flex container to handle both board and description
-            theString = `<div style="display:flex; flex-direction:column; align-items:center; max-width:95vw; max-height:95vh; overflow-y:auto; gap:15px;">`
+            theString = `<div style="display:flex; flex-direction:column; align-items:center; max-width:95vw; max-height:95vh; overflow-y:auto; overflow-x:hidden; gap:15px;">`
             
             // Board container
             theString += `<div style="position:relative; width:${boardWidth}px;height:${boardHeight}px; flex-shrink:0;">`
 
             el.board.forEach((square) => {
                 if(square.lighted){
-                    theString += `<div style=" z-index:500; background:${availableSquareColor};width:${magicNumber}px;height:${magicNumber}px;border:solid black 1px; position:absolute; left:${(square.x)*magicNumber}px;top:${(square.y)*magicNumber}px;"></div>`;
+                    theString += `<div style=" z-index:500; background:${availableSquareColor};width:${localMagicNumber}px;height:${localMagicNumber}px;border:solid black 1px; position:absolute; left:${(square.x)*localMagicNumber}px;top:${(square.y)*localMagicNumber}px;"></div>`;
                 }
                 else if(square.blocked){
-                    theString += `<div style=" z-index:500; background:${blockedSquareColor};width:${magicNumber}px;height:${magicNumber}px;border:solid black 1px; position:absolute; left:${(square.x)*magicNumber}px;top:${(square.y)*magicNumber}px;"></div>`;
+                    theString += `<div style=" z-index:500; background:${blockedSquareColor};width:${localMagicNumber}px;height:${localMagicNumber}px;border:solid black 1px; position:absolute; left:${(square.x)*localMagicNumber}px;top:${(square.y)*localMagicNumber}px;"></div>`;
                 }
                 else{
-                    theString += `<div style="z-index:500; background:${backgroundColor};width:${magicNumber}px;height:${magicNumber}px;border:solid black 1px; position:absolute; left:${square.x*magicNumber}px;top:${(square.y)*magicNumber}px;"></div>`;
+                    theString += `<div style="z-index:500; background:${backgroundColor};width:${localMagicNumber}px;height:${localMagicNumber}px;border:solid black 1px; position:absolute; left:${square.x*localMagicNumber}px;top:${(square.y)*localMagicNumber}px;"></div>`;
                 }
 
                 if(square.x ===el.pieceX && square.y === el.pieceY){
-                    theString += `<img style="z-index:500;position:absolute; width:${magicNumber}px;height:${magicNumber}px; left:${square.x*magicNumber}px;top:${(square.y)*magicNumber}px;" src="/static/${el.icon}"></img>`
+                    theString += `<img style="z-index:500;position:absolute; width:${localMagicNumber}px;height:${localMagicNumber}px; left:${square.x*localMagicNumber}px;top:${(square.y)*localMagicNumber}px;" src="/static/${el.icon}"></img>`
                 }
             })
             theString += `</div>` // Close board container
