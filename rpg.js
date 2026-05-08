@@ -2089,6 +2089,16 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
             });
         }
 
+        // Compact columns to the left
+        if (RPGStats.tacticsLevel < 2) {
+            let newFront = frontPieces.filter(p => p !== null);
+            let newBack = backPieces.filter(p => p !== null);
+            while (newFront.length < 8) newFront.push(null);
+            while (newBack.length < 8) newBack.push(null);
+            frontPieces = newFront;
+            backPieces = newBack;
+        }
+
         // Any backline piece without a frontline piece protecting it gets moved to reserve
         for (let i = 0; i < 8; i++) {
             if (backPieces[i] !== null && (!frontPieces[i] || !frontLineFactories.includes(frontPieces[i]))) {
@@ -2097,22 +2107,6 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                     backPieces[i] = null;
                 }
             }
-        }
-
-        // Compact columns to the left
-        if (RPGStats.tacticsLevel < 2) {
-            let newFront = [];
-            let newBack = [];
-            for (let i = 0; i < 8; i++) {
-                if (frontPieces[i] !== null || backPieces[i] !== null) {
-                    newFront.push(frontPieces[i]);
-                    newBack.push(backPieces[i]);
-                }
-            }
-            while (newFront.length < 8) newFront.push(null);
-            while (newBack.length < 8) newBack.push(null);
-            frontPieces = newFront;
-            backPieces = newBack;
         }
 
         // Place King at kingIndexTarget
@@ -2193,11 +2187,11 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                     if (RPGStats.kingLockedToRight && RPGStats.tacticsLevel < 1) {
                         if (index === kingIndexTarget) {
                             isDisabled = false; // King's slot
-                        } else if (index >= Math.max(0, maxFrontline - 1)) {
-                            isDisabled = true; // Only maxFrontline - 1 slots available for other backline pieces
+                        } else if (index >= Math.max(0, activeFrontline - 1)) {
+                            isDisabled = true; // Only activeFrontline - 1 slots available for other backline pieces
                         }
                     } else {
-                        if (index >= maxFrontline) {
+                        if (index >= activeFrontline) {
                             isDisabled = true; // Same availability as frontline slots
                         }
                     }
@@ -2322,17 +2316,12 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                     }
                 }
 
-                // Validation: Cannot remove frontline piece if a backline piece is directly behind it
+                // Validation: Cannot have more backline pieces than frontline pieces
                 if (RPGStats.tacticsLevel < 2) {
-                    let exposed = false;
-                    for (let i = 0; i < 8; i++) {
-                        if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
-                            exposed = true;
-                            break;
-                        }
-                    }
-                    if (exposed) {
-                        showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
+                    let frontCount = simFront.filter(p => p !== null && frontLineFactories.includes(p)).length;
+                    let backCount = simBack.filter(p => p !== null).length;
+                    if (backCount > frontCount) {
+                        showNotification("Not enough frontline pieces to protect all backline pieces.", "error");
                         return;
                     }
                 }
@@ -2442,17 +2431,12 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                     }
                 }
 
-                // Validation: Cannot remove frontline piece if a backline piece is directly behind it
+                // Validation: Cannot have more backline pieces than frontline pieces
                 if (RPGStats.tacticsLevel < 2) {
-                    let exposed = false;
-                    for (let i = 0; i < 8; i++) {
-                        if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
-                            exposed = true;
-                            break;
-                        }
-                    }
-                    if (exposed) {
-                        showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
+                    let frontCount = simFront.filter(p => p !== null && frontLineFactories.includes(p)).length;
+                    let backCount = simBack.filter(p => p !== null).length;
+                    if (backCount > frontCount) {
+                        showNotification("Not enough frontline pieces to protect all backline pieces.", "error");
                         return;
                     }
                 }
@@ -2525,17 +2509,12 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                         simBack[sourceIndex] = null;
                     }
 
-                    // Validation: Cannot remove frontline piece if a backline piece is directly behind it
+                    // Validation: Cannot have more backline pieces than frontline pieces
                     if (RPGStats.tacticsLevel < 2) {
-                        let exposed = false;
-                        for (let i = 0; i < 8; i++) {
-                            if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
-                                exposed = true;
-                                break;
-                            }
-                        }
-                        if (exposed) {
-                            showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
+                        let frontCount = simFront.filter(p => p !== null && frontLineFactories.includes(p)).length;
+                        let backCount = simBack.filter(p => p !== null).length;
+                        if (backCount > frontCount) {
+                            showNotification("Not enough frontline pieces to protect all backline pieces.", "error");
                             return;
                         }
                     }
@@ -2573,17 +2552,12 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                         simBack[sourceIndex] = null;
                     }
 
-                    // Validation: Cannot remove frontline piece if a backline piece is directly behind it
+                    // Validation: Cannot have more backline pieces than frontline pieces
                     if (RPGStats.tacticsLevel < 2) {
-                        let exposed = false;
-                        for (let i = 0; i < 8; i++) {
-                            if (simBack[i] !== null && (!simFront[i] || !frontLineFactories.includes(simFront[i]))) {
-                                exposed = true;
-                                break;
-                            }
-                        }
-                        if (exposed) {
-                            showNotification("Cannot remove frontline piece while a backline piece is behind it.", "error");
+                        let frontCount = simFront.filter(p => p !== null && frontLineFactories.includes(p)).length;
+                        let backCount = simBack.filter(p => p !== null).length;
+                        if (backCount > frontCount) {
+                            showNotification("Not enough frontline pieces to protect all backline pieces.", "error");
                             return;
                         }
                     }
@@ -2625,13 +2599,13 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
         }
 
         // Validation: Frontline must be a straight line without holes (unless Tactics >= 2)
+        // Since we compact them to the left, there are no holes, but we must ensure we have enough frontline for backline.
         if (RPGStats.tacticsLevel < 2) {
-            const requiredFrontline = Math.min(8, maxFrontline);
-            for (let i = 0; i < requiredFrontline; i++) {
-                if (!frontPieces[i]) {
-                    showNotification("Frontline cannot have empty slots or holes! Please fill all active frontline slots.", "error");
-                    return;
-                }
+            let frontCount = frontPieces.filter(p => p !== null && frontLineFactories.includes(p)).length;
+            let backCount = backPieces.filter(p => p !== null).length;
+            if (backCount > frontCount) {
+                showNotification("Not enough frontline pieces to protect all backline pieces.", "error");
+                return;
             }
         }
 
