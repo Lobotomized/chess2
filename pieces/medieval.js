@@ -42,6 +42,7 @@ function northernKing(color, x, y, options){
         color: color,
         value:800,
         posValue:1,
+        plagueDoctorDeathRank: color === 'black' ? 0 : 7,
         options:options,
         afterThisPieceTaken: function (state) {
             
@@ -51,7 +52,9 @@ function northernKing(color, x, y, options){
             if(!find){
                 state.won = giveOppositeColor(this.color);
             }
-
+            else{
+                find.northernKingDeathRank = this.y;
+            }
         },
         afterPieceMove:function(state, move, prevMove){
             if(this.color === 'black'){
@@ -78,7 +81,8 @@ function northernKing(color, x, y, options){
 
             let promoteCondition = (this.color === 'black' && this.y >= 3 || this.color === 'white' && this.y <= 4) &&
                 state.pieces.some(p => p.color === this.color && p.icon === this.color + 'PlagueDoctor.png' && 
-                    ((p.color === 'black' && p.y >= 3) || (p.color === 'white' && p.y <= 4)));
+                    ((p.color === 'black' && p.y >= 3) || (p.color === 'white' && p.y <= 4))) || 
+                (this.color === 'black' && this.plagueDoctorDeathRank >= 3 || this.color === 'white' && this.plagueDoctorDeathRank <= 4)  && (this.color === 'black' && this.y >= 3 || this.color === 'white' && this.y <= 4);
             
                 
             if(promoteCondition){
@@ -279,6 +283,7 @@ function plagueDoctor(color, x, y){
         moves: moves,
         x: x,
         y: y,
+        northernKingDeathRank: color === 'black' ? 0 : 7,
         color: color,
         value:800,
         posValue:1,
@@ -288,6 +293,10 @@ function plagueDoctor(color, x, y){
             })
             if(!find){
                 state.won = giveOppositeColor(this.color);
+            }
+            else{
+                console.log('plagueDoctorDeathRank', this.y);
+                find.plagueDoctorDeathRank = this.y;
             }
         },
         afterPieceMove:function(state, move, prevMove){
@@ -311,7 +320,8 @@ function plagueDoctor(color, x, y){
             }
             let promoteCondition = (this.color === 'black' && this.y >= 3 || this.color === 'white' && this.y <= 4) &&
                 state.pieces.some(p => p.color === this.color && p.icon === this.color + 'NorthernKing.png' && 
-                    ((p.color === 'black' && p.y >= 3) || (p.color === 'white' && p.y <= 4)));
+                    ((p.color === 'black' && p.y >= 3) || (p.color === 'white' && p.y <= 4))) || 
+               ( (this.color === 'black' && this.northernKingDeathRank >= 3 || this.color === 'white' && this.northernKingDeathRank <= 4) && (this.color === 'black' && this.y >= 3 || this.color === 'white' && this.y <= 4))
 
                 
             let kolbaPower = this.color === 'black' ? this.y : 7-this.y;
