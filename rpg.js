@@ -100,6 +100,11 @@ const rpgState = {
     gameActive: false,
     gold: 0,
     food: 100, // Initial food
+    startingFoodMode: null,
+    startingGoldMode: null,
+    permadeathMode: null,
+    armyType: 'mixed',
+    permadeath: false,
     shopOptions: [],
     showWinScreen: false, // New flag to persist win screen
     boardHistory: [] // Track board states for attrition warfare
@@ -236,6 +241,9 @@ function initRpgGame() {
     window.currentSaveSource = urlParams.get('source');
     window.initialDifficulty = urlParams.get('difficulty');
     window.initialArmyType = urlParams.get('armyType');
+    window.initialStartingFood = urlParams.get('startingFood');
+    window.initialStartingGold = urlParams.get('startingGold');
+    window.initialPermadeath = urlParams.get('permadeath');
     
     if (isNew) {
         currentSaveSlot = 'save_' + Date.now();
@@ -286,28 +294,53 @@ async function loadCustomGrandMap(mapId) {
     }
 }
 
-function applyDifficultySettings() {
-    let diff = window.initialDifficulty || rpgState.difficultyLevel || 'normal';
-    let armyType = window.initialArmyType || rpgState.armyType || 'mixed';
-    
-    rpgState.difficultyLevel = diff;
-    rpgState.armyType = armyType;
-    rpgState.permadeath = false;
-    
+function getLegacyDifficultySettings(diff) {
     if (diff === 'easy') {
-        RPGStats.startingGold = 10;
-        RPGStats.startingFood = 100;
-    } else if (diff === 'normal') {
-        RPGStats.startingGold = 0;
-        RPGStats.startingFood = 100;
-    } else if (diff === 'hard') {
-        RPGStats.startingGold = 0;
-        RPGStats.startingFood = 50;
-    } else if (diff === 'impossible') {
-        RPGStats.startingGold = 0;
-        RPGStats.startingFood = 100;
-        rpgState.permadeath = true;
+        return { startingFoodMode: 'normal', startingGoldMode: 'easy', permadeathMode: 'no' };
     }
+    if (diff === 'hard') {
+        return { startingFoodMode: 'hard', startingGoldMode: 'normal', permadeathMode: 'no' };
+    }
+    if (diff === 'impossible') {
+        return { startingFoodMode: 'normal', startingGoldMode: 'normal', permadeathMode: 'yes' };
+    }
+    return { startingFoodMode: 'normal', startingGoldMode: 'normal', permadeathMode: 'no' };
+}
+
+function getStartingFoodAmount(mode) {
+    if (mode === 'easy') return 200;
+    if (mode === 'hard') return 50;
+    if (mode === 'impossible') return 25;
+    return 100;
+}
+
+function getStartingGoldAmount(mode) {
+    if (mode === 'trivial') return 20;
+    if (mode === 'easy') return 10;
+    return 0;
+}
+
+function normalizePermadeathMode(mode) {
+    return mode === 'yes' || mode === true || mode === 'true' ? 'yes' : 'no';
+}
+
+function applyDifficultySettings() {
+    const legacyDiff = window.initialDifficulty || rpgState.difficultyLevel;
+    const legacySettings = getLegacyDifficultySettings(legacyDiff);
+    const armyType = window.initialArmyType || rpgState.armyType || 'mixed';
+    const startingFoodMode = window.initialStartingFood || rpgState.startingFoodMode || legacySettings.startingFoodMode;
+    const startingGoldMode = window.initialStartingGold || rpgState.startingGoldMode || legacySettings.startingGoldMode;
+    const permadeathMode = normalizePermadeathMode(window.initialPermadeath || rpgState.permadeathMode || legacySettings.permadeathMode);
+
+    rpgState.difficultyLevel = legacyDiff || null;
+    rpgState.armyType = armyType;
+    rpgState.startingFoodMode = startingFoodMode;
+    rpgState.startingGoldMode = startingGoldMode;
+    rpgState.permadeathMode = permadeathMode;
+    rpgState.permadeath = permadeathMode === 'yes';
+
+    RPGStats.startingFood = getStartingFoodAmount(startingFoodMode);
+    RPGStats.startingGold = getStartingGoldAmount(startingGoldMode);
 }
 
 function startNewGameWithMap(mapName) {
