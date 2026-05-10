@@ -244,6 +244,7 @@ function initRpgGame() {
     window.initialStartingFood = urlParams.get('startingFood');
     window.initialStartingGold = urlParams.get('startingGold');
     window.initialPermadeath = urlParams.get('permadeath');
+    window.initialGrowingEnemies = urlParams.get('growingEnemies');
     
     if (isNew) {
         currentSaveSlot = 'save_' + Date.now();
@@ -331,6 +332,7 @@ function applyDifficultySettings() {
     const startingFoodMode = window.initialStartingFood || rpgState.startingFoodMode || legacySettings.startingFoodMode;
     const startingGoldMode = window.initialStartingGold || rpgState.startingGoldMode || legacySettings.startingGoldMode;
     const permadeathMode = normalizePermadeathMode(window.initialPermadeath || rpgState.permadeathMode || legacySettings.permadeathMode);
+    const growingEnemiesMode = window.initialGrowingEnemies || rpgState.growingEnemiesMode || 'easy';
 
     rpgState.difficultyLevel = legacyDiff || null;
     rpgState.armyType = armyType;
@@ -338,6 +340,7 @@ function applyDifficultySettings() {
     rpgState.startingGoldMode = startingGoldMode;
     rpgState.permadeathMode = permadeathMode;
     rpgState.permadeath = permadeathMode === 'yes';
+    rpgState.growingEnemiesMode = growingEnemiesMode;
 
     RPGStats.startingFood = getStartingFoodAmount(startingFoodMode);
     RPGStats.startingGold = getStartingGoldAmount(startingGoldMode);
@@ -1438,10 +1441,29 @@ function generateRewardOptions() {
 // --- Level Management ---
 
 function ensureNodeArmy(node) {
-    if (!node.army && node.board !== 'Mountain' && node.board !== 'Library' && node.board !== 'Market' && node.board !== 'Inn') {
-        const { army, value } = generateRandomArmy(node.enemyPower, true, node.region);
-        node.army = army;
-        node.actualEnemyValue = value;
+    if (node.board === 'Mountain' || node.board === 'Library' || node.board === 'Market' || node.board === 'Inn' || node.board === 'Bank') return;
+    
+    let basePower = node.enemyPower || 1;
+    let bonusPower = 0;
+    if (typeof rpgState !== 'undefined' && rpgState.growingEnemiesMode) {
+        const mode = rpgState.growingEnemiesMode;
+        const turns = rpgState.level > 1 ? rpgState.level - 1 : 0;
+        if (mode === 'normal') bonusPower = Math.floor(turns / 5);
+        else if (mode === 'medium') bonusPower = Math.floor(turns / 3);
+        else if (mode === 'hard') bonusPower = turns * 1;
+        else if (mode === 'impossible') bonusPower = turns * 2;
+    }
+    const targetPower = basePower + bonusPower;
+
+    // If it has a generated army, but the power target has increased, we should regenerate it
+    // to reflect the new power, UNLESS it's a custom pre-set army.
+    if (!node.customArmy) {
+        if (!node.army || node.lastGeneratedPower !== targetPower) {
+            const { army, value } = generateRandomArmy(targetPower, true, node.region);
+            node.army = army;
+            node.actualEnemyValue = value;
+            node.lastGeneratedPower = targetPower;
+        }
     }
 }
 
@@ -1556,7 +1578,16 @@ function startLevel(level, difficultyOption) {
          enemyArmy = difficultyOption.node.army;
     } else {
         // Fallback generation
-        const result = generateRandomArmy(enemyValue, true, region);
+        let bonusPower = 0;
+        if (typeof rpgState !== 'undefined' && rpgState.growingEnemiesMode) {
+            const mode = rpgState.growingEnemiesMode;
+            const turns = rpgState.level > 1 ? rpgState.level - 1 : 0;
+            if (mode === 'normal') bonusPower = Math.floor(turns / 5);
+            else if (mode === 'medium') bonusPower = Math.floor(turns / 3);
+            else if (mode === 'hard') bonusPower = turns * 1;
+            else if (mode === 'impossible') bonusPower = turns * 2;
+        }
+        const result = generateRandomArmy(enemyValue + bonusPower, true, region);
         enemyArmy = result.army;
     }
     

@@ -170,34 +170,48 @@
     <div class="menu-container" id="newGameMenu" style="display: none; max-width: 700px;">
         <h1>Select Map</h1>
         
-        <label for="startingFoodSelect" style="color: white; font-size: 24px; -webkit-text-stroke: 1px black; margin-bottom: 5px; text-align: left; width: 100%;">Starting Food:</label>
-        <select id="startingFoodSelect" style="font-size: 20px; padding: 10px; margin-bottom: 15px; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: inherit;">
-            <option value="easy">Easy (200 Food)</option>
-            <option value="normal" selected>Normal (100 Food)</option>
-            <option value="hard">Hard (50 Food)</option>
-            <option value="impossible">Impossible (25 Food)</option>
-        </select>
-
-        <label for="startingGoldSelect" style="color: white; font-size: 24px; -webkit-text-stroke: 1px black; margin-bottom: 5px; text-align: left; width: 100%;">Starting Gold:</label>
-        <select id="startingGoldSelect" style="font-size: 20px; padding: 10px; margin-bottom: 15px; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: inherit;">
-            <option value="trivial">Trivial (20 Gold)</option>
-            <option value="easy">Easy (10 Gold)</option>
-            <option value="normal" selected>Normal (0 Gold)</option>
-        </select>
-
-        <label for="permadeathSelect" style="color: white; font-size: 24px; -webkit-text-stroke: 1px black; margin-bottom: 5px; text-align: left; width: 100%;">Permadeath:</label>
-        <select id="permadeathSelect" style="font-size: 20px; padding: 10px; margin-bottom: 15px; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: inherit;">
-            <option value="no" selected>No (Pieces revive after battles)</option>
-            <option value="yes">Yes (Once piece is lost it's lost forever)</option>
-        </select>
-
-        <label for="armyTypeSelect" style="color: white; font-size: 24px; -webkit-text-stroke: 1px black; margin-bottom: 5px; text-align: left; width: 100%;">Starting Army:</label>
-        <select id="armyTypeSelect" style="font-size: 20px; padding: 10px; margin-bottom: 15px; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: inherit;">
-            <option value="mixed" >Mixed Army</option>
-            <option selected value="classic">Classic Army</option>
-        </select>
-        
         <div id="mapsList" class="hide-scrollbar" style="display:flex; flex-direction:column; gap:15px; max-height:45vh; padding: 10px; width: 100%; box-sizing: border-box;"></div>
+        
+        <button onclick="toggleMoreOptions()" class="menu-button" id="moreOptionsBtn" style="font-size: 24px; padding: 10px;">More Options</button>
+        
+        <div id="moreOptionsContainer" style="display: none; width: 100%; flex-direction: column; align-items: flex-start;">
+            <label for="startingFoodSelect" style="color: white; font-size: 24px; -webkit-text-stroke: 1px black; margin-bottom: 5px; text-align: left; width: 100%;">Starting Food:</label>
+            <select id="startingFoodSelect" style="font-size: 20px; padding: 10px; margin-bottom: 15px; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: inherit;">
+                <option value="easy">Easy (200 Food)</option>
+                <option value="normal" selected>Normal (100 Food)</option>
+                <option value="hard">Hard (50 Food)</option>
+                <option value="impossible">Impossible (25 Food)</option>
+            </select>
+
+            <label for="startingGoldSelect" style="color: white; font-size: 24px; -webkit-text-stroke: 1px black; margin-bottom: 5px; text-align: left; width: 100%;">Starting Gold:</label>
+            <select id="startingGoldSelect" style="font-size: 20px; padding: 10px; margin-bottom: 15px; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: inherit;">
+                <option value="trivial">Trivial (20 Gold)</option>
+                <option value="easy">Easy (10 Gold)</option>
+                <option value="normal" selected>Normal (0 Gold)</option>
+            </select>
+
+            <label for="permadeathSelect" style="color: white; font-size: 24px; -webkit-text-stroke: 1px black; margin-bottom: 5px; text-align: left; width: 100%;">Permadeath:</label>
+            <select id="permadeathSelect" style="font-size: 20px; padding: 10px; margin-bottom: 15px; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: inherit;">
+                <option value="no" selected>No (Pieces revive after battles)</option>
+                <option value="yes">Yes (Once piece is lost it's lost forever)</option>
+            </select>
+
+            <label for="armyTypeSelect" style="color: white; font-size: 24px; -webkit-text-stroke: 1px black; margin-bottom: 5px; text-align: left; width: 100%;">Starting Army:</label>
+            <select id="armyTypeSelect" style="font-size: 20px; padding: 10px; margin-bottom: 15px; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: inherit;">
+                <option value="mixed" >Mixed Army</option>
+                <option selected value="classic">Classic Army</option>
+            </select>
+            
+            <label for="growingEnemiesSelect" style="color: white; font-size: 24px; -webkit-text-stroke: 1px black; margin-bottom: 5px; text-align: left; width: 100%;">Growing Enemies:</label>
+            <select id="growingEnemiesSelect" style="font-size: 20px; padding: 10px; margin-bottom: 15px; border-radius: 8px; width: 100%; box-sizing: border-box; font-family: inherit;">
+                <option value="easy" selected>Easy (enemies are always the same)</option>
+                <option value="normal">Normal (+1 power every 5 turns)</option>
+                <option value="medium">Medium (+1 power every 3 turns)</option>
+                <option value="hard">Hard (+1 power every turn)</option>
+                <option value="impossible">Impossible (+2 power every turn)</option>
+            </select>
+        </div>
+        
         <button onclick="showMainMenu()" class="menu-button back-button">Back</button>
     </div>
 
@@ -226,6 +240,18 @@
                 } else {
                     window.Auth.showAuthModal('login');
                 }
+            }
+        }
+
+        function toggleMoreOptions() {
+            const container = document.getElementById('moreOptionsContainer');
+            const btn = document.getElementById('moreOptionsBtn');
+            if (container.style.display === 'none') {
+                container.style.display = 'flex';
+                btn.innerText = 'Less Options';
+            } else {
+                container.style.display = 'none';
+                btn.innerText = 'More Options';
             }
         }
 
@@ -371,7 +397,8 @@
             const startingGold = document.getElementById('startingGoldSelect').value;
             const permadeath = document.getElementById('permadeathSelect').value;
             const armyType = document.getElementById('armyTypeSelect').value;
-            let url = '/rpg.html?new=true&startingFood=' + startingFood + '&startingGold=' + startingGold + '&permadeath=' + permadeath + '&armyType=' + armyType;
+            const growingEnemies = document.getElementById('growingEnemiesSelect').value;
+            let url = '/rpg.html?new=true&startingFood=' + startingFood + '&startingGold=' + startingGold + '&permadeath=' + permadeath + '&armyType=' + armyType + '&growingEnemies=' + growingEnemies;
             if (mapId !== 'random') {
                 url += '&customMapId=' + mapId;
             }

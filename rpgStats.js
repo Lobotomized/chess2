@@ -16,7 +16,7 @@ const RPGStats = {
     startingFood: 100,
     kingLockedToRight: true,
     tacticsLevel: 0,
-    scoutingLevel: 0,
+    scoutingLevel: 3,
     summonerLevel: 0,
     mountaineerLevel: 0,
 };
@@ -183,7 +183,7 @@ function resetRPGStats() {
     RPGStats.kingLockedToRight = true;
     RPGStats.tacticsLevel = 0;
     RPGStats.maxNumberOfPiecesToOwn = 8;
-    RPGStats.scoutingLevel = 0;
+    RPGStats.scoutingLevel = 3;
     RPGStats.summonerLevel = 0;
     RPGStats.mountaineerLevel = 0;
     RPGStats.divinationLevel = 0;
