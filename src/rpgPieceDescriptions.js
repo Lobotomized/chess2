@@ -43,6 +43,12 @@ const pieceDescriptions = {
         description: `It can move like a Queen but it cannot take enemy pieces. Instead of that it can spend it's turn to swap places with another piece.
         `
     },
+    "brainbug": {
+        name: "Brainbug",
+        description: `
+            Brain bug moves like classic king but when it takes a piece it spawns Queen Bug on the square from which it is coming.
+        `
+    },
     "pikeman":{
         name: "Pikeman",
         description: `

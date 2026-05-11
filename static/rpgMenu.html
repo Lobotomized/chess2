@@ -172,7 +172,7 @@
         
         <div id="mapsList" class="hide-scrollbar" style="display:flex; flex-direction:column; gap:15px; max-height:45vh; padding: 10px; width: 100%; box-sizing: border-box;"></div>
         
-        <button onclick="toggleMoreOptions()" class="menu-button" id="moreOptionsBtn" style="font-size: 24px; padding: 10px;">More Options</button>
+        <button onclick="toggleMoreOptions()" class="menu-button" id="moreOptionsBtn" style="font-size: 24px; padding: 10px;">Settings</button>
         
         <div id="moreOptionsContainer" style="display: none; width: 100%; flex-direction: column; align-items: flex-start;">
             <label for="startingFoodSelect" style="color: white; font-size: 24px; -webkit-text-stroke: 1px black; margin-bottom: 5px; text-align: left; width: 100%;">Starting Food:</label>
@@ -251,7 +251,7 @@
                 btn.innerText = 'Less Options';
             } else {
                 container.style.display = 'none';
-                btn.innerText = 'More Options';
+                btn.innerText = '';
             }
         }
 
