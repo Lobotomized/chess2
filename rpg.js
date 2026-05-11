@@ -1084,7 +1084,7 @@ function showPieceDiscoveryModal(factoryName) {
     // Get description from the new descriptions file if available, otherwise fallback
     let description = "A new unit has been discovered.";
     let displayName = factoryName.replace('Factory','');
-
+    console.log('tuka!?', factoryName)
     if (window.pieceDescriptions && window.pieceDescriptions[factoryName]) {
         const descEntry = window.pieceDescriptions[factoryName];
         if (typeof descEntry === 'object' && descEntry.description) {
