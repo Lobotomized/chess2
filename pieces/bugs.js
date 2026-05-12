@@ -152,7 +152,7 @@ function strongladybugFactory(color,x,y){
         weakMoves:weakMoves,
         x:x,
         y:y,
-        value:5.5,
+        value:7.5,
         posValue:posValue[3],
     }
 }
