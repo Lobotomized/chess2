@@ -136,7 +136,6 @@ self.addEventListener("message", async function(e) {
                 move = minimaxDeep(obj.state,obj.color,1, obj.removedTurns,methods[obj.AICharacter](0))
             }
             else if(obj.AIPower === 1){
-                console.log('here')
                 move = minimaxDeep(obj.state,obj.color,2, obj.removedTurns,
                     methods[obj.AICharacter](0),
                     [
@@ -194,13 +193,12 @@ self.addEventListener("message", async function(e) {
             }
             if(obj.AIPower === 101){
                 console.time('101')
-                console.log('gets in default newest')
                 move = minimaxAlphaBeta(obj.state,obj.color,2, obj.removedTurns,
                     methods[obj.AICharacter](0),
-                    [
-                        {method:removeNonAttackingMovesFilter, options:{maximum:2,maxPieceValue:2,randomException:0.3, filterDepth:1,
-                        exceptions:[pieceValueMustBeSmallerThanException,randomException]}},
-                    ]
+                    // [
+                    //     {method:removeNonAttackingMovesFilter, options:{maximum:2,maxPieceValue:2,randomException:0.3, filterDepth:1,
+                    //     exceptions:[pieceValueMustBeSmallerThanException,randomException]}},
+                    // ]
                 )
                 console.timeEnd('101')
             }

@@ -3756,7 +3756,7 @@ function triggerAI(color) {
     if (!w) w = new Worker("src/webworker.js");
     const state = hotseatGame.state;
     
-    let aiPower = 105;
+    let aiPower = 101;
     let customEvolutionBlackStr = undefined;
     
     if (rpgState.hofBots && rpgState.hofBots.length > 0) {
