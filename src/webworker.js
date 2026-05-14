@@ -207,7 +207,6 @@ self.addEventListener("message", async function(e) {
 
             else if(obj.AIPower === 'customEvolution'){
                 console.time('customEvolution');
-                console.log(obj.customEvolutionBlack)
                 // Read custom AI configuration
                 let charWhiteStr = obj.customEvolutionWhite;
                 let charBlackStr = obj.customEvolutionBlack;

@@ -673,12 +673,13 @@ function minimaxAlphaBeta(state, maximizer, depth, removedTurns, magnifiers, fil
      for (let i = 0; i < len; i++) {
          const piece = pieces[i];
          let magnifier = 0;
-         
          // Optimized magnifier loop
          for (let j = 0; j < magLen; j++) {
              const magObj = magnifierMethods[j];
              const isFriendly = colorPerspective === piece.color;
-             
+             if(!magObj.method){
+                continue
+             }
              if (isFriendly && !(magObj.options && magObj.options.onlyForEnemy)) {
                  magnifier += magObj.method(piece, pieces, board, piece.color, magObj.options);
              } else if (!isFriendly && !(magObj.options && magObj.options.onlyForMe)) {
