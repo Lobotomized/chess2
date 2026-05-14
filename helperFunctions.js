@@ -547,7 +547,13 @@ function getSinglePlayerGame() {
 
                 if(state.whiteRace && state.blackRace){
                     state.turn = 'white'
-                    raceChoiceChess(state,state.whiteRace,state.blackRace)
+                    if (state.gameType === 'morphingRaceChoiceChess') {
+                        morphingRaceChoiceChess(state, state.whiteRace, state.blackRace);
+                    } else if (state.gameType === 'rpgArmyChess') {
+                        rpgArmyChess(state, state.whiteRace, state.blackRace, 25);
+                    } else {
+                        raceChoiceChess(state,state.whiteRace,state.blackRace)
+                    }
                 }
             }   
             else{

@@ -270,6 +270,125 @@ function prohodRaceChoiceChess(state,raceWhite,raceBlack){
 
 
 
+function rpgArmyChess(state, raceWhite, raceBlack) {
+    let pieces = state.pieces;
+    let board = state.board;
+    pieces.length = 0;
+    if(!board.length){
+        for (let x = 0; x <= 7; x++) {
+            for (let y = 0; y <= 7; y++) {
+                board.push({ light: false, x: x, y: y })
+            }
+        }
+    }
+
+    const regionMap = {
+        'classic': ['rpgPawnFactory', 'rookFactory', 'knightFactory', 'bishopFactory', 'queenFactory'],
+        'medieval': ['horseFactory', 'pigFactory',"clownFactory", "ghostFactory", "ricarFactory"],
+        'bug': ["rpgAntFactory", "spiderFactory", 'goliathbugFactory', "rpgQueenbugFactory", "strongladybugFactory", "brainbugFactory"],
+        'promoters': ["shield","swordsMen","pikeman", "dragonFactory"],
+        'cyborgs': ["juggernautFactory", "executorFactory", "bootvesselFactory", "cyborgFactory"]
+    };
+
+    const allFactories = [
+        ...regionMap.classic,
+        ...regionMap.medieval,
+        ...regionMap.bug,
+        ...regionMap.cyborgs,
+        ...regionMap.promoters
+    ];
+
+    const frontLineFactories = ['rpgPawnFactory', 'swordsMen','ghostFactory', 'pikeman', 'rpgAntFactory', 'rpgQueenbugFactory'];
+
+    function getVal(factoryName) {
+        if (factoryName === 'ricarFactory') return 3;
+        if (factoryName === 'pigFactory') return 1.5;
+        if (typeof window[factoryName] === 'function') {
+            try { return window[factoryName]('white', 0, 0).value || 1; } catch (e) { return 1; }
+        }
+        return 1;
+    }
+
+    function genArmy(targetValue, race) {
+        let army = [];
+        let currentValue = 0;
+        army.push('simpleKingFactory');
+        let frontCount = 0;
+        let backCount = 1;
+        let iterations = 0;
+
+        let availableFactories = regionMap[race] || allFactories;
+        let currentFrontLineFactories = availableFactories.filter(f => frontLineFactories.includes(f));
+        let currentBackLineFactories = availableFactories.filter(f => !frontLineFactories.includes(f));
+
+        if (currentFrontLineFactories.length === 0) currentFrontLineFactories = ['rpgPawnFactory'];
+        if (currentBackLineFactories.length === 0) currentBackLineFactories = availableFactories;
+
+        while (currentValue < targetValue && iterations < 200) {
+            iterations++;
+            if (frontCount >= 8 && backCount >= 8) break;
+
+            let tryFrontline = false;
+            if (frontCount < 8 && backCount < 8) {
+                if (frontCount <= backCount) {
+                    tryFrontline = true;
+                } else {
+                    tryFrontline = Math.random() > 0.5;
+                }
+            } else if (frontCount < 8) {
+                tryFrontline = true;
+            } else {
+                tryFrontline = false;
+            }
+
+            let pool = tryFrontline ? currentFrontLineFactories : currentBackLineFactories;
+            let randomFactory = pool[Math.floor(Math.random() * pool.length)];
+            let val = getVal(randomFactory);
+
+            if (currentValue + val <= targetValue + 2 || iterations > 100) {
+                army.push(randomFactory);
+                currentValue += val;
+                if (tryFrontline) frontCount++;
+                else backCount++;
+            }
+        }
+        return army;
+    }
+
+    // RPG armies around value 25 for a mid-tier fight by default
+    let targetVal = arguments.length > 3 ? arguments[3] : 25;
+    let whiteArmyStr = genArmy(targetVal, raceWhite);
+    let blackArmyStr = genArmy(targetVal, raceBlack);
+
+    function placeArmy(armyStrs, color) {
+        let frontY = color === 'white' ? 6 : 1;
+        let backY = color === 'white' ? 7 : 0;
+
+        let frontPieces = armyStrs.filter(f => frontLineFactories.includes(f));
+        let backPieces = armyStrs.filter(f => !frontLineFactories.includes(f));
+
+        for (let i = 0; i < frontPieces.length; i++) {
+            if (typeof window[frontPieces[i]] === 'function') {
+                state.pieces.push(window[frontPieces[i]](color, i, frontY));
+            }
+        }
+        for (let i = 0; i < backPieces.length; i++) {
+            if (typeof window[backPieces[i]] === 'function') {
+                state.pieces.push(window[backPieces[i]](color, i, backY));
+            }
+        }
+    }
+
+    placeArmy(whiteArmyStr, 'white');
+    placeArmy(blackArmyStr, 'black');
+}
+
+
+function rpgArmyChessSmall(state, raceWhite, raceBlack) { rpgArmyChess(state, raceWhite, raceBlack, 8); }
+function rpgArmyChessMedium(state, raceWhite, raceBlack) { rpgArmyChess(state, raceWhite, raceBlack, 15); }
+function rpgArmyChessStrong(state, raceWhite, raceBlack) { rpgArmyChess(state, raceWhite, raceBlack, 30); }
+function rpgArmyChessBoss(state, raceWhite, raceBlack) { rpgArmyChess(state, raceWhite, raceBlack, 50); }
+
 function raceChoiceChess(state,raceWhite,raceBlack){
     pieces = state.pieces;
     board = state.board;

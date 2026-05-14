@@ -171,7 +171,13 @@ function confirmPlay() {
     localStorage.setItem('chess_evolution_custom_ai_black', JSON.stringify(char));
     localStorage.removeItem('chess_evolution_custom_ai_white');
     
-    let url = `/hotseat?whiteRace=${playerRace}&blackRace=${char.race || 'classic'}&AIColor=black&AIPowerBlack=customEvolution&gameType=raceChoiceChess&starts=whiteStarts`;
+    let gameType = 'raceChoiceChess';
+    if (currentHofMode === 'rpg_army_small') gameType = 'rpgArmyChessSmall';
+    else if (currentHofMode === 'rpg_army_medium') gameType = 'rpgArmyChessMedium';
+    else if (currentHofMode === 'rpg_army_strong') gameType = 'rpgArmyChessStrong';
+    else if (currentHofMode === 'rpg_army_boss') gameType = 'rpgArmyChessBoss';
+
+    let url = `/hotseat?whiteRace=${playerRace}&blackRace=${char.race || 'classic'}&AIColor=black&AIPowerBlack=customEvolution&gameType=${gameType}&starts=whiteStarts`;
     window.open(url, '_blank');
     
     closeRaceModal();
@@ -218,7 +224,13 @@ function watchHofFight() {
     localStorage.setItem('chess_evolution_custom_ai_white', JSON.stringify(wBot));
     localStorage.setItem('chess_evolution_custom_ai_black', JSON.stringify(bBot));
     
-    let url = `/hotseat?whiteRace=${wBot.race || 'classic'}&blackRace=${bBot.race || 'classic'}&AIColor=all&AIPowerWhite=customEvolution&AIPowerBlack=customEvolution&gameType=raceChoiceChess&starts=whiteStarts`;
+    let gameType = 'raceChoiceChess';
+    if (currentHofMode === 'rpg_army_small') gameType = 'rpgArmyChessSmall';
+    else if (currentHofMode === 'rpg_army_medium') gameType = 'rpgArmyChessMedium';
+    else if (currentHofMode === 'rpg_army_strong') gameType = 'rpgArmyChessStrong';
+    else if (currentHofMode === 'rpg_army_boss') gameType = 'rpgArmyChessBoss';
+
+    let url = `/hotseat?whiteRace=${wBot.race || 'classic'}&blackRace=${bBot.race || 'classic'}&AIColor=all&AIPowerWhite=customEvolution&AIPowerBlack=customEvolution&gameType=${gameType}&starts=whiteStarts`;
     window.open(url, '_blank');
 }
 
@@ -247,11 +259,18 @@ function startHofFight() {
         'slow': 120000
     };
 
+    let gameType = 'raceChoiceChess';
+    if (currentHofMode === 'rpg_army_small') gameType = 'rpgArmyChessSmall';
+    else if (currentHofMode === 'rpg_army_medium') gameType = 'rpgArmyChessMedium';
+    else if (currentHofMode === 'rpg_army_strong') gameType = 'rpgArmyChessStrong';
+    else if (currentHofMode === 'rpg_army_boss') gameType = 'rpgArmyChessBoss';
+
     worker.postMessage(JSONfn.stringify({
         charWhite: wBot,
         charBlack: bBot,
         whiteRace: wBot.race || 'classic',
-        blackRace: bBot.race || 'classic'
+        blackRace: bBot.race || 'classic',
+        gameType: gameType
     }));
     
     worker.onmessage = function(e) {

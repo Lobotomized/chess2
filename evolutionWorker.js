@@ -117,8 +117,20 @@ self.addEventListener("message", function(e) {
         won: false
     };
     
+    let gameType = data.gameType || 'raceChoiceChess';
     try {
-        raceChoiceChess(state, whiteRace, blackRace);
+        if (gameType.startsWith('rpgArmyChess')) {
+            if (typeof rpgArmyChess === 'function') {
+                let targetValue = 25;
+                if (gameType === 'rpgArmyChessSmall') targetValue = 8;
+                else if (gameType === 'rpgArmyChessMedium') targetValue = 15;
+                else if (gameType === 'rpgArmyChessStrong') targetValue = 30;
+                else if (gameType === 'rpgArmyChessBoss') targetValue = 50;
+                rpgArmyChess(state, whiteRace, blackRace, targetValue);
+            }
+        } else {
+            raceChoiceChess(state, whiteRace, blackRace);
+        }
     } catch(err) {
         // Fallback or ignore
     }

@@ -13,7 +13,8 @@ const MODE_TIMEOUTS = {
     'super_fast': 5000,
     'fast': 15000,
     'normal': 60000,
-    'slow': 120000
+    'slow': 120000,
+    'rpg_army': 60000
 };
 
 async function requestWakeLock() {
@@ -541,7 +542,13 @@ function confirmPlay() {
     localStorage.setItem('chess_evolution_custom_ai_black', JSON.stringify(char));
     localStorage.removeItem('chess_evolution_custom_ai_white');
     
-    let url = `/hotseat?whiteRace=${playerRace}&blackRace=${char.race || 'classic'}&AIColor=black&AIPowerBlack=customEvolution&gameType=raceChoiceChess&starts=whiteStarts`;
+    let gameType = 'raceChoiceChess';
+    if (currentMode === 'rpg_army_small') gameType = 'rpgArmyChessSmall';
+    else if (currentMode === 'rpg_army_medium') gameType = 'rpgArmyChessMedium';
+    else if (currentMode === 'rpg_army_strong') gameType = 'rpgArmyChessStrong';
+    else if (currentMode === 'rpg_army_boss') gameType = 'rpgArmyChessBoss';
+
+    let url = `/hotseat?whiteRace=${playerRace}&blackRace=${char.race || 'classic'}&AIColor=black&AIPowerBlack=customEvolution&gameType=${gameType}&starts=whiteStarts`;
     window.open(url, '_blank');
     
     closeRaceModal();
@@ -585,12 +592,19 @@ function runMatch() {
     document.getElementById('status').innerText = `Gen ${generation}: ${charWhite.id} (${whiteRace}) VS ${charBlack.id} (${blackRace}) ...`;
     
     worker = new Worker('evolutionWorker.js');
-    worker.postMessage(JSONfn.stringify({
-        charWhite: charWhite,
-        charBlack: charBlack,
-        whiteRace: whiteRace,
-        blackRace: blackRace
-    }));
+        let gameType = 'raceChoiceChess';
+        if (currentMode === 'rpg_army_small') gameType = 'rpgArmyChessSmall';
+        else if (currentMode === 'rpg_army_medium') gameType = 'rpgArmyChessMedium';
+        else if (currentMode === 'rpg_army_strong') gameType = 'rpgArmyChessStrong';
+        else if (currentMode === 'rpg_army_boss') gameType = 'rpgArmyChessBoss';
+
+        worker.postMessage(JSONfn.stringify({
+            charWhite: charWhite,
+            charBlack: charBlack,
+            whiteRace: whiteRace,
+            blackRace: blackRace,
+            gameType: gameType
+        }));
     
     let thinkingColor = 'white';
 
@@ -1311,7 +1325,13 @@ function watchEvoFight() {
     localStorage.setItem('chess_evolution_custom_ai_white', JSON.stringify(wBot));
     localStorage.setItem('chess_evolution_custom_ai_black', JSON.stringify(bBot));
     
-    let url = `/hotseat?whiteRace=${wBot.race || 'classic'}&blackRace=${bBot.race || 'classic'}&AIColor=all&AIPowerWhite=customEvolution&AIPowerBlack=customEvolution&gameType=raceChoiceChess&starts=whiteStarts`;
+    let gameType = 'raceChoiceChess';
+    if (currentMode === 'rpg_army_small') gameType = 'rpgArmyChessSmall';
+    else if (currentMode === 'rpg_army_medium') gameType = 'rpgArmyChessMedium';
+    else if (currentMode === 'rpg_army_strong') gameType = 'rpgArmyChessStrong';
+    else if (currentMode === 'rpg_army_boss') gameType = 'rpgArmyChessBoss';
+
+    let url = `/hotseat?whiteRace=${wBot.race || 'classic'}&blackRace=${bBot.race || 'classic'}&AIColor=all&AIPowerWhite=customEvolution&AIPowerBlack=customEvolution&gameType=${gameType}&starts=whiteStarts`;
     window.open(url, '_blank');
 }
 
@@ -1336,11 +1356,18 @@ function startEvoFight() {
     
     let fightWorker = new Worker('evolutionWorker.js');
     
+    let gameType = 'raceChoiceChess';
+    if (currentMode === 'rpg_army_small') gameType = 'rpgArmyChessSmall';
+    else if (currentMode === 'rpg_army_medium') gameType = 'rpgArmyChessMedium';
+    else if (currentMode === 'rpg_army_strong') gameType = 'rpgArmyChessStrong';
+    else if (currentMode === 'rpg_army_boss') gameType = 'rpgArmyChessBoss';
+
     fightWorker.postMessage(JSONfn.stringify({
         charWhite: wBot,
         charBlack: bBot,
         whiteRace: wBot.race || 'classic',
-        blackRace: bBot.race || 'classic'
+        blackRace: bBot.race || 'classic',
+        gameType: gameType
     }));
     
     fightWorker.onmessage = function(e) {
