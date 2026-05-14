@@ -21,6 +21,10 @@ const pieceDescriptions = {
         name: "Queen",
         description: "The most powerful piece. Moves any number of squares horizontally, vertically, or diagonally."
     },
+    "cyborgFactory": {
+        name: "Cyborg",
+        description: "It moves only ahead and jumps one square. It can swap places with nearby friendly pieces. If it reaches the end it promotes to a Juggernaut."
+    },
     "ghostFactory": {
         name: "Ghost",
         description: "The Ghost can move and take one or two squares ahead and it can jump THROUGH pieces."

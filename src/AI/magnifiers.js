@@ -192,12 +192,12 @@ function evaluationMagnifierKingVulnerability(piece,pieces,board,colorPerspectiv
 
 function evaluationMagnifierPiece(piece,pieces,board,colorPerspective,options){
     // Fast path for most common case
-    if (!options.whoHasMorePieces && !options.threshold) {
+    if (!options.whoHasMorePieces) {
         return piece.value * options.pieceValue;
     }
 
     let myPieces;
-    if(options.whoHasMorePieces || options.threshold){
+    if(options.whoHasMorePieces){
         myPieces = pieces.filter((piece) => {
             return piece.color === colorPerspective;
         })
@@ -207,15 +207,8 @@ function evaluationMagnifierPiece(piece,pieces,board,colorPerspective,options){
     if(options.whoHasMorePieces){
         pieceDifferenceChange = myPieces.length/(pieces.length-myPieces.length);
     }
-    if(options.threshold){
 
-        let quantifier = options.threshold(myPieces.length);
-        
-
-        return piece.value * quantifier*pieceDifferenceChange;
-    }
-
-    return piece.value*options.pieceValue;
+    return piece.value*options.pieceValue*pieceDifferenceChange;
 }
 
 function evaluationMagnifierThreatGeneration(piece,pieces,board,colorPerspective,options){
@@ -271,7 +264,7 @@ function evaluationMagnifierAttackingPieces(piece,pieces,board,colorPerspective,
     let isAttacked = null;
     
     for(let i = 0; i < enemyPieces.length; i++){
-        const enemy = enemyPieces[i];
+        const enemy = enemyPieces[i];   
         
         const attacksEnemy = board.find(square => square.x === enemy.x && square.y === enemy.y && square.allowedMove);
         if(attacksEnemy){
