@@ -1,5 +1,5 @@
 const request = require('supertest');
-const { app, http, io, cleanup } = require('./chessMissions.js');
+const { app, http, io, cleanup } = require('../chessMissions.js');
 
 describe('Endpoint Tests', () => {
   afterAll(async () => {
