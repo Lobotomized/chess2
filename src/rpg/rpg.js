@@ -355,7 +355,7 @@ function startNewGameWithMap(mapName) {
     applyDifficultySettings();
     
     // Reset rpgState object
-    rpgState.level = 1;
+    rpgState.level = 0;
     rpgState.kingLevel = 1;
     rpgState.kingExp = 0;
     rpgState.playerRoster = [];
@@ -375,7 +375,7 @@ function startNewGameWithMap(mapName) {
     rpgState.grandMap = { predefinedMap: mapName };
     
     updateGoldDisplay();
-    document.getElementById('levelDisplay').innerText = "Level: 1";
+    document.getElementById('levelDisplay').innerText = "Level: 0";
     
     // Initialize Grand Map with the predefined map
     if (typeof grandMap !== 'undefined') {
@@ -533,7 +533,7 @@ function startNewGame() {
     applyDifficultySettings();
     
     // Reset rpgState object
-    rpgState.level = 1;
+    rpgState.level = 0;
     rpgState.kingLevel = 1;
     rpgState.kingExp = 0;
     rpgState.playerRoster = [];
@@ -551,7 +551,7 @@ function startNewGame() {
     rpgState.boardHistory = [];
     
     updateGoldDisplay();
-    document.getElementById('levelDisplay').innerText = "Level: 1";
+    document.getElementById('levelDisplay').innerText = "Level: 0";
     
     // Initialize Grand Map
     if (typeof grandMap !== 'undefined') {
@@ -2008,9 +2008,16 @@ function showStartModal() {
             
             modal.close();
             showReorderModal(army, () => {
-                // Start level 1 with the easiest difficulty
-                const difficulty = window.difficulties ? window.difficulties[0] : { enemyValue: 3 };
-                startLevel(1, difficulty);
+                // Do not start a battle immediately. Let the player choose from the map.
+                rpgState.gameActive = false;
+                saveProgress();
+                
+                if (typeof showMapModal === 'function') {
+                    showMapModal();
+                } else {
+                    const mapDialog = document.getElementById('mapDialog');
+                    if (mapDialog) mapDialog.showModal();
+                }
             });
         };
         
@@ -2119,6 +2126,7 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
     let kingIndexTarget = 0;
 
     function recalculateLayout() {
+        
         activeFrontline = 0;
         frontPieces.forEach(u => {
             if (u && frontLineFactories.includes(u)) {
