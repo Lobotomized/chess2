@@ -29,15 +29,16 @@ async function init() {
     .then(res => res.json())
     .then(data => {
         gameData = data;
+        console.log(gameData, '  game data!?!?')
         document.getElementById('status').innerText = `${data.whiteRace} vs ${data.blackRace} - Winner: ${data.winner}`;
         
         // Initialize board
         gameState.whiteRace = data.whiteRace;
         gameState.blackRace = data.blackRace;
-        gameState.gameType = 'raceChoiceChess';
+        gameState.gameType = data.gameType || 'raceChoiceChess';
         
         // Reset board
-        raceChoiceChess(gameState, data.whiteRace, data.blackRace);
+        resetBoardToInitialState(data);
         
         drawBoard();
     })
@@ -47,6 +48,37 @@ async function init() {
     });
 }
 
+function resetBoardToInitialState(data) {
+    gameState.board.length = 0;
+    gameState.pieces.length = 0;
+    gameState.turn = 'white';
+    gameState.won = false;
+
+    let initialPieces = data.initialPieces;
+    if (typeof initialPieces === 'string') {
+        try { initialPieces = JSON.parse(initialPieces); } catch(e) {}
+    }
+    
+    if (initialPieces && initialPieces.length > 0) {
+        for (let x = 0; x <= 7; x++) {
+            for (let y = 0; y <= 7; y++) {
+                gameState.board.push({ light: false, x: x, y: y })
+            }
+        }
+        initialPieces.forEach(p => {
+            let factoryFn = window[p.factory];
+            if (!factoryFn && p.factory === 'simpleKingFactory') factoryFn = window.kingFactory;
+            
+            if (typeof factoryFn === 'function') {
+                gameState.pieces.push(factoryFn(p.color, p.x, p.y));
+            } else {
+                console.warn("Factory not found in replay: ", p.factory);
+            }
+        });
+    } else {
+        raceChoiceChess(gameState, data.whiteRace, data.blackRace);
+    }
+}
 const waitForImages = async () => {
     if (document.readyState !== 'complete') {
          await new Promise(resolve => window.addEventListener('load', resolve));
@@ -136,11 +168,7 @@ function prevMove() {
     
     // Reset
     currentMoveIndex = 0;
-    gameState.pieces = [];
-    gameState.board = [];
-    gameState.turn = 'white';
-    gameState.won = false;
-    raceChoiceChess(gameState, gameData.whiteRace, gameData.blackRace);
+    resetBoardToInitialState(gameData);
     
     // Fast forward
     while(currentMoveIndex < targetIndex) {

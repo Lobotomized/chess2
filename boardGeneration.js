@@ -303,8 +303,9 @@ function rpgArmyChess(state, raceWhite, raceBlack) {
     function getVal(factoryName) {
         if (factoryName === 'ricarFactory') return 3;
         if (factoryName === 'pigFactory') return 1.5;
-        if (typeof window[factoryName] === 'function') {
-            try { return window[factoryName]('white', 0, 0).value || 1; } catch (e) { return 1; }
+        let globalObj = typeof window !== 'undefined' ? window : self;
+        if (typeof globalObj[factoryName] === 'function') {
+            try { return globalObj[factoryName]('white', 0, 0).value || 1; } catch (e) { return 1; }
         }
         return 1;
     }
@@ -366,15 +367,20 @@ function rpgArmyChess(state, raceWhite, raceBlack) {
 
         let frontPieces = armyStrs.filter(f => frontLineFactories.includes(f));
         let backPieces = armyStrs.filter(f => !frontLineFactories.includes(f));
+        let globalObj = typeof window !== 'undefined' ? window : self;
 
         for (let i = 0; i < frontPieces.length; i++) {
-            if (typeof window[frontPieces[i]] === 'function') {
-                state.pieces.push(window[frontPieces[i]](color, i, frontY));
+            if (typeof globalObj[frontPieces[i]] === 'function') {
+                let piece = globalObj[frontPieces[i]](color, i, frontY);
+                piece.factoryName = frontPieces[i];
+                state.pieces.push(piece);
             }
         }
         for (let i = 0; i < backPieces.length; i++) {
-            if (typeof window[backPieces[i]] === 'function') {
-                state.pieces.push(window[backPieces[i]](color, i, backY));
+            if (typeof globalObj[backPieces[i]] === 'function') {
+                let piece = globalObj[backPieces[i]](color, i, backY);
+                piece.factoryName = backPieces[i];
+                state.pieces.push(piece);
             }
         }
     }

@@ -120,19 +120,33 @@ self.addEventListener("message", function(e) {
     let gameType = data.gameType || 'raceChoiceChess';
     try {
         if (gameType.startsWith('rpgArmyChess')) {
-            if (typeof rpgArmyChess === 'function') {
-                let targetValue = 25;
-                if (gameType === 'rpgArmyChessSmall') targetValue = 8;
-                else if (gameType === 'rpgArmyChessMedium') targetValue = 15;
-                else if (gameType === 'rpgArmyChessStrong') targetValue = 30;
-                else if (gameType === 'rpgArmyChessBoss') targetValue = 50;
+            let targetValue = 25;
+            if (gameType === 'rpgArmyChessSmall') targetValue = 8;
+            else if (gameType === 'rpgArmyChessMedium') targetValue = 15;
+            else if (gameType === 'rpgArmyChessStrong') targetValue = 30;
+            else if (gameType === 'rpgArmyChessBoss') targetValue = 50;
+            
+            // Web workers load boardGeneration.js directly, so functions are in global scope.
+            // If the wrapper function exists, call it. Otherwise fallback to the main function if available.
+            if (gameType === 'rpgArmyChessSmall' && typeof rpgArmyChessSmall === 'function') {
+                rpgArmyChessSmall(state, whiteRace, blackRace);
+            } else if (gameType === 'rpgArmyChessMedium' && typeof rpgArmyChessMedium === 'function') {
+                rpgArmyChessMedium(state, whiteRace, blackRace);
+            } else if (gameType === 'rpgArmyChessStrong' && typeof rpgArmyChessStrong === 'function') {
+                rpgArmyChessStrong(state, whiteRace, blackRace);
+            } else if (gameType === 'rpgArmyChessBoss' && typeof rpgArmyChessBoss === 'function') {
+                rpgArmyChessBoss(state, whiteRace, blackRace);
+            } else if (typeof rpgArmyChess === 'function') {
                 rpgArmyChess(state, whiteRace, blackRace, targetValue);
+            } else {
+                throw new Error("No rpgArmyChess generator functions found in worker scope");
             }
         } else {
             raceChoiceChess(state, whiteRace, blackRace);
         }
     } catch(err) {
         // Fallback or ignore
+        console.error("Worker board generation error:", err);
     }
     
     let whiteMagnifiers = characterToMagnifiers(charWhite);
@@ -140,6 +154,15 @@ self.addEventListener("message", function(e) {
     
     let whiteFilters = characterToFilters(charWhite);
     let blackFilters = characterToFilters(charBlack);
+
+    // To properly reconstruct RPG armies in replay, we must pass the initial board state.
+    // However, since pieces contain complex methods, we map them to simple initial definitions.
+    let initialPieces = state.pieces.map(p => ({
+        factory: p.factoryName || p.name || (p.icon ? p.icon.replace(p.color, '').replace('.png', '') + 'Factory' : null),
+        color: p.color,
+        x: p.x,
+        y: p.y
+    }));
 
     let turnLimit = 100; // 50 turns per side
     let turns = 0;
@@ -257,7 +280,14 @@ self.addEventListener("message", function(e) {
             }
         }
         
-        self.postMessage(JSONfn.stringify({ type: 'thinking', color: state.turn, turns: turns, moves: movesHistory }));
+        self.postMessage(JSONfn.stringify({
+            type: 'thinking', 
+            color: state.turn, 
+            turns: turns, 
+            moves: movesHistory,
+            initialPieces: initialPieces,
+            gameType: gameType
+        }));
 
         let moveStartTime = Date.now();
 
@@ -350,7 +380,9 @@ self.addEventListener("message", function(e) {
             blackRace: blackRace,
             winner: state.won,
             turns: turns,
-            moves: movesHistory 
+            moves: movesHistory,
+            initialPieces: initialPieces,
+            gameType: gameType
         }
     }));
 });

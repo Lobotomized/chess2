@@ -634,7 +634,9 @@ function runMatch() {
                             blackRace: blackRace,
                             winner: thinkingColor === 'white' ? 'black' : 'white',
                             turns: msg.turns || 0,
-                            moves: currentMoves // Use moves tracked until the timeout
+                            moves: currentMoves, // Use moves tracked until the timeout
+                            initialPieces: msg.initialPieces ? JSON.stringify(msg.initialPieces) : undefined,
+                            gameType: msg.gameType
                         }
                     };
                     handleMatchResult(charWhite, charBlack, result);
@@ -644,6 +646,9 @@ function runMatch() {
         }
         
         if (msg.type === 'result') {
+            if (msg.history && msg.history.initialPieces && typeof msg.history.initialPieces !== 'string') {
+                msg.history.initialPieces = JSON.stringify(msg.history.initialPieces);
+            }
             if (workerTimeout) clearTimeout(workerTimeout);
             handleMatchResult(charWhite, charBlack, msg);
         }
