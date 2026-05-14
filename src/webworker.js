@@ -213,7 +213,6 @@ self.addEventListener("message", async function(e) {
                 if (charConfigStr) {
                     try {
                         let charConfig = JSON.parse(charConfigStr);
-                        
                         // Build magnifiers
                         let mags = parseMags(charConfig.magnifiers, charConfig);
                         // Build filters

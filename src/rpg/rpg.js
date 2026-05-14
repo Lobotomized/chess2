@@ -198,6 +198,18 @@ function initRpgGame() {
         })
         .catch(err => console.error("Failed to load Hall of Fame bots:", err));
 
+    rpgState.rpgBots = {};
+    const rpgModes = ['rpg_army_small', 'rpg_army_medium', 'rpg_army_strong', 'rpg_army_boss'];
+    rpgModes.forEach(mode => {
+        fetch(`/api/bots/mode/${mode}`)
+            .then(res => res.json())
+            .then(data => {
+                rpgState.rpgBots[mode] = data;
+                console.log(`Loaded ${mode} bots:`, data.length);
+            })
+            .catch(err => console.error(`Failed to load ${mode} bots:`, err));
+    });
+
     // Bind cancel events to dialogs so Escape key behaves correctly
     const mapDialog = document.getElementById('mapDialog');
     if (mapDialog) {
@@ -3767,24 +3779,68 @@ function triggerAI(color) {
     let aiPower = 101;
     let customEvolutionBlackStr = undefined;
     
-    if (rpgState.hofBots && rpgState.hofBots.length > 0) {
-        // Map region to race string
-        let regionToRace = {
-            'Classic': 'classic',
-            'Medieval': 'medieval',
-            'Insect': 'bug',
-            'Promoters': 'promoters',
-            'Cyborgs': 'cyborgs'
-        };
-        let enemyRace = regionToRace[rpgState.enemyRegion] || 'classic';
-        
-        let raceBots = rpgState.hofBots.filter(b => b.race === enemyRace);
-        if (raceBots.length > 0) {
-            let randomIndex = Math.floor(Math.random() * raceBots.length);
-            let randomBot = raceBots[randomIndex];
-            aiPower = 'customEvolution';
-            customEvolutionBlackStr = JSON.stringify(randomBot);
+    // Map region to race string
+    let regionToRace = {
+        'Classic': 'classic',
+        'Medieval': 'medieval',
+        'Insect': 'bug',
+        'Promoters': 'promoters',
+        'Cyborgs': 'cyborgs'
+    };
+    let enemyRace = regionToRace[rpgState.enemyRegion] || 'classic';
+
+    // Calculate enemy army points
+    let totalPoints = 0;
+    if (hotseatGame && hotseatGame.state && hotseatGame.state.pieces) {
+        hotseatGame.state.pieces.filter(p => p.color === 'black').forEach(p => {
+            if (p.factory && !p.factory.toLowerCase().includes('king')) {
+                totalPoints += getPieceValue(p.factory);
+            } else if (!p.factory && p.value && p.value < 100) {
+                totalPoints += p.value;
+            }
+        });
+    }
+
+    let targetMode = 'rpg_army_boss';
+    if (totalPoints < 11) targetMode = 'rpg_army_small';
+    else if (totalPoints < 21) targetMode = 'rpg_army_medium';
+    else if (totalPoints < 40) targetMode = 'rpg_army_strong';
+
+    let selectedBot = null;
+    let rpgModes = ['rpg_army_small', 'rpg_army_medium', 'rpg_army_strong', 'rpg_army_boss'];
+
+    // 1. Try exact mode and race
+    if (rpgState.rpgBots && rpgState.rpgBots[targetMode]) {
+        let exactBots = rpgState.rpgBots[targetMode].filter(b => b.race === enemyRace);
+        if (exactBots.length > 0) {
+            selectedBot = exactBots[Math.floor(Math.random() * exactBots.length)];
         }
+    }
+
+    // 2. Try other RPG modes for the same race
+    if (!selectedBot && rpgState.rpgBots) {
+        let otherModesBots = [];
+        rpgModes.forEach(mode => {
+            if (mode !== targetMode && rpgState.rpgBots[mode]) {
+                otherModesBots = otherModesBots.concat(rpgState.rpgBots[mode].filter(b => b.race === enemyRace));
+            }
+        });
+        if (otherModesBots.length > 0) {
+            selectedBot = otherModesBots[Math.floor(Math.random() * otherModesBots.length)];
+        }
+    }
+
+    // 3. Try normal Hall of Fame bots for the same race
+    if (!selectedBot && rpgState.hofBots && rpgState.hofBots.length > 0) {
+        let normalBots = rpgState.hofBots.filter(b => b.race === enemyRace);
+        if (normalBots.length > 0) {
+            selectedBot = normalBots[Math.floor(Math.random() * normalBots.length)];
+        }
+    }
+
+    if (selectedBot) {
+        aiPower = 'customEvolution';
+        customEvolutionBlackStr = JSON.stringify(selectedBot);
     }
 
     w.postMessage(JSONfn.stringify({
