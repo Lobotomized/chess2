@@ -50,6 +50,6 @@ const botSchema = new Schema({
     mode: { type: String, default: 'normal' },
 
     createdAt: { type: Date, default: Date.now }
-});
+}, { strict: false });
 
 module.exports = mongoose.model('Bot', botSchema);

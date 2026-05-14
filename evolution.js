@@ -538,7 +538,8 @@ function confirmPlay() {
     
     let playerRace = document.getElementById('playerRaceSelect').value;
     
-    localStorage.setItem('chess_evolution_custom_ai', JSON.stringify(char));
+    localStorage.setItem('chess_evolution_custom_ai_black', JSON.stringify(char));
+    localStorage.removeItem('chess_evolution_custom_ai_white');
     
     let url = `/hotseat?whiteRace=${playerRace}&blackRace=${char.race || 'classic'}&AIColor=black&AIPowerBlack=customEvolution&gameType=raceChoiceChess&starts=whiteStarts`;
     window.open(url, '_blank');

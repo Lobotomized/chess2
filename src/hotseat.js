@@ -97,7 +97,7 @@ const startGameLoop = async () => {
                 else if (powerStr === 'randomHallOfFameHard') mode = 'normal';
                 else if (powerStr === 'randomHallOfFameSuperHard') mode = 'slow';
 
-                const res = await fetch(`/api/bots/mode/${mode}`);
+                const res = await fetch(`/api/bots/mode/${mode}?t=${Date.now()}`);
                 const bots = await res.json();
 
                 if (bots && bots.length > 0) {

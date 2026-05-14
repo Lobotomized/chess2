@@ -51,6 +51,12 @@
         th {
             background-color: #333;
         }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        tr:hover td {
+            background-color: #2d2d2d;
+        }
         .filter-tag {
             display: inline-block;
             padding: 2px 4px;
@@ -63,6 +69,56 @@
         .filter-ra { background-color: #ff6b6b; }
         .filter-rna { background-color: #4ecdc4; }
         .filter-rr { background-color: #ffe66d; }
+        
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+        .modal-content {
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 12px;
+            min-width: 400px;
+            max-width: 600px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            border: 1px solid #333;
+            text-align: left;
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 10px;
+        }
+        .modal-header h2 {
+            font-family: 'Lilita One', cursive; font-weight: normal; letter-spacing: 1px; margin: 0; color: #ffffff; 
+        }
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        .detail-label { color: #888; }
+        .detail-value { font-weight: bold; color: #e0e0e0; }
+        .section-title {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            font-size: 22px;
+            color: #829769;
+            border-bottom: 1px solid #444;
+            padding-bottom: 5px;
+        }
     </style>
     <script src="/src/jsonfn.js"></script>
 <script src="/src/modal.js?v=1"></script>
@@ -147,6 +203,19 @@
                 <button onclick="document.getElementById('historyModal').style.display='none'" style="position:absolute; top:10px; right:10px; background:#555;">Close</button>
                 <h2>Hall of Fame Fights History</h2>
                 <div id="historyContent">Loading...</div>
+            </div>
+        </div>
+
+        <!-- Bot Details Modal -->
+        <div id="detailsModal" class="modal-overlay" onclick="if(event.target === this) closeDetailsModal()">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Bot Details</h2>
+                    <button onclick="closeDetailsModal()" style="padding:5px 10px;">X</button>
+                </div>
+                <div id="modalBody">
+                    <!-- Content populated by JS -->
+                </div>
             </div>
         </div>
     </div>

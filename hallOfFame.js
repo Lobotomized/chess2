@@ -19,7 +19,7 @@ function changeHofMode(mode) {
 }
 
 function loadBots() {
-    fetch(`/api/bots/mode/${currentHofMode}`)
+    fetch(`/api/bots/mode/${currentHofMode}?t=${Date.now()}`)
     .then(res => res.json())
     .then(data => {
         bots = data;
@@ -72,10 +72,31 @@ function updateUI() {
         }
         
         let tr = document.createElement('tr');
-        let algStr = c.algorithm === 'minimaxDeep' ? 'Deep' : (c.algorithm === 'minimaxAlphaBetaBudget' ? 'ABB' : (c.algorithm === 'minimaxQuiescence' ? 'Q' : (c.algorithm === 'proofNumberSearch' ? 'PNS' : (c.algorithm === 'bestFirstSearch' ? 'BFS' : 'AB'))));
-        if (c.altAlgorithm) {
-            let altAlgStr = c.altAlgorithm === 'minimaxDeep' ? 'Deep' : (c.altAlgorithm === 'minimaxAlphaBetaBudget' ? 'ABB' : (c.altAlgorithm === 'minimaxQuiescence' ? 'Q' : (c.altAlgorithm === 'proofNumberSearch' ? 'PNS' : (c.altAlgorithm === 'bestFirstSearch' ? 'BFS' : 'AB'))));
-            algStr += ` <i>(${altAlgStr}<=${c.altPieceThreshold || 10})</i>`;
+        tr.style.cursor = 'pointer';
+        tr.onclick = (e) => {
+            if(e.target.tagName !== 'BUTTON') showDetails(c.id || c._id);
+        };
+
+        const getAlgShort = (alg) => {
+            if(alg === 'minimaxDeep') return 'Deep';
+            if(alg === 'minimaxAlphaBetaBudget') return 'ABB';
+            if(alg === 'minimaxQuiescence') return 'Q';
+            if(alg === 'proofNumberSearch') return 'PNS';
+            if(alg === 'bestFirstSearch') return 'BFS';
+            if(alg === 'principalVariationSearch') return 'PVS';
+            return 'AB';
+        };
+
+        let algStr = getAlgShort(c.algorithm);
+        
+        if (c.altAlgorithm && (!c.phases || c.phases.length === 0)) {
+            c.phases = [{threshold: c.altPieceThreshold || 10, algorithm: c.altAlgorithm}];
+        }
+        
+        if (c.phases && c.phases.length > 0) {
+            let sortedPhases = [...c.phases].sort((a,b) => b.threshold - a.threshold);
+            let phaseStrs = sortedPhases.map(p => `${getAlgShort(p.algorithm)}<=${p.threshold}`);
+            algStr += ` <br><i style="font-size:0.85em">(${phaseStrs.join(', ')})</i>`;
         }
 
         tr.innerHTML = `
@@ -147,7 +168,8 @@ function confirmPlay() {
     
     let playerRace = document.getElementById('playerRaceSelect').value;
     
-    localStorage.setItem('chess_evolution_custom_ai', JSON.stringify(char));
+    localStorage.setItem('chess_evolution_custom_ai_black', JSON.stringify(char));
+    localStorage.removeItem('chess_evolution_custom_ai_white');
     
     let url = `/hotseat?whiteRace=${playerRace}&blackRace=${char.race || 'classic'}&AIColor=black&AIPowerBlack=customEvolution&gameType=raceChoiceChess&starts=whiteStarts`;
     window.open(url, '_blank');
@@ -337,6 +359,99 @@ function showHofHistory() {
         document.getElementById('historyContent').innerText = 'Error loading history.';
         console.error(e);
     });
+}
+
+function showDetails(charId) {
+    let c = bots.find(char => (char.id || char._id) === charId);
+    if (!c) return;
+
+    document.getElementById('modalTitle').innerText = `Bot: ${c.name || c.id || c._id}`;
+    let body = document.getElementById('modalBody');
+    
+    let filtersHtml = '';
+    
+    const formatExc = (val, name) => val ? `<div class="detail-row"><span class="detail-label"> - ${name}</span><span class="detail-value">Yes</span></div>` : '';
+    const formatVal = (val, name) => val !== undefined ? `<div class="detail-row"><span class="detail-label"> - ${name}</span><span class="detail-value">${val.toFixed ? val.toFixed(2) : val}</span></div>` : '';
+
+    if(c.useRemoveAttacked) {
+        filtersHtml += `<div class="section-title">Remove Attacked Moves</div>`;
+        filtersHtml += formatVal(c.raRandomException, 'Random Exception');
+        filtersHtml += formatExc(c.raExceptionPieceValue, 'Piece Value Exception');
+        filtersHtml += formatExc(c.raExceptionPieceValueSmaller, 'Piece Value Smaller Exception');
+    }
+    if(c.useRemoveNonAttacking) {
+        filtersHtml += `<div class="section-title">Remove Non-Attacking Moves</div>`;
+        filtersHtml += formatVal(c.rnaMaxPieceValue, 'Max Piece Value');
+        filtersHtml += formatVal(c.rnaExceptionRandom, 'Random Exception');
+        filtersHtml += formatExc(c.rnaExceptionPieceValue, 'Piece Value Exception');
+        filtersHtml += formatExc(c.rnaExceptionPieceValueSmaller, 'Piece Value Smaller Exception');
+    }
+    if(c.useRandomlyRemove) {
+        filtersHtml += `<div class="section-title">Randomly Remove Moves</div>`;
+        filtersHtml += formatVal(c.rrN, '1 in N moves removed');
+        filtersHtml += formatVal(c.rrExceptionRandom, 'Random Exception');
+        filtersHtml += formatExc(c.rrExceptionAttacked, 'Attacked Exception');
+        filtersHtml += formatExc(c.rrExceptionPieceValueSmaller, 'Piece Value Smaller Exception');
+    }
+    if(c.useMaxMoves) {
+        filtersHtml += `<div class="section-title">Max Moves Per Piece</div>`;
+        filtersHtml += formatVal(c.mmMax, 'Max Moves');
+        filtersHtml += formatExc(c.mmExceptionAttacked, 'Attacked Exception');
+    }
+    if(c.useNthChance) {
+        filtersHtml += `<div class="section-title">Nth Chance to Skip Piece</div>`;
+        filtersHtml += formatVal(c.nthChance, 'Chance');
+        filtersHtml += formatExc(c.ncExceptionAttacked, 'Attacked Exception');
+        filtersHtml += formatExc(c.ncExceptionPieceValue, 'Piece Value Exception');
+    }
+    if(c.useRemoveWellPositioned) {
+        filtersHtml += `<div class="section-title">Remove Well Positioned</div>`;
+        filtersHtml += formatVal(c.rwpN, 'Max Moves Threshold');
+        filtersHtml += formatExc(c.rwpExceptionAttacked, 'Attacked Exception');
+    }
+
+    let magnifiersHtml = `<div class="section-title">Magnifiers</div>`;
+    
+    if (c.magnifiers && c.magnifiers.length > 0) {
+        c.magnifiers.forEach(m => {
+            magnifiersHtml += `<div class="detail-row" style="background:#333; padding:5px; border-radius:4px; margin-bottom:5px; display:block;">
+                <div style="font-weight:bold; color:#f0d9b5; margin-bottom:2px;">${m.name}</div>
+                <div style="display:flex; flex-wrap:wrap; gap:8px; font-size:11px;">`;
+            
+            Object.keys(m.options).forEach(k => {
+                let v = m.options[k];
+                if(typeof v === 'number') v = parseFloat(v.toFixed(2));
+                magnifiersHtml += `<span style="background:#222; padding:2px 4px; border-radius:3px; color:#aaa;">${k}: <span style="color:#fff;">${v}</span></span>`;
+            });
+            
+            magnifiersHtml += `</div></div>`;
+        });
+    } else {
+        if(c.pieceValueWeight !== undefined) magnifiersHtml += `<div class="detail-row"><span class="detail-label">Piece Value</span><span class="detail-value">${c.pieceValueWeight.toFixed(2)}</span></div>`;
+        if(c.posValueWeight !== undefined) magnifiersHtml += `<div class="detail-row"><span class="detail-label">Positional Value</span><span class="detail-value">${c.posValueWeight.toFixed(2)}</span></div>`;
+        if(c.kingTropismWeight !== undefined) magnifiersHtml += `<div class="detail-row"><span class="detail-label">King Tropism</span><span class="detail-value">${c.kingTropismWeight.toFixed(2)}</span></div>`;
+        if(c.defendedWeight !== undefined) magnifiersHtml += `<div class="detail-row"><span class="detail-label">Defended Pieces</span><span class="detail-value">${c.defendedWeight.toFixed(2)}</span></div>`;
+        if(c.kingVulnAttackWeight !== undefined) magnifiersHtml += `<div class="detail-row"><span class="detail-label">King Vuln (Att)</span><span class="detail-value">${c.kingVulnAttackWeight.toFixed(2)}</span></div>`;
+        if(c.kingVulnProxWeight !== undefined) magnifiersHtml += `<div class="detail-row"><span class="detail-label">King Vuln (Prox)</span><span class="detail-value">${c.kingVulnProxWeight.toFixed(2)}</span></div>`;
+    }
+
+    body.innerHTML = `
+        <div class="section-title" style="margin-top:0;">General Stats</div>
+        <div class="detail-row"><span class="detail-label">ELO Score</span><span class="detail-value">${Math.round(c.score)}</span></div>
+        <div class="detail-row"><span class="detail-label">Games Played</span><span class="detail-value">${c.gamesPlayed}</span></div>
+        <div class="detail-row"><span class="detail-label">Algorithm</span><span class="detail-value">${c.algorithm || 'minimaxAlphaBeta'}</span></div>
+        <div class="detail-row"><span class="detail-label">Search Depth</span><span class="detail-value">${c.depth}</span></div>
+        
+        ${magnifiersHtml}
+
+        ${filtersHtml}
+    `;
+
+    document.getElementById('detailsModal').style.display = 'flex';
+}
+
+function closeDetailsModal() {
+    document.getElementById('detailsModal').style.display = 'none';
 }
 
 window.onload = init;
