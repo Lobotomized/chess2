@@ -159,7 +159,7 @@ html{
     display: none; /* Chrome, Safari and Opera */
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 600px), (max-aspect-ratio: 1/1) {
     .board-wrapper {
         flex-direction: column !important;
         align-items: center !important;
@@ -621,7 +621,7 @@ html{
     to { opacity: 0; visibility: hidden; }
 }
 
-@media only screen and (max-width: 600px) {
+@media only screen and (max-width: 600px), (max-aspect-ratio: 1/1) {
     .desktop-only {
         display: none !important;
     }
@@ -630,7 +630,7 @@ html{
     }
 }
 
-@media only screen and (min-width: 601px) {
+@media only screen and (min-width: 601px) and (min-aspect-ratio: 1/1) {
     .desktop-only {
         display: flex !important;
     }
