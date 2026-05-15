@@ -14,7 +14,11 @@ function init() {
 
 function changeHofMode(mode) {
     currentHofMode = mode;
-    localStorage.setItem('chess_hof_mode', mode);
+    try {
+        localStorage.setItem('chess_hof_mode', mode);
+    } catch (e) {
+        console.warn("Could not save hof mode", e);
+    }
     loadBots();
 }
 

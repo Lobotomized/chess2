@@ -41,8 +41,14 @@ function init() {
 function loadDataForMode(mode) {
     characters = [];
     generation = 0;
-    let cacheKey = mode === 'normal' ? 'chess_evolution_cache' : `chess_evolution_cache_${mode}`;
-    let saved = localStorage.getItem(cacheKey);
+    let cacheKey = mode === 'normal' ? 'chess_evolution_cache' : `chess_evolution_cache_v2_${mode}`;
+    let saved = null;
+    try {
+        saved = localStorage.getItem(cacheKey);
+    } catch (e) {
+        console.warn("Could not read from localStorage", e);
+    }
+    
     if (saved) {
         try {
             let data = JSON.parse(saved);
@@ -74,24 +80,65 @@ function changeEvolutionMode(mode) {
         toggleEvolution(); // stop current
     }
     currentMode = mode;
-    localStorage.setItem('chess_evolution_mode', mode);
+    try {
+        localStorage.setItem('chess_evolution_mode', mode);
+    } catch (e) {
+        console.warn("Could not save evolution mode", e);
+    }
     loadDataForMode(mode);
     updateUI();
 }
 
 function saveData() {
-    let cacheKey = currentMode === 'normal' ? 'chess_evolution_cache' : `chess_evolution_cache_${currentMode}`;
-    localStorage.setItem(cacheKey, JSON.stringify({
-        characters: characters,
-        generation: generation
-    }));
+    let cacheKey = currentMode === 'normal' ? 'chess_evolution_cache' : `chess_evolution_cache_v2_${currentMode}`;
+    try {
+        localStorage.setItem(cacheKey, JSON.stringify({
+            characters: characters,
+            generation: generation
+        }));
+    } catch (e) {
+        console.error("Could not save evolution data, localStorage might be full", e);
+    }
 }
 
 function generateRandomCharacter() {
+    let depthMin = 2;
+    let depthMax = 3;
+    let phaseMax = 20;
+    let phaseMin = 4;
+    
+    if (currentMode === 'rpg_army_small') {
+        depthMin = 3;
+        depthMax = 4;
+        phaseMax = 8;
+        phaseMin = 2;
+    } else if (currentMode === 'rpg_army_medium') {
+        depthMin = 2;
+        depthMax = 4;
+        phaseMax = 12;
+        phaseMin = 3;
+    } else if (currentMode === 'rpg_army_strong') {
+        depthMin = 2;
+        depthMax = 3;
+        phaseMax = 16;
+        phaseMin = 4;
+    } else if (currentMode === 'rpg_army_boss') {
+        depthMin = 2;
+        depthMax = 3;
+        phaseMax = 20;
+        phaseMin = 4;
+    } else if (currentMode === 'super_fast') {
+        depthMin = 1;
+        depthMax = 2;
+    } else if (currentMode === 'slow') {
+        depthMin = 3;
+        depthMax = 5;
+    }
+
     let char = {
         id: Math.random().toString(36).substr(2, 6).toUpperCase(),
         race: RACES[Math.floor(Math.random() * RACES.length)],
-        depth: Math.floor(Math.random() * 2) + 2, // 2 or 3 for rapid play
+        depth: Math.floor(Math.random() * (depthMax - depthMin + 1)) + depthMin,
         algorithm: EVOLUTION_ALGORITHMS[Math.floor(Math.random() * EVOLUTION_ALGORITHMS.length)],
         phases: [],
         magnifiers: [],
@@ -168,7 +215,7 @@ function generateRandomCharacter() {
     let numPhases = Math.floor(Math.random() * 3);
     for (let i = 0; i < numPhases; i++) {
         char.phases.push({
-            threshold: Math.floor(Math.random() * 20) + 4, // 4 to 23 pieces
+            threshold: Math.floor(Math.random() * (phaseMax - phaseMin + 1)) + phaseMin,
             algorithm: EVOLUTION_ALGORITHMS[Math.floor(Math.random() * EVOLUTION_ALGORITHMS.length)]
         });
     }
@@ -729,6 +776,39 @@ function evolve() {
 }
 
 function crossover(p1, p2) {
+    let depthMin = 2;
+    let depthMax = 3;
+    let phaseMax = 20;
+    let phaseMin = 4;
+    
+    if (currentMode === 'rpg_army_small') {
+        depthMin = 3;
+        depthMax = 4;
+        phaseMax = 8;
+        phaseMin = 2;
+    } else if (currentMode === 'rpg_army_medium') {
+        depthMin = 2;
+        depthMax = 4;
+        phaseMax = 12;
+        phaseMin = 3;
+    } else if (currentMode === 'rpg_army_strong') {
+        depthMin = 2;
+        depthMax = 3;
+        phaseMax = 16;
+        phaseMin = 4;
+    } else if (currentMode === 'rpg_army_boss') {
+        depthMin = 2;
+        depthMax = 3;
+        phaseMax = 20;
+        phaseMin = 4;
+    } else if (currentMode === 'super_fast') {
+        depthMin = 1;
+        depthMax = 2;
+    } else if (currentMode === 'slow') {
+        depthMin = 3;
+        depthMax = 5;
+    }
+
     let child = {
         id: Math.random().toString(36).substr(2, 6).toUpperCase(),
         race: Math.random() > 0.5 ? p1.race : p2.race,
@@ -840,7 +920,7 @@ function crossover(p1, p2) {
     }
 
     if (Math.random() < 0.1) {
-        child.depth = Math.floor(Math.random() * 4) + 2;
+        child.depth = Math.floor(Math.random() * (depthMax - depthMin + 1)) + depthMin;
     }
     if (Math.random() < 0.1) {
         child.algorithm = EVOLUTION_ALGORITHMS[Math.floor(Math.random() * EVOLUTION_ALGORITHMS.length)];
@@ -859,7 +939,7 @@ function crossover(p1, p2) {
             let idx = Math.floor(Math.random() * pool.length);
             let picked = pool.splice(idx, 1)[0];
             // slight mutation on threshold
-            picked.threshold = Math.max(2, picked.threshold + Math.floor(Math.random() * 5) - 2);
+            picked.threshold = Math.max(phaseMin, Math.min(phaseMax, picked.threshold + Math.floor(Math.random() * 5) - 2));
             child.phases.push(picked);
         }
     }
@@ -867,7 +947,7 @@ function crossover(p1, p2) {
     // Mutation: add a completely new random phase
     if (Math.random() < 0.1) {
         child.phases.push({
-             threshold: Math.floor(Math.random() * 20) + 4,
+             threshold: Math.floor(Math.random() * (phaseMax - phaseMin + 1)) + phaseMin,
              algorithm: EVOLUTION_ALGORITHMS[Math.floor(Math.random() * EVOLUTION_ALGORITHMS.length)]
         });
     }
