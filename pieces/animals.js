@@ -116,7 +116,7 @@ function horseFactory(color,x,y){
         color:color,
         x:x,
         y:y,
-        value:5,
+        value:6,
         posValue:posValue[3]
     }
 }

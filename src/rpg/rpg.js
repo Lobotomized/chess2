@@ -1966,7 +1966,7 @@ function showStartModal() {
     
  
     const generatedOptions = [];
-    let maxValue = 0;
+    const TARGET_VALUE = 9;
 
     for (let i = 0; i < 4; i++) {
         // Increase initial targetValue slightly so it can actually afford 8 frontline pieces + some backline, 
@@ -1976,17 +1976,13 @@ function showStartModal() {
         
         let armyObj;
         if (rpgState.armyType === 'classic') {
-            armyObj = generateRandomArmy(9, true, 'Classic', true, allowNonClassic);
+            armyObj = generateRandomArmy(TARGET_VALUE, true, 'Classic', true, allowNonClassic);
         } else {
-            armyObj = generateRandomArmy(9, true, null, true, allowNonClassic);
+            armyObj = generateRandomArmy(TARGET_VALUE, true, null, true, allowNonClassic);
         }
         
         // Pick a random skill for this army
         const randomSkill = RPGSKILLS[Math.floor(Math.random() * RPGSKILLS.length)];
-
-        if (armyObj.value > maxValue) {
-            maxValue = armyObj.value;
-        }
 
         generatedOptions.push({
             army: armyObj.army,
@@ -2010,10 +2006,9 @@ function showStartModal() {
         const desc = randomSkill.getDescription ? randomSkill.getDescription(1) : randomSkill.description;
         
         let bonusFood = 0;
-        if (value < maxValue) {
-            // Give 15 food per point difference
-            console.log(value, maxValue)
-            bonusFood = Math.round((maxValue - value) * 15);
+        if (value < TARGET_VALUE) {
+            // Give 15 food per point difference from the target value
+            bonusFood = Math.round((TARGET_VALUE - value) * 15);
         }
         
         let bonusText = "";
