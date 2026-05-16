@@ -458,7 +458,7 @@
         }
 
         .map-cell.market::before {
-            content: '🛒';
+            content: '';
             font-size: 16px;
             opacity: 0.4;
             position: absolute;
@@ -534,8 +534,8 @@
     <div class="container" style="display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 100%; margin: 0 auto;">
         <div class="top-bar" style="display: flex; flex-direction: row; justify-content: space-between; align-items: center; padding: 15px 20px; box-sizing: border-box; width: 100%; max-width: 500px;">
             <div style="display: flex; flex-direction: column; gap: 5px; align-items: flex-start;">
-                <div id="foodDisplay" style="color: #f7e98e; font-weight: bold; font-size: 28px; text-shadow: 1px 1px 4px rgba(0,0,0,0.5);">🍖 <span id="foodValue">0</span></div>
-                <div id="enemyFoodDisplay" style="color: #ff6b6b; font-weight: bold; font-size: 28px; text-shadow: 1px 1px 4px rgba(0,0,0,0.5); display: none;">🍖 <span id="enemyFoodValue">0</span></div>
+                <div id="foodDisplay" style="color: #f7e98e; font-weight: bold; font-size: 28px; text-shadow: 1px 1px 4px rgba(0,0,0,0.5);"><img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"> <span id="foodValue">0</span></div>
+                <div id="enemyFoodDisplay" style="color: #ff6b6b; font-weight: bold; font-size: 28px; text-shadow: 1px 1px 4px rgba(0,0,0,0.5); display: none;"><img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"> <span id="enemyFoodValue">0</span></div>
             </div>
             <div style="display: flex; flex-direction: column; gap: 5px;">
                 <button class="general-btn" onclick="showEnemyInfo()">Learn about the enemy</button>
@@ -544,7 +544,7 @@
             
             <!-- Hidden elements -->
             <h1 id="levelDisplay" style="display: none;">Level: 1</h1>
-            <div id="goldDisplay" style="display: none;">🪙 <span id="goldValue">0</span></div>
+            <div id="goldDisplay" style="display: none;"><img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"> <span id="goldValue">0</span></div>
             <span id="turn" style="display: none;"></span>
         </div>
         <div class="board-wrapper" style="display: flex; flex-direction: row; gap: 20px; align-items: flex-start; justify-content: center; max-width: 100%;">
@@ -629,8 +629,8 @@
     <dialog id="mapDialog" style="max-width: 90vw; width: 90vw;" oncancel="event.preventDefault();">
         <h2>World Map</h2>
         <div style="display: flex; justify-content: center; gap: 30px; font-size: 24px; font-weight: bold; margin-bottom: 10px;">
-            <span style="color: #ffd700; text-shadow: 1px 1px 2px #000;"><span id="mapGoldDisplay">0</span> 💰</span>
-            <span style="color: #d32f2f; text-shadow: 1px 1px 2px #000;"><span id="mapFoodDisplay">0</span> 🍖</span>
+            <span style="color: #ffd700; text-shadow: 1px 1px 2px #000;"><span id="mapGoldDisplay">0</span> <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" alt="Gold" style="height: 1em; width: 1em; vertical-align: middle;"></span>
+            <span style="color: #d32f2f; text-shadow: 1px 1px 2px #000;"><span id="mapFoodDisplay">0</span> <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></span>
             <span style="color: #a29bfe; text-shadow: 1px 1px 2px #000; font-size: 20px;">Lvl <span id="mapKingLevelDisplay">1</span> (<span id="mapKingExpDisplay">0</span> / <span id="mapKingNextExpDisplay">0</span> XP) 👑</span>
         </div>
         <p>Drag to scroll</p>
@@ -670,7 +670,7 @@
     <!-- Shop Modal -->
     <dialog id="shopDialog" oncancel="event.preventDefault(); document.getElementById('shopDialog').close(); showMapModal();">
         <h2>Mercenary Market</h2>
-        <p>Current 🪙: <span id="playerGold" style="color:#e5b53e; font-weight:bold;">0</span></p>
+        <p><span id="playerGold" style="color:#e5b53e; font-weight:bold; font-size:40px;">0</span><img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"> </p>
         <div id="shopOptions" class="army-choice"></div>
         <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 20px;">
             <button onclick="document.getElementById('shopDialog').close(); showMapModal();">Leave Market</button>

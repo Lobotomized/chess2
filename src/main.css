@@ -160,6 +160,11 @@ html{
 }
 
 @media only screen and (max-width: 600px), (max-aspect-ratio: 1/1) {
+    .responsive-modal-buttons {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    
     .board-wrapper {
         flex-direction: column !important;
         align-items: center !important;
@@ -636,5 +641,12 @@ html{
     }
     .mobile-only {
         display: none !important;
+    }
+}
+
+@media only screen and (min-width: 601px) {
+    .food-icon-responsive {
+        width: 2em !important;
+        height: 2em !important;
     }
 }

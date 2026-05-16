@@ -794,32 +794,28 @@
                     if (node.board === 'Market') {
                         const marketInd = document.createElement('div');
                         marketInd.className = 'indicator boss-indicator'; // Centered
-                        marketInd.style.fontSize = '30px';
-                        marketInd.innerText = '🛒';
+                        marketInd.innerHTML = '<img src="/static/bigMap/shopIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
                         cell.appendChild(marketInd);
                     } 
                     
                     if (node.board === 'Library') {
                         const libInd = document.createElement('div');
                         libInd.className = 'indicator boss-indicator'; // Centered
-                        libInd.style.fontSize = '30px';
-                        libInd.innerText = '📖';
+                        libInd.innerHTML = '<img src="/static/bigMap/experienceIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
                         cell.appendChild(libInd);
                     } 
 
                     if (node.board === 'Inn') {
                         const innInd = document.createElement('div');
                         innInd.className = 'indicator boss-indicator'; // Centered
-                        innInd.style.fontSize = '30px';
-                        innInd.innerText = '🏨';
+                        innInd.innerHTML = '<img src="/static/bigMap/innIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
                         cell.appendChild(innInd);
                     } 
                     
                     if (node.board === 'Bank') {
                         const bankInd = document.createElement('div');
                         bankInd.className = 'indicator boss-indicator'; // Centered
-                        bankInd.style.fontSize = '30px';
-                        bankInd.innerText = '🏦';
+                        bankInd.innerHTML = '<img src="/static/bigMap/bank.jpg" style="height: 1em; width: 1em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
                         cell.appendChild(bankInd);
                     } 
                     
@@ -837,7 +833,15 @@
                         powerInd.style.background = 'rgba(0,0,0,0.6)';
                         powerInd.style.padding = '2px 4px';
                         powerInd.style.borderRadius = '4px';
-                        powerInd.innerText = `⚔️ ${node.enemyPower}`;
+                        if (node.board === 'Inn') {
+                            powerInd.innerHTML = `<img src="/static/bigMap/foodIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
+                        } else if (node.board === 'Bank') {
+                            powerInd.innerHTML = `<img src="/static/bigMap/bank.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
+                        } else if (node.board === 'Library') {
+                            powerInd.innerHTML = `<img src="/static/bigMap/experienceIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
+                        } else {
+                            powerInd.innerHTML = `<img src="/static/bigMap/swords.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
+                        }
                         cell.appendChild(powerInd);
                     }
                     

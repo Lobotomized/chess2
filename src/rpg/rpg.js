@@ -481,11 +481,11 @@ async function loadGame() {
                  if(goldText) {
                      if (rpgState.currentRewardType === 'piece') {
                          const pieceName = rpgState.currentRewardContent ? window.pieceDescriptions[rpgState.currentRewardContent]?.name || 'Unit' : 'Unit';
-                         goldText.innerText = `Won Unit: ${pieceName}`;
-                         if (rpgState.currentFoodReward > 0) goldText.innerText += ` + ${rpgState.currentFoodReward} 🍖`;
+                         goldText.innerHTML = `Won Unit: ${pieceName}`;
+                         if (rpgState.currentFoodReward > 0) goldText.innerHTML += ` + ${rpgState.currentFoodReward} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">`;
                      } else {
-                         goldText.innerText = `+${goldEarned} 🪙`;
-                         if (rpgState.currentFoodReward > 0) goldText.innerText += ` + ${rpgState.currentFoodReward} 🍖`;
+                         goldText.innerHTML = `+${goldEarned} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;">`;
+                         if (rpgState.currentFoodReward > 0) goldText.innerHTML += ` + ${rpgState.currentFoodReward} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">`;
                      }
                  }
                  
@@ -2814,12 +2814,12 @@ function showShopModal(restore = false) {
         const isFood = item.type === 'food';
         
         if (isFood) {
-            icon = `<div style="font-size: 50px; line-height: 50px; text-align: center; margin-bottom: 10px;">🍖</div>`;
+            icon = `<div style="font-size: 50px; line-height: 50px; text-align: center; margin-bottom: 10px;"><img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></div>`;
             div.innerHTML = `
                 ${icon}
                 <h3>Rations</h3>
-                <p>Amount: ${item.amount} 🍖</p>
-                <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} 🪙</p>
+                <p>Amount: ${item.amount} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></p>
+                <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
             `;
         } else {
             if (typeof window[item.factory] === 'function') {
@@ -2842,7 +2842,7 @@ function showShopModal(restore = false) {
                 ${icon}
                 <h3>${item.factory.replace('Factory','').replace('rpg','')}</h3>
                 <p>Power: ${item.value}</p>
-                <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} 🪙</p>
+                <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
             `;
             
             // Info Button
@@ -3062,7 +3062,7 @@ function showRewardModal() {
             div.style.borderColor = '#ffa000';
             div.innerHTML = `<h3>${option.type}</h3>
                              <p style="font-size:14px;">${option.description || ''}</p>
-                             <div style="text-align:center; font-size: 40px; margin: 10px 0;">🛒</div>
+                             <div style="text-align:center; font-size: 40px; margin: 10px 0;"><img src="/static/bigMap/shopIcon.jpg" class="food-icon-responsive" alt="Market" style="height: 1em; width: 1em; vertical-align: middle;"></div>
                              <p style="text-align:center;">Safe Zone</p>`;
                              
             div.onclick = () => {
@@ -3079,7 +3079,7 @@ function showRewardModal() {
             div.style.borderColor = '#fb8c00';
             div.innerHTML = `<h3>${option.type}</h3>
                              <p style="font-size:14px;">${option.description || ''}</p>
-                             <div style="text-align:center; font-size: 40px; margin: 10px 0;">🏨</div>
+                             <div style="text-align:center; font-size: 40px; margin: 10px 0;"><img src="/static/bigMap/innIcon.jpg" class="food-icon-responsive" alt="Inn" style="height: 1em; width: 1em; vertical-align: middle;"></div>
                              <p style="text-align:center;">+${option.enemyValue} Food</p>`;
                              
             div.onclick = () => {
@@ -3109,7 +3109,7 @@ function showRewardModal() {
             div.style.borderColor = '#fbc02d';
             div.innerHTML = `<h3>${option.type}</h3>
                              <p style="font-size:14px;">${option.description || ''}</p>
-                             <div style="text-align:center; font-size: 40px; margin: 10px 0;">🏦</div>
+                             <div style="text-align:center; font-size: 40px; margin: 10px 0;"><img src="/static/bigMap/bank.jpg" class="food-icon-responsive" alt="Bank" style="height: 1em; width: 1em; vertical-align: middle;"></div>
                              <p style="text-align:center;">+${option.enemyValue} Gold</p>`;
                              
             div.onclick = () => {
@@ -3139,7 +3139,7 @@ function showRewardModal() {
             div.style.borderColor = '#8d6e63';
             div.innerHTML = `<h3>${option.type}</h3>
                              <p style="font-size:14px;">${option.description || ''}</p>
-                             <div style="text-align:center; font-size: 40px; margin: 10px 0;">📖</div>
+                             <div style="text-align:center; font-size: 40px; margin: 10px 0;"><img src="/static/bigMap/experienceIcon.jpg" class="food-icon-responsive" alt="Experience" style="height: 1em; width: 1em; vertical-align: middle;"></div>
                              <p style="text-align:center;">+${option.enemyValue} King Exp</p>`;
                              
             div.onclick = () => {
@@ -3192,12 +3192,12 @@ function showRewardModal() {
                           </div>`;
             
             if (option.foodReward > 0) {
-                 rewardText += ` (Max ${option.foodReward} 🍖)`;
+                 rewardText += ` (Max ${option.foodReward} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">)`;
             }
         } else {
-            rewardText = `${option.rewardContent || '?'} 🪙`;
+            rewardText = `${option.rewardContent || '?'} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;">`;
             if (option.foodReward > 0) {
-                 rewardText += ` (Max ${option.foodReward} 🍖)`;
+                 rewardText += ` (Max ${option.foodReward} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">)`;
             }
         }
         
@@ -3593,16 +3593,16 @@ function checkGameEndSequence(state) {
                     
                     // Food for piece reward was calculated in generateRewardOptions and stored in currentFoodReward
                     if (foodEarned > 0) {
-                         winText += ` + ${foodEarned} 🍖`;
+                         winText += ` + ${foodEarned} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">`;
                     }
                     
                 } else {
                     // Gold comes from currentRewardContent
                     const goldEarned = (rpgState.currentRewardContent || 0) + RPGStats.additionalGoldPerWin;
                     rpgState.gold = (rpgState.gold || 0) + goldEarned;
-                    winText = `+${goldEarned} 🪙`;
+                    winText = `+${goldEarned} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;">`;
                     if (foodEarned > 0) {
-                         winText += ` + ${foodEarned} 🍖`;
+                         winText += ` + ${foodEarned} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">`;
                     }
                 }
                 
@@ -3622,7 +3622,7 @@ function checkGameEndSequence(state) {
             }
 
             const goldText = document.getElementById('goldEarnedText');
-            if(goldText) goldText.innerText = winText;
+            if(goldText) goldText.innerHTML = winText;
 
             setTimeout(() => {
                 // Fade to black
