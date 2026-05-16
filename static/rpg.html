@@ -687,6 +687,21 @@
 
     <dialog class="pieceModal displayNone"></dialog>
 
+    <!-- Objectives Modal -->
+    <dialog id="objectivesDialog" oncancel="event.preventDefault();">
+        <h2>Objectives</h2>
+        <div style="text-align: left; padding: 0 20px;">
+            <p>To win the game you need to either</p>
+            <ol style="font-size: 22px; margin-bottom: 20px; line-height: 1.5;">
+                <li>Take the king of the enemy.</li>
+                <li>Take all non-king pieces of the enemy.</li>
+                <li>Stall the game until enemies food is exhausted</li>
+            </ol>
+            <p style="font-size: 18px; font-style: italic;">Have in mind that you are going to steal all unused food from the enemy if you defeat him with option 1 or 2.</p>
+        </div>
+        <button onclick="closeObjectivesModal()" style="padding: 10px 20px; cursor: pointer; margin-top: 20px;">Understood</button>
+    </dialog>
+
     <!-- Confirmation Modal -->
     <dialog id="confirmationDialog" style="z-index: 2000;">
         <h2 id="confirmTitle">Confirm Action</h2>

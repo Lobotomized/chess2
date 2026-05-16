@@ -382,6 +382,7 @@ function startNewGameWithMap(mapName) {
     rpgState.shopOptions = [];
     rpgState.showWinScreen = false;
     rpgState.boardHistory = [];
+    rpgState.objectivesShown = false;
     
     // Set map info so it saves correctly
     rpgState.grandMap = { predefinedMap: mapName };
@@ -563,6 +564,7 @@ function startNewGame() {
     rpgState.grandMap = undefined; // Reset grand map state
     rpgState.mapName = undefined;
     rpgState.boardHistory = [];
+    rpgState.objectivesShown = false;
     
     updateGoldDisplay();
     document.getElementById('levelDisplay').innerText = "Level: 0";
@@ -1481,19 +1483,6 @@ function ensureNodeArmy(node) {
 }
 
 function startLevel(level, difficultyOption) {
-    const overlay = document.getElementById('deathOverlay');
-    if (overlay) {
-        overlay.style.opacity = '0';
-    }
-    rpgState.level = level;
-    rpgState.mapSeed = (difficultyOption && difficultyOption.node && difficultyOption.node.mapSeed !== undefined) ? difficultyOption.node.mapSeed : Math.random() * 10000;
-    rpgState.shopOptions = []; // Clear shop options to prevent reopening shop on refresh
-    rpgState.showWinScreen = false; // Ensure win screen is cleared
-    rpgState.gameOverSequenceStarted = false; // Reset flag for new level
-    rpgState.boardHistory = []; // Reset board history
-    rpgState.divinationUsed = false; // Reset divination skill usage per battle
-    updateGoldDisplay();
-
     // Check if it's a market visit
     if (difficultyOption && difficultyOption.boardShape === 'Market') {
         // Move on map
@@ -1508,6 +1497,29 @@ function startLevel(level, difficultyOption) {
         showShopModal();
         return;
     }
+
+    // Show Objectives modal before the first battle
+    if (!rpgState.objectivesShown) {
+        let modal = document.getElementById('objectivesDialog');
+        if (modal) {
+            modal.showModal();
+            window.pendingStartLevelArgs = [level, difficultyOption];
+            return;
+        }
+    }
+
+    const overlay = document.getElementById('deathOverlay');
+    if (overlay) {
+        overlay.style.opacity = '0';
+    }
+    rpgState.level = level;
+    rpgState.mapSeed = (difficultyOption && difficultyOption.node && difficultyOption.node.mapSeed !== undefined) ? difficultyOption.node.mapSeed : Math.random() * 10000;
+    rpgState.shopOptions = []; // Clear shop options to prevent reopening shop on refresh
+    rpgState.showWinScreen = false; // Ensure win screen is cleared
+    rpgState.gameOverSequenceStarted = false; // Reset flag for new level
+    rpgState.boardHistory = []; // Reset board history
+    rpgState.divinationUsed = false; // Reset divination skill usage per battle
+    updateGoldDisplay();
     
     let difficultyName = 'Unknown';
     let enemyValue = 5;
@@ -1936,29 +1948,55 @@ function placeArmy(roster, color, rows, maxX = 7) {
 
 // --- UI / Modals ---
 
+window.closeObjectivesModal = function() {
+    let modal = document.getElementById('objectivesDialog');
+    if (modal) modal.close();
+    rpgState.objectivesShown = true;
+    saveProgress();
+    if (window.pendingStartLevelArgs) {
+        startLevel(...window.pendingStartLevelArgs);
+        window.pendingStartLevelArgs = null;
+    }
+};
+
 function showStartModal() {
     let modal = document.getElementById('startDialog');
     const container = document.getElementById('startOptions');
     container.innerHTML = '';
     
  
+    const generatedOptions = [];
+    let maxValue = 0;
+
     for (let i = 0; i < 4; i++) {
         // Increase initial targetValue slightly so it can actually afford 8 frontline pieces + some backline, 
         // or just let it be 20 and it'll mostly just be frontline pieces.
         // 50% chance to allow a non-classic piece type in the army generation
         const allowNonClassic = Math.random() > 0.5;
         
-        let army;
+        let armyObj;
         if (rpgState.armyType === 'classic') {
-            army = generateRandomArmy(9, true, 'Classic', true, allowNonClassic).army;
+            armyObj = generateRandomArmy(9, true, 'Classic', true, allowNonClassic);
         } else {
-            army = generateRandomArmy(9, true, null, true, allowNonClassic).army;
+            armyObj = generateRandomArmy(9, true, null, true, allowNonClassic);
         }
         
         // Pick a random skill for this army
         const randomSkill = RPGSKILLS[Math.floor(Math.random() * RPGSKILLS.length)];
 
-        // Removed markPieceAsSeen(name) call to stop auto-popup
+        if (armyObj.value > maxValue) {
+            maxValue = armyObj.value;
+        }
+
+        generatedOptions.push({
+            army: armyObj.army,
+            value: armyObj.value,
+            skill: randomSkill
+        });
+    }
+
+    generatedOptions.forEach((option, i) => {
+        const { army, value, skill: randomSkill } = option;
 
         const div = document.createElement('div');
         div.className = 'army-option';
@@ -1970,7 +2008,20 @@ function showStartModal() {
         skillDiv.style.background = 'rgba(255, 255, 255, 0.1)';
         skillDiv.style.borderRadius = '5px';
         const desc = randomSkill.getDescription ? randomSkill.getDescription(1) : randomSkill.description;
-        skillDiv.innerHTML = `<strong>King's Skill: ${randomSkill.name}</strong><br><span style="font-size: 0.9em;">${desc}</span>`;
+        
+        let bonusFood = 0;
+        if (value < maxValue) {
+            // Give 15 food per point difference
+            console.log(value, maxValue)
+            bonusFood = Math.round((maxValue - value) * 15);
+        }
+        
+        let bonusText = "";
+        if (bonusFood > 0) {
+            bonusText = `<br><span style="color: #4CAF50; font-size: 0.9em; font-weight: bold;">+${bonusFood} Bonus Food (Army worth less points)</span>`;
+        }
+
+        skillDiv.innerHTML = `<strong>King's Skill: ${randomSkill.name}</strong><br><span style="font-size: 0.9em;">${desc}</span>${bonusText}`;
         div.appendChild(skillDiv);
 
         // Info Button
@@ -1997,8 +2048,6 @@ function showStartModal() {
                     showPieceDiscoveryModal(name);
                 };
                 preview.appendChild(img);
-                
-                // Mark as seen if we want to track it, but here we allow clicking to see info
             }
         });
         div.appendChild(preview);
@@ -2009,7 +2058,7 @@ function showStartModal() {
             applyAllRPGSkills(); // Apply the skill effect
             // We need to ensure gold and food are updated if the skill changed starting values
             rpgState.gold = RPGStats.startingGold;
-            rpgState.food = RPGStats.startingFood;
+            rpgState.food = RPGStats.startingFood + bonusFood; // Add the bonus food
             
             // Handle instant rewards that should only apply once when selected
             if (randomSkill.name === "Rich") {
@@ -2036,16 +2085,15 @@ function showStartModal() {
         };
         
         container.appendChild(div);
-    }
+    });
     
     modal.showModal();
     
     // Show Current Coordinates if available
     if (typeof grandMap !== 'undefined') {
-        const coords = grandMap.getState();
         const header = modal.querySelector('h2');
         if (header) {
-            header.innerText = `Choose Your Next Mission (Position: ${coords.currentX}, ${coords.currentY})`;
+            header.innerText = `Choose your starting hero`;
         }
     }
 }
@@ -3041,10 +3089,9 @@ function showRewardModal() {
     
     // Show Current Coordinates if available
     if (typeof grandMap !== 'undefined') {
-        const coords = grandMap.getState();
         const header = modal.querySelector('h2');
         if (header) {
-            header.innerText = `Choose Your Next Mission (Position: ${coords.currentX}, ${coords.currentY})`;
+            header.innerText = `Choose your hero`;
         }
     }
     
