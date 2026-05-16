@@ -385,6 +385,7 @@ function startNewGameWithMap(mapName) {
     
     // Set map info so it saves correctly
     rpgState.grandMap = { predefinedMap: mapName };
+    rpgState.mapName = mapName;
     
     updateGoldDisplay();
     document.getElementById('levelDisplay').innerText = "Level: 0";
@@ -560,6 +561,7 @@ function startNewGame() {
     rpgState.shopOptions = [];
     rpgState.showWinScreen = false;
     rpgState.grandMap = undefined; // Reset grand map state
+    rpgState.mapName = undefined;
     rpgState.boardHistory = [];
     
     updateGoldDisplay();

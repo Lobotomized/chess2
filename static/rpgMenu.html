@@ -332,9 +332,11 @@
             if (allSaves.length > 0) {
                 allSaves.forEach((save, index) => {
                     let level = save.data.level || '?';
-                    let mapName = 'Random Map (Super Hard)';
+                    let mapName = save.data.mapName || 'Random Map (Super Hard)';
                     if (save.data.grandMap && save.data.grandMap.predefinedMap) {
                         mapName = save.data.grandMap.predefinedMap;
+                    } else if (save.data.grandMap && save.data.grandMap.name) {
+                        mapName = save.data.grandMap.name; // Fallback
                     }
                     
                     const dateStr = save.date ? new Date(save.date).toLocaleString() : 'Legacy Save';

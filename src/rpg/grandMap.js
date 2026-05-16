@@ -34,7 +34,17 @@ const grandMap = {
 
     // Initialize or load state
     init(savedState) {
-        if (savedState && savedState.predefinedMap) {
+        if (savedState && savedState.map) {
+            this.currentX = savedState.currentX || 0;
+            this.currentY = savedState.currentY || 0;
+            this.map = savedState.map;
+            this.width = savedState.width || 15;
+            this.height = savedState.height || 15;
+            this.seed = savedState.seed || Math.random() * 10000;
+            this.predefinedMap = savedState.predefinedMap || null;
+            this.generateCenters();
+            this.ensureFinalBoss();
+        } else if (savedState && savedState.predefinedMap) {
             if (!this.loadPredefined(savedState.predefinedMap)) {
                 // Fallback if not found
                 this.currentX = 0;
@@ -43,15 +53,6 @@ const grandMap = {
                 this.height = 15;
                 this.generateMap();
             }
-        } else if (savedState && savedState.map) {
-            this.currentX = savedState.currentX || 0;
-            this.currentY = savedState.currentY || 0;
-            this.map = savedState.map;
-            this.width = savedState.width || 15;
-            this.height = savedState.height || 15;
-            this.seed = savedState.seed || Math.random() * 10000;
-            this.generateCenters();
-            this.ensureFinalBoss();
         } else {
             this.currentX = 0;
             this.currentY = 0;
@@ -98,6 +99,7 @@ const grandMap = {
             return false;
         }
 
+        this.predefinedMap = mapName;
         this.width = pMap.width;
         this.height = pMap.height;
         this.currentX = pMap.startX !== undefined ? pMap.startX : 0;
@@ -248,7 +250,8 @@ const grandMap = {
             map: this.map,
             width: this.width,
             height: this.height,
-            seed: this.seed
+            seed: this.seed,
+            predefinedMap: this.predefinedMap
         };
     },
 
@@ -268,6 +271,7 @@ const grandMap = {
 
     // Generate the full map
     generateMap() {
+        this.predefinedMap = null;
         this.map = [];
         this.seed = Math.random() * 10000;
         
