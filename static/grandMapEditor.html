@@ -390,9 +390,17 @@
                     <option value="inn">Place Inn</option>
                     <option value="bank">Place Bank</option>
                     <option value="start">Set Start Node</option>
+                    <option value="description">Set Description</option>
                 <option value="customArmy">Custom Enemy Army</option>
                 <option value="customTerrain">Custom Terrain Details</option>
             </select>
+
+                <!-- Tool Options: Description -->
+                <div id="options-description" class="tool-options">
+                    <label>Custom Description:</label>
+                    <textarea id="val-description" rows="3" placeholder="Enter custom description for node..."></textarea>
+                    <small style="font-size:12px; color:#555;">Click on a square to apply this description, or clear it if empty.</small>
+                </div>
 
                 <!-- Tool Options: Board -->
                 <div id="options-board" class="tool-options active">
@@ -559,6 +567,7 @@
                         if (n.difficulty && n.difficulty.name === "Marketplace") target.board = 'Market';
                         if (n.customArmy) target.customArmy = n.customArmy;
                         if (n.customTrees) target.customTrees = n.customTrees;
+                        if (n.description) target.description = n.description;
                         if (n.fountainX !== undefined) {
                             target.fountainX = n.fountainX;
                             target.fountainY = n.fountainY;
@@ -687,6 +696,13 @@
                 node.board = 'Bank';
                 node.enemyPower = 10;
                 node.isBoss = false;
+            } else if (tool === 'description') {
+                const val = document.getElementById('val-description').value.trim();
+                if (val) {
+                    node.description = val;
+                } else {
+                    delete node.description;
+                }
             } else if (tool === 'start') {
                 mapData.startX = x;
                 mapData.startY = y;
@@ -819,6 +835,20 @@
                         cell.appendChild(bankInd);
                     } 
                     
+                    if (node.description) {
+                        const descInd = document.createElement('div');
+                        descInd.style.position = 'absolute';
+                        descInd.style.bottom = '4px';
+                        descInd.style.left = '4px';
+                        descInd.style.fontSize = '14px';
+                        descInd.style.zIndex = '30';
+                        descInd.innerText = '📝';
+                        cell.appendChild(descInd);
+                        cell.title = node.description;
+                    } else {
+                        cell.title = "";
+                    }
+                    
                     if (node.customArmy) {
                         const armyInd = document.createElement('div');
                         armyInd.className = 'indicator boss-indicator'; // Centered
@@ -904,6 +934,9 @@
                     if (n.fountainX !== undefined) {
                         exportNode.fountainX = n.fountainX;
                         exportNode.fountainY = n.fountainY;
+                    }
+                    if (n.description) {
+                        exportNode.description = n.description;
                     }
                     
                     if (x === mapData.startX && y === mapData.startY) {

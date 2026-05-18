@@ -128,6 +128,7 @@ const grandMap = {
                     if (pMap.isCustom) {
                         // Custom maps export all nodes but omit defaults to save space.
                         // We must clear the generated random values first so they don't leak through.
+                        console.log(pMap.isCustom, nodeDef)
                         targetNode.board = 'Standard';
                         targetNode.region = 'Classic';
                         targetNode.enemyPower = 5;
@@ -135,7 +136,7 @@ const grandMap = {
                             enemyValue: 5,
                             rewardCap: 10,
                             name: "Standard Encounter",
-                            description: "Normal enemy"
+                            description:  nodeDef.description || "Normal enemy"
                         };
                     }
 
@@ -171,7 +172,7 @@ const grandMap = {
                             enemyValue: 0,
                             rewardCap: 0,
                             name: "Marketplace",
-                            description: "A safe haven to hire mercenaries."
+                            description: targetNode.description || "A safe haven to hire mercenaries."
                         };
                     }
                     
@@ -185,7 +186,7 @@ const grandMap = {
                             enemyValue: 80,
                             rewardCap: 0,
                             name: "Final Boss",
-                            description: "The ultimate challenge."
+                            description: targetNode.description || "The ultimate challenge."
                         };
                     } else if (targetNode.enemyPower !== undefined) {
                         // Recalculate rewards based on new enemy power for non-boss nodes

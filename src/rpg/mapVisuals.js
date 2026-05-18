@@ -939,7 +939,9 @@ function showMapCellPopup(node, grandMap) {
     
     if (node.board !== 'Mountain') {
         let desc = node.difficulty ? node.difficulty.description : '';
-        if (node.board === 'Bank') {
+        if (node.description) {
+            desc = node.description;
+        } else if (node.board === 'Bank') {
             desc = `You win ${node.enemyPower} gold without battle`;
         } else if (node.board === 'Inn') {
             desc = `You win ${node.enemyPower} food without battle`;
