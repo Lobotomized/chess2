@@ -1550,7 +1550,6 @@ function startLevel(level, difficultyOption) {
         
         // Try to find the difficulty in the list
         const found = window.difficulties ? window.difficulties.find(d => d.name === difficultyOption) : null;
-        console.log(found)
         if (found) {
             enemyValue = found.enemyValue;
             rewardCap = found.rewardCap;
@@ -2783,10 +2782,6 @@ function showShopModal(restore = false) {
 
     if (restore && rpgState.shopOptions && rpgState.shopOptions.length > 0) {
         shopItems = rpgState.shopOptions;
-    } else if (currentNode && currentNode.shopItems && currentNode.shopItems.length > 0) {
-        // Use permanently saved shop items for this specific node
-        shopItems = currentNode.shopItems;
-        rpgState.shopOptions = shopItems;
     } else {
         // Determine available factories based on region
         let factories = marketPieceFactories; // Default fallback
@@ -2794,8 +2789,22 @@ function showShopModal(restore = false) {
              factories = regionFactories[currentNode.region];
         }
 
-        // Generate 6 random units to buy (as requested)
+        let baseShopItems = [];
+        if (currentNode && currentNode.shopItems && currentNode.shopItems.length > 0) {
+            baseShopItems = currentNode.shopItems;
+        }
+
+        // Generate 6 units (or use predefined)
         for(let i=0; i<6; i++) {
+            if (baseShopItems[i] && baseShopItems[i] !== null) {
+                // Use predefined item, ensure bought state exists
+                const item = JSON.parse(JSON.stringify(baseShopItems[i]));
+                item.bought = false;
+                shopItems.push(item);
+                continue;
+            }
+            
+            // Generate random item for this slot
             if (Math.random() < 0.25) { // 25% chance for food
                 let goldCost = Math.floor(Math.random() * 10) + 2; // 2 to 11 gold
                 const foodAmount = goldCost * 5;
@@ -2811,9 +2820,6 @@ function showShopModal(restore = false) {
             }
         }
         rpgState.shopOptions = shopItems;
-        if (currentNode) {
-            currentNode.shopItems = shopItems; // Save to map node permanently
-        }
         saveProgress();
     }
 
@@ -3620,7 +3626,6 @@ function checkGameEndSequence(state) {
                             rpgState.pendingReorder = true;
                             
                             const pieceName = window.pieceDescriptions[pieceFactory].name;
-                            console.log(window.pieceDescriptions)
                             winText = `Won Unit: ${pieceName} (Placed in Reserve)`;
                             
                         } else {

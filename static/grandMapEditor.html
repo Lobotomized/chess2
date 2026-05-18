@@ -393,6 +393,7 @@
                     <option value="description">Set Description</option>
                 <option value="customArmy">Custom Enemy Army</option>
                 <option value="customTerrain">Custom Terrain Details</option>
+                <option value="customShop">Custom Shop Items</option>
             </select>
 
                 <!-- Tool Options: Description -->
@@ -565,8 +566,9 @@
                         if (n.enemyPower !== undefined) target.enemyPower = n.enemyPower;
                         if (n.difficulty && n.difficulty.name === "Final Boss") target.isBoss = true;
                         if (n.difficulty && n.difficulty.name === "Marketplace") target.board = 'Market';
-                        if (n.customArmy) target.customArmy = n.customArmy;
-                        if (n.customTrees) target.customTrees = n.customTrees;
+                    if (n.customArmy) target.customArmy = n.customArmy;
+                    if (n.shopItems) target.shopItems = n.shopItems;
+                    if (n.customTrees) target.customTrees = n.customTrees;
                         if (n.description) target.description = n.description;
                         if (n.fountainX !== undefined) {
                             target.fountainX = n.fountainX;
@@ -716,6 +718,13 @@
                     showAlert('Custom Terrain Details only apply to Woods or Fountain nodes.');
                 }
                 return;
+            } else if (tool === 'customShop') {
+                if (node.board === 'Market') {
+                    openCustomShopModal(node);
+                } else {
+                    showAlert('Custom Shop Items only apply to Market nodes.');
+                }
+                return;
             }
             renderGrid();
         }
@@ -812,6 +821,15 @@
                         marketInd.className = 'indicator boss-indicator'; // Centered
                         marketInd.innerHTML = '<img src="/static/bigMap/shopIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
                         cell.appendChild(marketInd);
+                        
+                        if (node.shopItems) {
+                            const shopInd = document.createElement('div');
+                            shopInd.className = 'indicator boss-indicator'; // Centered
+                            shopInd.style.fontSize = '30px';
+                            shopInd.style.marginTop = '15px'; // offset below the market icon
+                            shopInd.innerText = '⭐';
+                            cell.appendChild(shopInd);
+                        }
                     } 
                     
                     if (node.board === 'Library') {
@@ -927,6 +945,9 @@
                     }
                     if (n.customArmy) {
                         exportNode.customArmy = n.customArmy;
+                    }
+                    if (n.shopItems) {
+                        exportNode.shopItems = n.shopItems;
                     }
                     if (n.customTrees) {
                         exportNode.customTrees = n.customTrees;
@@ -1244,6 +1265,147 @@
             }
             renderTerrainBoard();
         }
+
+        let editingNodeForShop = null;
+        let currentShopItems = [];
+
+        function openCustomShopModal(node) {
+            editingNodeForShop = node;
+            // Initialize with 6 slots, use existing if available
+            currentShopItems = node.shopItems ? JSON.parse(JSON.stringify(node.shopItems)) : [];
+            // Fill up to 6 with null (random)
+            while(currentShopItems.length < 6) {
+                currentShopItems.push(null);
+            }
+            renderShopItems();
+            document.getElementById('customShopModal').showModal();
+        }
+
+        function renderShopItems() {
+            const container = document.getElementById('shopItemsContainer');
+            container.innerHTML = '';
+            
+            for(let i=0; i<6; i++) {
+                const item = currentShopItems[i];
+                
+                const row = document.createElement('div');
+                row.style.display = 'flex';
+                row.style.gap = '10px';
+                row.style.alignItems = 'center';
+                row.style.background = 'var(--board-light)';
+                row.style.padding = '10px';
+                row.style.borderRadius = '5px';
+                row.style.border = '1px solid var(--border-color)';
+                
+                const label = document.createElement('span');
+                label.innerText = `Slot ${i+1}:`;
+                label.style.fontWeight = 'bold';
+                label.style.width = '50px';
+                row.appendChild(label);
+                
+                const typeSelect = document.createElement('select');
+                typeSelect.innerHTML = `
+                    <option value="random" ${!item ? 'selected' : ''}>Random</option>
+                    <option value="unit" ${item && item.type === 'unit' ? 'selected' : ''}>Unit</option>
+                    <option value="food" ${item && item.type === 'food' ? 'selected' : ''}>Food</option>
+                `;
+                typeSelect.onchange = (e) => {
+                    if (e.target.value === 'random') currentShopItems[i] = null;
+                    else if (e.target.value === 'unit') currentShopItems[i] = { type: 'unit', factory: 'rpgPawnFactory', cost: 10, value: 2 };
+                    else if (e.target.value === 'food') currentShopItems[i] = { type: 'food', cost: 5, amount: 25 };
+                    renderShopItems();
+                };
+                row.appendChild(typeSelect);
+                
+                if (item && item.type === 'unit') {
+                    const pieceSelect = document.createElement('select');
+                    pieceSelect.style.flex = "1";
+                    popularEnemyFactories.forEach(p => {
+                        const opt = document.createElement('option');
+                        opt.value = p.value;
+                        opt.textContent = p.name;
+                        if (item.factory === p.value) opt.selected = true;
+                        pieceSelect.appendChild(opt);
+                    });
+                    pieceSelect.onchange = (e) => { currentShopItems[i].factory = e.target.value; };
+                    row.appendChild(pieceSelect);
+                    
+                    const costInput = document.createElement('input');
+                    costInput.type = 'number';
+                    costInput.value = item.cost;
+                    costInput.min = 0;
+                    costInput.style.width = '50px';
+                    costInput.onchange = (e) => { currentShopItems[i].cost = parseInt(e.target.value) || 0; };
+                    
+                    const costLabel = document.createElement('span');
+                    costLabel.innerHTML = `<img src="/static/bigMap/goldIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle;">`;
+                    row.appendChild(costLabel);
+                    row.appendChild(costInput);
+                    
+                    const valInput = document.createElement('input');
+                    valInput.type = 'number';
+                    valInput.value = item.value;
+                    valInput.min = 1;
+                    valInput.style.width = '50px';
+                    valInput.onchange = (e) => { currentShopItems[i].value = parseInt(e.target.value) || 1; };
+                    
+                    const valLabel = document.createElement('span');
+                    valLabel.innerHTML = `Power`;
+                    row.appendChild(valLabel);
+                    row.appendChild(valInput);
+                } else if (item && item.type === 'food') {
+                    // Spacer to align with unit select
+                    const spacer = document.createElement('div');
+                    spacer.style.flex = "1";
+                    row.appendChild(spacer);
+                    
+                    const costInput = document.createElement('input');
+                    costInput.type = 'number';
+                    costInput.value = item.cost;
+                    costInput.min = 0;
+                    costInput.style.width = '50px';
+                    costInput.onchange = (e) => { currentShopItems[i].cost = parseInt(e.target.value) || 0; };
+                    
+                    const costLabel = document.createElement('span');
+                    costLabel.innerHTML = `<img src="/static/bigMap/goldIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle;">`;
+                    row.appendChild(costLabel);
+                    row.appendChild(costInput);
+                    
+                    const amtInput = document.createElement('input');
+                    amtInput.type = 'number';
+                    amtInput.value = item.amount;
+                    amtInput.min = 1;
+                    amtInput.style.width = '50px';
+                    amtInput.onchange = (e) => { currentShopItems[i].amount = parseInt(e.target.value) || 1; };
+                    
+                    const amtLabel = document.createElement('span');
+                    amtLabel.innerHTML = `<img src="/static/bigMap/foodIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle;">`;
+                    row.appendChild(amtLabel);
+                    row.appendChild(amtInput);
+                }
+                
+                container.appendChild(row);
+            }
+        }
+
+        function saveCustomShop() {
+            // Check if there are any non-null items
+            const hasCustom = currentShopItems.some(item => item !== null);
+            if (hasCustom) {
+                editingNodeForShop.shopItems = JSON.parse(JSON.stringify(currentShopItems));
+            } else {
+                delete editingNodeForShop.shopItems;
+            }
+            document.getElementById('customShopModal').close();
+            renderGrid();
+        }
+
+        function clearCustomShop() {
+            delete editingNodeForShop.shopItems;
+            currentShopItems = [];
+            document.getElementById('customShopModal').close();
+            renderGrid();
+        }
     </script>
     <script src="/src/auth.js"></script>
 
@@ -1288,6 +1450,24 @@
             <button onclick="clearCustomTerrain()" class="secondary" style="background:#e0e0e0;">Clear/Reset</button>
             <button onclick="document.getElementById('customTerrainModal').close()" class="secondary">Cancel</button>
             <button onclick="saveCustomTerrain()" class="primary">Save</button>
+        </div>
+    </dialog>
+
+    <!-- Modal for Custom Shop -->
+    <dialog id="customShopModal" style="border:4px solid var(--border-color); border-radius:8px; padding:20px; background:var(--bg-overlay); max-width:600px; width:100%;">
+        <h2 style="font-family:'Lilita One', cursive; margin-top:0; text-align:center;">Custom Shop Items</h2>
+        <p style="font-size:14px; margin-bottom:15px; text-align:center;">Configure exact items to be sold in this Market. Leave a slot as "Random" for default generation.</p>
+        
+        <div id="shopItemsContainer" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+            <!-- 6 slots populated via JS -->
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:10px;">
+            <button onclick="clearCustomShop()" class="btn" style="background:#cc5449; color:white; font-family:'Lilita One', cursive; border: 2px solid var(--border-color); border-radius: 6px; padding: 10px 15px; cursor: pointer;">Clear (All Random)</button>
+            <div style="display:flex; gap:10px;">
+                <button onclick="document.getElementById('customShopModal').close()" class="btn" style="background:#aaa; font-family:'Lilita One', cursive; border: 2px solid var(--border-color); border-radius: 6px; padding: 10px 15px; cursor: pointer;">Cancel</button>
+                <button onclick="saveCustomShop()" class="btn" style="background:var(--highlight); color:white; font-family:'Lilita One', cursive; border: 2px solid var(--border-color); border-radius: 6px; padding: 10px 15px; cursor: pointer;">Save Shop</button>
+            </div>
         </div>
     </dialog>
 </body>

@@ -128,7 +128,6 @@ const grandMap = {
                     if (pMap.isCustom) {
                         // Custom maps export all nodes but omit defaults to save space.
                         // We must clear the generated random values first so they don't leak through.
-                        console.log(pMap.isCustom, nodeDef)
                         targetNode.board = 'Standard';
                         targetNode.region = 'Classic';
                         targetNode.enemyPower = 5;
