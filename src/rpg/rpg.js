@@ -2754,6 +2754,17 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
     modal.showModal();
 }
 
+function closeShop() {
+    let modal = document.getElementById('shopDialog');
+    if (modal) modal.close();
+    
+    if (typeof rpgState !== 'undefined' && rpgState.pendingSkillSelections && rpgState.pendingSkillSelections > 0) {
+        showSkillSelectionModal();
+    } else if (typeof showMapModal === 'function') {
+        showMapModal();
+    }
+}
+
 function showShopModal(restore = false) {
     // Reset overlay
     const overlay = document.getElementById('deathOverlay');
@@ -2805,12 +2816,19 @@ function showShopModal(restore = false) {
             }
             
             // Generate random item for this slot
-            if (Math.random() < 0.25) { // 25% chance for food
+            const rand = Math.random();
+            if (rand < 0.25) { // 25% chance for food
                 let goldCost = Math.floor(Math.random() * 10) + 2; // 2 to 11 gold
                 const foodAmount = goldCost * 5;
                 goldCost -= RPGStats.shopDiscout;
                 if(goldCost < 0) goldCost = 0;
                 shopItems.push({ type: 'food', cost: goldCost, amount: foodAmount, bought: false });
+            } else if (rand < 0.50) { // 25% chance for experience
+                let goldCost = Math.floor(Math.random() * 10) + 2; // 2 to 11 gold
+                const expAmount = goldCost; // 1 exp = 1 gold
+                goldCost -= RPGStats.shopDiscout;
+                if(goldCost < 0) goldCost = 0;
+                shopItems.push({ type: 'experience', cost: goldCost, amount: expAmount, bought: false });
             } else {
                 const randomFactory = factories[Math.floor(Math.random() * factories.length)];
                 const val = getPieceValue(randomFactory);
@@ -2839,7 +2857,7 @@ function showShopModal(restore = false) {
             const item = shopItems[index];
             if (item.bought) return; // Already bought state handled
 
-            if (item.type !== 'food') {
+            if (item.type !== 'food' && item.type !== 'experience') {
                 if (rosterFull) {
                     btn.disabled = true;
                     btn.style.opacity = '0.5';
@@ -2867,6 +2885,7 @@ function showShopModal(restore = false) {
         
         let icon = '';
         const isFood = item.type === 'food';
+        const isExp = item.type === 'experience';
         
         if (isFood) {
             icon = `<div style="font-size: 50px; line-height: 50px; text-align: center; margin-bottom: 10px;"><img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></div>`;
@@ -2874,6 +2893,14 @@ function showShopModal(restore = false) {
                 ${icon}
                 <h3>Rations</h3>
                 <p>Amount: ${item.amount} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></p>
+                <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
+            `;
+        } else if (isExp) {
+            icon = `<div style="font-size: 50px; line-height: 50px; text-align: center; margin-bottom: 10px;"><img src="/static/bigMap/experienceIcon.jpg" class="food-icon-responsive" alt="Experience" style="height: 1em; width: 1em; vertical-align: middle;"></div>`;
+            div.innerHTML = `
+                ${icon}
+                <h3>Experience</h3>
+                <p>Amount: ${item.amount} <img src="/static/bigMap/experienceIcon.jpg" class="food-icon-responsive" alt="Experience" style="height: 1em; width: 1em; vertical-align: middle;"></p>
                 <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
             `;
         } else {
@@ -2947,6 +2974,39 @@ function showShopModal(restore = false) {
                     // Refresh all buttons
                     updateAllButtons();
                 }
+            } else if (isExp) {
+                if (rpgState.gold >= item.cost && !item.bought) {
+                    rpgState.gold -= item.cost;
+                    if (typeof gainKingExperience === 'function') {
+                        gainKingExperience(item.amount);
+                    } else {
+                        rpgState.kingExp += item.amount;
+                    }
+                    item.bought = true;
+                    
+                    if (document.getElementById('playerGold')) {
+                        document.getElementById('playerGold').innerText = rpgState.gold;
+                    }
+                    updateGoldDisplay();
+                    saveProgress();
+                    
+                    // Update UI
+                    buyBtn.innerText = 'Bought';
+                    buyBtn.disabled = true;
+                    div.style.opacity = '0.5';
+                    
+                    // Refresh all buttons
+                    updateAllButtons();
+
+                    // Check for level up
+                    if (rpgState.pendingSkillSelections && rpgState.pendingSkillSelections > 0) {
+                        document.getElementById('shopDialog').close();
+                        showSkillSelectionModal(() => {
+                            // Re-open shop when done picking skills
+                            showShopModal(true);
+                        });
+                    }
+                }
             } else {
                 if (rpgState.gold >= item.cost && !item.bought && rpgState.playerRoster.length < 24) {
                     rpgState.gold -= item.cost;
@@ -2982,7 +3042,7 @@ function showShopModal(restore = false) {
     }
 }
 
-function showSkillSelectionModal() {
+function showSkillSelectionModal(onComplete) {
     let modal = document.getElementById('skillSelectionDialog');
     const container = document.getElementById('skillOptions');
     if (!modal || !container) return;
@@ -3008,7 +3068,11 @@ function showSkillSelectionModal() {
     if (choices.length === 0) {
         // No skills left to pick
         rpgState.pendingSkillSelections = 0;
-        showMapModal();
+        if (typeof onComplete === 'function') {
+            onComplete();
+        } else if (typeof showMapModal === 'function') {
+            showMapModal();
+        }
         return;
     }
     
@@ -3064,9 +3128,11 @@ function showSkillSelectionModal() {
             saveProgress();
             
             if (rpgState.pendingSkillSelections > 0) {
-                showSkillSelectionModal();
+                showSkillSelectionModal(onComplete);
             } else {
-                if (typeof showMapModal === 'function') {
+                if (typeof onComplete === 'function') {
+                    onComplete();
+                } else if (typeof showMapModal === 'function') {
                     showMapModal();
                 }
             }

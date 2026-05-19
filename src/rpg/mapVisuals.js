@@ -1272,12 +1272,19 @@ function showMapCellPopup(node, grandMap) {
                     }
                     let shopItems = [];
                     for(let i=0; i<6; i++) {
-                        if (Math.random() < 0.25) { // 25% chance for food
+                        const rand = Math.random();
+                        if (rand < 0.25) { // 25% chance for food
                             let goldCost = Math.floor(Math.random() * 10) + 2; // 2 to 11 gold
                             const foodAmount = goldCost * 5;
                             goldCost -= typeof RPGStats !== 'undefined' ? RPGStats.shopDiscout : 0;
                             if(goldCost < 0) goldCost = 0;
                             shopItems.push({ type: 'food', cost: goldCost, amount: foodAmount, bought: false });
+                        } else if (rand < 0.50) { // 25% chance for experience
+                            let goldCost = Math.floor(Math.random() * 10) + 2; // 2 to 11 gold
+                            const expAmount = goldCost;
+                            goldCost -= typeof RPGStats !== 'undefined' ? RPGStats.shopDiscout : 0;
+                            if(goldCost < 0) goldCost = 0;
+                            shopItems.push({ type: 'experience', cost: goldCost, amount: expAmount, bought: false });
                         } else if (factories.length > 0) {
                             const randomFactory = factories[Math.floor(Math.random() * factories.length)];
                             const val = typeof getPieceValue === 'function' ? getPieceValue(randomFactory) : 5;
@@ -1300,6 +1307,15 @@ function showMapCellPopup(node, grandMap) {
                                 <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${opacityStyle}">
                                     <div style="font-size:24px; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3));"><img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></div>
                                     <div style="font-size:10px; font-weight:bold; color:#4e342e; margin-top:2px;">Rations (${item.amount})</div>
+                                    <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></div>
+                                    ${soldOutText}
+                                </div>
+                            `;
+                        } else if (item.type === 'experience') {
+                            shopHtml += `
+                                <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${opacityStyle}">
+                                    <div style="font-size:24px; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3));"><img src="/static/bigMap/experienceIcon.jpg" class="food-icon-responsive" alt="Experience" style="height: 1em; width: 1em; vertical-align: middle;"></div>
+                                    <div style="font-size:10px; font-weight:bold; color:#4e342e; margin-top:2px;">Exp (${item.amount})</div>
                                     <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></div>
                                     ${soldOutText}
                                 </div>
