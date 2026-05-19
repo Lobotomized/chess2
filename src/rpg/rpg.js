@@ -2799,7 +2799,7 @@ function showShopModal(restore = false) {
             if (baseShopItems[i] && baseShopItems[i] !== null) {
                 // Use predefined item, ensure bought state exists
                 const item = JSON.parse(JSON.stringify(baseShopItems[i]));
-                item.bought = false;
+                if (item.bought === undefined) item.bought = false;
                 shopItems.push(item);
                 continue;
             }
@@ -2819,9 +2819,13 @@ function showShopModal(restore = false) {
                 shopItems.push({ type: 'unit', factory: randomFactory, cost: cost, value: val, bought: false });
             }
         }
-        rpgState.shopOptions = shopItems;
-        saveProgress();
     }
+
+    rpgState.shopOptions = shopItems;
+    if (currentNode) {
+        currentNode.shopItems = shopItems;
+    }
+    saveProgress();
 
     const updateAllButtons = () => {
         const buttons = container.querySelectorAll('.buy-btn');

@@ -1293,12 +1293,15 @@ function showMapCellPopup(node, grandMap) {
                 let shopHtml = `<div style="display:flex; flex-wrap:wrap; gap:10px; justify-content:center; margin-top:10px;">`;
                 if (node.shopItems && node.shopItems.length > 0) {
                     node.shopItems.forEach(item => {
+                        const opacityStyle = item.bought ? 'opacity: 0.5;' : '';
+                        const soldOutText = item.bought ? '<div style="color:red; font-size:10px; font-weight:bold; margin-top:2px;">SOLD</div>' : '';
                         if (item.type === 'food') {
                             shopHtml += `
-                                <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${opacityStyle}">
                                     <div style="font-size:24px; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3));"><img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></div>
                                     <div style="font-size:10px; font-weight:bold; color:#4e342e; margin-top:2px;">Rations (${item.amount})</div>
                                     <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></div>
+                                    ${soldOutText}
                                 </div>
                             `;
                         } else {
@@ -1313,18 +1316,20 @@ function showMapCellPopup(node, grandMap) {
                             const name = item.factory.replace('Factory', '').replace('rpg', '');
                             if (iconUrl) {
                                 shopHtml += `
-                                    <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${opacityStyle}">
                                         <img src="${iconUrl}" style="width:24px; height:24px; object-fit:contain; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3)); margin: 0 auto; display: block;">
                                         <div style="font-size:10px; font-weight:bold; color:#4e342e; margin-top:2px; word-break:break-all;">${name}</div>
                                         <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></div>
+                                        ${soldOutText}
                                     </div>
                                 `;
                             } else {
                                 shopHtml += `
-                                    <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                                    <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${opacityStyle}">
                                         <span style="font-size:24px; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3));">♟️</span>
                                         <div style="font-size:10px; font-weight:bold; color:#4e342e; margin-top:2px; word-break:break-all;">${name}</div>
                                         <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></div>
+                                        ${soldOutText}
                                     </div>
                                 `;
                             }

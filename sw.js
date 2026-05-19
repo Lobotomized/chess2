@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chess2-cache-v18';
+const CACHE_NAME = 'chess2-cache-v19';
 const urlsToCache = [
   '/',
   '/campaign.html',
