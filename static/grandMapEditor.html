@@ -684,7 +684,7 @@
                 node.enemyPower = val;
             } else if (tool === 'market') {
                 node.board = 'Market';
-                node.enemyPower = 0;
+                node.enemyPower = 6;
                 node.isBoss = false;
             } else if (tool === 'boss') {
                 node.isBoss = true;
@@ -887,6 +887,8 @@
                             powerInd.innerHTML = `<img src="/static/bigMap/bank.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
                         } else if (node.board === 'Library') {
                             powerInd.innerHTML = `<img src="/static/bigMap/experienceIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
+                        } else if (node.board === 'Market') {
+                            powerInd.innerHTML = `<img src="/static/bigMap/shopIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
                         } else {
                             powerInd.innerHTML = `<img src="/static/bigMap/swords.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
                         }
@@ -1271,10 +1273,15 @@
 
         function openCustomShopModal(node) {
             editingNodeForShop = node;
-            // Initialize with 6 slots, use existing if available
+            const numItems = node.enemyPower || 6;
+            // Initialize with numItems slots, use existing if available
             currentShopItems = node.shopItems ? JSON.parse(JSON.stringify(node.shopItems)) : [];
-            // Fill up to 6 with null (random)
-            while(currentShopItems.length < 6) {
+            // Trim if they reduced the size
+            if (currentShopItems.length > numItems) {
+                currentShopItems = currentShopItems.slice(0, numItems);
+            }
+            // Fill up to numItems with null (random)
+            while(currentShopItems.length < numItems) {
                 currentShopItems.push(null);
             }
             renderShopItems();
@@ -1284,8 +1291,9 @@
         function renderShopItems() {
             const container = document.getElementById('shopItemsContainer');
             container.innerHTML = '';
+            const numItems = editingNodeForShop.enemyPower || 6;
             
-            for(let i=0; i<6; i++) {
+            for(let i=0; i<numItems; i++) {
                 const item = currentShopItems[i];
                 
                 const row = document.createElement('div');
@@ -1459,7 +1467,7 @@
         <p style="font-size:14px; margin-bottom:15px; text-align:center;">Configure exact items to be sold in this Market. Leave a slot as "Random" for default generation.</p>
         
         <div id="shopItemsContainer" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
-            <!-- 6 slots populated via JS -->
+            <!-- slots populated via JS based on shop power -->
         </div>
 
         <div style="display:flex; justify-content:space-between; margin-top:10px;">

@@ -539,6 +539,8 @@ function showMapModal() {
                      rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="Food" style="display:flex; align-items:center;"><img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">${node.enemyPower}</span></div>`;
                 } else if (!node.cleared && node.board === 'Bank') {
                      rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="Gold" style="display:flex; align-items:center;"><img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" alt="Gold" style="height: 1em; width: 1em; vertical-align: middle;">${node.enemyPower}</span></div>`;
+                } else if (!node.cleared && node.board === 'Market') {
+                     rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="Shop Size" style="display:flex; align-items:center;"><img src="/static/bigMap/shopIcon.jpg" class="food-icon-responsive" alt="Shop Size" style="height: 1em; width: 1em; vertical-align: middle;">${node.enemyPower || 6}</span></div>`;
                 } else if (!node.cleared && node.rewards && node.board !== 'Market' && node.board !== 'Mountain' && node.board !== 'Inn' && node.board !== 'Bank' && !isFinalBossNode) {
                      const r = node.rewards;
                      let parts = [];
@@ -1264,36 +1266,63 @@ function showMapCellPopup(node, grandMap) {
                     </div>
                 `;
             } else if (node.board === 'Market') {
-                // Ensure shopItems are generated
-                if (!node.shopItems || node.shopItems.length === 0) {
+                let numItems = node.enemyPower || 6;
+                // Ensure shopItems are generated up to the required amount
+                if (!node.shopItems) node.shopItems = [];
+                
+                if (node.shopItems.length < numItems || node.shopItems.includes(null)) {
                     let factories = typeof marketPieceFactories !== 'undefined' ? marketPieceFactories : []; // Default fallback
                     if (node.region && typeof regionFactories !== 'undefined' && regionFactories[node.region]) {
                          factories = regionFactories[node.region];
                     }
-                    let shopItems = [];
-                    for(let i=0; i<6; i++) {
+                    for(let i=0; i<numItems; i++) {
+                        if (node.shopItems[i] !== undefined && node.shopItems[i] !== null) continue;
+                        
                         const rand = Math.random();
                         if (rand < 0.25) { // 25% chance for food
                             let goldCost = Math.floor(Math.random() * 10) + 2; // 2 to 11 gold
                             const foodAmount = goldCost * 5;
                             goldCost -= typeof RPGStats !== 'undefined' ? RPGStats.shopDiscout : 0;
                             if(goldCost < 0) goldCost = 0;
-                            shopItems.push({ type: 'food', cost: goldCost, amount: foodAmount, bought: false });
+                            if (i < node.shopItems.length) {
+                                node.shopItems[i] = { type: 'food', cost: goldCost, amount: foodAmount, bought: false };
+                            } else {
+                                node.shopItems.push({ type: 'food', cost: goldCost, amount: foodAmount, bought: false });
+                            }
                         } else if (rand < 0.50) { // 25% chance for experience
                             let goldCost = Math.floor(Math.random() * 10) + 2; // 2 to 11 gold
                             const expAmount = goldCost;
                             goldCost -= typeof RPGStats !== 'undefined' ? RPGStats.shopDiscout : 0;
                             if(goldCost < 0) goldCost = 0;
-                            shopItems.push({ type: 'experience', cost: goldCost, amount: expAmount, bought: false });
+                            if (i < node.shopItems.length) {
+                                node.shopItems[i] = { type: 'experience', cost: goldCost, amount: expAmount, bought: false };
+                            } else {
+                                node.shopItems.push({ type: 'experience', cost: goldCost, amount: expAmount, bought: false });
+                            }
                         } else if (factories.length > 0) {
                             const randomFactory = factories[Math.floor(Math.random() * factories.length)];
                             const val = typeof getPieceValue === 'function' ? getPieceValue(randomFactory) : 5;
                             let cost =  Math.floor(val * 5) - (typeof RPGStats !== 'undefined' ? RPGStats.shopDiscout : 0);
                             if(cost < 0) cost = 0;
-                            shopItems.push({ type: 'unit', factory: randomFactory, cost: cost, value: val, bought: false });
+                            if (i < node.shopItems.length) {
+                                node.shopItems[i] = { type: 'unit', factory: randomFactory, cost: cost, value: val, bought: false };
+                            } else {
+                                node.shopItems.push({ type: 'unit', factory: randomFactory, cost: cost, value: val, bought: false });
+                            }
+                        } else {
+                            if (i < node.shopItems.length) {
+                                node.shopItems[i] = { type: 'food', cost: 2, amount: 10, bought: false }; // absolute fallback
+                            } else {
+                                node.shopItems.push({ type: 'food', cost: 2, amount: 10, bought: false });
+                            }
                         }
                     }
-                    node.shopItems = shopItems;
+                    if(typeof saveProgress === 'function') saveProgress();
+                }
+                
+                // Trim if it exceeds power
+                if (node.shopItems.length > numItems) {
+                    node.shopItems = node.shopItems.slice(0, numItems);
                     if(typeof saveProgress === 'function') saveProgress();
                 }
                 

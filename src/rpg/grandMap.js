@@ -166,7 +166,6 @@ const grandMap = {
                         
                     // Special case for Market
                     if (targetNode.board === 'Market') {
-                        targetNode.enemyPower = 0;
                         targetNode.difficulty = {
                             enemyValue: 0,
                             rewardCap: 0,

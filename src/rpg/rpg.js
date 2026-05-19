@@ -2805,37 +2805,65 @@ function showShopModal(restore = false) {
             baseShopItems = currentNode.shopItems;
         }
 
-        // Generate 6 units (or use predefined)
-        for(let i=0; i<6; i++) {
+        let numItems = 6;
+        if (currentNode && currentNode.enemyPower) {
+            numItems = currentNode.enemyPower;
+        }
+        
+        // Push predefined items
+        for(let i=0; i<Math.min(baseShopItems.length, numItems); i++) {
             if (baseShopItems[i] && baseShopItems[i] !== null) {
-                // Use predefined item, ensure bought state exists
                 const item = JSON.parse(JSON.stringify(baseShopItems[i]));
                 if (item.bought === undefined) item.bought = false;
                 shopItems.push(item);
-                continue;
-            }
-            
-            // Generate random item for this slot
-            const rand = Math.random();
-            if (rand < 0.25) { // 25% chance for food
-                let goldCost = Math.floor(Math.random() * 10) + 2; // 2 to 11 gold
-                const foodAmount = goldCost * 5;
-                goldCost -= RPGStats.shopDiscout;
-                if(goldCost < 0) goldCost = 0;
-                shopItems.push({ type: 'food', cost: goldCost, amount: foodAmount, bought: false });
-            } else if (rand < 0.50) { // 25% chance for experience
-                let goldCost = Math.floor(Math.random() * 10) + 2; // 2 to 11 gold
-                const expAmount = goldCost; // 1 exp = 1 gold
-                goldCost -= RPGStats.shopDiscout;
-                if(goldCost < 0) goldCost = 0;
-                shopItems.push({ type: 'experience', cost: goldCost, amount: expAmount, bought: false });
             } else {
-                const randomFactory = factories[Math.floor(Math.random() * factories.length)];
-                const val = getPieceValue(randomFactory);
-                let cost =  Math.floor(val * 5) - RPGStats.shopDiscout;
-                if(cost < 0) cost = 0;
-                shopItems.push({ type: 'unit', factory: randomFactory, cost: cost, value: val, bought: false });
+                shopItems.push(null); // Placeholder for generation below
             }
+        }
+
+        // Only ensure array has correct length by generating for nulls or missing elements
+        if (shopItems.length < numItems || shopItems.includes(null)) {
+            for(let i=0; i<numItems; i++) {
+                if (shopItems[i] !== undefined && shopItems[i] !== null) continue;
+                
+                const rand = Math.random();
+                if (rand < 0.25) { 
+                    let goldCost = Math.floor(Math.random() * 10) + 2; 
+                    const foodAmount = goldCost * 5;
+                    goldCost -= RPGStats.shopDiscout;
+                    if(goldCost < 0) goldCost = 0;
+                    if (i < shopItems.length) {
+                        shopItems[i] = { type: 'food', cost: goldCost, amount: foodAmount, bought: false };
+                    } else {
+                        shopItems.push({ type: 'food', cost: goldCost, amount: foodAmount, bought: false });
+                    }
+                } else if (rand < 0.50) { 
+                    let goldCost = Math.floor(Math.random() * 10) + 2; 
+                    const expAmount = goldCost; 
+                    goldCost -= RPGStats.shopDiscout;
+                    if(goldCost < 0) goldCost = 0;
+                    if (i < shopItems.length) {
+                        shopItems[i] = { type: 'experience', cost: goldCost, amount: expAmount, bought: false };
+                    } else {
+                        shopItems.push({ type: 'experience', cost: goldCost, amount: expAmount, bought: false });
+                    }
+                } else {
+                    const randomFactory = factories[Math.floor(Math.random() * factories.length)];
+                    const val = getPieceValue(randomFactory);
+                    let cost =  Math.floor(val * 5) - RPGStats.shopDiscout;
+                    if(cost < 0) cost = 0;
+                    if (i < shopItems.length) {
+                        shopItems[i] = { type: 'unit', factory: randomFactory, cost: cost, value: val, bought: false };
+                    } else {
+                        shopItems.push({ type: 'unit', factory: randomFactory, cost: cost, value: val, bought: false });
+                    }
+                }
+            }
+        }
+        
+        // Trim if too large
+        if (shopItems.length > numItems) {
+            shopItems = shopItems.slice(0, numItems);
         }
     }
 
@@ -2879,161 +2907,243 @@ function showShopModal(restore = false) {
         });
     };
 
-    shopItems.forEach((item, index) => {
-        const div = document.createElement('div');
-        div.className = 'army-option';
-        
-        let icon = '';
-        const isFood = item.type === 'food';
-        const isExp = item.type === 'experience';
-        
-        if (isFood) {
-            icon = `<div style="font-size: 50px; line-height: 50px; text-align: center; margin-bottom: 10px;"><img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></div>`;
-            div.innerHTML = `
-                ${icon}
-                <h3>Rations</h3>
-                <p>Amount: ${item.amount} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></p>
-                <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
-            `;
-        } else if (isExp) {
-            icon = `<div style="font-size: 50px; line-height: 50px; text-align: center; margin-bottom: 10px;"><img src="/static/bigMap/experienceIcon.jpg" class="food-icon-responsive" alt="Experience" style="height: 1em; width: 1em; vertical-align: middle;"></div>`;
-            div.innerHTML = `
-                ${icon}
-                <h3>Experience</h3>
-                <p>Amount: ${item.amount} <img src="/static/bigMap/experienceIcon.jpg" class="food-icon-responsive" alt="Experience" style="height: 1em; width: 1em; vertical-align: middle;"></p>
-                <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
-            `;
-        } else {
-            if (typeof window[item.factory] === 'function') {
-                 const p = window[item.factory]('white', 0, 0);
-                 icon = `<img src="/static/${p.icon}" style="width:50px;height:50px;display:block;margin:0 auto 10px;cursor:help" title="Click for info">`;
-                 
-                 // Add click handler to icon for info
-                 setTimeout(() => {
-                     const img = div.querySelector('img');
-                     if(img) {
-                         img.onclick = (e) => {
-                             e.stopPropagation();
-                             showPieceDiscoveryModal(item.factory);
-                         };
-                     }
-                 }, 0);
-            }
-            
-            div.innerHTML = `
-                ${icon}
-                <h3>${item.factory.replace('Factory','').replace('rpg','')}</h3>
-                <p>Power: ${item.value}</p>
-                <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
-            `;
-            
-            // Info Button
-            const infoBtn = document.createElement('button');
-            infoBtn.innerText = 'Info';
-            infoBtn.style.width = '100%';
-            infoBtn.style.marginBottom = '5px';
-            infoBtn.style.fontSize = '12px';
-            infoBtn.onclick = (e) => {
-                e.stopPropagation();
-                showPieceDiscoveryModal(item.factory);
-            };
-            div.appendChild(infoBtn);
-        }
+    let currentPage = 0;
+    const ITEMS_PER_PAGE = 6;
+    const totalPages = Math.ceil(shopItems.length / ITEMS_PER_PAGE);
 
-        // Buy Button
-        const buyBtn = document.createElement('button');
-        buyBtn.innerText = item.bought ? 'Bought' : 'Buy';
-        buyBtn.className = 'buy-btn';
-        buyBtn.dataset.index = index;
-        buyBtn.style.width = '100%';
-        
-        if (item.bought) {
-            buyBtn.disabled = true;
-            div.style.opacity = '0.5';
-        }
-        
-        buyBtn.onclick = (e) => {
-            e.stopPropagation();
+    function renderShopPage(page) {
+        container.innerHTML = '';
+        const startIdx = page * ITEMS_PER_PAGE;
+        const endIdx = Math.min(startIdx + ITEMS_PER_PAGE, shopItems.length);
+        const pageItems = shopItems.slice(startIdx, endIdx);
+
+        pageItems.forEach((item, indexInPage) => {
+            const index = startIdx + indexInPage;
+            const div = document.createElement('div');
+            div.className = 'army-option';
+            
+            let icon = '';
+            const isFood = item.type === 'food';
+            const isExp = item.type === 'experience';
+            
             if (isFood) {
-                if (rpgState.gold >= item.cost && !item.bought) {
-                    rpgState.gold -= item.cost;
-                    rpgState.food += item.amount;
-                    item.bought = true;
-                    
-                    if (document.getElementById('playerGold')) {
-                        document.getElementById('playerGold').innerText = rpgState.gold;
-                    }
-                    updateGoldDisplay();
-                    saveProgress();
-                    
-                    // Update UI
-                    buyBtn.innerText = 'Bought';
-                    buyBtn.disabled = true;
-                    div.style.opacity = '0.5';
-                    
-                    // Refresh all buttons
-                    updateAllButtons();
-                }
+                icon = `<div style="font-size: 50px; line-height: 50px; text-align: center; margin-bottom: 10px;"><img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></div>`;
+                div.innerHTML = `
+                    ${icon}
+                    <h3>Rations</h3>
+                    <p>Amount: ${item.amount} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></p>
+                    <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
+                `;
             } else if (isExp) {
-                if (rpgState.gold >= item.cost && !item.bought) {
-                    rpgState.gold -= item.cost;
-                    if (typeof gainKingExperience === 'function') {
-                        gainKingExperience(item.amount);
-                    } else {
-                        rpgState.kingExp += item.amount;
-                    }
-                    item.bought = true;
-                    
-                    if (document.getElementById('playerGold')) {
-                        document.getElementById('playerGold').innerText = rpgState.gold;
-                    }
-                    updateGoldDisplay();
-                    saveProgress();
-                    
-                    // Update UI
-                    buyBtn.innerText = 'Bought';
-                    buyBtn.disabled = true;
-                    div.style.opacity = '0.5';
-                    
-                    // Refresh all buttons
-                    updateAllButtons();
-
-                    // Check for level up
-                    if (rpgState.pendingSkillSelections && rpgState.pendingSkillSelections > 0) {
-                        document.getElementById('shopDialog').close();
-                        showSkillSelectionModal(() => {
-                            // Re-open shop when done picking skills
-                            showShopModal(true);
-                        });
-                    }
-                }
+                icon = `<div style="font-size: 50px; line-height: 50px; text-align: center; margin-bottom: 10px;"><img src="/static/bigMap/experienceIcon.jpg" class="food-icon-responsive" alt="Experience" style="height: 1em; width: 1em; vertical-align: middle;"></div>`;
+                div.innerHTML = `
+                    ${icon}
+                    <h3>Experience</h3>
+                    <p>Amount: ${item.amount} <img src="/static/bigMap/experienceIcon.jpg" class="food-icon-responsive" alt="Experience" style="height: 1em; width: 1em; vertical-align: middle;"></p>
+                    <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
+                `;
             } else {
-                if (rpgState.gold >= item.cost && !item.bought && rpgState.playerRoster.length < 24) {
-                    rpgState.gold -= item.cost;
-                    rpgState.playerRoster.push(item.factory);
-                    item.bought = true;
-                    
-                    if (document.getElementById('playerGold')) {
-                        document.getElementById('playerGold').innerText = rpgState.gold;
-                    }
-                    updateGoldDisplay();
-                    saveProgress();
-                    
-                    // Update UI
-                    buyBtn.innerText = 'Bought';
-                    buyBtn.disabled = true;
-                    div.style.opacity = '0.5';
-                    
-                    // Refresh all buttons
-                    updateAllButtons();
+                if (typeof window[item.factory] === 'function') {
+                     const p = window[item.factory]('white', 0, 0);
+                     icon = `<img src="/static/${p.icon}" style="width:50px;height:50px;display:block;margin:0 auto 10px;cursor:help" title="Click for info">`;
+                     
+                     // Add click handler to icon for info
+                     setTimeout(() => {
+                         const img = div.querySelector('img');
+                         if(img) {
+                             img.onclick = (e) => {
+                                 e.stopPropagation();
+                                 showPieceDiscoveryModal(item.factory);
+                             };
+                         }
+                     }, 0);
                 }
+                
+                div.innerHTML = `
+                    ${icon}
+                    <h3>${item.factory.replace('Factory','').replace('rpg','')}</h3>
+                    <p>Power: ${item.value}</p>
+                    <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
+                `;
+                
+                // Info Button
+                const infoBtn = document.createElement('button');
+                infoBtn.innerText = 'Info';
+                infoBtn.style.width = '100%';
+                infoBtn.style.marginBottom = '5px';
+                infoBtn.style.fontSize = '12px';
+                infoBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    showPieceDiscoveryModal(item.factory);
+                };
+                div.appendChild(infoBtn);
             }
-        };
-        
-        div.appendChild(buyBtn);
-        container.appendChild(div);
-    });
-    
+
+            // Buy Button
+            const buyBtn = document.createElement('button');
+            buyBtn.innerText = item.bought ? 'Bought' : 'Buy';
+            buyBtn.className = 'buy-btn';
+            buyBtn.dataset.index = index;
+            buyBtn.style.width = '100%';
+            
+            if (item.bought) {
+                buyBtn.disabled = true;
+                div.style.opacity = '0.5';
+            }
+            
+            buyBtn.onclick = (e) => {
+                e.stopPropagation();
+                if (isFood) {
+                    if (rpgState.gold >= item.cost && !item.bought) {
+                        rpgState.gold -= item.cost;
+                        rpgState.food += item.amount;
+                        item.bought = true;
+                        
+                        if (document.getElementById('playerGold')) {
+                            document.getElementById('playerGold').innerText = rpgState.gold;
+                        }
+                        updateGoldDisplay();
+                        saveProgress();
+                        
+                        // Update UI
+                        buyBtn.innerText = 'Bought';
+                        buyBtn.disabled = true;
+                        div.style.opacity = '0.5';
+                        
+                        // Refresh all buttons
+                        updateAllButtons();
+                    }
+                } else if (isExp) {
+                    if (rpgState.gold >= item.cost && !item.bought) {
+                        rpgState.gold -= item.cost;
+                        if (typeof gainKingExperience === 'function') {
+                            gainKingExperience(item.amount);
+                        } else {
+                            rpgState.kingExp += item.amount;
+                        }
+                        item.bought = true;
+                        
+                        if (document.getElementById('playerGold')) {
+                            document.getElementById('playerGold').innerText = rpgState.gold;
+                        }
+                        updateGoldDisplay();
+                        saveProgress();
+                        
+                        // Update UI
+                        buyBtn.innerText = 'Bought';
+                        buyBtn.disabled = true;
+                        div.style.opacity = '0.5';
+                        
+                        // Refresh all buttons
+                        updateAllButtons();
+
+                        // Check for level up
+                        if (rpgState.pendingSkillSelections && rpgState.pendingSkillSelections > 0) {
+                            document.getElementById('shopDialog').close();
+                            showSkillSelectionModal(() => {
+                                // Re-open shop when done picking skills
+                                showShopModal(true);
+                            });
+                        }
+                    }
+                } else {
+                    if (rpgState.gold >= item.cost && !item.bought && rpgState.playerRoster.length < 24) {
+                        rpgState.gold -= item.cost;
+                        rpgState.playerRoster.push(item.factory);
+                        item.bought = true;
+                        
+                        if (document.getElementById('playerGold')) {
+                            document.getElementById('playerGold').innerText = rpgState.gold;
+                        }
+                        updateGoldDisplay();
+                        saveProgress();
+                        
+                        // Update UI
+                        buyBtn.innerText = 'Bought';
+                        buyBtn.disabled = true;
+                        div.style.opacity = '0.5';
+                        
+                        // Refresh all buttons
+                        updateAllButtons();
+                    }
+                }
+            };
+            
+            div.appendChild(buyBtn);
+            container.appendChild(div);
+        });
+
+        // Add Pagination Controls
+        if (totalPages > 1) {
+            // First check if pagination already exists to avoid duplicates
+            let paginationDiv = container.parentElement.querySelector('.shop-pagination');
+            if (!paginationDiv) {
+                paginationDiv = document.createElement('div');
+                paginationDiv.className = 'shop-pagination';
+                paginationDiv.style.width = '100%';
+                paginationDiv.style.display = 'flex';
+                paginationDiv.style.justifyContent = 'center';
+                paginationDiv.style.alignItems = 'center';
+                paginationDiv.style.marginTop = '20px';
+                paginationDiv.style.gap = '15px';
+                // Append directly to the modal body (after container), not inside the flex grid
+                container.parentElement.insertBefore(paginationDiv, container.nextSibling);
+            }
+            
+            paginationDiv.innerHTML = ''; // clear contents to rebuild
+
+            const prevBtn = document.createElement('button');
+            prevBtn.innerText = '◀ Prev';
+            prevBtn.style.padding = '8px 16px';
+            prevBtn.style.minWidth = '80px';
+            if (currentPage === 0) {
+                prevBtn.disabled = true;
+                prevBtn.style.opacity = '0.5';
+                prevBtn.style.cursor = 'not-allowed';
+            } else {
+                prevBtn.onclick = () => {
+                    currentPage--;
+                    renderShopPage(currentPage);
+                    updateAllButtons();
+                };
+            }
+
+            const pageIndicator = document.createElement('span');
+            pageIndicator.innerText = `Page ${currentPage + 1} of ${totalPages}`;
+            pageIndicator.style.fontWeight = 'bold';
+            pageIndicator.style.color = 'var(--piece-black, #4e342e)';
+            pageIndicator.style.minWidth = '80px';
+            pageIndicator.style.textAlign = 'center';
+
+            const nextBtn = document.createElement('button');
+            nextBtn.innerText = 'Next ▶';
+            nextBtn.style.padding = '8px 16px';
+            nextBtn.style.minWidth = '80px';
+            if (currentPage >= totalPages - 1) {
+                nextBtn.disabled = true;
+                nextBtn.style.opacity = '0.5';
+                nextBtn.style.cursor = 'not-allowed';
+            } else {
+                nextBtn.onclick = () => {
+                    currentPage++;
+                    renderShopPage(currentPage);
+                    updateAllButtons();
+                };
+            }
+
+            paginationDiv.appendChild(prevBtn);
+            paginationDiv.appendChild(pageIndicator);
+            paginationDiv.appendChild(nextBtn);
+        } else {
+            // Remove pagination if it exists but we don't need it
+            const paginationDiv = container.parentElement.querySelector('.shop-pagination');
+            if (paginationDiv) {
+                paginationDiv.remove();
+            }
+        }
+    }
+
+    renderShopPage(0);
     // Initial update
     updateAllButtons();
     
