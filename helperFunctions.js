@@ -165,11 +165,10 @@ function renderMoveHistory(state) {
                 if (typeof rpgState !== 'undefined' && rpgState && typeof RPGStats !== 'undefined' && RPGStats.divinationLevel > 0 && !rpgState.divinationUsed && !state.won) {
                     if (backwardsIndex <= RPGStats.divinationLevel * 2) {
                         const clockBtn = document.createElement('button');
-                        clockBtn.innerText = '⏰';
+                        clockBtn.innerHTML = '<img src="/static/bigMap/clockIcon.png" style="width: 24px; height: 24px; vertical-align: middle;">';
                         clockBtn.style.background = 'transparent';
                         clockBtn.style.border = 'none';
                         clockBtn.style.cursor = 'pointer';
-                        clockBtn.style.fontSize = '16px';
                         clockBtn.title = 'Use Divination to revert to before this move';
                         clockBtn.onclick = async () => {
                             if(await showConfirm('Use Divination to go back to this move? (Once per battle)')) {

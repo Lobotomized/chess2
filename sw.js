@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chess2-cache-v33';
+const CACHE_NAME = 'chess2-cache-v34';
 const urlsToCache = [
   '/',
   '/campaign.html',
@@ -6,6 +6,7 @@ const urlsToCache = [
   '/static/rpgBg.png',
   '/static/campaignBg.png',
   '/static/rpgTopBar.png',
+  '/static/bigMap/clockIcon.png',
   '/rpg.html',
   '/rpg-menu',
   '/single-player',
