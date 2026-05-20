@@ -168,7 +168,7 @@ const RPGSKILLS = [
     },
     {
         name: "Myrmecologist",
-        maxLevel: 3,
+        maxLevel: 5,
         getDescription: (level) => `Summons ${level * 2} Ants on random empty spots anywhere on the board at the start of battle.`,
         apply: (level) => { RPGStats.myrmecologistLevel = level; }
     },
