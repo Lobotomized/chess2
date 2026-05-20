@@ -882,7 +882,7 @@
                         powerInd.style.padding = '2px 4px';
                         powerInd.style.borderRadius = '4px';
                         if (node.board === 'Inn') {
-                            powerInd.innerHTML = `<img src="/static/bigMap/foodIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
+                            powerInd.innerHTML = `<img src="/static/bigMap/foodIcon.png" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
                         } else if (node.board === 'Bank') {
                             powerInd.innerHTML = `<img src="/static/bigMap/bank.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
                         } else if (node.board === 'Library') {
@@ -1387,7 +1387,7 @@
                     amtInput.onchange = (e) => { currentShopItems[i].amount = parseInt(e.target.value) || 1; };
                     
                     const amtLabel = document.createElement('span');
-                    amtLabel.innerHTML = `<img src="/static/bigMap/foodIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle;">`;
+                    amtLabel.innerHTML = `<img src="/static/bigMap/foodIcon.png" style="height: 1em; width: 1em; vertical-align: middle;">`;
                     row.appendChild(amtLabel);
                     row.appendChild(amtInput);
                 }

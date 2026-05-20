@@ -483,13 +483,13 @@ function showMapModal() {
                 } else if (node.cleared) {
                      icon = '🏳️'; // Cleared/Conquered
                 } else if (node.board === 'Market') {
-                     icon = '<img src="/static/bigMap/shopIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
+                     icon = '<img src="/static/bigMap/shopIcon.jpg" style="height: 2em; width: 2em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
                 } else if (node.board === 'Library') {
-                     icon = '<img src="/static/bigMap/experienceIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
+                     icon = '<img src="/static/bigMap/experienceIcon.jpg" style="height: 2em; width: 2em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
                 } else if (node.board === 'Inn') {
-                     icon = '<img src="/static/bigMap/innIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
+                     icon = '<img src="/static/bigMap/innIcon.jpg" style="height: 2em; width: 2em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
                 } else if (node.board === 'Bank') {
-                     icon = '<img src="/static/bigMap/bank.jpg" style="height: 1em; width: 1em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
+                     icon = '<img src="/static/bigMap/bank.jpg" style="height: 2em; width: 2em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
                 } else if (node.board === 'Mountain') {
                      icon = ''; // No combat icon on mountains
                 } else {
@@ -534,13 +534,13 @@ function showMapModal() {
                 let rewardsHtml = '';
                 if (!node.cleared && node.board === 'Library') {
                      // Library shows King Experience instead of standard rewards
-                     rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="King Experience" style="display:flex; align-items:center;"><img src="/static/bigMap/experienceIcon.jpg" class="food-icon-responsive" alt="Experience" style="height: 1em; width: 1em; vertical-align: middle;">${node.enemyPower}</span></div>`;
+                     rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="King Experience" style="display:flex; align-items:center;"><img src="/static/bigMap/experienceIcon.jpg" class="food-icon-responsive" alt="Experience" style="height: 2em; width: 2em; vertical-align: middle;">${node.enemyPower}</span></div>`;
                 } else if (!node.cleared && node.board === 'Inn') {
-                     rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="Food" style="display:flex; align-items:center;"><img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">${node.enemyPower}</span></div>`;
+                     rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="Food" style="display:flex; align-items:center;"><img src="/static/bigMap/foodIcon.png" class="food-icon-responsive" alt="Food" style="height: 2em; width: 2em; vertical-align: middle;">${node.enemyPower}</span></div>`;
                 } else if (!node.cleared && node.board === 'Bank') {
-                     rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="Gold" style="display:flex; align-items:center;"><img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" alt="Gold" style="height: 1em; width: 1em; vertical-align: middle;">${node.enemyPower}</span></div>`;
+                     rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="Gold" style="display:flex; align-items:center;"><img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" alt="Gold" style="height: 2em; width: 2em; vertical-align: middle;">${node.enemyPower}</span></div>`;
                 } else if (!node.cleared && node.board === 'Market') {
-                     rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="Shop Size" style="display:flex; align-items:center;"><img src="/static/bigMap/shopIcon.jpg" class="food-icon-responsive" alt="Shop Size" style="height: 1em; width: 1em; vertical-align: middle;">${node.enemyPower || 6}</span></div>`;
+                     rewardsHtml = `<div class="map-cell-rewards" style="display: flex; gap: 10px; font-size: 16px; font-weight:bold; color: #fff; text-shadow: 2px 2px 2px #000; background: rgba(0,0,0,0.75); padding: 4px 8px; border-radius: 8px; margin-bottom: 6px; pointer-events: auto; border: 1px solid rgba(255,255,255,0.2); box-shadow: 0 2px 4px rgba(0,0,0,0.5);"><span title="Shop Size" style="display:flex; align-items:center;"><img src="/static/bigMap/shopIcon.jpg" class="food-icon-responsive" alt="Shop Size" style="height: 2em; width: 2em; vertical-align: middle;">${node.enemyPower || 6}</span></div>`;
                 } else if (!node.cleared && node.rewards && node.board !== 'Market' && node.board !== 'Mountain' && node.board !== 'Inn' && node.board !== 'Bank' && !isFinalBossNode) {
                      const r = node.rewards;
                      let parts = [];
@@ -550,7 +550,7 @@ function showMapModal() {
                      if (hasPiece && !rosterFull) {
                          // Only piece reward is given, don't show gold
                      } else if (r.gold > 0) {
-                         parts.push(`<span title="Gold" style="display:flex; align-items:center;"><img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" alt="Gold" style="height: 1em; width: 1em; vertical-align: middle;">${r.gold}</span>`);
+                         parts.push(`<span title="Gold" style="display:flex; align-items:center;"><img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" alt="Gold" style="height: 2em; width: 2em; vertical-align: middle;">${r.gold}</span>`);
                      }
                      
                      if (hasPiece && !rosterFull) {
@@ -769,12 +769,17 @@ function showMapCellPopup(node, grandMap) {
         `;
     }
     
-    if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 3 && node.board !== 'Market' && node.board !== 'Library' && node.board !== 'Mountain') {
+    if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 2 && node.board !== 'Market' && node.board !== 'Library' && node.board !== 'Mountain') {
         // Pre-calculate exact layout for preview
+        let previewMaxX = 7;
+        let previewMaxY = 7;
+        if (node.board === 'Desert') {
+            previewMaxX = 8;
+        }
         let boardPreview = [];
-        for(let y=0; y<=7; y++){
+        for(let y=0; y<=previewMaxY; y++){
             boardPreview[y] = [];
-            for(let x=0; x<=7; x++){
+            for(let x=0; x<=previewMaxX; x++){
                 boardPreview[y][x] = true; // default exists
             }
         }
@@ -789,7 +794,7 @@ function showMapCellPopup(node, grandMap) {
                 }
                 const seed = node.mapSeed;
                 const candidateSquares = [];
-                for (let x = 0; x <= 7; x++) {
+                for (let x = 0; x <= previewMaxX; x++) {
                     for (let y = 2; y <= 5; y++) {
                         candidateSquares.push({ x, y });
                     }
@@ -840,7 +845,7 @@ function showMapCellPopup(node, grandMap) {
             
             const kings = backline.filter(u => u && u.toLowerCase().includes('king'));
             const others = backline.filter(u => u && !u.toLowerCase().includes('king'));
-            const availableSlots = 8;
+            const availableSlots = previewMaxX + 1;
             if (kings.length + others.length > availableSlots) {
                 const allowedOthersCount = Math.max(0, availableSlots - kings.length);
                 for (let i = others.length - 1; i > 0; i--) {
@@ -862,13 +867,13 @@ function showMapCellPopup(node, grandMap) {
                 let py = rows[currentRowIndex];
                 
                 const isValidSquare = (bx, by) => {
-                    if (by < 0 || by > 7 || bx < 0 || bx > 7) return false;
+                    if (by < 0 || by > previewMaxY || bx < 0 || bx > previewMaxX) return false;
                     return boardPreview[by][bx] !== false;
                 };
                 
                 const advance = () => {
                     px++;
-                    if (px > 7) {
+                    if (px > previewMaxX) {
                         px = 0;
                         currentRowIndex++;
                         if (currentRowIndex >= rows.length) return false;
@@ -899,10 +904,14 @@ function showMapCellPopup(node, grandMap) {
         }
         
         // Render mini board preview
-        let miniBoardHtml = `<div style="display:flex; flex-direction:column; border: 4px solid #5d4037; background: #fff; width: 240px; height: 240px; margin: 10px auto; box-shadow: 0 4px 8px rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden;">`;
-        for(let y=0; y<=7; y++){
-            miniBoardHtml += `<div style="display:flex; height: 12.5%;">`;
-            for(let x=0; x<=7; x++){
+        const boardWidthPx = (previewMaxX + 1) * 30;
+        const boardHeightPx = (previewMaxY + 1) * 30;
+        const rowHeightPct = 100 / (previewMaxY + 1);
+        const colWidthPct = 100 / (previewMaxX + 1);
+        let miniBoardHtml = `<div style="display:flex; flex-direction:column; border: 4px solid #5d4037; background: #fff; width: ${boardWidthPx}px; height: ${boardHeightPx}px; margin: 10px auto; box-shadow: 0 4px 8px rgba(0,0,0,0.3); border-radius: 4px; overflow: hidden;">`;
+        for(let y=0; y<=previewMaxY; y++){
+            miniBoardHtml += `<div style="display:flex; height: ${rowHeightPct}%;">`;
+            for(let x=0; x<=previewMaxX; x++){
                 const isLight = (x + y) % 2 === 0;
                 const bgColor = isLight ? '#f0d9b5' : '#b58863';
                 let sqContent = '';
@@ -927,7 +936,7 @@ function showMapCellPopup(node, grandMap) {
                         }
                     }
                 }
-                miniBoardHtml += `<div style="width: 12.5%; height: 100%; background: ${bgColor}; display:flex; align-items:center; justify-content:center; font-size:20px;">${sqContent}</div>`;
+                miniBoardHtml += `<div style="width: ${colWidthPct}%; height: 100%; background: ${bgColor}; display:flex; align-items:center; justify-content:center; font-size:20px;">${sqContent}</div>`;
             }
             miniBoardHtml += `</div>`;
         }
@@ -935,7 +944,7 @@ function showMapCellPopup(node, grandMap) {
         
         content += `<p style="margin:5px 0; color: #2e7d32; font-weight: bold;">Terrain Layout: ${node.board || 'Standard'}</p>`;
         content += miniBoardHtml;
-    } else if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 3 && node.board !== 'Market') {
+    } else if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 2 && node.board !== 'Market') {
         content += `<p style="margin:5px 0; color: #2e7d32; font-weight: bold;">Terrain: ${node.board}</p>`;
     }
     
@@ -990,33 +999,33 @@ function showMapCellPopup(node, grandMap) {
         
         if (node.board === 'Market') {
              if (canAttack) {
-                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/shopIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Enter Market</button>`;
+                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/shopIcon.jpg" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Enter Market</button>`;
              } else {
-                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;"><img src="/static/bigMap/shopIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Enter Market (Too Far)</button>`;
+                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;"><img src="/static/bigMap/shopIcon.jpg" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Enter Market (Too Far)</button>`;
              }
         } else if (node.board === 'Library') {
              if (canAttack) {
-                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/experienceIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Enter Library</button>`;
+                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/experienceIcon.jpg" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Enter Library</button>`;
              } else {
-                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;"><img src="/static/bigMap/experienceIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Enter Library (Too Far)</button>`;
+                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;"><img src="/static/bigMap/experienceIcon.jpg" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Enter Library (Too Far)</button>`;
              }
         } else if (node.board === 'Inn') {
              if (canAttack) {
-                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/innIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Rest at Inn</button>`;
+                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/innIcon.jpg" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Rest at Inn</button>`;
              } else {
-                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;"><img src="/static/bigMap/innIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Rest at Inn (Too Far)</button>`;
+                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;"><img src="/static/bigMap/innIcon.jpg" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Rest at Inn (Too Far)</button>`;
              }
         } else if (node.board === 'Bank') {
              if (canAttack) {
-                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/bank.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Visit Bank</button>`;
+                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/bank.jpg" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Visit Bank</button>`;
              } else {
-                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;"><img src="/static/bigMap/bank.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Visit Bank (Too Far)</button>`;
+                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;"><img src="/static/bigMap/bank.jpg" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Visit Bank (Too Far)</button>`;
              }
         } else {
              if (canAttack) {
-                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/swords.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Attack</button>`;
+                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/swords.jpg" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Attack</button>`;
              } else {
-                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;"><img src="/static/bigMap/swords.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Attack (Too Far)</button>`;
+                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;"><img src="/static/bigMap/swords.jpg" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Attack (Too Far)</button>`;
              }
         }
     }
@@ -1026,15 +1035,15 @@ function showMapCellPopup(node, grandMap) {
         const infoBtnStyle = `padding: 10px 20px; font-weight:normal; letter-spacing: 1px; cursor:pointer; border:2px solid #4e342e; border-radius:4px; margin-bottom: 5px; font-family: 'Lilita One', cursive;`;
         if (node.board === 'Market') {
              if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 2) {
-                 content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/eye.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Scout Market</button>`;
+                 content += `<button id="popupInfoBtn" style="${infoBtnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/eyeActive.png" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Scout Market</button>`;
              } else {
-                 content += `<button disabled style="${infoBtnStyle} background:#e0e0e0; color:#9e9e9e; cursor:not-allowed;" title="Requires Scouting Level 2"><img src="/static/bigMap/eye.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Scout Market (Req. Scouting Lvl 2)</button>`;
+                 content += `<button disabled style="${infoBtnStyle} background:#e0e0e0; color:#9e9e9e; cursor:not-allowed;" title="Requires Scouting Level 2"><img src="/static/bigMap/eyeInactive.png" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Scout Market (Req. Scouting Lvl 2)</button>`;
              }
         } else if (node.board !== 'Library' && node.board !== 'Inn' && node.board !== 'Bank') {
              if (typeof RPGStats !== 'undefined' && RPGStats.scoutingLevel >= 1) {
-                 content += `<button id="popupEnemyBtn" style="${infoBtnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/eye.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Scout Enemies</button>`;
+                 content += `<button id="popupEnemyBtn" style="${infoBtnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/eyeActive.png" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Scout Enemies</button>`;
              } else {
-                 content += `<button disabled style="${infoBtnStyle} background:#e0e0e0; color:#9e9e9e; cursor:not-allowed;" title="Requires Scouting Level 1"><img src="/static/bigMap/eye.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Scout Enemies (Req. Scouting Lvl 1)</button>`;
+                 content += `<button disabled style="${infoBtnStyle} background:#e0e0e0; color:#9e9e9e; cursor:not-allowed;" title="Requires Scouting Level 1"><img src="/static/bigMap/eyeInactive.png" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Scout Enemies (Req. Scouting Lvl 1)</button>`;
              }
         }
     }   
@@ -1334,18 +1343,18 @@ function showMapCellPopup(node, grandMap) {
                         if (item.type === 'food') {
                             shopHtml += `
                                 <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${opacityStyle}">
-                                    <div style="font-size:24px; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3));"><img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></div>
+                                    <div style="font-size:24px; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3));"><img src="/static/bigMap/foodIcon.png" class="food-icon-responsive" alt="Food" style="height: 2em; width: 2em; vertical-align: middle;"></div>
                                     <div style="font-size:10px; font-weight:bold; color:#4e342e; margin-top:2px;">Rations (${item.amount})</div>
-                                    <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></div>
+                                    <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 2em; width: 2em; vertical-align: middle;"></div>
                                     ${soldOutText}
                                 </div>
                             `;
                         } else if (item.type === 'experience') {
                             shopHtml += `
                                 <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${opacityStyle}">
-                                    <div style="font-size:24px; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3));"><img src="/static/bigMap/experienceIcon.jpg" class="food-icon-responsive" alt="Experience" style="height: 1em; width: 1em; vertical-align: middle;"></div>
+                                    <div style="font-size:24px; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3));"><img src="/static/bigMap/experienceIcon.jpg" class="food-icon-responsive" alt="Experience" style="height: 2em; width: 2em; vertical-align: middle;"></div>
                                     <div style="font-size:10px; font-weight:bold; color:#4e342e; margin-top:2px;">Exp (${item.amount})</div>
-                                    <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></div>
+                                    <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 2em; width: 2em; vertical-align: middle;"></div>
                                     ${soldOutText}
                                 </div>
                             `;
@@ -1364,7 +1373,7 @@ function showMapCellPopup(node, grandMap) {
                                     <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${opacityStyle}">
                                         <img src="${iconUrl}" style="width:24px; height:24px; object-fit:contain; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3)); margin: 0 auto; display: block;">
                                         <div style="font-size:10px; font-weight:bold; color:#4e342e; margin-top:2px; word-break:break-all;">${name}</div>
-                                        <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></div>
+                                        <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 2em; width: 2em; vertical-align: middle;"></div>
                                         ${soldOutText}
                                     </div>
                                 `;
@@ -1373,7 +1382,7 @@ function showMapCellPopup(node, grandMap) {
                                     <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${opacityStyle}">
                                         <span style="font-size:24px; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3));">♟️</span>
                                         <div style="font-size:10px; font-weight:bold; color:#4e342e; margin-top:2px; word-break:break-all;">${name}</div>
-                                        <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></div>
+                                        <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 2em; width: 2em; vertical-align: middle;"></div>
                                         ${soldOutText}
                                     </div>
                                 `;
@@ -1404,7 +1413,7 @@ function showMapCellPopup(node, grandMap) {
                 if (hasPiece && !rosterFull) {
                      rewardsText += `<p style="margin-top:0;"><strong>Unit:</strong> ${r.specificPiece ? r.specificPiece.replace('Factory','') : 'Unknown'} ♟️</p>`;
                 } else {
-                     rewardsText += `<p style="margin-top:0;"><strong>Gold:</strong> ${r.gold} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" alt="Gold" style="height: 1em; width: 1em; vertical-align: middle;"></p>`;
+                     rewardsText += `<p style="margin-top:0;"><strong>Gold:</strong> ${r.gold} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" alt="Gold" style="height: 2em; width: 2em; vertical-align: middle;"></p>`;
                      if (hasPiece) {
                          // If roster is full, they still see the unit they missed or it just falls back to gold?
                          // Actually, if roster is full, they get gold instead. Let's just show Gold.

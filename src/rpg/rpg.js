@@ -484,10 +484,10 @@ async function loadGame() {
                      if (rpgState.currentRewardType === 'piece') {
                          const pieceName = rpgState.currentRewardContent ? window.pieceDescriptions[rpgState.currentRewardContent]?.name || 'Unit' : 'Unit';
                          goldText.innerHTML = `Won Unit: ${pieceName}`;
-                         if (rpgState.currentFoodReward > 0) goldText.innerHTML += ` + ${rpgState.currentFoodReward} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">`;
+                         if (rpgState.currentFoodReward > 0) goldText.innerHTML += ` + ${rpgState.currentFoodReward} <img src="/static/bigMap/foodIcon.png" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">`;
                      } else {
                          goldText.innerHTML = `+${goldEarned} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;">`;
-                         if (rpgState.currentFoodReward > 0) goldText.innerHTML += ` + ${rpgState.currentFoodReward} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">`;
+                         if (rpgState.currentFoodReward > 0) goldText.innerHTML += ` + ${rpgState.currentFoodReward} <img src="/static/bigMap/foodIcon.png" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">`;
                      }
                  }
                  
@@ -2951,11 +2951,11 @@ function showShopModal(restore = false) {
             const isExp = item.type === 'experience';
             
             if (isFood) {
-                icon = `<div style="font-size: 50px; line-height: 50px; text-align: center; margin-bottom: 10px;"><img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></div>`;
+                icon = `<div style="font-size: 50px; line-height: 50px; text-align: center; margin-bottom: 10px;"><img src="/static/bigMap/foodIcon.png" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></div>`;
                 div.innerHTML = `
                     ${icon}
                     <h3>Rations</h3>
-                    <p>Amount: ${item.amount} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></p>
+                    <p>Amount: ${item.amount} <img src="/static/bigMap/foodIcon.png" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></p>
                     <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
                 `;
             } else if (isExp) {
@@ -3448,12 +3448,12 @@ function showRewardModal() {
                           </div>`;
             
             if (option.foodReward > 0) {
-                 rewardText += ` (Max ${option.foodReward} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">)`;
+                 rewardText += ` (Max ${option.foodReward} <img src="/static/bigMap/foodIcon.png" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">)`;
             }
         } else {
             rewardText = `${option.rewardContent || '?'} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;">`;
             if (option.foodReward > 0) {
-                 rewardText += ` (Max ${option.foodReward} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">)`;
+                 rewardText += ` (Max ${option.foodReward} <img src="/static/bigMap/foodIcon.png" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">)`;
             }
         }
         
@@ -3848,7 +3848,7 @@ function checkGameEndSequence(state) {
                     
                     // Food for piece reward was calculated in generateRewardOptions and stored in currentFoodReward
                     if (foodEarned > 0) {
-                         winText += ` + ${foodEarned} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">`;
+                         winText += ` + ${foodEarned} <img src="/static/bigMap/foodIcon.png" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">`;
                     }
                     
                 } else {
@@ -3857,7 +3857,7 @@ function checkGameEndSequence(state) {
                     rpgState.gold = (rpgState.gold || 0) + goldEarned;
                     winText = `+${goldEarned} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;">`;
                     if (foodEarned > 0) {
-                         winText += ` + ${foodEarned} <img src="/static/bigMap/foodIcon.jpg" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">`;
+                         winText += ` + ${foodEarned} <img src="/static/bigMap/foodIcon.png" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;">`;
                     }
                 }
                 
@@ -4180,8 +4180,14 @@ function animate(secretState){
     // ... Copying the animate function logic from hotseat.js ...
     // Since I can't import `animate` from `hotseat.js`, I must redefine it.
     
-    canvas.width = squareLength * 8 + squareLength; // Default 8x8
-    canvas.height = squareLength * 8 + squareLength;
+    let maxX = 7;
+    let maxY = 7;
+    if (secretState.board && secretState.board.length > 0) {
+        maxX = Math.max(...secretState.board.map(sq => sq.x));
+        maxY = Math.max(...secretState.board.map(sq => sq.y));
+    }
+    canvas.width = squareLength * (maxX + 1) + squareLength;
+    canvas.height = squareLength * (maxY + 1) + squareLength;
     
     const state = secretState;
     if(hoveredPiece){

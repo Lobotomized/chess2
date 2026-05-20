@@ -26,8 +26,8 @@ const RPGStats = {
 const RPGSKILLS = [
     { 
         name: "Scouting", 
-        maxLevel: 3,
-        getDescription: (level) => level === 1 ? "You can see enemy pieces on the map." : level === 2 ? "You can see what options the shops have." : "You can see the square terrain (woods, fountains, etc.) and the exact positioning of all enemy pieces.",
+        maxLevel: 2,
+        getDescription: (level) => level === 1 ? "You can see enemy pieces on the map." : "You can see what options the shops have, the square terrain (woods, fountains, etc.), and the exact positioning of all enemy pieces.",
         apply: (level) => { RPGStats.scoutingLevel = level; } 
     },
     { 

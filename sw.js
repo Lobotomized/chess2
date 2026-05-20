@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chess2-cache-v29';
+const CACHE_NAME = 'chess2-cache-v32';
 const urlsToCache = [
   '/',
   '/campaign.html',
@@ -273,6 +273,7 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
@@ -351,6 +352,7 @@ self.addEventListener('fetch', event => {
 });
 
 self.addEventListener('activate', event => {
+  event.waitUntil(self.clients.claim());
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
