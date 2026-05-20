@@ -19,6 +19,8 @@ const RPGStats = {
     scoutingLevel: 0,
     summonerLevel: 0,
     mountaineerLevel: 0,
+    myrmecologistLevel: 0,
+    wisdomLevel: 0,
 };
 
 const RPGSKILLS = [
@@ -163,6 +165,18 @@ const RPGSKILLS = [
         maxLevel: 3,
         getDescription: (level) => `Allows you to go back in time up to ${level} turn${level > 1 ? 's' : ''} once per battle. One time piece effects that were used are not refreshed.`,
         apply: (level) => { RPGStats.divinationLevel = level; }
+    },
+    {
+        name: "Myrmecologist",
+        maxLevel: 3,
+        getDescription: (level) => `Summons ${level * 2} Ants on random empty spots anywhere on the board at the start of battle.`,
+        apply: (level) => { RPGStats.myrmecologistLevel = level; }
+    },
+    {
+        name: "Wisdom",
+        maxLevel: 1,
+        getDescription: (level) => "Pick from 5 options instead of 3 when choosing a new skill.",
+        apply: (level) => { RPGStats.wisdomLevel = level; }
     }
 ];
 
@@ -187,6 +201,8 @@ function resetRPGStats() {
     RPGStats.summonerLevel = 0;
     RPGStats.mountaineerLevel = 0;
     RPGStats.divinationLevel = 0;
+    RPGStats.myrmecologistLevel = 0;
+    RPGStats.wisdomLevel = 0;
     
     if (typeof applyDifficultySettings === 'function') {
         applyDifficultySettings();

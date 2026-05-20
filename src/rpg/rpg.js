@@ -1884,6 +1884,30 @@ function setupBoard(shapeName = 'Standard') {
             }
         }
     }
+
+    // --- Myrmecologist Skill Logic ---
+    if (RPGStats.myrmecologistLevel > 0) {
+        const emptySquares = [];
+        
+        hotseatGame.state.board.forEach(sq => {
+            const isOccupied = hotseatGame.state.pieces.some(p => p.x === sq.x && p.y === sq.y);
+            if (!isOccupied) {
+                emptySquares.push(sq);
+            }
+        });
+
+        const numAnts = RPGStats.myrmecologistLevel * 2;
+        
+        for (let i = 0; i < numAnts && emptySquares.length > 0; i++) {
+            const randomIdx = Math.floor(Math.random() * emptySquares.length);
+            const randomSq = emptySquares.splice(randomIdx, 1)[0];
+            
+            if (typeof window['antFactory'] === 'function') {
+                const summonedPiece = window['antFactory']('white', randomSq.x, randomSq.y);
+                hotseatGame.state.pieces.push(summonedPiece);
+            }
+        }
+    }
 }
 
 function placeArmy(roster, color, rows, maxX = 7) {
@@ -3168,8 +3192,10 @@ function showSkillSelectionModal(onComplete) {
     });
     
     // Pick 3 random skills, or fewer if less than 3 available
+    // Pick 5 random skills if Wisdom is active
     let choices = [];
-    while (choices.length < 3 && availableSkills.length > 0) {
+    let numChoices = RPGStats.wisdomLevel > 0 ? 5 : 3;
+    while (choices.length < numChoices && availableSkills.length > 0) {
         const idx = Math.floor(Math.random() * availableSkills.length);
         choices.push(availableSkills[idx]);
         availableSkills.splice(idx, 1); // remove picked skill
