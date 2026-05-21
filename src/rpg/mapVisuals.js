@@ -615,6 +615,15 @@ function showMapModal() {
                             if (typeof showReorderModal === 'function' && typeof rpgState !== 'undefined') {
                                 // Pass a callback that just re-opens the map dialog
                                 showReorderModal(rpgState.playerRoster, () => {
+                                    // Update Map UI before showing
+                                    const kingLevelDisplay = document.getElementById('mapKingLevelDisplay');
+                                    if (kingLevelDisplay) kingLevelDisplay.innerText = rpgState.kingLevel || 1;
+                                    const kingExpDisplay = document.getElementById('mapKingExpDisplay');
+                                    if (kingExpDisplay) kingExpDisplay.innerText = Math.floor(rpgState.kingExp || 0);
+                                    const kingNextExpDisplay = document.getElementById('mapKingNextExpDisplay');
+                                    if (kingNextExpDisplay && typeof KING_EXP_THRESHOLDS !== 'undefined') {
+                                        kingNextExpDisplay.innerText = rpgState.kingLevel < rpgState.maxKingLevel ? KING_EXP_THRESHOLDS[rpgState.kingLevel] : 'Max';
+                                    }
                                     const mDialog = document.getElementById('mapDialog');
                                     if (mDialog) mDialog.showModal();
                                 }, true); // The `true` parameter forces the button text to be "Confirm Army"

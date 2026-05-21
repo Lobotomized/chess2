@@ -593,6 +593,13 @@
                 <img id="heroIcon" src="/static/blackKing.png" alt="Hero" style="width: 60px; height: 60px; border-radius: 50%; border: 2px solid #e5b53e; background: rgba(0,0,0,0.2);">
                 <div style="position: absolute; bottom: -5px; right: -10px; background: #a29bfe; color: white; border-radius: 50%; width: 24px; height: 24px; font-size: 14px; font-weight: bold; display: flex; align-items: center; justify-content: center; border: 2px solid #2d1b15;" id="heroLevelBadge">1</div>
             </div>
+            <div style="margin-top: 5px; font-size: 14px; color: #a29bfe; font-weight: bold; text-shadow: 1px 1px 2px #000;">
+                XP: <span id="heroExpDisplay">0</span> / <span id="heroNextExpDisplay">10</span>
+            </div>
+            <div style="margin-top: 5px; font-size: 14px; font-weight: bold; display: flex; justify-content: center; gap: 15px;">
+                <span style="color: #ffd700; text-shadow: 1px 1px 2px #000;"><span id="reorderGoldDisplay">0</span> <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" alt="Gold" style="height: 1em; width: 1em; vertical-align: middle;"></span>
+                <span style="color: #d32f2f; text-shadow: 1px 1px 2px #000;"><span id="reorderFoodDisplay">0</span> <img src="/static/bigMap/foodIcon.png" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></span>
+            </div>
             <div id="heroSkillList" style="display: none; background: rgba(0,0,0,0.8); color: white; padding: 15px; border-radius: 8px; margin-top: 10px; text-align: left; border: 1px solid #e5b53e;"></div>
         </div>
         <h2>Organize Your Army <span id="armySizeDisplay" style="font-size: 18px; color: var(--piece-black); font-weight: normal;"></span></h2>
@@ -607,9 +614,9 @@
         </div>
         <div style="margin-bottom: 20px;">
             <h3 style="color: #000000; border-bottom: 1px solid var(--board-dark); margin-bottom: 10px;">Reserve</h3>
-            <p style="font-size: 26px; margin-bottom: 5px;">(Pieces here will not join battle. Click to select, then click 'Delete' to remove.)</p>
+            <p style="font-size: 26px; margin-bottom: 5px;">(Pieces here will not join battle. Click to select, then click 'Sacrifice selected piece' to remove.)</p>
             <div id="reorderReserve" style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; min-height: 60px; padding: 10px; background: rgba(255,255,255,0.3); border-radius: 12px;"></div>
-            <button id="deleteReserveBtn" style="display: none; background: #e53e3e; color: white; border: none; padding: 5px 10px; margin-top: 10px; cursor: pointer;">Delete Selected Piece</button>
+            <button id="deleteReserveBtn" style="display: none; background: linear-gradient(135deg, #3a0000 0%, #110000 100%); color: #ffcccc; border: 2px solid #8b0000; box-shadow: 0 0 10px #8b0000; border-radius: 8px; padding: 12px 20px; margin-top: 15px; cursor: pointer; font-size: 20px; font-weight: bold; font-family: 'Quicksand', sans-serif; text-shadow: 2px 2px 4px #000000; transition: all 0.3s ease;">SACRIFICE SELECTED PIECE</button>
         </div>
         <button id="confirmReorderBtn" style="padding: 10px 20px; font-size: 26px; width: 200px;">Begin Journey</button>
     </dialog>

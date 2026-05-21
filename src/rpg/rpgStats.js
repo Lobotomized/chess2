@@ -23,9 +23,33 @@ const RPGStats = {
     wisdomLevel: 0,
     handToHandLevel: 0,
     initiativeLevel: 0,
+    sadismLevel: 0,
+    sadismExpMultipliers: [0, 1, 2, 3],
+    cannibalismLevel: 0,
+    cannibalismFoodMultipliers: [0, 10, 20, 30],
 };
 
 const RPGSKILLS = [
+    { 
+        name: "Cannibalism", 
+        maxLevel: 3,
+        getDescription: (level) => {
+            const mult = RPGStats.cannibalismFoodMultipliers[level];
+            return `You get ${mult} food per creature's point value when you sacrifice them.`;
+        },
+        apply: (level) => { RPGStats.cannibalismLevel = level; } 
+    },
+    { 
+        name: "Sadism", 
+        maxLevel: 3,
+        getDescription: (level) => {
+            const mult = RPGStats.sadismExpMultipliers[level];
+            if (level === 1) return "You get the same amount of points the creature is evaluated as in experience points when you sacrifice them.";
+            if (level === 2) return `You get ${mult} (floored down) times the creature's points as experience when you sacrifice them.`;
+            return `You get ${mult} times the creature's points as experience when you sacrifice them.`;
+        },
+        apply: (level) => { RPGStats.sadismLevel = level; } 
+    },
     { 
         name: "Scouting", 
         maxLevel: 2,
@@ -219,6 +243,8 @@ function resetRPGStats() {
     RPGStats.wisdomLevel = 0;
     RPGStats.handToHandLevel = 0;
     RPGStats.initiativeLevel = 0;
+    RPGStats.sadismLevel = 0;
+    RPGStats.cannibalismLevel = 0;
     
     if (typeof applyDifficultySettings === 'function') {
         applyDifficultySettings();

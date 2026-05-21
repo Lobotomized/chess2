@@ -172,6 +172,26 @@ function updateGoldDisplay() {
     } else if (foodDisplay) {
         foodDisplay.innerText = `${rpgState.food || 0}`;
     }
+    
+    const mapFoodDisplay = document.getElementById('mapFoodDisplay');
+    if (mapFoodDisplay) {
+        mapFoodDisplay.innerText = rpgState.food || 0;
+    }
+    
+    const mapGoldDisplay = document.getElementById('mapGoldDisplay');
+    if (mapGoldDisplay) {
+        mapGoldDisplay.innerText = rpgState.gold || 0;
+    }
+
+    const reorderFoodDisplay = document.getElementById('reorderFoodDisplay');
+    if (reorderFoodDisplay) {
+        reorderFoodDisplay.innerText = rpgState.food || 0;
+    }
+    
+    const reorderGoldDisplay = document.getElementById('reorderGoldDisplay');
+    if (reorderGoldDisplay) {
+        reorderGoldDisplay.innerText = rpgState.gold || 0;
+    }
 
     if (enemyFoodDisplay) {
         if (rpgState.gameActive) {
@@ -2179,6 +2199,8 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
     // Update Hero UI
     const heroIcon = document.getElementById('heroIcon');
     const heroLevelBadge = document.getElementById('heroLevelBadge');
+    const heroExpDisplay = document.getElementById('heroExpDisplay');
+    const heroNextExpDisplay = document.getElementById('heroNextExpDisplay');
     const heroSkillList = document.getElementById('heroSkillList');
     
     if (heroIcon && heroLevelBadge && heroSkillList) {
@@ -2191,6 +2213,12 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
         }
         
         heroLevelBadge.innerText = rpgState.kingLevel || 1;
+        
+        if (heroExpDisplay) heroExpDisplay.innerText = Math.floor(rpgState.kingExp || 0);
+        if (heroNextExpDisplay) {
+            const nextThreshold = rpgState.kingLevel < rpgState.maxKingLevel ? KING_EXP_THRESHOLDS[rpgState.kingLevel] : 'Max';
+            heroNextExpDisplay.innerText = nextThreshold;
+        }
         
         if (rpgState.activeSkills && rpgState.activeSkills.length > 0) {
             heroSkillList.innerHTML = '<strong>Active Skills:</strong><ul style="margin: 5px 0 0 15px; padding: 0;">' + 
@@ -2205,6 +2233,11 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
             heroSkillList.innerHTML = '<em>No active skills.</em>';
         }
         heroSkillList.style.display = 'none'; // hide by default
+    }
+    
+    // Update Reorder Modal Resource displays
+    if (typeof updateGoldDisplay === 'function') {
+        updateGoldDisplay();
     }
 
     if(confirmBtn) {
@@ -2554,8 +2587,84 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
                     // Show delete button if in reserve
                     if (isReserve && deleteBtn) {
                         deleteBtn.style.display = 'inline-block';
+                        
+                        let expGainedPreview = 0;
+                        let foodGainedPreview = 0;
+                        if (typeof RPGStats !== 'undefined') {
+                            const pieceToDelete = piecesArray[index];
+                            if (pieceToDelete) {
+                                const points = getPieceValue(pieceToDelete);
+                                
+                                if (RPGStats.sadismLevel && RPGStats.sadismLevel > 0) {
+                                    const expMultiplier = RPGStats.sadismExpMultipliers[RPGStats.sadismLevel] || 0;
+                                    expGainedPreview = Math.floor(expMultiplier * points);
+                                }
+                                
+                                if (RPGStats.cannibalismLevel && RPGStats.cannibalismLevel > 0) {
+                                    const foodMultiplier = RPGStats.cannibalismFoodMultipliers[RPGStats.cannibalismLevel] || 0;
+                                    foodGainedPreview = Math.floor(foodMultiplier * points);
+                                }
+                            }
+                        }
+                        
+                        let previewText = `SACRIFICE SELECTED PIECE`;
+                        if (expGainedPreview > 0 || foodGainedPreview > 0) {
+                            previewText += `<br><span style="color: #ff6b6b; font-size: 16px; font-style: italic; font-weight: normal; text-shadow: 1px 1px 2px #000;">YOU WILL GET `;
+                            let rewards = [];
+                            if (expGainedPreview > 0) rewards.push(`${expGainedPreview} EXPERIENCE`);
+                            if (foodGainedPreview > 0) rewards.push(`${foodGainedPreview} FOOD`);
+                            previewText += rewards.join(" AND ");
+                            previewText += `</span>`;
+                        }
+                        
+                        deleteBtn.innerHTML = previewText;
+
                         deleteBtn.onclick = (e) => {
                             e.stopPropagation();
+                            
+                            if (typeof RPGStats !== 'undefined') {
+                                const pieceToDelete = piecesArray[index];
+                                if (pieceToDelete) {
+                                    const points = getPieceValue(pieceToDelete);
+                                    let totalExpGained = 0;
+                                    let totalFoodGained = 0;
+                                    
+                                    // Check for Sadism skill
+                                    if (RPGStats.sadismLevel && RPGStats.sadismLevel > 0) {
+                                        const expMultiplier = RPGStats.sadismExpMultipliers[RPGStats.sadismLevel] || 0;
+                                        totalExpGained = Math.floor(expMultiplier * points);
+                                    }
+                                    
+                                    // Check for Cannibalism skill
+                                    if (RPGStats.cannibalismLevel && RPGStats.cannibalismLevel > 0) {
+                                        const foodMultiplier = RPGStats.cannibalismFoodMultipliers[RPGStats.cannibalismLevel] || 0;
+                                        totalFoodGained = Math.floor(foodMultiplier * points);
+                                    }
+                                    
+                                    if (totalExpGained > 0 && typeof gainKingExperience === 'function') {
+                                        gainKingExperience(totalExpGained);
+                                    }
+                                    
+                                    if (totalFoodGained > 0) {
+                                        rpgState.food += totalFoodGained;
+                                        if (typeof updateGoldDisplay === 'function') updateGoldDisplay();
+                                    }
+                                    
+                                    if (totalExpGained > 0 || totalFoodGained > 0) {
+                                        let msgParts = [];
+                                        if (totalExpGained > 0) msgParts.push(`${totalExpGained} King Experience`);
+                                        if (totalFoodGained > 0) msgParts.push(`${totalFoodGained} Food`);
+                                        
+                                        const msg = `Sacrificed for ${msgParts.join(' and ')}!`;
+                                        if (typeof showNotification === 'function') {
+                                            showNotification(msg, 'success');
+                                        } else if (typeof showAlert === 'function') {
+                                            showAlert(msg);
+                                        }
+                                    }
+                                }
+                            }
+
                             // Delete piece
                             piecesArray.splice(index, 1);
                             // Deselect
@@ -2817,7 +2926,22 @@ function showReorderModal(army, onConfirm, forceConfirmText = false) {
         // Reconstruct the roster: Front (8) + Back (8) + Reserve (...)
         rpgState.playerRoster = [...frontPieces, ...backPieces, ...reservePieces];
         modal.close();
-        if (onConfirm) onConfirm();
+        
+        if (typeof rpgState !== 'undefined' && rpgState.pendingSkillSelections && rpgState.pendingSkillSelections > 0) {
+            if (typeof showSkillSelectionModal === 'function') {
+                showSkillSelectionModal(() => {
+                    if (onConfirm) {
+                        onConfirm();
+                    } else if (typeof showMapModal === 'function') {
+                        showMapModal();
+                    }
+                });
+            } else {
+                if (onConfirm) onConfirm();
+            }
+        } else {
+            if (onConfirm) onConfirm();
+        }
     };
 
     modal.showModal();
@@ -3567,6 +3691,26 @@ function gainKingExperience(exp) {
         rpgState.kingLevel++;
         rpgState.pendingSkillSelections = (rpgState.pendingSkillSelections || 0) + 1;
         console.log(`King leveled up to ${rpgState.kingLevel}!`);
+    }
+
+    // Update Map UI if visible
+    const mapKingLevelDisplay = document.getElementById('mapKingLevelDisplay');
+    if (mapKingLevelDisplay) mapKingLevelDisplay.innerText = rpgState.kingLevel || 1;
+    const mapKingExpDisplay = document.getElementById('mapKingExpDisplay');
+    if (mapKingExpDisplay) mapKingExpDisplay.innerText = Math.floor(rpgState.kingExp || 0);
+    const mapKingNextExpDisplay = document.getElementById('mapKingNextExpDisplay');
+    if (mapKingNextExpDisplay && typeof KING_EXP_THRESHOLDS !== 'undefined') {
+        mapKingNextExpDisplay.innerText = rpgState.kingLevel < rpgState.maxKingLevel ? KING_EXP_THRESHOLDS[rpgState.kingLevel] : 'Max';
+    }
+
+    // Update Reorder Modal UI if visible
+    const heroLevelBadge = document.getElementById('heroLevelBadge');
+    if (heroLevelBadge) heroLevelBadge.innerText = rpgState.kingLevel || 1;
+    const heroExpDisplay = document.getElementById('heroExpDisplay');
+    if (heroExpDisplay) heroExpDisplay.innerText = Math.floor(rpgState.kingExp || 0);
+    const heroNextExpDisplay = document.getElementById('heroNextExpDisplay');
+    if (heroNextExpDisplay && typeof KING_EXP_THRESHOLDS !== 'undefined') {
+        heroNextExpDisplay.innerText = rpgState.kingLevel < rpgState.maxKingLevel ? KING_EXP_THRESHOLDS[rpgState.kingLevel] : 'Max';
     }
 }
 
