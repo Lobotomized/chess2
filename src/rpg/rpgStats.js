@@ -16,12 +16,13 @@ const RPGStats = {
     startingFood: 100,
     kingLockedToRight: true,
     tacticsLevel: 0,
-    scoutingLevel: 2,
+    scoutingLevel: 0,
     summonerLevel: 0,
     mountaineerLevel: 0,
     myrmecologistLevel: 0,
     wisdomLevel: 0,
     handToHandLevel: 0,
+    initiativeLevel: 0,
 };
 
 const RPGSKILLS = [
@@ -184,6 +185,12 @@ const RPGSKILLS = [
         maxLevel: 2,
         getDescription: (level) => level === 1 ? "Your king now moves like a knight." : "Your king now moves like a classic Knight + classic King.",
         apply: (level) => { RPGStats.handToHandLevel = level; }
+    },
+    {
+        name: "Initiative",
+        maxLevel: 1,
+        getDescription: (level) => "You always act first in battle.",
+        apply: (level) => { RPGStats.initiativeLevel = level; }
     }
 ];
 
@@ -204,13 +211,14 @@ function resetRPGStats() {
     RPGStats.kingLockedToRight = true;
     RPGStats.tacticsLevel = 0;
     RPGStats.maxNumberOfPiecesToOwn = 8;
-    RPGStats.scoutingLevel = 2;
+    RPGStats.scoutingLevel = 0;
     RPGStats.summonerLevel = 0;
     RPGStats.mountaineerLevel = 0;
     RPGStats.divinationLevel = 0;
     RPGStats.myrmecologistLevel = 0;
     RPGStats.wisdomLevel = 0;
     RPGStats.handToHandLevel = 0;
+    RPGStats.initiativeLevel = 0;
     
     if (typeof applyDifficultySettings === 'function') {
         applyDifficultySettings();

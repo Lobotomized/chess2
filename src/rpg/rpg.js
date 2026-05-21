@@ -704,12 +704,12 @@ function restoreBoard(savedBoard) {
         } else {
             turnDisplay.innerText = "Enemy Turn";
             turnDisplay.style.color = '#ff6b6b';
-            
-            // If it's enemy turn, trigger AI
-            if (!hotseatGame.state.won) {
-                setTimeout(triggerAI, 1000); // Small delay for visual clarity
-            }
         }
+    }
+    
+    // If it's enemy turn, trigger AI
+    if (hotseatGame.state.turn === 'black' && !hotseatGame.state.won) {
+        setTimeout(triggerAI, 1000); // Small delay for visual clarity
     }
     
     updateGoldDisplay();
@@ -1658,15 +1658,29 @@ function startLevel(level, difficultyOption) {
     setupBoard(boardShape);
     
     // Reset Game State
-    hotseatGame.state.turn = 'white';
+    if (RPGStats.initiativeLevel > 0) {
+        hotseatGame.state.turn = 'white';
+    } else {
+        hotseatGame.state.turn = 'black';
+    }
     hotseatGame.state.won = null;
     hotseatGame.state.message = '';
     
     // Update Turn UI
     const turnDisplay = document.getElementById('turn');
     if(turnDisplay) {
-        turnDisplay.innerText = "Your Turn";
-        turnDisplay.style.color = 'var(--selected)';
+        if(hotseatGame.state.turn === 'white') {
+            turnDisplay.innerText = "Your Turn";
+            turnDisplay.style.color = 'var(--selected)';
+        } else {
+            turnDisplay.innerText = "Enemy Turn";
+            turnDisplay.style.color = '#ff6b6b';
+        }
+    }
+    
+    // If it's enemy turn, trigger AI
+    if (hotseatGame.state.turn === 'black') {
+        setTimeout(triggerAI, 1000);
     }
     
     rpgState.gameActive = true;
