@@ -2854,7 +2854,7 @@ function showShopModal(restore = false) {
                 if (rand < 0.25) { 
                     let goldCost = Math.floor(Math.random() * 10) + 2; 
                     const foodAmount = goldCost * 5;
-                    goldCost -= RPGStats.shopDiscout;
+                    // Discount is applied dynamically when buying
                     if(goldCost < 0) goldCost = 0;
                     if (i < shopItems.length) {
                         shopItems[i] = { type: 'food', cost: goldCost, amount: foodAmount, bought: false };
@@ -2864,7 +2864,7 @@ function showShopModal(restore = false) {
                 } else if (rand < 0.50) { 
                     let goldCost = Math.floor(Math.random() * 10) + 2; 
                     const expAmount = goldCost; 
-                    goldCost -= RPGStats.shopDiscout;
+                    // Discount is applied dynamically when buying
                     if(goldCost < 0) goldCost = 0;
                     if (i < shopItems.length) {
                         shopItems[i] = { type: 'experience', cost: goldCost, amount: expAmount, bought: false };
@@ -2874,7 +2874,7 @@ function showShopModal(restore = false) {
                 } else {
                     const randomFactory = factories[Math.floor(Math.random() * factories.length)];
                     const val = getPieceValue(randomFactory);
-                    let cost =  Math.floor(val * 5) - RPGStats.shopDiscout;
+                    let cost =  Math.floor(val * 5);
                     if(cost < 0) cost = 0;
                     if (i < shopItems.length) {
                         shopItems[i] = { type: 'unit', factory: randomFactory, cost: cost, value: val, bought: false };
@@ -2909,6 +2909,8 @@ function showShopModal(restore = false) {
             const item = shopItems[index];
             if (item.bought) return; // Already bought state handled
 
+            const effectiveCost = Math.max(0, item.cost - (typeof RPGStats !== 'undefined' ? RPGStats.shopDiscout : 0));
+
             if (item.type !== 'food' && item.type !== 'experience') {
                 if (rosterFull) {
                     btn.disabled = true;
@@ -2919,7 +2921,7 @@ function showShopModal(restore = false) {
                 }
             }
 
-            if (rpgState.gold < item.cost) {
+            if (rpgState.gold < effectiveCost) {
                 btn.disabled = true;
                 btn.style.opacity = '0.5';
                 btn.style.cursor = 'not-allowed';
@@ -2949,6 +2951,7 @@ function showShopModal(restore = false) {
             let icon = '';
             const isFood = item.type === 'food';
             const isExp = item.type === 'experience';
+            const effectiveCost = Math.max(0, item.cost - (typeof RPGStats !== 'undefined' ? RPGStats.shopDiscout : 0));
             
             if (isFood) {
                 icon = `<div style="font-size: 50px; line-height: 50px; text-align: center; margin-bottom: 10px;"><img src="/static/bigMap/foodIcon.png" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></div>`;
@@ -2956,7 +2959,7 @@ function showShopModal(restore = false) {
                     ${icon}
                     <h3>Rations</h3>
                     <p>Amount: ${item.amount} <img src="/static/bigMap/foodIcon.png" class="food-icon-responsive" alt="Food" style="height: 1em; width: 1em; vertical-align: middle;"></p>
-                    <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
+                    <p style="color:#e5b53e;font-weight:bold;">Cost: ${effectiveCost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
                 `;
             } else if (isExp) {
                 icon = `<div style="font-size: 50px; line-height: 50px; text-align: center; margin-bottom: 10px;"><img src="/static/bigMap/experienceIcon.jpg" class="food-icon-responsive" alt="Experience" style="height: 1em; width: 1em; vertical-align: middle;"></div>`;
@@ -2964,7 +2967,7 @@ function showShopModal(restore = false) {
                     ${icon}
                     <h3>Experience</h3>
                     <p>Amount: ${item.amount} <img src="/static/bigMap/experienceIcon.jpg" class="food-icon-responsive" alt="Experience" style="height: 1em; width: 1em; vertical-align: middle;"></p>
-                    <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
+                    <p style="color:#e5b53e;font-weight:bold;">Cost: ${effectiveCost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
                 `;
             } else {
                 if (typeof window[item.factory] === 'function') {
@@ -2987,7 +2990,7 @@ function showShopModal(restore = false) {
                     ${icon}
                     <h3>${item.factory.replace('Factory','').replace('rpg','')}</h3>
                     <p>Power: ${item.value}</p>
-                    <p style="color:#e5b53e;font-weight:bold;">Cost: ${item.cost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
+                    <p style="color:#e5b53e;font-weight:bold;">Cost: ${effectiveCost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
                 `;
                 
                 // Info Button
@@ -3018,8 +3021,8 @@ function showShopModal(restore = false) {
             buyBtn.onclick = (e) => {
                 e.stopPropagation();
                 if (isFood) {
-                    if (rpgState.gold >= item.cost && !item.bought) {
-                        rpgState.gold -= item.cost;
+                    if (rpgState.gold >= effectiveCost && !item.bought) {
+                        rpgState.gold -= effectiveCost;
                         rpgState.food += item.amount;
                         item.bought = true;
                         
@@ -3038,8 +3041,8 @@ function showShopModal(restore = false) {
                         updateAllButtons();
                     }
                 } else if (isExp) {
-                    if (rpgState.gold >= item.cost && !item.bought) {
-                        rpgState.gold -= item.cost;
+                    if (rpgState.gold >= effectiveCost && !item.bought) {
+                        rpgState.gold -= effectiveCost;
                         if (typeof gainKingExperience === 'function') {
                             gainKingExperience(item.amount);
                         } else {
@@ -3071,8 +3074,10 @@ function showShopModal(restore = false) {
                         }
                     }
                 } else {
-                    if (rpgState.gold >= item.cost && !item.bought && rpgState.playerRoster.length < 24) {
-                        rpgState.gold -= item.cost;
+                    const currentCount = rpgState.playerRoster.filter(u => u !== null).length;
+                    const rosterFull = currentCount >= RPGStats.maxNumberOfPiecesToOwn;
+                    if (rpgState.gold >= effectiveCost && !item.bought && !rosterFull) {
+                        rpgState.gold -= effectiveCost;
                         rpgState.playerRoster.push(item.factory);
                         item.bought = true;
                         
