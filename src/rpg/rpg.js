@@ -1642,6 +1642,17 @@ function startLevel(level, difficultyOption) {
             rpgState.customTrees = null;
         }
     }
+
+    if (boardShape === 'Desert') {
+        if (difficultyOption && difficultyOption.node && typeof difficultyOption.node.desertSize !== 'undefined') {
+            rpgState.desertSize = difficultyOption.node.desertSize;
+        } else if (difficultyOption && typeof difficultyOption.desertSize !== 'undefined') {
+            rpgState.desertSize = difficultyOption.desertSize;
+        } else {
+             // Fallback for non-map or legacy
+             rpgState.desertSize = Math.random() < 0.5 ? 9 : 10;
+        }
+    }
     
     // Setup Board
     setupBoard(boardShape);
@@ -1732,8 +1743,10 @@ const boardShapes = {
         }
     },
     'Desert': (board) => {
-        for (let x = 0; x <= 8; x++) {
-            for (let y = 0; y <= 7; y++) {
+        const size = (rpgState.desertSize !== undefined) ? rpgState.desertSize : 9;
+        const maxXY = size - 1;
+        for (let x = 0; x <= maxXY; x++) {
+            for (let y = 0; y <= maxXY; y++) {
                 board.push({ light: false, x: x, y: y });
             }
         }

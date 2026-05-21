@@ -774,7 +774,21 @@ function showMapCellPopup(node, grandMap) {
         let previewMaxX = 7;
         let previewMaxY = 7;
         if (node.board === 'Desert') {
-            previewMaxX = 8;
+            if (node.desertSize === undefined) {
+                // Determine size from mapSeed or fallback
+                if (node.mapSeed === undefined) {
+                    node.mapSeed = Math.random() * 10000;
+                    if (typeof saveProgress === 'function') saveProgress();
+                }
+                const seededRandom = () => {
+                    const val = Math.sin(node.mapSeed) * 10000;
+                    return val - Math.floor(val);
+                };
+                node.desertSize = seededRandom() < 0.5 ? 9 : 10;
+                if (typeof saveProgress === 'function') saveProgress();
+            }
+            previewMaxX = node.desertSize - 1;
+            previewMaxY = node.desertSize - 1;
         }
         let boardPreview = [];
         for(let y=0; y<=previewMaxY; y++){
@@ -1083,6 +1097,7 @@ function showMapCellPopup(node, grandMap) {
                     customTrees: node.customTrees,
                     fountainX: node.fountainX,
                     fountainY: node.fountainY,
+                    desertSize: node.desertSize,
                     difficultyIndex: 0
                 };
                 

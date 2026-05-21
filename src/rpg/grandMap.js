@@ -390,6 +390,10 @@ const grandMap = {
         if (board === 'Fountain') {
             const fVal = getDeterministicRandom(3); 
             node.fountainX = Math.floor(fVal * 7); // 0 to 6
+        } else if (board === 'Desert') {
+            const dVal = getDeterministicRandom(5);
+            console.log('here?')
+            node.desertSize = dVal < 0.5 ? 9 : 10;
         }
 
         // Generate Rewards
