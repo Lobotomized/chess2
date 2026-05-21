@@ -255,6 +255,65 @@ function simpleKingFactory(color, x, y){
     }
 }
 
+function simpleKingTwoFactory(color, x, y){
+    return {
+        icon: color + 'King.png',
+        vulnerable: true,
+        moved: false,
+        value:1000,
+        posValue:1,
+        x: x,
+        y: y,
+        color:color,
+        maxY:0,
+        moves: [
+            { type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
+        { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 },
+        { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: 1, x: -2 },
+        { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 }
+    ],
+        afterThisPieceTaken: function (state) {
+            if (this.color == 'white') {
+                state.won = 'black';
+             }
+            else if (this.color == 'black') {
+                state.won = 'white';
+            }
+            return false;
+        },
+    }
+}
+
+function simpleKingThreeFactory(color, x, y){
+    return {
+        icon: color + 'King.png',
+        vulnerable: true,
+        moved: false,
+        value:1000,
+        posValue:1,
+        x: x,
+        y: y,
+        color:color,
+        maxY:0,
+        moves: [{ type: 'absolute', y: 2, x: 1 }, { type: 'absolute', y: 2, x: -1 },
+        { type: 'absolute', y: -2, x: 1 }, { type: 'absolute', y: -2, x: -1 },
+        { type: 'absolute', y: 1, x: 2 }, { type: 'absolute', y: 1, x: -2 },
+        { type: 'absolute', y: -1, x: 2 }, { type: 'absolute', y: -1, x: -2 },
+        { type: 'absolute', x: 0, y: 1 },{ type: 'absolute', x: 1, y: 0 },{ type: 'absolute', x: 1, y: 1 },
+        { type: 'absolute', x: -1, y: -1 },{ type: 'absolute', x: 0, y: -1 },{ type: 'absolute', x: -1, y: 0 },
+        { type: 'absolute', x: -1, y: 1 },{ type: 'absolute', x: 1, y: -1 }],
+        afterThisPieceTaken: function (state) {
+            if (this.color == 'white') {
+                state.won = 'black';
+             }
+            else if (this.color == 'black') {
+                state.won = 'white';
+            }
+            return false;
+        },
+    }
+}
+
 function kingLikeFactory(color, x, y){
     return {
         icon: color + 'SleepingDragon.png',
@@ -649,7 +708,9 @@ try{
         queenFactory,
         simpleKingFactory,
         kingLikeFactory,
-        kingFactory
+        kingFactory,
+        simpleKingTwoFactory,
+        simpleKingThreeFactory,
     }
 }
 catch(err){

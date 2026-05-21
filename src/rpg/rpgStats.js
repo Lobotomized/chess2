@@ -21,6 +21,7 @@ const RPGStats = {
     mountaineerLevel: 0,
     myrmecologistLevel: 0,
     wisdomLevel: 0,
+    handToHandLevel: 0,
 };
 
 const RPGSKILLS = [
@@ -177,6 +178,12 @@ const RPGSKILLS = [
         maxLevel: 1,
         getDescription: (level) => "Pick from 5 options instead of 3 when choosing a new skill.",
         apply: (level) => { RPGStats.wisdomLevel = level; }
+    },
+    {
+        name: "Hand to Hand combat",
+        maxLevel: 2,
+        getDescription: (level) => level === 1 ? "Start every battle with an upgraded King (Level 1)." : "Start every battle with a fully upgraded King (Level 2).",
+        apply: (level) => { RPGStats.handToHandLevel = level; }
     }
 ];
 
@@ -203,6 +210,7 @@ function resetRPGStats() {
     RPGStats.divinationLevel = 0;
     RPGStats.myrmecologistLevel = 0;
     RPGStats.wisdomLevel = 0;
+    RPGStats.handToHandLevel = 0;
     
     if (typeof applyDifficultySettings === 'function') {
         applyDifficultySettings();

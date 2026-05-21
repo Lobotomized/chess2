@@ -1908,6 +1908,24 @@ function setupBoard(shapeName = 'Standard') {
             }
         }
     }
+
+    // --- Hand to Hand combat Skill Logic ---
+    if (RPGStats.handToHandLevel > 0) {
+        let newFactory = 'simpleKingTwoFactory';
+        if (RPGStats.handToHandLevel >= 2) {
+            newFactory = 'simpleKingThreeFactory';
+        }
+        
+        const pIndex = hotseatGame.state.pieces.findIndex(p => p.color === 'white' && (p.icon.includes('King') || p.icon.includes('king') || p.icon.includes('SimpleKing')));
+        if (pIndex !== -1) {
+            const oldKing = hotseatGame.state.pieces[pIndex];
+            if (typeof window[newFactory] === 'function') {
+                const newKing = window[newFactory]('white', oldKing.x, oldKing.y);
+                newKing.factory = oldKing.factory; // Keep original factory name so permadeath and checks work properly
+                hotseatGame.state.pieces[pIndex] = newKing;
+            }
+        }
+    }
 }
 
 function placeArmy(roster, color, rows, maxX = 7) {
