@@ -94,7 +94,7 @@ const RPGSKILLS = [
         } 
     },
     { 
-        name: "Trader", 
+        name: "Haggling", 
         maxLevel: 3,
         getDescription: (level) => `Shop prices reduced by ${level}.`,
         apply: (level) => { RPGStats.shopDiscout = level; } 
