@@ -182,7 +182,7 @@ const RPGSKILLS = [
     {
         name: "Hand to Hand combat",
         maxLevel: 2,
-        getDescription: (level) => level === 1 ? "Start every battle with an upgraded King (Level 1)." : "Start every battle with a fully upgraded King (Level 2).",
+        getDescription: (level) => level === 1 ? "Your king now moves like a knight." : "Your king now moves like a classic Knight + classic King.",
         apply: (level) => { RPGStats.handToHandLevel = level; }
     }
 ];
