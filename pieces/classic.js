@@ -95,9 +95,15 @@ function pawnFactory(color, x, y) {
             let checkForLastRow = state.board.find((square) => {
                 return square.x === move.x && square.y > move.y;
                })
+            let checkForFirstRow = state.board.find((square) => {
+                return square.x === move.x && square.y < move.y;
+               })
                let isItLast = false;
                if(!checkForLastRow){
                 isItLast = true;
+               }
+               if(!checkForFirstRow){
+                isItFirstRow = true;
                }
             if (this.color == 'black' && isItLast) {
                 this.icon = color + 'Queen.png';
@@ -107,7 +113,7 @@ function pawnFactory(color, x, y) {
                     { type: 'blockable', repeat: true, x: -1, y: -1 }, { type: 'blockable', repeat: true, x: 1, y: 1 },
                     { type: 'blockable', repeat: true, x: -1, y: 1 }, { type: 'blockable', repeat: true, x: 1, y: -1 })
             }
-            else if (this.color == 'white' && this.y == 0) {
+            else if (this.color == 'white' && isItFirstRow) {
                 this.icon = color + 'Queen.png';
                 this.moves.length = 0;
                 this.moves.push({ type: 'blockable', repeat: true, x: 0, y: -1 }, { type: 'blockable', repeat: true, x: 0, y: 1 },

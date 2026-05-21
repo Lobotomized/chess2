@@ -3276,7 +3276,7 @@ function showSkillSelectionModal(onComplete) {
                 rpgState.gold += (nextLevel * 10);
                 updateGoldDisplay();
             } else if (skill.name === "Inheritance") {
-                const foodReward = nextLevel === 1 ? 30 : nextLevel === 2 ? 50 : 80;
+                const foodReward = nextLevel === 1 ? 30 : nextLevel === 2 ? 40 : 60;
                 rpgState.food += foodReward;
                 updateGoldDisplay();
             }

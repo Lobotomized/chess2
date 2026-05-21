@@ -53,13 +53,13 @@ const RPGSKILLS = [
     },
     { 
         name: "Bounty Hunter", 
-        maxLevel: 3,
+        maxLevel: 5,
         getDescription: (level) => `Earn ${level*2} extra gold per win.`,
         apply: (level) => { RPGStats.additionalGoldPerWin = level*2; } 
     },
     { 
         name: "Scavenger", 
-        maxLevel: 3,
+        maxLevel: 5,
         getDescription: (level) => `Earn ${level * 4} extra food per win.`,
         apply: (level) => { RPGStats.additionalFoodPerWin = level * 4; } 
     },
@@ -96,7 +96,7 @@ const RPGSKILLS = [
     },
     { 
         name: "Haggling", 
-        maxLevel: 3,
+        maxLevel: 5,
         getDescription: (level) => `Shop prices reduced by ${level}.`,
         apply: (level) => { RPGStats.shopDiscout = level; } 
     },
@@ -109,7 +109,7 @@ const RPGSKILLS = [
     { 
         name: "Inheritance", 
         maxLevel: 3,
-        getDescription: (level) => `Gain ${level === 1 ? '30' : level === 2 ? '50' : '80'} extra food.`,
+        getDescription: (level) => `Gain ${level === 1 ? '30' : level === 2 ? '40' : '60'} extra food.`,
         apply: (level) => { /* Applied instantly in rpg.js */ } 
     },
     { 
@@ -141,7 +141,7 @@ const RPGSKILLS = [
     },
     { 
         name: "Learning", 
-        maxLevel: 3,
+        maxLevel: 5,
         getDescription: (level) => `Gain +${level * 2} experience for every battle.`,
         apply: (level) => { RPGStats.additionalExperiencePerWin = level * 2; } 
     },
@@ -163,7 +163,7 @@ const RPGSKILLS = [
     },
     {
         name: "Divination",
-        maxLevel: 3,
+        maxLevel: 5,
         getDescription: (level) => `Allows you to go back in time up to ${level} turn${level > 1 ? 's' : ''} once per battle. One time piece effects that were used are not refreshed.`,
         apply: (level) => { RPGStats.divinationLevel = level; }
     },
