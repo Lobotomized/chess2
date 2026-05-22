@@ -1393,11 +1393,21 @@ function showMapCellPopup(node, grandMap) {
                             } catch(e) {}
                             
                             const name = item.factory.replace('Factory', '').replace('rpg', '');
+                            
+                            const frontLineFacts = typeof frontLineFactories !== 'undefined' ? frontLineFactories : ['rpgPawnFactory'];
+                            const isFrontline = frontLineFacts.includes(item.factory);
+                            const flagStyle = isFrontline 
+                                ? "background: #f0d9b5; border: 1px solid #b58863; color: #4e342e;"
+                                : "background: #b58863; border: 1px solid #4e342e; color: #fdf6e3;";
+                            const flagText = isFrontline ? 'FRONT' : 'BACK';
+                            const flagHtml = `<div style="${flagStyle} font-size: 8px; font-weight: bold; padding: 2px 4px; border-radius: 3px; display: inline-block; margin-top: 2px; font-family: inherit;">${flagText}</div>`;
+
                             if (iconUrl) {
                                 shopHtml += `
                                     <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${opacityStyle}">
                                         <img src="${iconUrl}" style="width:24px; height:24px; object-fit:contain; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3)); margin: 0 auto; display: block;">
                                         <div style="font-size:10px; font-weight:bold; color:#4e342e; margin-top:2px; word-break:break-all;">${name}</div>
+                                        ${flagHtml}
                                         <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${effectiveCost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 2em; width: 2em; vertical-align: middle;"></div>
                                         ${soldOutText}
                                     </div>
@@ -1407,6 +1417,7 @@ function showMapCellPopup(node, grandMap) {
                                     <div style="background:#fdf6e3; padding:5px; border-radius:4px; border: 1px solid rgba(93, 64, 55, 0.2); width:70px; text-align:center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); ${opacityStyle}">
                                         <span style="font-size:24px; filter:drop-shadow(1px 1px 2px rgba(0,0,0,0.3));">♟️</span>
                                         <div style="font-size:10px; font-weight:bold; color:#4e342e; margin-top:2px; word-break:break-all;">${name}</div>
+                                        ${flagHtml}
                                         <div style="font-size:10px; color:#e5b53e; font-weight:bold; margin-top:2px;">${effectiveCost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 2em; width: 2em; vertical-align: middle;"></div>
                                         ${soldOutText}
                                     </div>

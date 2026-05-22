@@ -3155,9 +3155,16 @@ function showShopModal(restore = false) {
                      }, 0);
                 }
                 
+                const isFrontline = frontLineFactories.includes(item.factory);
+                const flagStyle = isFrontline 
+                    ? "background: #f0d9b5; border: 1px solid #b58863; color: #4e342e;"
+                    : "background: #b58863; border: 1px solid #4e342e; color: #fdf6e3;";
+                const flagText = isFrontline ? 'FRONTLINE' : 'BACKLINE';
+
                 div.innerHTML = `
                     ${icon}
                     <h3>${item.factory.replace('Factory','').replace('rpg','')}</h3>
+                    <div style="${flagStyle} font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 5px; font-family: inherit;">${flagText}</div>
                     <p>Power: ${item.value}</p>
                     <p style="color:#e5b53e;font-weight:bold;">Cost: ${effectiveCost} <img src="/static/bigMap/goldIcon.jpg" class="food-icon-responsive" style="height: 1em; width: 1em; vertical-align: middle;"></p>
                 `;
