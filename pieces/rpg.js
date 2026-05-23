@@ -175,7 +175,7 @@ function rpgQueenbugFactory(color,x,y){
         posValue:posValue[2],
         afterPieceMove:function(state, move, prevMove) {
             let color = this.color;
-            const direction = this.y <= 4 ? 'black' : 'white'
+            const direction = this.y <= 3 ? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;
             const ant = rpgAntFactory(color,move.x,move.y,direction)
