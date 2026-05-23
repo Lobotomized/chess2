@@ -314,10 +314,17 @@ function queenbugFactory(color,x,y){
         x:x,
         y:y,
         value:2.5,
+        centerBoard:undefined,
         posValue:posValue[2],
         afterPieceMove:function(state, move, prevMove) {
+        if (this.centerBoard === undefined) {
+            const yCoordinates = state.board.map(square => square.y);
+            const minY = Math.min(...yCoordinates);
+            const maxY = Math.max(...yCoordinates);
+            this.centerBoard = Math.round((minY + maxY) / 2);
+        }
             let color = this.color;
-            const direction = prevMove.y < 4? 'black' : 'white'
+            const direction = prevMove.y < this.centerBoard? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;
             const ant = antFactory(color,move.x,move.y,direction)

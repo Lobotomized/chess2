@@ -171,11 +171,18 @@ function rpgQueenbugFactory(color,x,y){
         color:color,
         x:x,
         y:y,
+        centerBoard:undefined,
         value:2.5,
         posValue:posValue[2],
         afterPieceMove:function(state, move, prevMove) {
+            if (this.centerBoard === undefined) {
+                const yCoordinates = state.board.map(square => square.y);
+                const minY = Math.min(...yCoordinates);
+                const maxY = Math.max(...yCoordinates);
+                this.centerBoard = Math.round((minY + maxY) / 2);
+            }
             let color = this.color;
-            const direction = prevMove.y <= 3 ? 'black' : 'white'
+            const direction = prevMove.y < this.centerBoard? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;
             const ant = rpgAntFactory(color,move.x,move.y,direction)
