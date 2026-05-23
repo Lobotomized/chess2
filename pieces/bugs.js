@@ -317,7 +317,7 @@ function queenbugFactory(color,x,y){
         posValue:posValue[2],
         afterPieceMove:function(state, move, prevMove) {
             let color = this.color;
-            const direction = this.y < 4? 'black' : 'white'
+            const direction = prevMove.y < 4? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;
             const ant = antFactory(color,move.x,move.y,direction)
