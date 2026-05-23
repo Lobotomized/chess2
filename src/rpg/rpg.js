@@ -4513,21 +4513,20 @@ function animate(secretState){
     if(state.oldMove){
             const oldSquare = findSquareByXY(state.board,state.oldMove.oldX, state.oldMove.oldY);
             const newSquare = findSquareByXY(state.board,state.oldMove.currentX, state.oldMove.currentY);
-
             if(hotseatGame.state.turn === 'black'){
-                if(oldSquare && !oldSquare.light){
+                if(oldSquare && !oldSquare.light && !oldSquare.red){
                     drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
                 }
-                if(newSquare && !newSquare.light){
+                if(newSquare && !newSquare.light && !oldSquare.red){
                     drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
                 }
             }
             else if(hotseatGame.state.turn === 'white'){
 
-                if(oldSquare && !oldSquare.light){
+                if(oldSquare && !oldSquare.light && !oldSquare.red){
                     drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
                 }
-                if(newSquare && !newSquare.light){
+                if(newSquare && !newSquare.light && !oldSquare.red){
                     drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
                 }
             }
