@@ -4530,7 +4530,6 @@ function animate(secretState){
                     drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
                 }
             }
-
         }
 
     // Draw Pieces
