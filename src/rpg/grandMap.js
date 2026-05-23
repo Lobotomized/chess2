@@ -330,15 +330,16 @@ const grandMap = {
         });
 
         // Determine board type
-        // Adjust probabilities: Standard (35%), Woods (25%), Fountain (20%), Desert (10%), Market (10%)
-        const boards = ['Standard', 'Woods', 'Fountain', 'Desert', 'Market', 'Mountain'];
+        // Adjust probabilities: Standard (30%), Woods (20%), Fountain (15%), Desert (10%), Tunnel (10%), Market (10%), Mountain (5%)
+        const boards = ['Standard', 'Woods', 'Fountain', 'Desert', 'Tunnel', 'Market', 'Mountain'];
         let board = 'Standard';
         const rand = getDeterministicRandom(1);
-        if (rand < 0.35) board = 'Standard';
-        else if (rand < 0.55) board = 'Woods';
-        else if (rand < 0.70) board = 'Fountain';
-        else if (rand < 0.80) board = 'Desert';
-        else if (rand < 0.90) board = 'Market';
+        if (rand < 0.30) board = 'Standard';
+        else if (rand < 0.50) board = 'Woods';
+        else if (rand < 0.65) board = 'Fountain';
+        else if (rand < 0.75) board = 'Desert';
+        else if (rand < 0.85) board = 'Tunnel';
+        else if (rand < 0.95) board = 'Market';
         else board = 'Mountain';
         
         // Determine Difficulty
@@ -394,6 +395,9 @@ const grandMap = {
             const dVal = getDeterministicRandom(5);
             console.log('here?')
             node.desertSize = dVal < 0.5 ? 9 : 10;
+        } else if (board === 'Tunnel') {
+            const tVal = getDeterministicRandom(6);
+            node.tunnelWidth = Math.floor(tVal * 4) + 4; // 4 to 7
         }
 
         // Generate Rewards

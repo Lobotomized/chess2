@@ -798,6 +798,21 @@ function showMapCellPopup(node, grandMap) {
             }
             previewMaxX = node.desertSize - 1;
             previewMaxY = node.desertSize - 1;
+        } else if (node.board === 'Tunnel') {
+            if (node.tunnelWidth === undefined) {
+                if (node.mapSeed === undefined) {
+                    node.mapSeed = Math.random() * 10000;
+                    if (typeof saveProgress === 'function') saveProgress();
+                }
+                const seededRandom = () => {
+                    const val = Math.sin(node.mapSeed) * 10000;
+                    return val - Math.floor(val);
+                };
+                node.tunnelWidth = Math.floor(seededRandom() * 4) + 4; // 4 to 7
+                if (typeof saveProgress === 'function') saveProgress();
+            }
+            previewMaxX = node.tunnelWidth - 1;
+            previewMaxY = 7;
         }
         let boardPreview = [];
         for(let y=0; y<=previewMaxY; y++){
@@ -868,7 +883,7 @@ function showMapCellPopup(node, grandMap) {
             
             const kings = backline.filter(u => u && u.toLowerCase().includes('king'));
             const others = backline.filter(u => u && !u.toLowerCase().includes('king'));
-            const availableSlots = previewMaxX + 1;
+            const availableSlots = (node.board === 'Tunnel') ? (previewMaxX + 1) * 2 : (previewMaxX + 1);
             if (kings.length + others.length > availableSlots) {
                 const allowedOthersCount = Math.max(0, availableSlots - kings.length);
                 for (let i = others.length - 1; i > 0; i--) {
@@ -920,10 +935,17 @@ function showMapCellPopup(node, grandMap) {
                 return result;
             };
             
-            enemyPieces = [
-                ...placePreviewArmy(front, [1]),
-                ...placePreviewArmy(backline, [0])
-            ];
+            if (node.board === 'Tunnel') {
+                enemyPieces = [
+                    ...placePreviewArmy(front, [2, 3]),
+                    ...placePreviewArmy(backline, [0, 1])
+                ];
+            } else {
+                enemyPieces = [
+                    ...placePreviewArmy(front, [1]),
+                    ...placePreviewArmy(backline, [0])
+                ];
+            }
         }
         
         // Render mini board preview

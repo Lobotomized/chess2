@@ -410,6 +410,7 @@
                         <option value="Woods">Woods (Forest)</option>
                         <option value="Fountain">Fountain (Lake)</option>
                         <option value="Desert">Desert</option>
+                        <option value="Tunnel">Tunnel</option>
                         <option value="Library">Library</option>
                         <option value="Mountain">Mountain</option>
                         <option value="Inn">Inn</option>
@@ -712,10 +713,10 @@
                 openCustomArmyModal(node);
                 return; // don't render Grid yet
             } else if (tool === 'customTerrain') {
-                if (node.board === 'Woods' || node.board === 'Fountain') {
+                if (node.board === 'Woods' || node.board === 'Fountain' || node.board === 'Tunnel') {
                     openCustomTerrainModal(node);
                 } else {
-                    showAlert('Custom Terrain Details only apply to Woods or Fountain nodes.');
+                    showAlert('Custom Terrain Details only apply to Woods, Fountain, or Tunnel nodes.');
                 }
                 return;
             } else if (tool === 'customShop') {
@@ -772,6 +773,12 @@
                         cell.classList.add('desert');
                         const num = (node.x * 31 + node.y * 17) % 4 + 1;
                         cell.style.backgroundImage = `url("/static/bigMap/desert${num}.png")`;
+                        cell.style.backgroundSize = 'cover';
+                        cell.style.backgroundPosition = 'center';
+                    }
+                    else if (node.board === 'Tunnel') {
+                        cell.classList.add('tunnel');
+                        cell.style.backgroundImage = `url("/static/bigMap/mountain1.png")`;
                         cell.style.backgroundSize = 'cover';
                         cell.style.backgroundPosition = 'center';
                     }
@@ -1152,6 +1159,7 @@
         let editingNodeForTerrain = null;
         let currentCustomTrees = [];
         let currentFountainPos = {x: 3, y: 3};
+        let currentTunnelWidth = 4;
         
         function openCustomTerrainModal(node) {
             editingNodeForTerrain = node;
@@ -1168,6 +1176,10 @@
                 subtitle.innerText = 'Click a square to place the top-left corner of the 2x2 fountain.';
                 currentFountainPos.x = node.fountainX !== undefined ? node.fountainX : 3;
                 currentFountainPos.y = node.fountainY !== undefined ? node.fountainY : 3;
+            } else if (node.board === 'Tunnel') {
+                title.innerText = 'Custom Tunnel Width';
+                subtitle.innerText = 'Click a square in a column to set the tunnel width (from 4 to 7). Default is 4.';
+                currentTunnelWidth = node.tunnelWidth !== undefined ? node.tunnelWidth : 4;
             }
             
             renderTerrainBoard();
@@ -1210,6 +1222,10 @@
                             square.style.background = '#0277bd';
                             square.style.border = '1px solid #fff';
                         }
+                    } else if (editingNodeForTerrain.board === 'Tunnel') {
+                        if (x < currentTunnelWidth) {
+                            square.style.background = 'rgba(0, 255, 0, 0.3)';
+                        }
                     }
                     
                     square.onclick = () => handleTerrainBoardClick(x, y);
@@ -1232,6 +1248,14 @@
                 if (y > 6) y = 6;
                 currentFountainPos.x = x;
                 currentFountainPos.y = y;
+            } else if (editingNodeForTerrain.board === 'Tunnel') {
+                if (x >= 3 && x <= 6) {
+                    currentTunnelWidth = x + 1;
+                } else if (x < 3) {
+                    currentTunnelWidth = 4;
+                } else if (x > 6) {
+                    currentTunnelWidth = 7;
+                }
             }
             renderTerrainBoard();
         }
@@ -1246,6 +1270,8 @@
             } else if (editingNodeForTerrain.board === 'Fountain') {
                 editingNodeForTerrain.fountainX = currentFountainPos.x;
                 editingNodeForTerrain.fountainY = currentFountainPos.y;
+            } else if (editingNodeForTerrain.board === 'Tunnel') {
+                editingNodeForTerrain.tunnelWidth = currentTunnelWidth;
             }
             document.getElementById('customTerrainModal').close();
             renderGrid();
@@ -1264,6 +1290,8 @@
             } else if (editingNodeForTerrain.board === 'Fountain') {
                 currentFountainPos.x = 3;
                 currentFountainPos.y = 3;
+            } else if (editingNodeForTerrain.board === 'Tunnel') {
+                currentTunnelWidth = 4;
             }
             renderTerrainBoard();
         }
@@ -1448,7 +1476,7 @@
     <!-- Modal for Custom Terrain -->
     <dialog id="customTerrainModal" style="border:4px solid var(--border-color); border-radius:8px; padding:20px; background:var(--bg-overlay); max-width:500px;">
         <h2 id="terrainModalTitle" style="font-family:'Lilita One', cursive; margin-top:0;">Custom Terrain</h2>
-        <p id="terrainModalSubtitle" style="font-size:14px; margin-bottom:15px;">Customize the placement of trees or fountain.</p>
+        <p id="terrainModalSubtitle" style="font-size:14px; margin-bottom:15px;">Customize the placement of trees, fountain, or tunnel width.</p>
         
         <div style="display:flex; justify-content:center; margin-bottom:15px;">
             <div id="terrainBoard" style="display:grid; grid-template-columns:repeat(8, 40px); grid-template-rows:repeat(8, 40px); border:2px solid var(--border-color); background:var(--border-color);"></div>

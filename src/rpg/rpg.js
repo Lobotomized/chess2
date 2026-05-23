@@ -1674,6 +1674,16 @@ function startLevel(level, difficultyOption) {
         }
     }
     
+    if (boardShape === 'Tunnel') {
+        if (difficultyOption && difficultyOption.node && typeof difficultyOption.node.tunnelWidth !== 'undefined') {
+            rpgState.tunnelWidth = difficultyOption.node.tunnelWidth;
+        } else if (difficultyOption && typeof difficultyOption.tunnelWidth !== 'undefined') {
+            rpgState.tunnelWidth = difficultyOption.tunnelWidth;
+        } else {
+             rpgState.tunnelWidth = Math.floor(Math.random() * 4) + 4;
+        }
+    }
+
     // Setup Board
     setupBoard(boardShape);
     
@@ -1784,6 +1794,15 @@ const boardShapes = {
                 board.push({ light: false, x: x, y: y });
             }
         }
+    },
+    'Tunnel': (board) => {
+        const width = (rpgState.tunnelWidth !== undefined) ? rpgState.tunnelWidth : Math.floor(Math.random() * 4) + 4;
+        const maxX = width - 1;
+        for (let x = 0; x <= maxX; x++) {
+            for (let y = 0; y <= 7; y++) {
+                board.push({ light: false, x: x, y: y });
+            }
+        }
     }
 };
 
@@ -1846,8 +1865,14 @@ function setupBoard(shapeName = 'Standard') {
     // Front Line: Row maxY - 1 (Pawns)
     // Back Line: Row maxY (Rest)
     const playerSplit = splitArmy(rpgState.playerRoster, true);
-    placeArmy(playerSplit.front, 'white', [maxY - 1], maxX); 
-    placeArmy(playerSplit.back, 'white', [maxY], maxX); 
+    
+    if (shapeName === 'Tunnel') {
+        placeArmy(playerSplit.back, 'white', [maxY - 1, maxY], maxX); 
+        placeArmy(playerSplit.front, 'white', [maxY - 3, maxY - 2], maxX); 
+    } else {
+        placeArmy(playerSplit.front, 'white', [maxY - 1], maxX); 
+        placeArmy(playerSplit.back, 'white', [maxY], maxX); 
+    }
     
     // Place Enemy Army (Black)
     if (rpgState.enemyRoster && rpgState.enemyRoster.length > 0 && typeof rpgState.enemyRoster[0] === 'object') {
@@ -1866,11 +1891,16 @@ function setupBoard(shapeName = 'Standard') {
         // Front Line: Row 1 (Pawns)
         // Back Line: Row 0 (Rest)
         const enemySplit = splitArmy(rpgState.enemyRoster, false);
-        placeArmy(enemySplit.front, 'black', [1], maxX);
+        
+        if (shapeName === 'Tunnel') {
+            placeArmy(enemySplit.front, 'black', [2, 3], maxX);
+        } else {
+            placeArmy(enemySplit.front, 'black', [1], maxX);
+        }
         
         // Randomize backline (King and elite units)
         // Ensure King is not lost if roster exceeds available squares
-        const availableSlots = maxX + 1;
+        const availableSlots = (shapeName === 'Tunnel') ? (maxX + 1) * 2 : (maxX + 1);
         let backline = enemySplit.back;
 
         // Separate King
@@ -1898,7 +1928,11 @@ function setupBoard(shapeName = 'Standard') {
             [backline[i], backline[j]] = [backline[j], backline[i]];
         }
         
-        placeArmy(backline, 'black', [0], maxX);
+        if (shapeName === 'Tunnel') {
+            placeArmy(backline, 'black', [0, 1], maxX);
+        } else {
+            placeArmy(backline, 'black', [0], maxX);
+        }
     }
 
     // --- Summoner Skill Logic ---
