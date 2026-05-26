@@ -300,19 +300,27 @@ function applyCustomEffects(piece, customDef) {
         // Save the original hook if the piece already has one
         const originalHook = piece[hookName];
         
-        // Create a self-contained stringified function for JSONfn serialization
+        // Safely serialize variables to avoid injection during eval
+        const safeHookName = JSON.stringify(hookName);
+        const safeEffectName = JSON.stringify(effectDef.name);
+        
+        // Create a self-contained stringified function body for JSONfn serialization
         // This avoids closure scope issues when the AI worker parses the state
-        const wrapperString = `function(...args) {
+        const wrapperString = `
             let state;
-            if ('${hookName}' === 'afterEnemyPieceTaken') {
+            const currentHook = ${safeHookName};
+            const currentEffectName = ${safeEffectName};
+
+            if (currentHook === 'afterEnemyPieceTaken') {
                 state = args[1];
             } else {
                 state = args[0];
             }
 
             let returnVal;
-            if (typeof this._original_${hookName} === 'function') {
-                returnVal = this._original_${hookName}(...args);
+            const originalHookName = '_original_' + currentHook;
+            if (typeof this[originalHookName] === 'function') {
+                returnVal = this[originalHookName](...args);
             }
             
             // Re-resolve condition and effect functions from global scope during evaluation
@@ -338,31 +346,31 @@ function applyCustomEffects(piece, customDef) {
             }
 
             if (allConditionsMet) {
-                const effFunc = _globalObj.effects['${effectDef.name}'];
+                const effFunc = _globalObj.effects[currentEffectName];
                 const effSettings = ${JSON.stringify(effectDef.settings)};
                 if (effFunc) {
                     let effectReturn = effFunc(state, this, effSettings);
                     if (effectReturn !== undefined) returnVal = effectReturn;
                 } else {
-                    console.error("customEffects error: Effect function not found:", '${effectDef.name}');
+                    console.error("customEffects error: Effect function not found:", currentEffectName);
                 }
             }
                 
             
             // For hooks like afterPieceMove that require a truthy return value to validate the move
-            if (returnVal === undefined && '${hookName}' === 'afterPieceMove') {
+            if (returnVal === undefined && currentHook === 'afterPieceMove') {
                 return true;
             }
             return returnVal;
-        }`;
+        `;
 
-        // Assign the original hook to a hidden property so the eval'd string can access it
+        // Assign the original hook to a hidden property so the new function can access it
         if (typeof originalHook === 'function') {
             piece[`_original_${hookName}`] = originalHook;
         }
 
-        // Evaluate the wrapper string into a real function and attach it
-        piece[hookName] = eval('(' + wrapperString + ')');
+        // Evaluate the wrapper string into a real function and attach it without using eval
+        piece[hookName] = new Function('...args', wrapperString);
     });
 }
 

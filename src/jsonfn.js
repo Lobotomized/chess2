@@ -14,7 +14,7 @@ if (!JSONfn) {
 	JSONfn.parse = function(str) {
 		return JSON.parse(str,function(key, value){
 			if(typeof value != 'string') return value;
-			return ( value.substring(0,8) == 'function') ? eval('('+value+')') : value;
+			return ( value.substring(0,8) == 'function') ? new Function('return (' + value + ')')() : value;
 		});
 	}
 }());
