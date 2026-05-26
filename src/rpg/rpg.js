@@ -4583,7 +4583,7 @@ function animate(secretState){
         if (Math.abs(piece.x - piece.currentX) < 0.01) piece.currentX = piece.x;
         if (Math.abs(piece.y - piece.currentY) < 0.01) piece.currentY = piece.y;
         
-        drawPiece(piece.currentX, piece.currentY, piece.icon, squareLength);
+        drawPiece(piece.currentX, piece.currentY, piece.icon, squareLength, piece.direction);
     });
 
     if (typeof renderMoveHistory === 'function') {

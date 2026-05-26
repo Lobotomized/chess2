@@ -446,7 +446,7 @@
             gameState.pieces.forEach(p => {
                 if (typeof drawPiece === 'function') {
                     // Use the game's native drawPiece function which handles the sprite sheets properly
-                    drawPiece(p.x, p.y, p.icon, squareLength);
+                    drawPiece(p.x, p.y, p.icon, squareLength, p.direction);
                 } else {
                     // Fallback
                     let img = new Image();

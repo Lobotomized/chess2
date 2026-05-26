@@ -291,13 +291,29 @@ bScaryCat.src = '/static/'+folderSrc+'/blackScaryCat.png'
 const wScaryCat = new Image();
 wScaryCat.src = '/static/'+folderSrc+'/whiteScaryCat.png'
 
-function drawPiece(x, y, img, size) {
+function drawPiece(x, y, img, size, direction) {
     if(size == undefined){
         size = 500
     }
     size = squareLength
     sizePiece = size;
     
+    let rotationAngle = 0;
+    if (direction === 'black' || direction === 'down') {
+        rotationAngle = Math.PI; // 180 degrees
+    } else if (direction === 'left') {
+        rotationAngle = -Math.PI / 2; // -90 degrees
+    } else if (direction === 'right') {
+        rotationAngle = Math.PI / 2; // 90 degrees
+    }
+
+    if (rotationAngle !== 0) {
+        ctx.save();
+        ctx.translate(x * size + sizePiece / 2, y * size + sizePiece / 2);
+        ctx.rotate(rotationAngle);
+        ctx.translate(-(x * size + sizePiece / 2), -(y * size + sizePiece / 2));
+    }
+
     // Support for custom uploaded images
     if (img && (img.startsWith('http') || img.startsWith('/uploads/'))) {
         if (!window.customImageCache) {
@@ -317,6 +333,9 @@ function drawPiece(x, y, img, size) {
             if (cachedImg.complete && cachedImg.naturalHeight !== 0) {
                 ctx.drawImage(cachedImg, x * size, y * size, sizePiece, sizePiece);
             }
+        }
+        if (rotationAngle !== 0) {
+            ctx.restore();
         }
         return;
     }
@@ -625,6 +644,10 @@ function drawPiece(x, y, img, size) {
     case 'whiteScaryCat.png':
         ctx.drawImage(wScaryCat, -100, -100, 1500, 1500, x * size, y * size, sizePiece, sizePiece);
     break;
+    }
+
+    if (rotationAngle !== 0) {
+        ctx.restore();
     }
 }
 

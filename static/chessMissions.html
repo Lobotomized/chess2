@@ -768,10 +768,10 @@
             //Draw Pieces
             state.pieces.forEach((piece) => {
                 if(IAM == 'black'){
-                    drawPiece(piece.x, reverseNumber(piece.y,boardHeight), piece.icon, squareLength)
+                    drawPiece(piece.x, reverseNumber(piece.y,boardHeight), piece.icon, squareLength, piece.direction)
                 }
                 else{
-                    drawPiece(piece.x, piece.y, piece.icon, squareLength)
+                    drawPiece(piece.x, piece.y, piece.icon, squareLength, piece.direction)
                 }
             })
             
@@ -1059,10 +1059,10 @@
                 }
                 
                 if(IAM == 'black'){
-                    drawPiece(drawX, reverseNumber(drawY,boardHeight), piece.icon, squareLength)
+                    drawPiece(drawX, reverseNumber(drawY,boardHeight), piece.icon, squareLength, piece.direction)
                 }
                 else{
-                    drawPiece(drawX, drawY, piece.icon, squareLength)
+                    drawPiece(drawX, drawY, piece.icon, squareLength, piece.direction)
                 }
             })
             

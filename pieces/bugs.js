@@ -49,7 +49,7 @@ function antFactory(color,x,y, direction){
                     return piece.x == move.x && piece.y == move.y
                 })
                 state.pieces.splice(state.pieces.indexOf(me),1);
-                state.pieces.push(queenbugFactory(this.color,move.x,move.y));
+                state.pieces.push(queenbugFactory(this.color,move.x,move.y, this.direction));
                 return true;
             }
             return true;
@@ -305,7 +305,7 @@ function shroomFactory(color,x,y){
     }
 }
 
-function queenbugFactory(color,x,y){
+function queenbugFactory(color, x, y, initialDirection){
     return {
         icon: color+'QueenBug.png',
         moves: [{ type: 'absolute', x: 0, y: -1, impotent:true }, { type: 'absolute', x: 0, y: 1 , impotent:true},
@@ -316,6 +316,7 @@ function queenbugFactory(color,x,y){
         value:2.5,
         centerBoard:undefined,
         posValue:posValue[2],
+        direction: initialDirection || (color === 'white' ? 'up' : 'down'),
         afterPieceMove:function(state, move, prevMove) {
         if (this.centerBoard === undefined) {
             const yCoordinates = state.board.map(square => square.y);
@@ -327,6 +328,17 @@ function queenbugFactory(color,x,y){
             const direction = prevMove.y < this.centerBoard? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;
+
+            if (move.x > prevMove.x) {
+                this.direction = 'right';
+            } else if (move.x < prevMove.x) {
+                this.direction = 'left';
+            } else if (move.y > prevMove.y) {
+                this.direction = 'down';
+            } else if (move.y < prevMove.y) {
+                this.direction = 'up';
+            }
+
             const ant = antFactory(color,move.x,move.y,direction)
             state.pieces.push(ant);
             return true;
@@ -357,7 +369,12 @@ function brainbugFactory(color,x,y){
                 return sq.x == prevMove.x && sq.y == prevMove.y;
             })
             if(!copy && squareCheck != undefined){
-                state.pieces.push(queenbugFactory(color, prevMove.x, prevMove.y));
+                let dir = color === 'white' ? 'up' : 'down';
+                if (this.x > prevMove.x) dir = 'right';
+                else if (this.x < prevMove.x) dir = 'left';
+                else if (this.y > prevMove.y) dir = 'down';
+                else if (this.y < prevMove.y) dir = 'up';
+                state.pieces.push(queenbugFactory(color, prevMove.x, prevMove.y, dir));
             }
         },
 

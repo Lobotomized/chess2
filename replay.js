@@ -104,7 +104,7 @@ function drawBoard() {
     
     // Draw pieces
     gameState.pieces.forEach(p => {
-        drawPiece(p.x, p.y, p.icon, squareLength);
+        drawPiece(p.x, p.y, p.icon, squareLength, p.direction);
     });
 }
 

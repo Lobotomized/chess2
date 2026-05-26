@@ -162,8 +162,8 @@ function rpgPawnFactory(color, x, y) {
         }
     }
 }
-
-function rpgQueenbugFactory(color,x,y){
+    
+function rpgQueenbugFactory(color, x, y, initialDirection){
     return {
         icon: color+'QueenBug.png',
         moves: [{ type: 'absolute', x: 0, y: -1, impotent:true }, { type: 'absolute', x: 0, y: 1 , impotent:true},
@@ -174,6 +174,7 @@ function rpgQueenbugFactory(color,x,y){
         centerBoard:undefined,
         value:2.5,
         posValue:posValue[2],
+        direction: initialDirection || (color === 'white' ? 'up' : 'down'),
         afterPieceMove:function(state, move, prevMove) {
             if (this.centerBoard === undefined) {
                 const yCoordinates = state.board.map(square => square.y);
@@ -185,6 +186,17 @@ function rpgQueenbugFactory(color,x,y){
             const direction = prevMove.y < this.centerBoard? 'black' : 'white'
             this.x = prevMove.x;
             this.y = prevMove.y;
+
+            if (move.x > prevMove.x) {
+                this.direction = 'right';
+            } else if (move.x < prevMove.x) {
+                this.direction = 'left';
+            } else if (move.y > prevMove.y) {
+                this.direction = 'down';
+            } else if (move.y < prevMove.y) {
+                this.direction = 'up';
+            }
+
             const ant = rpgAntFactory(color,move.x,move.y,direction)
             state.pieces.push(ant);
             return true;
@@ -269,7 +281,7 @@ function rpgAntFactory(color,x,y, direction){
                     return piece.x == move.x && piece.y == move.y
                 })
                 state.pieces.splice(state.pieces.indexOf(me),1);
-                state.pieces.push(rpgQueenbugFactory(this.color,move.x,move.y));
+                state.pieces.push(rpgQueenbugFactory(this.color,move.x,move.y, this.direction));
                 return true;
             }
             return true;
