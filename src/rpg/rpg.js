@@ -3580,7 +3580,7 @@ function showRewardModal() {
             div.style.borderColor = '#fbc02d';
             div.innerHTML = `<h3>${option.type}</h3>
                              <p style="font-size:14px;">${option.description || ''}</p>
-                             <div style="text-align:center; font-size: 40px; margin: 10px 0;"><img src="/static/bigMap/bank.jpg" class="food-icon-responsive" alt="Bank" style="height: 1em; width: 1em; vertical-align: middle;"></div>
+                             <div style="text-align:center; font-size: 40px; margin: 10px 0;"><img src="/static/bigMap/bank-icon.jpg" class="food-icon-responsive" alt="Bank" style="height: 1em; width: 1em; vertical-align: middle;"></div>
                              <p style="text-align:center;">+${option.enemyValue} Gold</p>`;
                              
             div.onclick = () => {

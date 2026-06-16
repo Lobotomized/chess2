@@ -787,17 +787,22 @@
                     }
                     else if (node.board === 'Library') {
                         cell.classList.add('library');
+                        cell.style.backgroundImage = `url("/static/bigMap/library.jpg")`;
+                        cell.style.backgroundSize = 'cover';
+                        cell.style.backgroundPosition = 'center';
                     }
                     else if (node.board === 'Inn') {
                         cell.classList.add('inn');
+                        cell.style.backgroundImage = `url("/static/bigMap/inn.jpg")`;
+                        cell.style.backgroundSize = 'cover';
+                        cell.style.backgroundPosition = 'center';
                     }
                     else if (node.board === 'Bank') {
                         cell.classList.add('bank');
                     }
                     else if (node.board === 'Mountain') {
                         cell.classList.add('mountain');
-                        const num = (node.x * 31 + node.y * 17) % 4 + 1;
-                        cell.style.backgroundImage = `url("/static/bigMap/mountain${num}.png")`;
+                        cell.style.backgroundImage = `url("/static/bigMap/mountain.jpg")`;
                         cell.style.backgroundSize = 'cover';
                         cell.style.backgroundPosition = 'center';
                     }
@@ -856,7 +861,7 @@
                     if (node.board === 'Bank') {
                         const bankInd = document.createElement('div');
                         bankInd.className = 'indicator boss-indicator'; // Centered
-                        bankInd.innerHTML = '<img src="/static/bigMap/bank.jpg" style="height: 1em; width: 1em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
+                        bankInd.innerHTML = '<img src="/static/bigMap/bank-icon.jpg" style="height: 1em; width: 1em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
                         cell.appendChild(bankInd);
                     } 
                     
@@ -891,7 +896,7 @@
                         if (node.board === 'Inn') {
                             powerInd.innerHTML = `<img src="/static/bigMap/foodIcon.png" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
                         } else if (node.board === 'Bank') {
-                            powerInd.innerHTML = `<img src="/static/bigMap/bank.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
+                            powerInd.innerHTML = `<img src="/static/bigMap/bank-icon.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
                         } else if (node.board === 'Library') {
                             powerInd.innerHTML = `<img src="/static/bigMap/experienceIcon.jpg" style="height: 1em; width: 1em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> ${node.enemyPower}`;
                         } else if (node.board === 'Market') {

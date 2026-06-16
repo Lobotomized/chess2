@@ -270,6 +270,9 @@ const urlsToCache = [
   '/static/bigMap/forest3.png',
   '/static/bigMap/forest4.png',
   '/static/bigMap/lake1.png',
+  '/static/bigMap/library.jpg',
+  '/static/bigMap/inn.jpg',
+  '/static/bigMap/mountain.jpg',
   '/static/bigMap/plains1.png'
 ];
 

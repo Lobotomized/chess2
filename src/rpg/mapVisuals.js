@@ -407,14 +407,23 @@ function showMapModal() {
                 }
                 else if (node.board === 'Mountain') {
                     cell.classList.add('mountain');
-                    const num = (node.x * 31 + node.y * 17) % 4 + 1;
-                    cell.style.backgroundImage = `url("/static/bigMap/mountain${num}.png")`;
+                    cell.style.backgroundImage = `url("/static/bigMap/mountain.jpg")`;
                     cell.style.backgroundSize = 'cover';
                     cell.style.backgroundPosition = 'center';
                 }
                 else if (node.board === 'Market') cell.classList.add('market');
-                else if (node.board === 'Library') cell.classList.add('library');
-                else if (node.board === 'Inn') cell.classList.add('inn');
+                else if (node.board === 'Library') {
+                    cell.classList.add('library');
+                    cell.style.backgroundImage = `url("/static/bigMap/library.jpg")`;
+                    cell.style.backgroundSize = 'cover';
+                    cell.style.backgroundPosition = 'center';
+                }
+                else if (node.board === 'Inn') {
+                    cell.classList.add('inn');
+                    cell.style.backgroundImage = `url("/static/bigMap/inn.jpg")`;
+                    cell.style.backgroundSize = 'cover';
+                    cell.style.backgroundPosition = 'center';
+                }
                 else if (node.board === 'Bank') cell.classList.add('bank');
                 else {
                     cell.classList.add('standard');
@@ -489,7 +498,7 @@ function showMapModal() {
                 } else if (node.board === 'Inn') {
                      icon = '<img src="/static/bigMap/innIcon.jpg" style="height: 2em; width: 2em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
                 } else if (node.board === 'Bank') {
-                     icon = '<img src="/static/bigMap/bank.jpg" style="height: 2em; width: 2em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
+                     icon = '<img src="/static/bigMap/bank-icon.jpg" style="height: 2em; width: 2em; vertical-align: middle; filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)); border-radius: 4px;">';
                 } else if (node.board === 'Mountain') {
                      icon = ''; // No combat icon on mountains
                 } else {
@@ -1062,9 +1071,9 @@ function showMapCellPopup(node, grandMap) {
              }
         } else if (node.board === 'Bank') {
              if (canAttack) {
-                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/bank.jpg" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Visit Bank</button>`;
+                 content += `<button id="popupAttackBtn" style="${btnStyle} background:#e6d5ac; color:#4e342e;"><img src="/static/bigMap/bank-icon.jpg" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px;"> Visit Bank</button>`;
              } else {
-                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;"><img src="/static/bigMap/bank.jpg" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Visit Bank (Too Far)</button>`;
+                 content += `<button disabled style="${btnStyle} background:#d7ccc8; color:#8d6e63; cursor:not-allowed;"><img src="/static/bigMap/bank-icon.jpg" style="height: 2em; width: 2em; vertical-align: middle; margin-right: 2px; border-radius: 2px; opacity: 0.5;"> Visit Bank (Too Far)</button>`;
              }
         } else {
              if (canAttack) {
