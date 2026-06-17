@@ -407,11 +407,17 @@ function showMapModal() {
                 }
                 else if (node.board === 'Mountain') {
                     cell.classList.add('mountain');
-                    cell.style.backgroundImage = `url("/static/bigMap/mountain.jpg")`;
+                    const num = (node.x * 31 + node.y * 17) % 3 + 1;
+                    cell.style.backgroundImage = `url("/static/bigMap/mountain${num}.jpg")`;
                     cell.style.backgroundSize = 'cover';
                     cell.style.backgroundPosition = 'center';
                 }
-                else if (node.board === 'Market') cell.classList.add('market');
+                else if (node.board === 'Market') {
+                    cell.classList.add('market');
+                    cell.style.backgroundImage = `url("/static/bigMap/shop.jpg")`;
+                    cell.style.backgroundSize = 'cover';
+                    cell.style.backgroundPosition = 'center';
+                }
                 else if (node.board === 'Library') {
                     cell.classList.add('library');
                     cell.style.backgroundImage = `url("/static/bigMap/library.jpg")`;
@@ -424,7 +430,12 @@ function showMapModal() {
                     cell.style.backgroundSize = 'cover';
                     cell.style.backgroundPosition = 'center';
                 }
-                else if (node.board === 'Bank') cell.classList.add('bank');
+                else if (node.board === 'Bank') {
+                    cell.classList.add('bank');
+                    cell.style.backgroundImage = `url("/static/bigMap/bank.jpg")`;
+                    cell.style.backgroundSize = 'cover';
+                    cell.style.backgroundPosition = 'center';
+                }
                 else {
                     cell.classList.add('standard');
                     cell.style.backgroundImage = `url("/static/bigMap/plains1.png")`;

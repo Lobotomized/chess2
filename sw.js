@@ -272,7 +272,11 @@ const urlsToCache = [
   '/static/bigMap/lake1.png',
   '/static/bigMap/library.jpg',
   '/static/bigMap/inn.jpg',
-  '/static/bigMap/mountain.jpg',
+  '/static/bigMap/bank.jpg',
+  '/static/bigMap/shop.jpg',
+  '/static/bigMap/mountain1.jpg',
+  '/static/bigMap/mountain2.jpg',
+  '/static/bigMap/mountain3.jpg',
   '/static/bigMap/plains1.png'
 ];
 

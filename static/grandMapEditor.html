@@ -778,12 +778,15 @@
                     }
                     else if (node.board === 'Tunnel') {
                         cell.classList.add('tunnel');
-                        cell.style.backgroundImage = `url("/static/bigMap/mountain1.png")`;
+                        cell.style.backgroundImage = `url("/static/bigMap/mountain1.jpg")`;
                         cell.style.backgroundSize = 'cover';
                         cell.style.backgroundPosition = 'center';
                     }
                     else if (node.board === 'Market') {
                         cell.classList.add('market');
+                        cell.style.backgroundImage = `url("/static/bigMap/shop.jpg")`;
+                        cell.style.backgroundSize = 'cover';
+                        cell.style.backgroundPosition = 'center';
                     }
                     else if (node.board === 'Library') {
                         cell.classList.add('library');
@@ -799,10 +802,14 @@
                     }
                     else if (node.board === 'Bank') {
                         cell.classList.add('bank');
+                        cell.style.backgroundImage = `url("/static/bigMap/bank.jpg")`;
+                        cell.style.backgroundSize = 'cover';
+                        cell.style.backgroundPosition = 'center';
                     }
                     else if (node.board === 'Mountain') {
                         cell.classList.add('mountain');
-                        cell.style.backgroundImage = `url("/static/bigMap/mountain.jpg")`;
+                        const num = (x * 31 + y * 17) % 3 + 1;
+                        cell.style.backgroundImage = `url("/static/bigMap/mountain${num}.jpg")`;
                         cell.style.backgroundSize = 'cover';
                         cell.style.backgroundPosition = 'center';
                     }
