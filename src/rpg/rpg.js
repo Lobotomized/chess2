@@ -4551,7 +4551,7 @@ function animate(secretState){
                 if(oldSquare && !oldSquare.light && !oldSquare.red){
                     drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
                 }
-                if(newSquare && !newSquare.light && !oldSquare.red){
+                if(newSquare && !newSquare.light && oldSquare && !oldSquare.red){
                     drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
                 }
             }
@@ -4560,7 +4560,7 @@ function animate(secretState){
                 if(oldSquare && !oldSquare.light && !oldSquare.red){
                     drawColoredSquare(state.oldMove.oldX*squareLength, state.oldMove.oldY*squareLength,oldMoveSquareColor, squareLength)
                 }
-                if(newSquare && !newSquare.light && !oldSquare.red){
+                if(newSquare && !newSquare.light && oldSquare && !oldSquare.red){
                     drawColoredSquare(state.oldMove.currentX*squareLength, state.oldMove.currentY*squareLength,oldMoveSquareColor, squareLength)
                 }
             }
