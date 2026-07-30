@@ -652,7 +652,7 @@
     <!-- Game Over Modal -->
     <dialog id="gameOverDialog">
         <h2>Game Over</h2>
-        <img src="/static/youLose.jpg" alt="You Lose" style="max-width: 100%; height: auto; margin-bottom: 15px; border-radius: 12px;">
+        <img src="/static/youLose.jpg" alt="You Lose" style="max-width: 100%; max-height: 40vh; object-fit: contain; margin-bottom: 15px; border-radius: 12px;">
         <p>Your army has fallen.</p>
         <button onclick="location.reload()" style="padding: 10px 20px; cursor: pointer;">Try Again</button>
     </dialog>
@@ -660,7 +660,7 @@
     <!-- Game Won Modal -->
     <dialog id="gameWonDialog" oncancel="event.preventDefault(); closeWinScreen();">
         <h2>Victory!</h2>
-        <img src="/static/youWin.jpg" alt="You Win" style="max-width: 100%; height: auto; margin-bottom: 15px; border-radius: 12px;">
+        <img src="/static/youWin.jpg" alt="You Win" style="max-width: 100%; max-height: 40vh; object-fit: contain; margin-bottom: 15px; border-radius: 12px;">
         <p>Your army is victorious.</p>
         <p id="goldEarnedText" style="font-weight:bold; color:#e5b53e; font-size: 36px; text-shadow: 1px 1px 4px rgba(0,0,0,0.5);"></p>
         <button onclick="closeWinScreen()" style="padding: 10px 20px; cursor: pointer;">Return to Map</button>
@@ -669,7 +669,7 @@
     <!-- Game Complete Modal -->
     <dialog id="gameCompleteDialog" oncancel="event.preventDefault(); clearProgress(); location.reload();">
         <h2>Campaign Complete!</h2>
-        <img src="/static/youWin.jpg" alt="You Win" style="max-width: 100%; height: auto; margin-bottom: 15px; border-radius: 12px;">
+        <img src="/static/youWin.jpg" alt="You Win" style="max-width: 100%; max-height: 40vh; object-fit: contain; margin-bottom: 15px; border-radius: 12px;">
         <p>You have defeated the Final Boss and conquered the Grand Map.</p>
         <button onclick="clearProgress(); location.reload();" style="padding: 10px 20px; cursor: pointer;">Finish</button>
     </dialog>
