@@ -224,6 +224,18 @@
 
 
 <script>
+    window.cachedProfile = null;
+    document.addEventListener('DOMContentLoaded', async () => {
+        const authModule = window.Auth || null;
+        if (authModule && authModule.getToken()) {
+            try {
+                window.cachedProfile = await authModule.getMe();
+            } catch(e) {
+                console.error("Failed to fetch profile for drawing logic", e);
+            }
+        }
+    });
+
     let squareLength = screen.width < screen.height? parseInt(screen.width/8) : parseInt(screen.height/12) 
     const canvas = document.getElementById('canvas');
     const ctx = canvas.getContext('2d');
@@ -260,7 +272,7 @@
         }
     }
 
-    function setupLocalBotGame(bot, roomId) {
+    async function setupLocalBotGame(bot, roomId) {
         localBot = bot;
         localGameId = roomId;
         
@@ -307,7 +319,25 @@
                     localState.board.push({ light: false, x: x, y: y })
                 }
             }
-            localState.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4), empoweredCrystalFactory('white',1,5));
+            localState.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3));
+            
+            // Only add paid races if the user actually owns them
+            try {
+                const authModule = window.Auth || null;
+                if (authModule && authModule.getToken()) {
+                    const profile = await authModule.getMe();
+                    if (profile && profile.purchasedRaces) {
+                        if (profile.purchasedRaces.includes('promoters')) {
+                            localState.pieces.push(northernKing('white',1,4));
+                        }
+                        if (profile.purchasedRaces.includes('cyborgs')) {
+                            localState.pieces.push(empoweredCrystalFactory('white',1,5));
+                        }
+                    }
+                }
+            } catch(e) {
+                console.error("Error fetching purchased races for menu setup", e);
+            }
         }
         
         IAM = 'white';
@@ -776,6 +806,21 @@
 
             //Draw Pieces
             state.pieces.forEach((piece) => {
+                
+                // Hide paid races if the user doesn't own them and we are in the menu
+                if (state.turn === 'menu' && (piece.name === 'Northern King' || piece.name === 'Empowered Crystal')) {
+                    // Check if the current user owns them. 
+                    // This is synchronous during the draw loop, so we rely on a cached profile
+                    const authModule = window.Auth || null;
+                    if (authModule && window.cachedProfile) {
+                        if (piece.name === 'Northern King' && !window.cachedProfile.purchasedRaces?.includes('promoters')) return;
+                        if (piece.name === 'Empowered Crystal' && !window.cachedProfile.purchasedRaces?.includes('cyborgs')) return;
+                    } else if (authModule && authModule.getToken() && !window.cachedProfile) {
+                        // Profile hasn't loaded yet, default to hiding to prevent flashes of unowned pieces
+                        return;
+                    }
+                }
+
                 if(IAM == 'black'){
                     drawPiece(piece.x, reverseNumber(piece.y,boardHeight), piece.icon, squareLength, piece.direction)
                 }
@@ -833,17 +878,26 @@
 
             if (attemptingToBuy) {
                 try {
-                    const authModule = window.Auth ? new window.Auth() : null;
+                    const authModule = window.Auth || null;
                     if (authModule) {
-                        const profile = await authModule.getProfile();
-                        if (!profile || !profile.purchasedRaces || !profile.purchasedRaces.includes(attemptingToBuy)) {
-                            authModule.promptPurchase(attemptingToBuy);
-                            return; // Block the click
-                        }
+                        authModule.getMe().then(profile => {
+                             if (!profile || !profile.purchasedRaces || !profile.purchasedRaces.includes(attemptingToBuy)) {
+                                 authModule.promptPurchase(attemptingToBuy);
+                             }
+                        });
                     }
                 } catch(err) {
                     console.error("Auth check failed", err);
                 }
+                
+                // Block the click completely if we suspect they don't own it, 
+                // the promise will handle showing the modal.
+                // However, since we now hide the pieces if they don't own them, 
+                // clicking on empty squares shouldn't trigger race selection anyway.
+                // We'll leave the block just in case to prevent selecting invisible pieces.
+                const pieces = localState ? localState.pieces : state.pieces;
+                const targetPiece = pieceFromXY(cx, actualCy, pieces);
+                if (!targetPiece) return; 
             }
         }
         

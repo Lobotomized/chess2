@@ -74,7 +74,7 @@ const Auth = {
     },
 
     async promptPurchase(raceName) {
-        const profile = await this.getProfile();
+        const profile = await this.getMe();
         if (!profile) {
             this.showAuthModal();
             return;

@@ -450,12 +450,45 @@
     </script>
 
         <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const authModule = window.Auth || null;
+            if (authModule && authModule.getToken()) {
+                try {
+                    const profile = await authModule.getMe();
+                    if (profile && profile.purchasedRaces) {
+                        if (!profile.purchasedRaces.includes('cyborgs')) {
+                            const cTiles = document.querySelectorAll('.cyborgs-tile');
+                            cTiles.forEach(cTile => cTile.style.display = 'none');
+                        }
+                        if (!profile.purchasedRaces.includes('promoters')) {
+                            const pTiles = document.querySelectorAll('.promoters-tile');
+                            pTiles.forEach(pTile => pTile.style.display = 'none');
+                        }
+                    } else {
+                        // Profile loaded but no races owned, hide them
+                        const cTiles = document.querySelectorAll('.cyborgs-tile');
+                        cTiles.forEach(cTile => cTile.style.display = 'none');
+                        const pTiles = document.querySelectorAll('.promoters-tile');
+                        pTiles.forEach(pTile => pTile.style.display = 'none');
+                    }
+                } catch(e) {
+                    console.error("Auth failed on hotseat menu", e);
+                }
+            } else {
+                // Not logged in, hide paid races
+                const cTiles = document.querySelectorAll('.cyborgs-tile');
+                cTiles.forEach(cTile => cTile.style.display = 'none');
+                const pTiles = document.querySelectorAll('.promoters-tile');
+                pTiles.forEach(pTile => pTile.style.display = 'none');
+            }
+        });
+
         async function handleRaceSelect(element, className, raceName) {
             if (raceName === 'cyborgs' || raceName === 'promoters') {
-                const authModule = window.Auth ? new window.Auth() : null;
+                const authModule = window.Auth || null;
                 if (!authModule) return;
                 
-                const profile = await authModule.getProfile();
+                const profile = await authModule.getMe();
                 if (!profile) {
                     authModule.showAuthModal();
                     return;

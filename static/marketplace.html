@@ -129,10 +129,10 @@
     <script src="/src/auth.js?v=1710423851"></script>
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
-            const authModule = window.Auth ? new window.Auth() : null;
+            const authModule = window.Auth || null;
             let profile = null;
             if (authModule && authModule.getToken()) {
-                profile = await authModule.getProfile();
+                profile = await authModule.getMe();
             }
 
             const products = [
@@ -173,10 +173,10 @@
         });
 
         async function handleBuy(raceId) {
-            const authModule = window.Auth ? new window.Auth() : null;
+            const authModule = window.Auth || null;
             if (!authModule) return;
 
-            const profile = await authModule.getProfile();
+            const profile = await authModule.getMe();
             if (!profile) {
                 authModule.showAuthModal();
                 return;

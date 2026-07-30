@@ -296,6 +296,11 @@ self.addEventListener('fetch', event => {
     return;
   }
 
+  // Only cache http/https schemes (ignore chrome-extension://, etc)
+  if (!event.request.url.startsWith('http')) {
+    return;
+  }
+
   const url = new URL(event.request.url);
 
   // Exclude API calls from cache-first strategy

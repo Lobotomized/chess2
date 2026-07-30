@@ -665,7 +665,14 @@ let lobby = newG({properties:{
                             state.board.push({ light: false, x: x, y: y })
                     }
                 }
-                state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3), northernKing('white',1,4), empoweredCrystalFactory('white',1,5))
+                state.pieces.push(kingFactory('white',1,1), hatFactory('white',1,2), shroomFactory('white', 1, 3))
+                // We don't add paid races to the state object here by default.
+                // The client side logic already restricts clicking them if not owned,
+                // but visually they will be missing from the server state.
+                // Note: The UI is currently drawing state.pieces, so if we omit them here, 
+                // they won't render at all on the multiplayer board for ANYONE initially.
+                // Let's add them back, but we'll modify the front-end to filter the render.
+                state.pieces.push(northernKing('white',1,4), empoweredCrystalFactory('white',1,5));
                 state.gameType = 'raceChoiceChess'
                 state.turn = 'menu'
             }
