@@ -9,7 +9,10 @@
   "jest": {
     "testEnvironment": "node",
     "testEnvironmentOptions": {
-      "customExportConditions": ["node", "node-addons"]
+      "customExportConditions": [
+        "node",
+        "node-addons"
+      ]
     }
   },
   "author": "",
@@ -24,6 +27,7 @@
     "mongoose": "^8.4.1",
     "multer": "^2.1.1",
     "socket.io": "^2.3.0",
+    "stripe": "^22.4.0",
     "ws": "^6.1.4"
   },
   "devDependencies": {

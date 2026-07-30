@@ -37,6 +37,58 @@ const upload = multer({
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key_here'; // Fallback for dev
 
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder');
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_placeholder';
+
+app.post('/webhook', express.raw({type: 'application/json'}), async (request, response) => {
+    const sig = request.headers['stripe-signature'];
+    let event;
+
+    try {
+        event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+    } catch (err) {
+        return response.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    // Handle the event
+    try {
+        switch (event.type) {
+            case 'checkout.session.completed': {
+                const session = event.data.object;
+                const userId = session.client_reference_id;
+                
+                if (userId) {
+                    await User.findByIdAndUpdate(userId, {
+                        isPaidAccount: true,
+                        stripeCustomerId: session.customer,
+                        stripeSubscriptionId: session.subscription
+                    });
+                    console.log(`User ${userId} upgraded to paid account.`);
+                }
+                break;
+            }
+            case 'customer.subscription.deleted':
+            case 'customer.subscription.updated': {
+                const subscription = event.data.object;
+                const isActive = subscription.status === 'active' || subscription.status === 'trialing';
+                
+                await User.findOneAndUpdate(
+                    { stripeSubscriptionId: subscription.id },
+                    { isPaidAccount: isActive }
+                );
+                console.log(`Subscription ${subscription.id} status updated to ${subscription.status}. isPaidAccount: ${isActive}`);
+                break;
+            }
+            default:
+                console.log(`Unhandled event type ${event.type}`);
+        }
+    } catch (err) {
+        console.error('Error processing webhook:', err);
+    }
+
+    response.send();
+});
+
 app.use(express.json({ limit: '50mb' })); // Allow JSON body parsing with large limit
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
@@ -78,8 +130,8 @@ Object.keys(pieceDefinitions).forEach(key => {
     }
 });
 const {lightBoardFE, checkRemi, getColorPieces} = require('./helperFunctions.js');
-app.use('/static', express.static('public', { maxAge: '1d' }))
-app.use('/src', express.static('src', { maxAge: '1d' }))
+app.use('/static', express.static('public', { maxAge: '0' }))
+app.use('/src', express.static('src', { maxAge: '0' }))
 
 
 
@@ -1084,6 +1136,18 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password');
         if (!user) return res.status(404).json({ error: 'User not found' });
+        res.status(200).json(user);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.post('/api/auth/simulate-payment', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findByIdAndUpdate(req.user.id, {
+            isPaidAccount: true,
+            stripeSubscriptionId: 'sub_simulated_test_123'
+        }, { new: true }).select('-password');
         res.status(200).json(user);
     } catch (err) {
         res.status(500).json({ error: err.message });

@@ -42,6 +42,36 @@ const Auth = {
         return token ? { 'Authorization': `Bearer ${token}` } : {};
     },
 
+    async getMe() {
+        if (!this.getToken()) return null;
+        try {
+            const response = await fetch('/api/auth/me', {
+                headers: this.getAuthHeaders(),
+                cache: 'no-store'
+            });
+            if (!response.ok) throw new Error('Not logged in');
+            return await response.json();
+        } catch (err) {
+            return null;
+        }
+    },
+
+    async simulatePayment() {
+        if (!this.getToken()) return;
+        try {
+            const response = await fetch('/api/auth/simulate-payment', {
+                method: 'POST',
+                headers: this.getAuthHeaders()
+            });
+            if (response.ok) {
+                alert('Payment simulated successfully! Refreshing...');
+                window.location.reload();
+            }
+        } catch (err) {
+            console.error('Error simulating payment:', err);
+        }
+    },
+
     ensureAuthenticated() {
         if (!this.getToken()) {
             this.showAuthModal();
@@ -125,25 +155,55 @@ const Auth = {
 window.Auth = Auth;
 
 // Automatically inject login/logout button into the navigation bar
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const navLinks = document.getElementById('navLinks');
     if (navLinks) {
-        const authBtn = document.createElement('a');
-        authBtn.href = "#";
         if (Auth.getToken()) {
+            const user = await Auth.getMe();
+            
+            if (user) {
+                const subBtn = document.createElement('a');
+                if (navLinks.classList.contains('menu-container')) subBtn.className = 'menu-button';
+                if (user.isPaidAccount) {
+                    subBtn.href = "#";
+                    subBtn.innerHTML = '<img src="/static/lg/whiteCrystalEmpowered.png" class="icon"> Premium Member';
+                    subBtn.style.color = '#ffd700';
+                    subBtn.onclick = (e) => e.preventDefault();
+                } else {
+                    subBtn.href = "#";
+                    subBtn.innerHTML = '<img src="/static/lg/whiteCrystal.png" class="icon"> Upgrade Account';
+                    subBtn.onclick = (e) => {
+                        e.preventDefault();
+                        if (confirm('For testing purposes, do you want to simulate a successful payment locally?')) {
+                            Auth.simulatePayment();
+                        } else {
+                            window.open(`https://buy.stripe.com/fZu8wPg7udPL8R0aw06Zy01?client_reference_id=${user._id}`, '_blank');
+                        }
+                    };
+                }
+                navLinks.appendChild(subBtn);
+            }
+
+            const authBtn = document.createElement('a');
+            if (navLinks.classList.contains('menu-container')) authBtn.className = 'menu-button';
+            authBtn.href = "#";
             authBtn.innerHTML = '<img src="/static/lg/blackKing.png" class="icon"> Logout';
             authBtn.onclick = (e) => {
                 e.preventDefault();
                 Auth.clearToken();
                 window.location.reload();
             };
+            navLinks.appendChild(authBtn);
         } else {
+            const authBtn = document.createElement('a');
+            if (navLinks.classList.contains('menu-container')) authBtn.className = 'menu-button';
+            authBtn.href = "#";
             authBtn.innerHTML = '<img src="/static/lg/whiteKing.png" class="icon"> Login';
             authBtn.onclick = (e) => {
                 e.preventDefault();
                 Auth.showAuthModal('login');
             };
+            navLinks.appendChild(authBtn);
         }
-        navLinks.appendChild(authBtn);
     }
 });

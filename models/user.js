@@ -22,6 +22,18 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    isPaidAccount: {
+        type: Boolean,
+        default: false
+    },
+    stripeCustomerId: {
+        type: String,
+        default: null
+    },
+    stripeSubscriptionId: {
+        type: String,
+        default: null
+    },
     customPieces: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'CustomPiece'
