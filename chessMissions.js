@@ -796,6 +796,10 @@ app.get('/hotseat', function(req,res){
     return res.status(200).sendFile(__dirname + '/static/hotseat.html');
 })
 
+app.get('/marketplace', function(req,res){
+    return res.status(200).sendFile(__dirname + '/static/marketplace.html');
+})
+
 app.get('/gameRecorder.js', function(req,res){
     return res.status(200).sendFile(__dirname + '/gameRecorder.js');
 })

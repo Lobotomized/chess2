@@ -4,6 +4,7 @@
 
 <script src="/src/loadImages.js"></script>
 <script src="/src/jsonfn.js"></script>
+<script src="/src/auth.js?v=1710423851"></script>
 <script src="/moveMethods.js"></script>
 <script src="/pieceDefinitions.js"></script>
 <script src="/src/globby.js"></script>
@@ -811,28 +812,47 @@
 
     })
 
-    canvas.addEventListener('click', (e) => {
+    canvas.addEventListener('click', async (e) => {
         let {x, y} = getMousePos(canvas, e);
         
         let mx = x;
         let my = y;
         
-        if (localState) {
-            let cx = parseInt(mx / squareLength);
-            let cy = parseInt(my / squareLength);
-            if (IAM === 'black' && boardHeight) {
-                cy = reverseNumber(cy, boardHeight);
+        let cx = parseInt(mx / squareLength);
+        let cy = parseInt(my / squareLength);
+        let actualCy = cy;
+        if (IAM === 'black' && boardHeight) {
+            actualCy = reverseNumber(cy, boardHeight);
+        }
+
+        // Lock paid races in menu
+        if ((localState && localState.turn === 'menu') || (state && state.turn === 'menu')) {
+            let attemptingToBuy = null;
+            if (cx === 1 && actualCy === 4) attemptingToBuy = 'promoters';
+            if (cx === 1 && actualCy === 5) attemptingToBuy = 'cyborgs';
+
+            if (attemptingToBuy) {
+                try {
+                    const authModule = window.Auth ? new window.Auth() : null;
+                    if (authModule) {
+                        const profile = await authModule.getProfile();
+                        if (!profile || !profile.purchasedRaces || !profile.purchasedRaces.includes(attemptingToBuy)) {
+                            authModule.promptPurchase(attemptingToBuy);
+                            return; // Block the click
+                        }
+                    }
+                } catch(err) {
+                    console.error("Auth check failed", err);
+                }
             }
-            handleLocalMove(cx, cy);
+        }
+        
+        if (localState) {
+            handleLocalMove(cx, actualCy);
             return;
         }
         
-        if(IAM == 'black' && boardHeight){
-            socket.emit('move', { x: parseInt(mx / squareLength), y: reverseNumber(parseInt(my / squareLength),boardHeight) })
-        }
-        else{
-            socket.emit('move', { x: parseInt(mx / squareLength), y: parseInt(my / squareLength) })
-        }
+        socket.emit('move', { x: cx, y: actualCy })
     })
 
     canvas.addEventListener('mousemove', (e) => {

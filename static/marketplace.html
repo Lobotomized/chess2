@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marketplace - Chess 2</title>
+    <link rel="stylesheet" href="/src/main.css">
+    <style>@import url('https://fonts.googleapis.com/css2?family=Lilita+One&family=Quicksand:wght@500;700&display=swap');</style>
+    <style>
+        body {
+            background-color: var(--black-square-color, #4b4747);
+            color: var(--piece-white);
+            font-family: 'Quicksand', sans-serif;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            font-family: 'Lilita One', cursive;
+            font-size: 48px;
+            text-align: center;
+            margin-bottom: 40px;
+            text-shadow: 0px 4px 0px var(--piece-black);
+            -webkit-text-stroke: 2px var(--piece-black);
+        }
+
+        .marketplace-container {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+            max-width: 1200px;
+        }
+
+        .product-card {
+            background: rgba(0, 0, 0, 0.4);
+            border: 4px solid var(--highlight, #b58863);
+            border-radius: 12px;
+            padding: 30px;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+            transition: transform 0.2s;
+        }
+
+        .product-card:hover {
+            transform: scale(1.05);
+            border-color: var(--white-square-color, #f0d9b5);
+        }
+
+        .product-card h2 {
+            font-family: 'Lilita One', cursive;
+            font-size: 32px;
+            margin-top: 0;
+            color: var(--white-square-color, #f0d9b5);
+        }
+
+        .product-card img {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            filter: drop-shadow(0px 4px 0px rgba(0,0,0,0.5));
+        }
+
+        .product-card p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .buy-button {
+            background: #829769;
+            color: white;
+            border: 3px solid #2e2e2e;
+            padding: 15px 30px;
+            font-size: 24px;
+            font-family: 'Lilita One', cursive;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s;
+            width: 100%;
+        }
+
+        .buy-button:hover {
+            background: #9ab07e;
+        }
+
+        .buy-button.owned {
+            background: #555;
+            cursor: default;
+        }
+
+        .buy-button.owned:hover {
+            background: #555;
+        }
+
+        .back-button {
+            margin-top: 50px;
+            background: #2e2e2e;
+            color: white;
+            border: 3px solid #f0d9b5;
+            padding: 15px 40px;
+            font-size: 24px;
+            font-family: 'Lilita One', cursive;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .back-button:hover {
+            background: #444;
+        }
+    </style>
+</head>
+<body>
+    <h1><img src="/static/lg/whiteKnight.png" style="height: 48px; vertical-align: middle;"> Marketplace <img src="/static/lg/blackKnight.png" style="height: 48px; vertical-align: middle;"></h1>
+    
+    <div class="marketplace-container" id="marketplaceItems">
+        <!-- Products will be injected here -->
+        <h2 style="font-family: 'Lilita One'; text-align: center; width: 100%;">Loading...</h2>
+    </div>
+
+    <a href="/" class="back-button">Back to Main Menu</a>
+
+    <script src="/src/auth.js?v=1710423851"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const authModule = window.Auth ? new window.Auth() : null;
+            let profile = null;
+            if (authModule && authModule.getToken()) {
+                profile = await authModule.getProfile();
+            }
+
+            const products = [
+                {
+                    id: 'cyborgs',
+                    name: 'Cyborgs Race',
+                    image: '/static/lg/whiteCrystal.png',
+                    description: 'Unlock the advanced Cyborgs race for multiplayer and hotseat modes! Features mechanical synergies.',
+                    price: '10 Euro'
+                },
+                {
+                    id: 'promoters',
+                    name: 'Promoters Race',
+                    image: '/static/lg/whiteNorthernKing.png',
+                    description: 'Unlock the mighty Promoters race! Command legendary units and overwhelm your opponents.',
+                    price: '10 Euro'
+                }
+            ];
+
+            const container = document.getElementById('marketplaceItems');
+            container.innerHTML = '';
+
+            products.forEach(product => {
+                const isOwned = profile && profile.purchasedRaces && profile.purchasedRaces.includes(product.id);
+                
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <h2>${product.name}</h2>
+                    <img src="${product.image}" alt="${product.name}">
+                    <p>${product.description}</p>
+                    <button class="buy-button ${isOwned ? 'owned' : ''}" onclick="handleBuy('${product.id}')">
+                        ${isOwned ? 'Owned ✓' : 'Buy for ' + product.price}
+                    </button>
+                `;
+                container.appendChild(card);
+            });
+        });
+
+        async function handleBuy(raceId) {
+            const authModule = window.Auth ? new window.Auth() : null;
+            if (!authModule) return;
+
+            const profile = await authModule.getProfile();
+            if (!profile) {
+                authModule.showAuthModal();
+                return;
+            }
+
+            if (profile.purchasedRaces && profile.purchasedRaces.includes(raceId)) {
+                return; // Already owned
+            }
+
+            authModule.promptPurchase(raceId);
+        }
+    </script>
+</body>
+</html>

@@ -73,6 +73,29 @@ const Auth = {
         }
     },
 
+    async promptPurchase(raceName) {
+        const profile = await this.getProfile();
+        if (!profile) {
+            this.showAuthModal();
+            return;
+        }
+
+        const hasPurchased = profile.purchasedRaces && profile.purchasedRaces.includes(raceName);
+        if (!hasPurchased) {
+            const cost = "10 Euro";
+            const link = raceName === 'cyborgs' ? 'https://buy.stripe.com/14A5kD5sQ6nj5EO33y6Zy02' : 'https://buy.stripe.com/fZu14n4oM4fbc3c6fK6Zy03';
+            const fullLink = `${link}?client_reference_id=${profile._id}|${raceName}`;
+            
+            if (confirm(`The ${raceName} race costs ${cost}. Do you want to unlock it?\n\n(Click OK to simulate local payment or Cancel to go to Stripe)`)) {
+                this.simulatePayment(raceName);
+            } else {
+                window.open(fullLink, '_blank');
+            }
+            return false;
+        }
+        return true;
+    },
+
     ensureAuthenticated() {
         if (!this.getToken()) {
             this.showAuthModal();

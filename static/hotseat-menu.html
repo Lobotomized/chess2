@@ -450,23 +450,20 @@
     </script>
 
         <script>
-        function handleRaceSelect(element, className, raceName) {
+        async function handleRaceSelect(element, className, raceName) {
             if (raceName === 'cyborgs' || raceName === 'promoters') {
-                if (!currentUser) {
-                    window.Auth.showAuthModal();
+                const authModule = window.Auth ? new window.Auth() : null;
+                if (!authModule) return;
+                
+                const profile = await authModule.getProfile();
+                if (!profile) {
+                    authModule.showAuthModal();
                     return;
                 }
-                const hasPurchased = currentUser.purchasedRaces && currentUser.purchasedRaces.includes(raceName);
+
+                const hasPurchased = profile.purchasedRaces && profile.purchasedRaces.includes(raceName);
                 if (!hasPurchased) {
-                    const cost = "10 Euro";
-                    const link = raceName === 'cyborgs' ? 'https://buy.stripe.com/14A5kD5sQ6nj5EO33y6Zy02' : 'https://buy.stripe.com/fZu14n4oM4fbc3c6fK6Zy03';
-                    const fullLink = `${link}?client_reference_id=${currentUser._id}|${raceName}`;
-                    
-                    if (confirm(`The ${raceName} race costs ${cost}. Do you want to unlock it?\n\n(Click OK to simulate local payment or Cancel to go to Stripe)`)) {
-                        window.Auth.simulatePayment(raceName);
-                    } else {
-                        window.open(fullLink, '_blank');
-                    }
+                    authModule.promptPurchase(raceName);
                     return; // Stop selection
                 }
             }
