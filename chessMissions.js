@@ -50,7 +50,8 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (request, re
             event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
         } else {
             // Fallback for when webhook secret isn't configured (e.g. testing without CLI)
-            event = JSON.parse(request.body.toString());
+            const payloadString = Buffer.isBuffer(request.body) ? request.body.toString() : request.body;
+            event = typeof payloadString === 'string' ? JSON.parse(payloadString) : payloadString;
             console.log("Warning: Processing webhook without signature verification (STRIPE_WEBHOOK_SECRET not set)");
         }
     } catch (err) {
