@@ -43,6 +43,34 @@ let hoveredPiece;
 let playerRef;
 let w;
 
+window.updateSquareLengthFallback = function(bWidth, bHeight) {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    const availableWidth = width * 0.95;
+    const availableHeight = height * 0.75;
+    
+    let cols = 8;
+    let rows = 8;
+    const bw = bWidth !== undefined ? bWidth : (typeof boardWidth !== 'undefined' ? boardWidth : 7);
+    const bh = bHeight !== undefined ? bHeight : (typeof boardHeight !== 'undefined' ? boardHeight : 7);
+    
+    if (bw > 0) cols = bw + 1;
+    if (bh > 0) rows = bh + 1;
+    
+    squareLength = Math.floor(Math.min(availableWidth / Math.max(8, cols), availableHeight / Math.max(8, rows)));
+};
+
+window.addEventListener('resize', () => {
+    if (typeof window.updateSquareLength === 'function') {
+        window.updateSquareLength();
+    } else {
+        window.updateSquareLengthFallback();
+    }
+    if (state && state.board) {
+        // Force a redraw to apply new squareLength
+        ani();
+    }
+});
 
 
 hotseatGame.join('white', 'white');
@@ -244,10 +272,23 @@ function triggerAITurn(state) {
 
 function animate(secretState){
     //Draw the game
+    state = secretState;
     const myTurnH1 = document.getElementById('turn');
+    
+    if (state.board && state.board.length > 0) {
+        boardWidth = Math.max(...state.board.map(sq => sq.x));
+        boardHeight = Math.max(...state.board.map(sq => sq.y));
+        
+        // Dynamically adjust squareLength based on board dimensions to fit screen
+        if (typeof window.updateSquareLength === 'function') {
+            window.updateSquareLength(boardWidth, boardHeight);
+        } else {
+            window.updateSquareLengthFallback(boardWidth, boardHeight);
+        }
+    }
+
     canvas.width = squareLength * boardWidth + squareLength;
     canvas.height = squareLength * boardHeight + squareLength;
-    state = secretState;
 
     if(state.modalMessages && typeof buildModal !== 'undefined'){
         if (!state.won) {
@@ -297,23 +338,6 @@ function animate(secretState){
         if(state.playerRef !== undefined){
             playerRef = state.playerRef
         }
-
-        boardWidth  = state.board.reduce((accumulator, currentValue) => {
-            if(accumulator > currentValue.x){
-                return accumulator
-            }
-            else{
-                return currentValue.x
-            }
-        })
-        boardHeight  = state.board.reduce((accumulator, currentValue) => {
-            if(accumulator > currentValue.y){
-                return accumulator
-            }
-            else{
-                return currentValue.y
-            }
-        })
 
         state.board.forEach((sq,index) => {
             let y = sq.y;

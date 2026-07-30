@@ -253,6 +253,14 @@
             box-shadow: 0 8px 16px rgba(0,0,0,0.3);
         }
 
+        /* Desktop responsiveness */
+        @media (min-width: 601px) {
+            body, html {
+                overflow: hidden;
+                height: 100vh;
+            }
+        }
+
         /* Mobile responsiveness for top bar and canvas container */
         @media (max-width: 600px), (max-aspect-ratio: 1/1) {
             html, body {

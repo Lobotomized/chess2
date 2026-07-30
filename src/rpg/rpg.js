@@ -124,32 +124,40 @@ let squareLength;
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 
-function updateSquareLength() {
+let boardWidth = 8;
+let boardHeight = 8;
+
+function updateSquareLength(bWidth, bHeight) {
     const width = window.innerWidth;
     const height = window.innerHeight;
-    
-    // We need space for 8 squares + 1 extra for margins/padding as per original code
-    // Original code used 8 squares for width calc, but canvas width was 9 squares.
-    // To fit on screen, we must divide by 9.
     
     const availableWidth = width * 0.95; // 95% of screen width
     const availableHeight = height * 0.75; // 75% of screen height (leave room for UI)
     
-    squareLength = Math.min(availableWidth / 9, availableHeight / 9);
+    let cols = 9;
+    let rows = 9;
     
-    // Ensure integer to avoid blurry lines? Canvas handles floats but integers are sharper.
+    // Use passed boardWidth/boardHeight if provided, else check global
+    const w = bWidth !== undefined ? bWidth : boardWidth;
+    const h = bHeight !== undefined ? bHeight : boardHeight;
+    
+    if (w > 0) cols = w + 1;
+    if (h > 0) rows = h + 1;
+    
+    // Ensure we scale down for larger boards, minimum divisor 9
+    squareLength = Math.min(availableWidth / Math.max(9, cols), availableHeight / Math.max(9, rows));
+    
     squareLength = Math.floor(squareLength);
 }
 
 updateSquareLength();
-window.addEventListener('resize', updateSquareLength);
+window.addEventListener('resize', () => updateSquareLength());
 const forfeitTextButton = document.getElementById('forfeitText');
 let hotseatGame;
 let mouseX;
 let mouseY;
 let w; // Web Worker
 let hoveredPiece;
-let boardWidth, boardHeight;
 
 function updateGoldDisplay() {
     const goldValue = document.getElementById('goldValue');
