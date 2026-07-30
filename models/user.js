@@ -22,17 +22,9 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    isPaidAccount: {
-        type: Boolean,
-        default: false
-    },
-    stripeCustomerId: {
-        type: String,
-        default: null
-    },
-    stripeSubscriptionId: {
-        type: String,
-        default: null
+    purchasedRaces: {
+        type: [String],
+        default: []
     },
     customPieces: [{
         type: mongoose.Schema.Types.ObjectId,

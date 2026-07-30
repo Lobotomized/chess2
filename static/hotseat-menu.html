@@ -422,9 +422,13 @@
         Loading Assets...
     </div>
     <script>
-        window.addEventListener('load', function() {
+        let currentUser = null;
+        window.addEventListener('load', async function() {
             const screen = document.getElementById('loadingScreen');
             if(screen) screen.style.display = 'none';
+            if (window.Auth && window.Auth.getToken()) {
+                currentUser = await window.Auth.getMe();
+            }
         });
     </script>
     <nav>
@@ -445,14 +449,39 @@
         }
     </script>
 
+        <script>
+        function handleRaceSelect(element, className, raceName) {
+            if (raceName === 'cyborgs' || raceName === 'promoters') {
+                if (!currentUser) {
+                    window.Auth.showAuthModal();
+                    return;
+                }
+                const hasPurchased = currentUser.purchasedRaces && currentUser.purchasedRaces.includes(raceName);
+                if (!hasPurchased) {
+                    const cost = "10 Euro";
+                    const link = raceName === 'cyborgs' ? 'https://buy.stripe.com/14A5kD5sQ6nj5EO33y6Zy02' : 'https://buy.stripe.com/fZu14n4oM4fbc3c6fK6Zy03';
+                    const fullLink = `${link}?client_reference_id=${currentUser._id}|${raceName}`;
+                    
+                    if (confirm(`The ${raceName} race costs ${cost}. Do you want to unlock it?\n\n(Click OK to simulate local payment or Cancel to go to Stripe)`)) {
+                        window.Auth.simulatePayment(raceName);
+                    } else {
+                        window.open(fullLink, '_blank');
+                    }
+                    return; // Stop selection
+                }
+            }
+            cleanSelect(element, className, raceName);
+        }
+        </script>
+
     <div class="hotseat">
         <h1><img src="/static/lg/whiteKing.png" class="icon"> Pick White Race</h1>
         <div class="row">
-            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'medieval')" src="/static/lg/whiteClown.png" alt="">
-            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'bug')" src="/static/lg/whiteAnt.png" alt="">
-            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'classic')" src="/static/lg/whiteKing.png" alt="">
-            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'cyborgs')" src="/static/lg/whiteCrystal.png" alt="">
-            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedWhite', 'promoters')" src="/static/lg/whiteNorthernKing.png" alt="">
+            <img class="racePickImage" onclick="handleRaceSelect(this, 'racePickImageSelectedWhite', 'medieval')" src="/static/lg/whiteClown.png" alt="">
+            <img class="racePickImage" onclick="handleRaceSelect(this, 'racePickImageSelectedWhite', 'bug')" src="/static/lg/whiteAnt.png" alt="">
+            <img class="racePickImage" onclick="handleRaceSelect(this, 'racePickImageSelectedWhite', 'classic')" src="/static/lg/whiteKing.png" alt="">
+            <img class="racePickImage" onclick="handleRaceSelect(this, 'racePickImageSelectedWhite', 'cyborgs')" src="/static/lg/whiteCrystal.png" alt="">
+            <img class="racePickImage" onclick="handleRaceSelect(this, 'racePickImageSelectedWhite', 'promoters')" src="/static/lg/whiteNorthernKing.png" alt="">
             <select name="" id="whitePlayerSelect">
                 <option value="">Human Player</option>
                 <option value="101">AI</option>
@@ -461,11 +490,11 @@
 
         <h1><img src="/static/lg/blackKing.png" class="icon"> Pick Black Race</h1>
         <div class="row">
-            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'medieval')" src="/static/lg/blackClown.png" alt="">
-            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'bug')" src="/static/lg/blackAnt.png" alt="">
-            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'classic')" src="/static/lg/blackKing.png" alt="">
-            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'cyborgs')" src="/static/lg/blackCrystal.png" alt="">
-            <img class="racePickImage" onclick="cleanSelect(this, 'racePickImageSelectedBlack', 'promoters')" src="/static/lg/blackNorthernKing.png" alt="">
+            <img class="racePickImage" onclick="handleRaceSelect(this, 'racePickImageSelectedBlack', 'medieval')" src="/static/lg/blackClown.png" alt="">
+            <img class="racePickImage" onclick="handleRaceSelect(this, 'racePickImageSelectedBlack', 'bug')" src="/static/lg/blackAnt.png" alt="">
+            <img class="racePickImage" onclick="handleRaceSelect(this, 'racePickImageSelectedBlack', 'classic')" src="/static/lg/blackKing.png" alt="">
+            <img class="racePickImage" onclick="handleRaceSelect(this, 'racePickImageSelectedBlack', 'cyborgs')" src="/static/lg/blackCrystal.png" alt="">
+            <img class="racePickImage" onclick="handleRaceSelect(this, 'racePickImageSelectedBlack', 'promoters')" src="/static/lg/blackNorthernKing.png" alt="">
             <select  name="" id="blackPlayerSelect">
                 <option value="">Human Player</option>
                 <option value="101">AI</option>

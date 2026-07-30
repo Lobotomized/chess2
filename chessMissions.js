@@ -66,32 +66,23 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (request, re
         switch (event.type) {
             case 'checkout.session.completed': {
                 const session = event.data.object;
-                const userId = session.client_reference_id;
-                console.log(`Checkout completed for userId: ${userId}, customer: ${session.customer}`);
                 
-                if (userId) {
+                // Parse custom client reference ID which now includes the user ID and race
+                // format: "USERID|RACE_NAME"
+                const refParts = session.client_reference_id ? session.client_reference_id.split('|') : [];
+                const userId = refParts[0];
+                const racePurchased = refParts[1];
+                
+                console.log(`Checkout completed for userId: ${userId}, race: ${racePurchased}, customer: ${session.customer}`);
+                
+                if (userId && racePurchased) {
                     const result = await User.findByIdAndUpdate(userId, {
-                        isPaidAccount: true,
-                        stripeCustomerId: session.customer,
-                        stripeSubscriptionId: session.subscription
+                        $addToSet: { purchasedRaces: racePurchased }
                     }, { new: true });
-                    console.log(`User ${userId} upgraded to paid account. Result:`, result ? 'Success' : 'User not found');
+                    console.log(`User ${userId} unlocked ${racePurchased}. Result:`, result ? 'Success' : 'User not found');
                 } else {
-                    console.log('Error: No client_reference_id found in session');
+                    console.log('Error: Invalid client_reference_id format in session. Expected USERID|RACE');
                 }
-                break;
-            }
-            case 'customer.subscription.deleted':
-            case 'customer.subscription.updated': {
-                const subscription = event.data.object;
-                const isActive = subscription.status === 'active' || subscription.status === 'trialing';
-                
-                const result = await User.findOneAndUpdate(
-                    { stripeSubscriptionId: subscription.id },
-                    { isPaidAccount: isActive },
-                    { new: true }
-                );
-                console.log(`Subscription ${subscription.id} status updated to ${subscription.status}. isPaidAccount: ${isActive}. Result:`, result ? 'Success' : 'User not found');
                 break;
             }
             default:
@@ -1157,11 +1148,11 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
     }
 });
 
-app.post('/api/auth/simulate-payment', authenticateToken, async (req, res) => {
+app.post('/api/auth/simulate-payment', authenticateToken, express.json(), async (req, res) => {
     try {
+        const raceToUnlock = req.body.race || 'cyborgs';
         const user = await User.findByIdAndUpdate(req.user.id, {
-            isPaidAccount: true,
-            stripeSubscriptionId: 'sub_simulated_test_123'
+            $addToSet: { purchasedRaces: raceToUnlock }
         }, { new: true }).select('-password');
         res.status(200).json(user);
     } catch (err) {

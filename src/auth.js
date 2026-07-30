@@ -56,15 +56,16 @@ const Auth = {
         }
     },
 
-    async simulatePayment() {
+    async simulatePayment(race) {
         if (!this.getToken()) return;
         try {
             const response = await fetch('/api/auth/simulate-payment', {
                 method: 'POST',
-                headers: this.getAuthHeaders()
+                headers: { ...this.getAuthHeaders(), 'Content-Type': 'application/json' },
+                body: JSON.stringify({ race })
             });
             if (response.ok) {
-                alert('Payment simulated successfully! Refreshing...');
+                alert(`Payment for ${race} simulated successfully!`);
                 window.location.reload();
             }
         } catch (err) {
@@ -162,38 +163,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             const user = await Auth.getMe();
             
             if (user) {
-                const subBtn = document.createElement('a');
-                if (navLinks.classList.contains('menu-container')) subBtn.className = 'menu-button';
-                if (user.isPaidAccount) {
-                    subBtn.href = "#";
-                    subBtn.innerHTML = '<img src="/static/lg/whiteCrystalEmpowered.png" class="icon"> Premium Member';
-                    subBtn.style.color = '#ffd700';
-                    subBtn.onclick = (e) => e.preventDefault();
-                } else {
-                    subBtn.href = "#";
-                    subBtn.innerHTML = '<img src="/static/lg/whiteCrystal.png" class="icon"> Upgrade Account';
-                    subBtn.onclick = (e) => {
-                        e.preventDefault();
-                        if (confirm('For testing purposes, do you want to simulate a successful payment locally?')) {
-                            Auth.simulatePayment();
-                        } else {
-                            window.open(`https://buy.stripe.com/fZu8wPg7udPL8R0aw06Zy01?client_reference_id=${user._id}`, '_blank');
-                        }
-                    };
-                }
-                navLinks.appendChild(subBtn);
+                // Keep the logout button, we'll handle premium races in the lobby itself
+                const authBtn = document.createElement('a');
+                if (navLinks.classList.contains('menu-container')) authBtn.className = 'menu-button';
+                authBtn.href = "#";
+                authBtn.innerHTML = '<img src="/static/lg/blackKing.png" class="icon"> Logout';
+                authBtn.onclick = (e) => {
+                    e.preventDefault();
+                    Auth.clearToken();
+                    window.location.reload();
+                };
+                navLinks.appendChild(authBtn);
             }
-
-            const authBtn = document.createElement('a');
-            if (navLinks.classList.contains('menu-container')) authBtn.className = 'menu-button';
-            authBtn.href = "#";
-            authBtn.innerHTML = '<img src="/static/lg/blackKing.png" class="icon"> Logout';
-            authBtn.onclick = (e) => {
-                e.preventDefault();
-                Auth.clearToken();
-                window.location.reload();
-            };
-            navLinks.appendChild(authBtn);
         } else {
             const authBtn = document.createElement('a');
             if (navLinks.classList.contains('menu-container')) authBtn.className = 'menu-button';
