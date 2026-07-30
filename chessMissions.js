@@ -40,62 +40,76 @@ const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key_here'; /
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder');
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_placeholder';
 
-app.post('/webhook', express.raw({type: 'application/json'}), async (request, response) => {
+let recentWebhooks = [];
+
+// 1. Mount the webhook endpoint BEFORE express.json()
+app.post('/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
     console.log("Webhook hit!");
     const sig = request.headers['stripe-signature'];
     let event;
 
     try {
         if (process.env.STRIPE_WEBHOOK_SECRET) {
+            const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
             event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
         } else {
-            // Fallback for when webhook secret isn't configured (e.g. testing without CLI)
             const payloadString = Buffer.isBuffer(request.body) ? request.body.toString() : request.body;
             event = typeof payloadString === 'string' ? JSON.parse(payloadString) : payloadString;
-            console.log("Warning: Processing webhook without signature verification (STRIPE_WEBHOOK_SECRET not set)");
+            console.log("Warning: Processing webhook without signature verification");
         }
     } catch (err) {
         console.error(`Webhook Error: ${err.message}`);
+        recentWebhooks.unshift({ error: err.message, time: new Date() });
+        if (recentWebhooks.length > 20) recentWebhooks.pop();
         return response.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    console.log(`Processing webhook event type: ${event.type}`);
+    let webhookLog = { type: event.type, time: new Date(), success: false, logs: [] };
 
-    // Handle the event
     try {
         switch (event.type) {
             case 'checkout.session.completed': {
                 const session = event.data.object;
+                webhookLog.client_reference_id = session.client_reference_id;
                 
-                // Parse custom client reference ID which now includes the user ID and race
-                // format: "USERID-RACE_NAME"
-                const refParts = session.client_reference_id ? session.client_reference_id.split('-') : [];
-                const userId = refParts[0];
-                const racePurchased = refParts[1];
+                let userId = null;
+                let racePurchased = null;
                 
-                console.log(`Checkout completed for userId: ${userId}, race: ${racePurchased}, customer: ${session.customer}`);
+                if (session.client_reference_id) {
+                    let delimiter = session.client_reference_id.includes('|') ? '|' : '-';
+                    const refParts = session.client_reference_id.split(delimiter);
+                    userId = refParts[0];
+                    racePurchased = refParts[1];
+                }
                 
-                if (userId && racePurchased) {
+                webhookLog.logs.push(`Checkout completed for userId: ${userId}, race: ${racePurchased}`);
+                
+                if (userId && racePurchased && mongoose.Types.ObjectId.isValid(userId)) {
                     const result = await User.findByIdAndUpdate(userId, {
                         $addToSet: { purchasedRaces: racePurchased }
                     }, { new: true });
-                    console.log(`User ${userId} unlocked ${racePurchased}. Result:`, result ? 'Success' : 'User not found');
-                } else {
-                    console.log('Error: Invalid client_reference_id format in session. Expected USERID|RACE');
+                    
+                    if (result) webhookLog.success = true;
                 }
                 break;
             }
-            default:
-                console.log(`Unhandled event type ${event.type}`);
         }
     } catch (err) {
-        console.error('Error processing webhook logic:', err);
+        webhookLog.logs.push(`Error: ${err.message}`);
     }
+
+    recentWebhooks.unshift(webhookLog);
+    if (recentWebhooks.length > 20) recentWebhooks.pop();
 
     response.json({received: true});
 });
 
-app.use(express.json({ limit: '50mb' })); // Allow JSON body parsing with large limit
+app.get('/api/webhook-debug', (req, res) => {
+    res.json(recentWebhooks);
+});
+
+// 2. NOW mount express.json() for all other routes
+app.use(express.json({ limit: '50mb' }));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 app.use('/boardGeneration.js', express.static('./boardGeneration.js'))
