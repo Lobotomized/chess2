@@ -84,7 +84,9 @@ const Auth = {
         if (!hasPurchased) {
             const cost = "10 Euro";
             const link = raceName === 'cyborgs' ? 'https://buy.stripe.com/14A5kD5sQ6nj5EO33y6Zy02' : 'https://buy.stripe.com/fZu14n4oM4fbc3c6fK6Zy03';
-            const fullLink = `${link}?client_reference_id=${profile._id}|${raceName}`;
+            // Stripe client_reference_id only allows alphanumeric, dashes, and underscores. 
+            // Using '-' as the delimiter.
+            const fullLink = `${link}?client_reference_id=${profile._id}-${raceName}`;
             
             if (confirm(`The ${raceName} race costs ${cost}. Do you want to unlock it?\n\n(Click OK to simulate local payment or Cancel to go to Stripe)`)) {
                 this.simulatePayment(raceName);

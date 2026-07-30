@@ -68,8 +68,8 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (request, re
                 const session = event.data.object;
                 
                 // Parse custom client reference ID which now includes the user ID and race
-                // format: "USERID|RACE_NAME"
-                const refParts = session.client_reference_id ? session.client_reference_id.split('|') : [];
+                // format: "USERID-RACE_NAME"
+                const refParts = session.client_reference_id ? session.client_reference_id.split('-') : [];
                 const userId = refParts[0];
                 const racePurchased = refParts[1];
                 
