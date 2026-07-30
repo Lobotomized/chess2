@@ -46,11 +46,18 @@ let recentWebhooks = [];
 app.post('/webhook', express.raw({ type: 'application/json' }), async (request, response) => {
     console.log("Webhook hit!");
     const sig = request.headers['stripe-signature'];
+    
+    // DEBUGGING
+    console.log("Is body a Buffer?", Buffer.isBuffer(request.body));
+    console.log("Body length:", request.body ? request.body.length : 'undefined');
+    console.log("Signature header:", sig ? "Present" : "Missing");
+    
     let event;
 
     try {
         if (process.env.STRIPE_WEBHOOK_SECRET) {
             const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
+            console.log("Secret starts with:", endpointSecret.substring(0, 5));
             event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
         } else {
             const payloadString = Buffer.isBuffer(request.body) ? request.body.toString() : request.body;
