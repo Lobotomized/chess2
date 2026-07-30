@@ -41,14 +41,24 @@ const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_place
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_placeholder';
 
 app.post('/webhook', express.raw({type: 'application/json'}), async (request, response) => {
+    console.log("Webhook hit!");
     const sig = request.headers['stripe-signature'];
     let event;
 
     try {
-        event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+        if (process.env.STRIPE_WEBHOOK_SECRET) {
+            event = stripe.webhooks.constructEvent(request.body, sig, endpointSecret);
+        } else {
+            // Fallback for when webhook secret isn't configured (e.g. testing without CLI)
+            event = JSON.parse(request.body.toString());
+            console.log("Warning: Processing webhook without signature verification (STRIPE_WEBHOOK_SECRET not set)");
+        }
     } catch (err) {
+        console.error(`Webhook Error: ${err.message}`);
         return response.status(400).send(`Webhook Error: ${err.message}`);
     }
+
+    console.log(`Processing webhook event type: ${event.type}`);
 
     // Handle the event
     try {
@@ -56,14 +66,17 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (request, re
             case 'checkout.session.completed': {
                 const session = event.data.object;
                 const userId = session.client_reference_id;
+                console.log(`Checkout completed for userId: ${userId}, customer: ${session.customer}`);
                 
                 if (userId) {
-                    await User.findByIdAndUpdate(userId, {
+                    const result = await User.findByIdAndUpdate(userId, {
                         isPaidAccount: true,
                         stripeCustomerId: session.customer,
                         stripeSubscriptionId: session.subscription
-                    });
-                    console.log(`User ${userId} upgraded to paid account.`);
+                    }, { new: true });
+                    console.log(`User ${userId} upgraded to paid account. Result:`, result ? 'Success' : 'User not found');
+                } else {
+                    console.log('Error: No client_reference_id found in session');
                 }
                 break;
             }
@@ -72,21 +85,22 @@ app.post('/webhook', express.raw({type: 'application/json'}), async (request, re
                 const subscription = event.data.object;
                 const isActive = subscription.status === 'active' || subscription.status === 'trialing';
                 
-                await User.findOneAndUpdate(
+                const result = await User.findOneAndUpdate(
                     { stripeSubscriptionId: subscription.id },
-                    { isPaidAccount: isActive }
+                    { isPaidAccount: isActive },
+                    { new: true }
                 );
-                console.log(`Subscription ${subscription.id} status updated to ${subscription.status}. isPaidAccount: ${isActive}`);
+                console.log(`Subscription ${subscription.id} status updated to ${subscription.status}. isPaidAccount: ${isActive}. Result:`, result ? 'Success' : 'User not found');
                 break;
             }
             default:
                 console.log(`Unhandled event type ${event.type}`);
         }
     } catch (err) {
-        console.error('Error processing webhook:', err);
+        console.error('Error processing webhook logic:', err);
     }
 
-    response.send();
+    response.json({received: true});
 });
 
 app.use(express.json({ limit: '50mb' })); // Allow JSON body parsing with large limit
