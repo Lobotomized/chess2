@@ -56,23 +56,6 @@ const Auth = {
         }
     },
 
-    async simulatePayment(race) {
-        if (!this.getToken()) return;
-        try {
-            const response = await fetch('/api/auth/simulate-payment', {
-                method: 'POST',
-                headers: { ...this.getAuthHeaders(), 'Content-Type': 'application/json' },
-                body: JSON.stringify({ race })
-            });
-            if (response.ok) {
-                alert(`Payment for ${race} simulated successfully!`);
-                window.location.reload();
-            }
-        } catch (err) {
-            console.error('Error simulating payment:', err);
-        }
-    },
-
     async promptPurchase(raceName) {
         const profile = await this.getMe();
         if (!profile) {
@@ -88,11 +71,7 @@ const Auth = {
             // Using '-' as the delimiter.
             const fullLink = `${link}?client_reference_id=${profile._id}-${raceName}`;
             
-            if (confirm(`The ${raceName} race costs ${cost}. Do you want to unlock it?\n\n(Click OK to simulate local payment or Cancel to go to Stripe)`)) {
-                this.simulatePayment(raceName);
-            } else {
-                window.open(fullLink, '_blank');
-            }
+            window.open(fullLink, '_blank');
             return false;
         }
         return true;

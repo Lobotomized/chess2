@@ -1198,18 +1198,6 @@ app.get('/api/auth/me', authenticateToken, async (req, res) => {
     }
 });
 
-app.post('/api/auth/simulate-payment', authenticateToken, express.json(), async (req, res) => {
-    try {
-        const raceToUnlock = req.body.race || 'cyborgs';
-        const user = await User.findByIdAndUpdate(req.user.id, {
-            $addToSet: { purchasedRaces: raceToUnlock }
-        }, { new: true }).select('-password');
-        res.status(200).json(user);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
 app.get('/api/custom-pieces', authenticateToken, async (req, res) => {
     try {
         let user = await User.findById(req.user.id).populate('customPieces');
