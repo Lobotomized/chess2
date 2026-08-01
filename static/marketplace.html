@@ -204,6 +204,12 @@
                 profile = await authModule.getMe();
             }
 
+            if (!profile) {
+                if (authModule) authModule.showAuthModal();
+                document.getElementById('marketplaceItems').innerHTML = '<h2 style="font-family: \'Lilita One\'; text-align: center; width: 100%;">Please log in to view the marketplace.</h2>';
+                return;
+            }
+
             const products = [
                 {
                     id: 'cyborgs',

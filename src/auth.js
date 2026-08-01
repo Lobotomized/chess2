@@ -178,8 +178,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                     window.location.reload();
                 };
                 navLinks.appendChild(authBtn);
+
+                const mpLink = document.querySelector('a[href="/marketplace"]');
+                if (mpLink) mpLink.style.display = 'flex';
+            } else {
+                // Token exists but getMe failed (e.g. invalid token)
+                const mpLink = document.querySelector('a[href="/marketplace"]');
+                if (mpLink) mpLink.style.display = 'none';
             }
         } else {
+            const mpLink = document.querySelector('a[href="/marketplace"]');
+            if (mpLink) mpLink.style.display = 'none';
+
             const authBtn = document.createElement('a');
             if (navLinks.classList.contains('menu-container')) authBtn.className = 'menu-button';
             authBtn.href = "#";
