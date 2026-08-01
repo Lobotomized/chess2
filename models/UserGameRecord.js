@@ -11,7 +11,9 @@ const userGameRecordSchema = new Schema({
     whiteRace: String,
     blackRace: String,
     initialBoard: Array,
-    initialPieces: Array
+    initialPieces: Array,
+    username: String,
+    ipAddress: String
 });
 
 module.exports = mongoose.model('UserGameRecord', userGameRecordSchema);

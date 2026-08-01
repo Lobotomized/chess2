@@ -53,9 +53,16 @@
         if (recordedGames.length === 0) return;
         if (!navigator.onLine) return;
 
+        let headers = { 'Content-Type': 'application/json' };
+        if (typeof Auth !== 'undefined') {
+            Object.assign(headers, Auth.getAuthHeaders());
+        } else if (localStorage.getItem('chess2_token')) {
+            headers['Authorization'] = `Bearer ${localStorage.getItem('chess2_token')}`;
+        }
+
         fetch('/api/record-games', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify({ games: recordedGames })
         })
         .then(res => {

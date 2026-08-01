@@ -37,6 +37,39 @@ const upload = multer({
 
 const JWT_SECRET = process.env.JWT_SECRET || 'your_super_secret_jwt_key_here'; // Fallback for dev
 
+// Authentication middleware
+const authenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token) return res.status(401).json({ error: 'Access denied, token missing' });
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ error: 'Invalid or expired token' });
+        req.user = user;
+        next();
+    });
+};
+
+const optionalAuthenticateToken = (req, res, next) => {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+
+    if (!token) {
+        req.user = null;
+        return next();
+    }
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) {
+            req.user = null;
+            return next();
+        }
+        req.user = user;
+        next();
+    });
+};
+
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY || 'sk_test_placeholder');
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET || 'whsec_placeholder';
 
@@ -878,6 +911,10 @@ app.get('/taenadmin', function(req,res){
     return res.status(200).sendFile(__dirname + '/static/adminDashboard.html');
 })
 
+app.get('/taenanalytics', function(req,res){
+    return res.status(200).sendFile(__dirname + '/static/analytics.html');
+})
+
 app.get('/evolution', function(req,res){
     return res.status(200).sendFile(__dirname + '/static/evolution.html');
 });
@@ -896,12 +933,15 @@ app.get('/replay.html', function(req,res){
 
 
 // POST endpoint to record games
-app.post('/api/record-games', async (req, res) => {
+app.post('/api/record-games', optionalAuthenticateToken, async (req, res) => {
     try {
         const games = req.body.games;
         if (!games || !Array.isArray(games)) {
             return res.status(400).json({ error: 'Invalid payload' });
         }
+
+        const username = req.user ? req.user.username : 'Anonymous';
+        const ipAddress = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip;
 
         for (const game of games) {
             // Upsert to prevent duplicates
@@ -917,7 +957,9 @@ app.post('/api/record-games', async (req, res) => {
                     whiteRace: game.whiteRace,
                     blackRace: game.blackRace,
                     initialBoard: game.initialBoard,
-                    initialPieces: game.initialPieces
+                    initialPieces: game.initialPieces,
+                    username: username,
+                    ipAddress: ipAddress
                 },
                 { upsert: true }
             );
@@ -941,42 +983,63 @@ app.get('/api/all-recorded-games', async (req, res) => {
     }
 });
 
+// GET endpoint to retrieve analytics data
+app.get('/api/admin/analytics', async (req, res) => {
+    try {
+        const totalGames = await UserGameRecord.countDocuments();
+        
+        const modeDistribution = await UserGameRecord.aggregate([
+            { $group: { _id: "$mode", count: { $sum: 1 } } }
+        ]);
+
+        const raceDistributionRaw = await UserGameRecord.aggregate([
+            { $project: { whiteRace: 1, blackRace: 1 } }
+        ]);
+
+        const raceCount = {};
+        raceDistributionRaw.forEach(game => {
+            const w = game.whiteRace || 'classic';
+            const b = game.blackRace || 'classic';
+            raceCount[w] = (raceCount[w] || 0) + 1;
+            raceCount[b] = (raceCount[b] || 0) + 1;
+        });
+
+        const raceDistribution = Object.keys(raceCount).map(k => ({ _id: k, count: raceCount[k] }));
+
+        const userActivity = await UserGameRecord.aggregate([
+            { $group: { _id: "$username", count: { $sum: 1 } } },
+            { $sort: { count: -1 } },
+            { $limit: 10 }
+        ]);
+
+        const recentGamesRaw = await UserGameRecord.aggregate([
+            {
+                $group: {
+                    _id: { $dateToString: { format: "%Y-%m-%d", date: "$date" } },
+                    count: { $sum: 1 }
+                }
+            },
+            { $sort: { _id: -1 } },
+            { $limit: 14 }
+        ]);
+
+        const recentGames = recentGamesRaw.reverse();
+
+        res.status(200).json({
+            totalGames,
+            modeDistribution,
+            raceDistribution,
+            userActivity,
+            recentGames
+        });
+    } catch (error) {
+        console.error('Error fetching analytics:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // POST endpoint to create a map
 app.use(express.json()); // Middleware to parse JSON body
-
-
-// Authentication middleware
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-
-    if (!token) return res.status(401).json({ error: 'Access denied, token missing' });
-
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ error: 'Invalid or expired token' });
-        req.user = user;
-        next();
-    });
-};
-
-const optionalAuthenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
-
-    if (!token) {
-        req.user = null;
-        return next();
-    }
-
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) {
-            req.user = null;
-            return next();
-        }
-        req.user = user;
-        next();
-    });
-};
 
 app.post('/api/upload-image-pair', authenticateToken, (req, res) => {
     const uploadPair = upload.fields([
