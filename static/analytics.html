@@ -156,7 +156,13 @@
     <script>
         async function fetchAnalytics() {
             try {
-                const response = await fetch('/api/admin/analytics');
+                let headers = {};
+                if (typeof Auth !== 'undefined' && Auth.getAuthHeaders) {
+                    headers = Auth.getAuthHeaders();
+                } else if (localStorage.getItem('chess2_token')) {
+                    headers['Authorization'] = `Bearer ${localStorage.getItem('chess2_token')}`;
+                }
+                const response = await fetch('/api/admin/analytics', { headers });
                 if (!response.ok) throw new Error('Failed to fetch analytics');
                 const data = await response.json();
                 

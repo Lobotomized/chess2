@@ -82,6 +82,36 @@
             height: 100%;
             background-color: rgba(0,0,0,0.8);
         }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            align-items: center;
+        }
+        .pagination button {
+            background-color: #4b4747;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: bold;
+        }
+        .pagination button:hover {
+            background-color: #5c5858;
+        }
+        .pagination button:disabled {
+            background-color: #2b2b2b;
+            color: #666;
+            cursor: not-allowed;
+        }
+        .pagination span {
+            font-weight: bold;
+            color: #e0e0e0;
+        }
         .modal-content {
             background-color: #363636;
             margin: 2% auto;
@@ -221,6 +251,12 @@
                 <!-- Rows will be populated here -->
             </tbody>
         </table>
+
+        <div id="pagination" class="pagination" style="display: none;">
+            <button id="prevPage" onclick="changePage(-1)">Previous</button>
+            <span id="pageInfo">Page 1 of 1</span>
+            <button id="nextPage" onclick="changePage(1)">Next</button>
+        </div>
     </div>
 
     <!-- Modal for showing moves -->
@@ -247,6 +283,8 @@
 
     <script>
         let allGames = [];
+        let currentPage = 1;
+        let totalPages = 1;
         let currentGameData = null;
         let currentMoveIndex = 0;
         let isPlaying = false;
@@ -260,19 +298,48 @@
             won: false
         };
 
-        async function fetchGames() {
+        async function fetchGames(page = 1) {
             try {
-                const response = await fetch('/api/all-recorded-games');
+                document.getElementById('loading').style.display = 'block';
+                document.getElementById('gamesTable').style.display = 'none';
+                const paginationEl = document.getElementById('pagination');
+                if (paginationEl) paginationEl.style.display = 'none';
+
+                let headers = {};
+                if (typeof Auth !== 'undefined' && Auth.getAuthHeaders) {
+                    headers = Auth.getAuthHeaders();
+                } else if (localStorage.getItem('chess2_token')) {
+                    headers['Authorization'] = `Bearer ${localStorage.getItem('chess2_token')}`;
+                }
+                const response = await fetch(`/api/all-recorded-games?page=${page}&limit=50`, { headers });
                 if (!response.ok) throw new Error('Failed to fetch');
-                allGames = await response.json();
+                const data = await response.json();
                 
-                // Sort by date descending
-                allGames.sort((a, b) => new Date(b.date) - new Date(a.date));
+                allGames = data.games;
+                currentPage = data.currentPage;
+                totalPages = data.totalPages;
                 
                 renderTable();
+                renderPagination();
             } catch (error) {
                 console.error(error);
                 document.getElementById('loading').innerText = 'Error loading records. Make sure you are logged in / authorized.';
+            }
+        }
+
+        function renderPagination() {
+            const paginationEl = document.getElementById('pagination');
+            if (!paginationEl) return;
+            paginationEl.style.display = 'flex';
+            document.getElementById('pageInfo').innerText = `Page ${currentPage} of ${totalPages}`;
+            document.getElementById('prevPage').disabled = currentPage <= 1;
+            document.getElementById('nextPage').disabled = currentPage >= totalPages;
+        }
+
+        function changePage(delta) {
+            const newPage = currentPage + delta;
+            if (newPage >= 1 && newPage <= totalPages) {
+                fetchGames(newPage);
             }
         }
 

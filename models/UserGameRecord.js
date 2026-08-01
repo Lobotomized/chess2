@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 const userGameRecordSchema = new Schema({
     gameRecordId: { type: String, unique: true },
-    date: { type: Date, default: Date.now },
+    date: { type: Date, default: Date.now, index: -1 },
     mode: String,
     vsBot: Boolean,
     winner: String,

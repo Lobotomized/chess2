@@ -973,10 +973,31 @@ app.post('/api/record-games', optionalAuthenticateToken, async (req, res) => {
 });
 
 // GET endpoint to retrieve all recorded games
-app.get('/api/all-recorded-games', async (req, res) => {
+app.get('/api/all-recorded-games', optionalAuthenticateToken, async (req, res) => {
+    // Only allow Ivan or specific admin usernames to access game records
+    if (!req.user || req.user.email !== 'ivan@writecraft.io') {
+        return res.status(403).json({ error: 'Access denied: Admin privileges required.' });
+    }
+
     try {
-        const games = await UserGameRecord.find({}).sort({ date: -1 });
-        res.status(200).json(games);
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 50;
+        const skip = (page - 1) * limit;
+
+        const totalGames = await UserGameRecord.countDocuments();
+        const totalPages = Math.ceil(totalGames / limit);
+
+        const games = await UserGameRecord.find({}, null, { allowDiskUse: true })
+            .sort({ date: -1 })
+            .skip(skip)
+            .limit(limit);
+
+        res.status(200).json({
+            games,
+            totalGames,
+            totalPages,
+            currentPage: page
+        });
     } catch (error) {
         console.error('Error fetching recorded games:', error);
         res.status(500).json({ error: error.message });
@@ -984,7 +1005,11 @@ app.get('/api/all-recorded-games', async (req, res) => {
 });
 
 // GET endpoint to retrieve analytics data
-app.get('/api/admin/analytics', async (req, res) => {
+app.get('/api/admin/analytics', optionalAuthenticateToken, async (req, res) => {
+    // Only allow Ivan or specific admin usernames to access analytics
+    if (!req.user || req.user.email !== 'ivan@writecraft.io') {
+        return res.status(403).json({ error: 'Access denied: Admin privileges required.' });
+    }
     try {
         const totalGames = await UserGameRecord.countDocuments();
         
